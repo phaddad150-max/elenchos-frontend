@@ -19,6 +19,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
+
       const currentMonth = new Date().toISOString().slice(0, 7)
       const { data } = await supabase
         .from('dashboard_overviews')
