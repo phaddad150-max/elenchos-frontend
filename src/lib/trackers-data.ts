@@ -571,15 +571,120 @@ export type MediaTrustData = {
   honest_assessment?: string;
 };
 
+type BackendMediaRegion = {
+  region?: string;
+  summary?: string | null;
+  dimensions?: Record<string, number>;
+  top_outlets?: MediaOutlet[];
+  outlets?: MediaOutlet[];
+  key_insights?: string[];
+  honest_assessment?: string;
+  citizen_perspective?: string;
+  language_discrepancies?: MediaLanguageDiscrepancy[];
+  overall_media_trust_score?: number;
+  average_trust?: number;
+};
+
+function coerceMediaRegion(raw: unknown): {
+  summary?: string | null;
+  average_trust?: number | null;
+  outlets?: MediaOutlet[];
+} | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as BackendMediaRegion;
+  const outlets = Array.isArray(r.top_outlets)
+    ? r.top_outlets
+    : Array.isArray(r.outlets)
+      ? r.outlets
+      : [];
+  const average_trust =
+    typeof r.overall_media_trust_score === "number"
+      ? r.overall_media_trust_score
+      : typeof r.average_trust === "number"
+        ? r.average_trust
+        : null;
+  if (!outlets.length && average_trust == null && !r.summary && !r.honest_assessment) return null;
+  return {
+    summary: r.summary ?? r.honest_assessment ?? null,
+    average_trust,
+    outlets,
+  };
+}
+
 export function extractMediaTrust(row?: TrackerRow): MediaTrustData {
   const data = (row?.data ?? {}) as Record<string, unknown>;
-  const out: MediaTrustData = {
-    overall_score:
-      typeof data.overall_score === "number"
-        ? (data.overall_score as number)
-        : typeof (data as { overall_trust_score?: number }).overall_trust_score === "number"
-          ? ((data as { overall_trust_score?: number }).overall_trust_score as number)
-          : (row?.overall_score ?? null),
+  const all = (data.all ?? {}) as Record<string, unknown>;
+  const rawRegions = (data.regions ?? {}) as Record<string, unknown>;
+
+  const regions: NonNullable<MediaTrustData["regions"]> = {};
+  for (const bucket of MEDIA_REGION_BUCKETS) {
+    const coerced = coerceMediaRegion(rawRegions[bucket.key]);
+    if (coerced) regions[bucket.key] = coerced;
+  }
+
+  const regionsSummary = all.regions_summary as Record<string, number> | undefined;
+  if (regionsSummary) {
+    for (const bucket of MEDIA_REGION_BUCKETS) {
+      const score = regionsSummary[bucket.key];
+      if (typeof score !== "number") continue;
+      regions[bucket.key] = {
+        ...(regions[bucket.key] ?? {}),
+        average_trust: regions[bucket.key]?.average_trust ?? score,
+        outlets: regions[bucket.key]?.outlets ?? [],
+      };
+    }
+  }
+
+  const overall_score =
+    typeof data.overall_score === "number"
+      ? (data.overall_score as number)
+      : typeof (data as { overall_trust_score?: number }).overall_trust_score === "number"
+        ? ((data as { overall_trust_score?: number }).overall_trust_score as number)
+        : typeof all.overall_media_trust_score === "number"
+          ? (all.overall_media_trust_score as number)
+          : (row?.overall_score ?? null);
+
+  const language_discrepancies: MediaLanguageDiscrepancy[] = [];
+  const pushDiscrepancies = (raw: unknown) => {
+    if (!Array.isArray(raw)) return;
+    for (const item of raw) {
+      if (item && typeof item === "object") language_discrepancies.push(item as MediaLanguageDiscrepancy);
+    }
+  };
+  pushDiscrepancies(data.language_discrepancies);
+  for (const bucket of MEDIA_REGION_BUCKETS) {
+    pushDiscrepancies((rawRegions[bucket.key] as BackendMediaRegion | undefined)?.language_discrepancies);
+  }
+
+  const keyInsights = new Set<string>();
+  const addInsights = (raw: unknown) => {
+    if (!Array.isArray(raw)) return;
+    for (const item of raw) {
+      if (typeof item === "string" && item.trim()) keyInsights.add(item.trim());
+    }
+  };
+  addInsights(row?.key_insights);
+  addInsights(data.key_insights);
+  for (const bucket of MEDIA_REGION_BUCKETS) {
+    addInsights((rawRegions[bucket.key] as BackendMediaRegion | undefined)?.key_insights);
+  }
+
+  let citizen_perspective = data.citizen_perspective as string | undefined;
+  let honest_assessment = data.honest_assessment as string | undefined;
+  if (!citizen_perspective || !honest_assessment) {
+    for (const bucket of MEDIA_REGION_BUCKETS) {
+      const region = rawRegions[bucket.key] as BackendMediaRegion | undefined;
+      if (!citizen_perspective && region?.citizen_perspective) {
+        citizen_perspective = region.citizen_perspective;
+      }
+      if (!honest_assessment && region?.honest_assessment) {
+        honest_assessment = region.honest_assessment;
+      }
+    }
+  }
+
+  return {
+    overall_score,
     posts_analyzed:
       typeof data.posts_analyzed === "number"
         ? (data.posts_analyzed as number)
@@ -590,17 +695,12 @@ export function extractMediaTrust(row?: TrackerRow): MediaTrustData {
       (data.snapshot_date as string | undefined) ??
       row?.created_at ??
       null,
-    regions: (data.regions as MediaTrustData["regions"]) ?? {},
-    language_discrepancies:
-      (data.language_discrepancies as MediaLanguageDiscrepancy[] | undefined) ?? [],
-    key_insights:
-      (data.key_insights as string[] | undefined) ??
-      (row?.key_insights as string[] | undefined) ??
-      [],
-    citizen_perspective: (data.citizen_perspective as string | undefined) ?? undefined,
-    honest_assessment: (data.honest_assessment as string | undefined) ?? undefined,
+    regions,
+    language_discrepancies,
+    key_insights: [...keyInsights],
+    citizen_perspective,
+    honest_assessment,
   };
-  return out;
 }
 
 
