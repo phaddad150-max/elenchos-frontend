@@ -56,7 +56,6 @@ export const SPONSOR_LOCKED_TOPIC_IDS: Record<string, string> = {
   "levant-realignment": "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
   "eu-migration-green-divisions": "Migration, Green Policies & Internal EU Divisions",
   "government-performance-corruption": "Government Performance, Corruption & Scandals",
-  "crime-safety-lawlessness": "Crime, Safety & Lawlessness",
   "political-polarization-populism": "Political Polarization & Populism Rise",
   "cuba-sanctions-domino": "Cuba Sanctions & the Domino Effect",
 };

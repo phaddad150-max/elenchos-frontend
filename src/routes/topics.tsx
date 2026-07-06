@@ -195,8 +195,7 @@ function TopicsPage() {
                   <span className="text-cyan">Public Square Sentiment</span>
                 </h1>
                 <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-                  Citizen sentiment and narrative divergence from real public discourse on X — one topic tracked near
-                  real-time, the rest on weekly or monthly refresh cycles.
+                  Citizen sentiment and narrative divergence from real public discourse on X
                 </p>
               </header>
 
@@ -356,8 +355,7 @@ function TopicsFilterableGrid({
 
   const visibleCount = activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
-  const topicGridClass =
-    "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3";
+  const topicGridClass = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3";
 
   const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
@@ -403,32 +401,30 @@ function TopicsFilterableGrid({
         </div>
       )}
 
-      {activeTopics.length > 0 && (
+      {(activeTopics.length > 0 || sponsorLocked.length > 0) && (
         <section className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
             <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
-              Active topics
+              Topics
             </h2>
             <span className="text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
-              · Live, weekly &amp; monthly refresh
+              · Live, weekly &amp; monthly · sponsor to unlock
             </span>
           </div>
           <div className={topicGridClass}>
             {activeTopics.map((t, i) => renderTopicCard(t, i))}
-          </div>
-        </section>
-      )}
-
-      {sponsorLocked.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
-            Sponsor to unlock
-          </h2>
-          <div className={topicGridClass}>
             {sponsorVisible.map((t, i) => (
-              <SponsorMeCard key={t.id} topic={t} delay={i * 0.03} />
+              <SponsorMeCard key={t.id} topic={t} delay={(activeTopics.length + i) * 0.03} />
             ))}
+            {sponsorExpanded &&
+              sponsorMore.map((t, i) => (
+                <SponsorMeCard
+                  key={t.id}
+                  topic={t}
+                  delay={(activeTopics.length + sponsorVisible.length + i) * 0.03}
+                />
+              ))}
           </div>
           {sponsorMore.length > 0 && (
             <button
@@ -449,23 +445,6 @@ function TopicsFilterableGrid({
               )}
             </button>
           )}
-          <AnimatePresence initial={false}>
-            {sponsorExpanded && sponsorMore.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="overflow-hidden"
-              >
-                <div className={`${topicGridClass} pt-3`}>
-                  {sponsorMore.map((t, i) => (
-                    <SponsorMeCard key={t.id} topic={t} delay={i * 0.03} />
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </section>
       )}
     </div>
@@ -475,7 +454,8 @@ function TopicsFilterableGrid({
 function shortTitle(t: string): string {
   const map: Record<string, string> = {
     "Arab–Israeli Normalization": "Arab–Israeli Normalization",
-    "Iranian Voices vs Islamic Regime": "Iranian Voices vs Regime",
+    "Iranian Voices vs Islamic Regime": "Iranian Voices",
+    "Iranian Voices vs Regime": "Iranian Voices",
     "Maritime AI Industry & Greece's Global Role": "Greek Maritime AI",
     "The Global AI Race": "Global AI Race",
     "Trump Administration Actions & US Politics": "Trump Admin & US Politics",
@@ -570,7 +550,13 @@ function TopicCard({
         </span>
       </div>
 
-      <div className="shrink-0 flex items-center justify-center gap-2.5 py-1">
+      <div className="shrink-0 flex items-center justify-center min-h-[2.75rem] px-1 py-0.5">
+        <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center">
+          {shortTitle(topic.title)}
+        </h3>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center gap-2.5 py-0.5">
         {hasScores ? (
           <>
             <div className="text-center min-w-[2.75rem]">
@@ -599,12 +585,6 @@ function TopicCard({
             Awaiting cycle
           </div>
         )}
-      </div>
-
-      <div className="flex-1 flex items-center justify-center min-h-0 px-1">
-        <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3 text-center">
-          {shortTitle(topic.title)}
-        </h3>
       </div>
 
       <span className="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground transition-all">
@@ -1017,7 +997,7 @@ const LIVE_TOPIC_KEYS: Record<string, { rootKey: string; headerLabel: string }> 
   },
   "iranian-voices-vs-regime": {
     rootKey: "Iranian Voices vs Regime",
-    headerLabel: "Iranian Voices vs Islamic Regime",
+    headerLabel: "Iranian Voices",
   },
   "maritime-ai-greece-global-role": {
     rootKey: "Maritime AI Industry & Greece's Global Role",
