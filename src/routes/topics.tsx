@@ -1,12 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { loadDashboardData, useSimMode, type TopicSnapshot } from "@/lib/dashboard-data";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -344,36 +339,35 @@ function TopicsFilterableGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, simMode, unlocked]);
 
-  const { liveRealtime, activeTopics, sponsorLocked } = useMemo(() => {
-    const liveRealtime: FeatureTopic[] = [];
+  const { activeTopics, sponsorLocked } = useMemo(() => {
     const activeTopics: FeatureTopic[] = [];
     const sponsorLocked: FeatureTopic[] = [];
     for (const t of ordered) {
-      const bucket = bucketOf(t);
-      if (bucket === "sponsor-locked") sponsorLocked.push(t);
-      else if (t.id === NEAR_REALTIME_TOPIC_ID) liveRealtime.push(t);
+      if (bucketOf(t) === "sponsor-locked") sponsorLocked.push(t);
       else activeTopics.push(t);
     }
-    return { liveRealtime, activeTopics, sponsorLocked };
+    return { activeTopics, sponsorLocked };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ordered, simMode, unlocked]);
 
+  const [sponsorExpanded, setSponsorExpanded] = useState(false);
   const sponsorVisible = sponsorLocked.slice(0, SPONSOR_VISIBLE_COUNT);
   const sponsorMore = sponsorLocked.slice(SPONSOR_VISIBLE_COUNT);
 
-  const visibleCount = liveRealtime.length + activeTopics.length + sponsorLocked.length;
+  const visibleCount = activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
+  const topicGridClass =
+    "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3";
 
-  const renderTopicCard = (t: FeatureTopic, i: number, featured = false) => {
+  const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
     const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
     return (
       <TopicCard
         key={t.id}
         topic={t}
-        delay={i * 0.04}
+        delay={i * 0.03}
         cadence={topicCadence(t.id)}
-        featured={featured}
         snapshot={snap}
         onOpen={() => onOpen(t.id)}
       />
@@ -409,26 +403,18 @@ function TopicsFilterableGrid({
         </div>
       )}
 
-      {liveRealtime.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
-              Live Now · Near real-time
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-xl">
-            {liveRealtime.map((t, i) => renderTopicCard(t, i, true))}
-          </div>
-        </section>
-      )}
-
       {activeTopics.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
-            Active topics · Weekly &amp; monthly refresh
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
+              Active topics
+            </h2>
+            <span className="text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
+              · Live, weekly &amp; monthly refresh
+            </span>
+          </div>
+          <div className={topicGridClass}>
             {activeTopics.map((t, i) => renderTopicCard(t, i))}
           </div>
         </section>
@@ -439,12 +425,47 @@ function TopicsFilterableGrid({
           <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
             Sponsor to unlock
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+          <div className={topicGridClass}>
             {sponsorVisible.map((t, i) => (
-              <SponsorMeCard key={t.id} topic={t} delay={i * 0.04} />
+              <SponsorMeCard key={t.id} topic={t} delay={i * 0.03} />
             ))}
-            {sponsorMore.length > 0 && <SponsorMoreDropdown topics={sponsorMore} delay={sponsorVisible.length * 0.04} />}
           </div>
+          {sponsorMore.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSponsorExpanded((v) => !v)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-cyan/35 bg-cyan/[0.04] hover:bg-cyan/[0.08] hover:border-cyan/50 text-[11px] font-mono uppercase tracking-[0.2em] text-cyan transition-colors"
+            >
+              {sponsorExpanded ? (
+                <>
+                  <ChevronDown className="w-4 h-4 rotate-180" />
+                  Show fewer sponsor topics
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  Show {sponsorMore.length} more sponsor topics
+                </>
+              )}
+            </button>
+          )}
+          <AnimatePresence initial={false}>
+            {sponsorExpanded && sponsorMore.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div className={`${topicGridClass} pt-3`}>
+                  {sponsorMore.map((t, i) => (
+                    <SponsorMeCard key={t.id} topic={t} delay={i * 0.03} />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
       )}
     </div>
@@ -471,6 +492,8 @@ function shortTitle(t: string): string {
   return map[t] ?? t;
 }
 
+const TOPIC_CARD_HEIGHT = "h-[176px]";
+
 function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number }) {
   const backendName = SPONSOR_LOCKED_TOPIC_IDS[topic.id];
   const category = topicCategory(topic.id);
@@ -480,62 +503,23 @@ function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number })
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       whileHover={{ scale: 1.02, y: -2 }}
-      className="group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col min-h-[148px] hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all"
+      className={`group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col ${TOPIC_CARD_HEIGHT} hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all`}
     >
-      <div className="inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-[0.18em] text-cyan/80">
+      <div className="shrink-0 flex items-center justify-center gap-1 text-[9px] font-mono uppercase tracking-[0.18em] text-cyan/80">
         <Lock className="w-2.5 h-2.5" /> {category}
       </div>
-      <h3 className="mt-1 text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.4em]">
-        {shortTitle(topic.title)}
-      </h3>
-      <div className="flex-1 flex items-center justify-center py-1">
-        <Lock className="w-5 h-5 text-cyan/60" />
+      <div className="flex-1 flex flex-col items-center justify-center min-h-0 px-1 text-center">
+        <Lock className="w-4 h-4 text-cyan/50 mb-1.5 shrink-0" />
+        <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3">
+          {shortTitle(topic.title)}
+        </h3>
       </div>
       <a
         href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-        className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 transition-all"
+        className="shrink-0 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 transition-all"
       >
         <Heart className="w-3 h-3" /> Sponsor me
       </a>
-    </motion.div>
-  );
-}
-
-function SponsorMoreDropdown({ topics, delay }: { topics: FeatureTopic[]; delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="min-h-[148px]"
-    >
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            className="w-full h-full min-h-[148px] rounded-xl border border-dashed border-cyan/35 bg-cyan/[0.04] hover:bg-cyan/[0.08] hover:border-cyan/55 transition-all flex flex-col items-center justify-center gap-2 p-3 text-center"
-          >
-            <span className="text-2xl font-display font-semibold text-cyan tabular-nums">+{topics.length}</span>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">More topics</span>
-            <ChevronDown className="w-4 h-4 text-cyan/70" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64 max-h-72 overflow-y-auto">
-          {topics.map((t) => {
-            const backendName = SPONSOR_LOCKED_TOPIC_IDS[t.id];
-            return (
-              <DropdownMenuItem key={t.id} asChild>
-                <a
-                  href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-                  className="cursor-pointer text-[13px] font-display"
-                >
-                  {shortTitle(t.title)}
-                </a>
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
     </motion.div>
   );
 }
@@ -549,14 +533,12 @@ function TopicCard({
   onOpen,
   snapshot = null,
   cadence = "weekly",
-  featured = false,
 }: {
   topic: FeatureTopic;
   delay: number;
   onOpen: () => void;
   snapshot?: TopicSnapshot | null;
   cadence?: "realtime" | "weekly" | "monthly";
-  featured?: boolean;
 }) {
   const os = snapshot?.overall_sentiment;
   const sentiment = typeof os === "object" && os && typeof os.score === "number" ? Math.round(os.score) : undefined;
@@ -565,7 +547,6 @@ function TopicCard({
   const divergenceTone = typeof divergence === "number" ? scoreTone(divergence, "divergence") : "var(--muted-foreground)";
   const category = topicCategory(topic.id);
   const hasScores = typeof sentiment === "number" || typeof divergence === "number";
-  const scoreSize = featured ? "text-4xl" : "text-3xl";
 
   return (
     <motion.button
@@ -575,12 +556,12 @@ function TopicCard({
       whileTap={{ scale: 0.98 }}
       transition={{ delay }}
       onClick={onOpen}
-      className="group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 text-left flex flex-col min-h-[148px] hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all w-full"
+      className={`group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col ${TOPIC_CARD_HEIGHT} hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all w-full text-center`}
     >
-      <div className="flex items-center justify-between gap-1.5 mb-1">
+      <div className="shrink-0 flex items-center justify-between gap-1">
         <span className="text-[9px] font-mono uppercase tracking-[0.16em] text-cyan/75 truncate">{category}</span>
         <span
-          className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8.5px] font-mono uppercase tracking-[0.14em] ${
+          className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-[0.12em] ${
             cadence === "realtime" ? "text-cyan bg-cyan/10 border border-cyan/30" : "text-muted-foreground bg-background/50 border border-border/50"
           }`}
         >
@@ -589,48 +570,44 @@ function TopicCard({
         </span>
       </div>
 
-      <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.4em]">
-        {shortTitle(topic.title)}
-      </h3>
-
-      <div className="flex-1 flex items-center justify-center py-1">
+      <div className="shrink-0 flex items-center justify-center gap-2.5 py-1">
         {hasScores ? (
-          <div className="flex items-center justify-center gap-3 w-full">
-            <div className="text-center min-w-[3.5rem]">
-              <div className="text-[8.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-0.5">Sentiment</div>
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: delay + 0.08, type: "spring" }}
-                className={`${scoreSize} font-display font-bold tabular-nums leading-none`}
-                style={{ color: sentimentTone, textShadow: typeof sentiment === "number" ? `0 0 16px ${sentimentTone}44` : undefined }}
+          <>
+            <div className="text-center min-w-[2.75rem]">
+              <div className="text-[8px] font-mono uppercase tracking-[0.14em] text-muted-foreground">Sentiment</div>
+              <div
+                className="text-2xl font-display font-bold tabular-nums leading-none"
+                style={{ color: sentimentTone }}
               >
                 {typeof sentiment === "number" ? sentiment : "—"}
-              </motion.div>
+              </div>
             </div>
-            <div className="w-px h-9 bg-border/70" />
-            <div className="text-center min-w-[3.5rem]">
-              <div className="text-[8.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-0.5">Divergence</div>
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: delay + 0.12, type: "spring" }}
-                className={`${scoreSize} font-display font-bold tabular-nums leading-none`}
-                style={{ color: divergenceTone, textShadow: typeof divergence === "number" ? `0 0 16px ${divergenceTone}44` : undefined }}
+            <div className="w-px h-8 bg-border/70" />
+            <div className="text-center min-w-[2.75rem]">
+              <div className="text-[8px] font-mono uppercase tracking-[0.14em] text-muted-foreground">Divergence</div>
+              <div
+                className="text-2xl font-display font-bold tabular-nums leading-none"
+                style={{ color: divergenceTone }}
               >
                 {typeof divergence === "number" ? divergence : "—"}
-              </motion.div>
+              </div>
             </div>
-          </div>
+          </>
         ) : (
-          <div className="text-[10px] font-mono text-muted-foreground inline-flex items-center gap-1.5">
+          <div className="text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
-            Awaiting next cycle
+            Awaiting cycle
           </div>
         )}
       </div>
 
-      <span className="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground transition-all">
+      <div className="flex-1 flex items-center justify-center min-h-0 px-1">
+        <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3 text-center">
+          {shortTitle(topic.title)}
+        </h3>
+      </div>
+
+      <span className="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground transition-all">
         View Analysis →
       </span>
     </motion.button>
