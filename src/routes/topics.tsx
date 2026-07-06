@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { loadDashboardData, useSimMode, type TopicSnapshot, COMING_SOON_TOPICS } from "@/lib/dashboard-data";
+import { loadDashboardData, useSimMode, type TopicSnapshot } from "@/lib/dashboard-data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -36,7 +42,56 @@ import {
 } from "@/lib/sponsor-topics";
 import { getUnlockedSponsorTopics } from "@/lib/sponsor-unlocks.functions";
 
+const NEAR_REALTIME_TOPIC_ID = "arab-israeli-normalization";
+const SPONSOR_VISIBLE_COUNT = 4;
+
+const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly"> = {
+  "arab-israeli-normalization": "realtime",
+  "iranian-voices-vs-regime": "weekly",
+  "fifa-world-cup-2026": "weekly",
+  "us-ai-economy-boom": "weekly",
+  "new-us-foreign-policy": "weekly",
+  "crypto-regulation-financial-markets": "weekly",
+  "eu-migration-green-divisions": "weekly",
+  "government-performance-corruption": "weekly",
+  "crime-safety-lawlessness": "weekly",
+  "political-polarization-populism": "weekly",
+  "levant-realignment": "monthly",
+  "global-ai-race": "monthly",
+  "maritime-ai-greece-global-role": "monthly",
+  "cuba-sanctions-domino": "monthly",
+};
+
+function topicCadence(id: string): "realtime" | "weekly" | "monthly" {
+  return TOPIC_UPDATE_CADENCE[id] ?? "weekly";
+}
+
+function readDivergenceScore(snapshot?: TopicSnapshot | null): number | undefined {
+  if (snapshot == null) return undefined;
+  if (typeof snapshot.divergence_score === "number") return Math.round(snapshot.divergence_score);
+  const raw = snapshot.narrative_divergence;
+  if (typeof raw === "number") return Math.round(raw);
+  if (raw && typeof raw === "object" && typeof (raw as { score?: number }).score === "number") {
+    return Math.round((raw as { score: number }).score);
+  }
+  return undefined;
+}
+
+function scoreTone(score: number, kind: "sentiment" | "divergence"): string {
+  if (kind === "sentiment") {
+    return score >= 60 ? "var(--emerald-signal)" : score >= 40 ? "var(--amber-signal)" : "var(--rose-signal)";
+  }
+  return score >= 60 ? "var(--rose-signal)" : score >= 35 ? "var(--amber-signal)" : "var(--emerald-signal)";
+}
+
+function cadenceLabel(cadence: "realtime" | "weekly" | "monthly"): string {
+  if (cadence === "realtime") return "Live · Near real-time";
+  if (cadence === "weekly") return "Weekly refresh";
+  return "Monthly refresh";
+}
+
 function avgDivergence(t: FeatureTopic) {
+  if (!t.compare.length) return 0;
   return Math.round(t.compare.reduce((s, r) => s + r.divergence, 0) / t.compare.length);
 }
 
@@ -144,8 +199,9 @@ function TopicsPage() {
                   Live Topics:{" "}
                   <span className="text-cyan">Public Square Sentiment</span>
                 </h1>
-                <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-none lg:whitespace-nowrap leading-relaxed">
-                  Real conversations from ordinary people on major global issues — what citizens actually think.
+                <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
+                  Citizen sentiment and narrative divergence from real public discourse on X — one topic tracked near
+                  real-time, the rest on weekly or monthly refresh cycles.
                 </p>
               </header>
 
@@ -268,28 +324,64 @@ function TopicsFilterableGrid({
 
   const ordered = useMemo(() => {
     const PRIORITY = [
+      NEAR_REALTIME_TOPIC_ID,
+      "iranian-voices-vs-regime",
       "fifa-world-cup-2026",
       "us-ai-economy-boom",
-      "arab-israeli-normalization",
-      "iranian-voices-vs-regime",
     ];
     const prio = (id: string) => {
       const i = PRIORITY.indexOf(id);
       return i === -1 ? 99 : i;
     };
-    return [...filtered].sort((a, b) => {
-      const ba = bucketRank[bucketOf(a)];
-      const bb = bucketRank[bucketOf(b)];
-      if (ba !== bb) return ba - bb;
-      return prio(a.id) - prio(b.id);
-    });
+    return [...filtered]
+      .filter((t) => bucketOf(t) !== "unavailable")
+      .sort((a, b) => {
+        const ba = bucketRank[bucketOf(a)];
+        const bb = bucketRank[bucketOf(b)];
+        if (ba !== bb) return ba - bb;
+        return prio(a.id) - prio(b.id);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, simMode, unlocked]);
 
+  const { liveRealtime, activeTopics, sponsorLocked } = useMemo(() => {
+    const liveRealtime: FeatureTopic[] = [];
+    const activeTopics: FeatureTopic[] = [];
+    const sponsorLocked: FeatureTopic[] = [];
+    for (const t of ordered) {
+      const bucket = bucketOf(t);
+      if (bucket === "sponsor-locked") sponsorLocked.push(t);
+      else if (t.id === NEAR_REALTIME_TOPIC_ID) liveRealtime.push(t);
+      else activeTopics.push(t);
+    }
+    return { liveRealtime, activeTopics, sponsorLocked };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ordered, simMode, unlocked]);
+
+  const sponsorVisible = sponsorLocked.slice(0, SPONSOR_VISIBLE_COUNT);
+  const sponsorMore = sponsorLocked.slice(SPONSOR_VISIBLE_COUNT);
+
+  const visibleCount = liveRealtime.length + activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
 
+  const renderTopicCard = (t: FeatureTopic, i: number, featured = false) => {
+    const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
+    const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
+    return (
+      <TopicCard
+        key={t.id}
+        topic={t}
+        delay={i * 0.04}
+        cadence={topicCadence(t.id)}
+        featured={featured}
+        snapshot={snap}
+        onOpen={() => onOpen(t.id)}
+      />
+    );
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-full border border-border bg-background/40 p-1 text-[11px] font-mono">
           {cats.map((c) => (
@@ -307,43 +399,54 @@ function TopicsFilterableGrid({
           ))}
         </div>
         <span className="ml-auto text-[11px] font-mono text-muted-foreground">
-          {ordered.length} of {FEATURE_TOPICS.length} topics
+          {visibleCount} topics
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {ordered.map((t, i) => {
-          const bucket = bucketOf(t);
-          if (bucket === "sponsor-locked") {
-            return <SponsorMeCard key={t.id} topic={t} delay={i * 0.05} />;
-          }
-          const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
-          const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
-          const simOpen = simMode && Boolean(LIVE_TOPIC_KEYS[t.id]);
-          const canOpen = Boolean(LIVE_TOPIC_KEYS[t.id]) || simOpen;
-          return (
-            <TopicCard
-              key={t.id}
-              topic={t}
-              delay={i * 0.05}
-              comingSoon={!canOpen}
-              snapshot={snap}
-              onOpen={() => {
-                if (canOpen) onOpen(t.id);
-              }}
-            />
-          );
-        })}
-        {category === "all" &&
-          COMING_SOON_TOPICS.map((title: string, i: number) => (
-            <ComingSoonCard key={title} title={title} delay={(ordered.length + i) * 0.05} />
-          ))}
-        {ordered.length === 0 && (
-          <div className="col-span-full text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
-            No topics match these filters.
+      {visibleCount === 0 && (
+        <div className="text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
+          No topics match these filters.
+        </div>
+      )}
+
+      {liveRealtime.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
+              Live Now · Near real-time
+            </h2>
           </div>
-        )}
-      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-xl">
+            {liveRealtime.map((t, i) => renderTopicCard(t, i, true))}
+          </div>
+        </section>
+      )}
+
+      {activeTopics.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
+            Active topics · Weekly &amp; monthly refresh
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+            {activeTopics.map((t, i) => renderTopicCard(t, i))}
+          </div>
+        </section>
+      )}
+
+      {sponsorLocked.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
+            Sponsor to unlock
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+            {sponsorVisible.map((t, i) => (
+              <SponsorMeCard key={t.id} topic={t} delay={i * 0.04} />
+            ))}
+            {sponsorMore.length > 0 && <SponsorMoreDropdown topics={sponsorMore} delay={sponsorVisible.length * 0.04} />}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -373,45 +476,66 @@ function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number })
   const category = topicCategory(topic.id);
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       whileHover={{ scale: 1.02, y: -2 }}
-      className="group relative overflow-hidden rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-4 flex flex-col min-h-[240px] hover:border-cyan/60 hover:shadow-[0_0_30px_-12px_var(--cyan-glow)] transition-all"
+      className="group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col min-h-[148px] hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all"
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ background: "radial-gradient(420px circle at 50% 0%, var(--cyan-glow), transparent 60%)" }}
-      />
-      <span
-        className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full pulse-dot"
-        style={{ background: "var(--cyan)", boxShadow: "0 0 8px var(--cyan-glow)" }}
-      />
-      {/* Header: category chip */}
-      <div className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80">
+      <div className="inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-[0.18em] text-cyan/80">
         <Lock className="w-2.5 h-2.5" /> {category}
       </div>
-      {/* Title: fixed 2 lines */}
-      <h3 className="mt-1.5 text-[15px] font-display font-semibold tracking-tight leading-snug pr-4 text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.6em]">
+      <h3 className="mt-1 text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.4em]">
         {shortTitle(topic.title)}
       </h3>
-      {/* Middle: centered lock badge in place of score */}
-      <div className="flex-1 flex items-center justify-center py-3">
-        <div className="text-center">
-          <Lock className="w-6 h-6 mx-auto text-cyan/70" />
-          <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            Sponsor to unlock
-          </div>
-        </div>
+      <div className="flex-1 flex items-center justify-center py-1">
+        <Lock className="w-5 h-5 text-cyan/60" />
       </div>
-      {/* CTA: pinned to bottom */}
       <a
         href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-mono uppercase tracking-[0.18em] font-semibold bg-cyan text-background hover:bg-cyan/90 shadow-[0_0_20px_var(--cyan-glow)] transition-all"
+        className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 transition-all"
       >
-        <Heart className="w-3.5 h-3.5" /> Sponsor me
+        <Heart className="w-3 h-3" /> Sponsor me
       </a>
+    </motion.div>
+  );
+}
+
+function SponsorMoreDropdown({ topics, delay }: { topics: FeatureTopic[]; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="min-h-[148px]"
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="w-full h-full min-h-[148px] rounded-xl border border-dashed border-cyan/35 bg-cyan/[0.04] hover:bg-cyan/[0.08] hover:border-cyan/55 transition-all flex flex-col items-center justify-center gap-2 p-3 text-center"
+          >
+            <span className="text-2xl font-display font-semibold text-cyan tabular-nums">+{topics.length}</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">More topics</span>
+            <ChevronDown className="w-4 h-4 text-cyan/70" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64 max-h-72 overflow-y-auto">
+          {topics.map((t) => {
+            const backendName = SPONSOR_LOCKED_TOPIC_IDS[t.id];
+            return (
+              <DropdownMenuItem key={t.id} asChild>
+                <a
+                  href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
+                  className="cursor-pointer text-[13px] font-display"
+                >
+                  {shortTitle(t.title)}
+                </a>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </motion.div>
   );
 }
@@ -423,217 +547,99 @@ function TopicCard({
   topic,
   delay,
   onOpen,
-  comingSoon = false,
   snapshot = null,
+  cadence = "weekly",
+  featured = false,
 }: {
   topic: FeatureTopic;
   delay: number;
   onOpen: () => void;
-  comingSoon?: boolean;
   snapshot?: TopicSnapshot | null;
+  cadence?: "realtime" | "weekly" | "monthly";
+  featured?: boolean;
 }) {
-  const gap = avgDivergence(topic);
-  const gapTone = gap > 40 ? "var(--rose-signal)" : gap > 25 ? "var(--amber-signal)" : "var(--emerald-signal)";
   const os = snapshot?.overall_sentiment;
-  const liveScore = typeof os === "object" && os ? os.score : undefined;
-  const liveLabel = typeof os === "object" && os ? os.label : undefined;
-  const liveTone =
-    typeof liveScore === "number"
-      ? liveScore >= 60
-        ? "var(--emerald-signal)"
-        : liveScore >= 40
-          ? "var(--amber-signal)"
-          : "var(--rose-signal)"
-      : null;
+  const sentiment = typeof os === "object" && os && typeof os.score === "number" ? Math.round(os.score) : undefined;
+  const divergence = readDivergenceScore(snapshot);
+  const sentimentTone = typeof sentiment === "number" ? scoreTone(sentiment, "sentiment") : "var(--muted-foreground)";
+  const divergenceTone = typeof divergence === "number" ? scoreTone(divergence, "divergence") : "var(--muted-foreground)";
   const category = topicCategory(topic.id);
-  const dotColor = comingSoon ? "var(--amber-signal)" : (liveTone ?? gapTone);
+  const hasScores = typeof sentiment === "number" || typeof divergence === "number";
+  const scoreSize = featured ? "text-4xl" : "text-3xl";
+
   return (
     <motion.button
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={comingSoon ? undefined : { scale: 1.03, y: -3 }}
-      whileTap={comingSoon ? undefined : { scale: 0.98 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ delay }}
       onClick={onOpen}
-      disabled={comingSoon}
-      className={`group relative overflow-hidden rounded-2xl border p-4 text-left flex flex-col min-h-[210px] transition-all ${
-        comingSoon
-          ? "border-amber-signal/40 bg-amber-signal/[0.06] hover:bg-amber-signal/[0.09] cursor-not-allowed"
-          : "border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] hover:border-cyan/60 hover:shadow-[0_0_30px_-12px_var(--cyan-glow)]"
-      }`}
+      className="group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 text-left flex flex-col min-h-[148px] hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all w-full"
     >
-      {!comingSoon && (
+      <div className="flex items-center justify-between gap-1.5 mb-1">
+        <span className="text-[9px] font-mono uppercase tracking-[0.16em] text-cyan/75 truncate">{category}</span>
         <span
-          aria-hidden
-          className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: `radial-gradient(420px circle at 50% 0%, ${dotColor}22, transparent 60%)` }}
-        />
-      )}
-      <span
-        className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full pulse-dot"
-        style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}` }}
-      />
-
-      {/* Header: category chip */}
-      <div
-        className={`inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.2em] ${
-          comingSoon ? "text-amber-signal/80" : "text-cyan/80"
-        }`}
-      >
-        {category}
+          className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8.5px] font-mono uppercase tracking-[0.14em] ${
+            cadence === "realtime" ? "text-cyan bg-cyan/10 border border-cyan/30" : "text-muted-foreground bg-background/50 border border-border/50"
+          }`}
+        >
+          {cadence === "realtime" && <span className="w-1 h-1 rounded-full bg-cyan pulse-dot" />}
+          {cadenceLabel(cadence)}
+        </span>
       </div>
 
-      {/* Title: fixed 2 lines, uniform height across cards */}
-      <h3
-        className={`mt-1.5 text-[15px] font-display font-semibold tracking-tight leading-snug pr-4 transition-colors line-clamp-2 min-h-[2.6em] ${
-          comingSoon ? "text-foreground/80" : "text-foreground group-hover:text-cyan"
-        }`}
-      >
+      <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.4em]">
         {shortTitle(topic.title)}
       </h3>
 
-      {/* Middle: score centered — same spot on every card */}
-      <div className="flex-1 flex items-center justify-center py-2">
-        {snapshot && typeof liveScore === "number" ? (
-          <div className="flex flex-col items-center gap-1.5 w-full">
-            <div className="flex items-baseline gap-1">
-              <motion.span
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: delay + 0.1, type: "spring" }}
-                className="text-4xl font-display font-bold tabular-nums leading-none"
-                style={{ color: liveTone ?? undefined, textShadow: `0 0 24px ${liveTone}55` }}
-              >
-                {liveScore}
-              </motion.span>
-              <span className="text-[11px] font-mono text-muted-foreground">/100</span>
-            </div>
-            {/* Single unified trend/sentiment pill (no duplicate indicators) */}
-            <UnifiedTrendPill snapshot={snapshot} tone={liveTone} label={liveLabel} />
-            {/* Animated score bar for visual life */}
-            <div className="w-full max-w-[140px] h-1 rounded-full bg-border/50 overflow-hidden mt-0.5">
+      <div className="flex-1 flex items-center justify-center py-1">
+        {hasScores ? (
+          <div className="flex items-center justify-center gap-3 w-full">
+            <div className="text-center min-w-[3.5rem]">
+              <div className="text-[8.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-0.5">Sentiment</div>
               <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.max(2, Math.min(100, liveScore))}%` }}
-                transition={{ delay: delay + 0.15, duration: 0.9, ease: "easeOut" }}
-                className="h-full rounded-full"
-                style={{ background: liveTone ?? "var(--cyan)", boxShadow: `0 0 10px ${liveTone ?? "var(--cyan)"}88` }}
-              />
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: delay + 0.08, type: "spring" }}
+                className={`${scoreSize} font-display font-bold tabular-nums leading-none`}
+                style={{ color: sentimentTone, textShadow: typeof sentiment === "number" ? `0 0 16px ${sentimentTone}44` : undefined }}
+              >
+                {typeof sentiment === "number" ? sentiment : "—"}
+              </motion.div>
             </div>
-            {typeof gap === "number" && gap > 0 && (
-              <div className="text-[9.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                Δ Narrative gap <span style={{ color: gapTone }}>{Math.round(gap)}</span>
-              </div>
-            )}
-          </div>
-        ) : !comingSoon ? (
-          <div className="text-[11px] font-mono text-muted-foreground inline-flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
-            Awaiting next cycle
+            <div className="w-px h-9 bg-border/70" />
+            <div className="text-center min-w-[3.5rem]">
+              <div className="text-[8.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-0.5">Divergence</div>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: delay + 0.12, type: "spring" }}
+                className={`${scoreSize} font-display font-bold tabular-nums leading-none`}
+                style={{ color: divergenceTone, textShadow: typeof divergence === "number" ? `0 0 16px ${divergenceTone}44` : undefined }}
+              >
+                {typeof divergence === "number" ? divergence : "—"}
+              </motion.div>
+            </div>
           </div>
         ) : (
-          <div className="text-[11px] font-mono text-amber-signal/80 uppercase tracking-[0.22em]">
-            No live data
+          <div className="text-[10px] font-mono text-muted-foreground inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
+            Awaiting next cycle
           </div>
         )}
       </div>
 
-      {/* CTA: pinned to bottom, same spot on every card */}
-      <span
-        className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-mono uppercase tracking-[0.18em] font-semibold transition-all ${
-          comingSoon
-            ? "bg-amber-signal/15 text-amber-signal border border-amber-signal/30"
-            : "bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground group-hover:shadow-[0_0_20px_var(--cyan-glow)]"
-        }`}
-      >
-        {comingSoon ? "Coming soon" : "View Analysis →"}
+      <span className="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground transition-all">
+        View Analysis →
       </span>
     </motion.button>
   );
 }
 
-function UnifiedTrendPill({
-  snapshot,
-  tone,
-  label,
-}: {
-  snapshot: TopicSnapshot;
-  tone: string | null;
-  label?: string;
-}) {
-  const os = snapshot.overall_sentiment;
-  const trendStr =
-    typeof os === "object" && os && typeof os.trend === "string" ? os.trend.toLowerCase() : "";
-  const up = /(rising|improving|up|positive|growing|increasing)/.test(trendStr);
-  const down = /(declining|falling|down|negative|worsening|cooling|dropping)/.test(trendStr);
-  const Icon = up ? TrendingUp : down ? TrendingDown : Minus;
-  const color = tone ?? (up ? "var(--emerald-signal)" : down ? "var(--rose-signal)" : "var(--muted-foreground)");
-  const text = label || (up ? "Rising" : down ? "Falling" : "Stable");
-  return (
-    <motion.span
-      initial={{ opacity: 0, y: -2 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider"
-      style={{ color, background: `${color}1f`, border: `1px solid ${color}55` }}
-    >
-      <Icon className="w-3 h-3" />
-      {text}
-    </motion.span>
-  );
-}
 
-function TopicTrendArrow({ snapshot }: { snapshot: TopicSnapshot }) {
-  const os = snapshot.overall_sentiment;
-  const trendStr =
-    typeof os === "object" && os && typeof os.trend === "string" ? os.trend.toLowerCase() : "";
-  const up = /(rising|improving|up|positive|growing|increasing)/.test(trendStr);
-  const down = /(declining|falling|down|negative|worsening|cooling|dropping)/.test(trendStr);
-  const Icon = up ? TrendingUp : down ? TrendingDown : Minus;
-  const color = up
-    ? "var(--emerald-signal)"
-    : down
-      ? "var(--rose-signal)"
-      : "var(--muted-foreground)";
-  const label = up ? "Rising" : down ? "Falling" : "Stable";
-  return (
-    <motion.span
-      initial={{ opacity: 0, x: -4 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="inline-flex items-center gap-1 mb-1 px-1.5 py-0.5 rounded-md font-mono text-[10px] uppercase tracking-wider"
-      style={{ color, background: `${color}1f`, border: `1px solid ${color}55` }}
-      title={`Trend: ${label}`}
-    >
-      <Icon className="w-3 h-3" />
-      {label}
-    </motion.span>
-  );
-}
 
-function ComingSoonCard({ title, delay }: { title: string; delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="relative overflow-hidden rounded-xl border border-amber-signal/40 bg-amber-signal/[0.06] p-4 flex flex-col gap-2 min-h-[140px]"
-      aria-disabled="true"
-    >
-      <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-amber-signal pulse-dot" />
-      <div className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.2em] text-amber-signal/80">
-        <Sparkles className="w-2.5 h-2.5" /> Coming soon
-      </div>
-      <h3 className="text-base font-display font-semibold tracking-tight leading-snug pr-4 text-foreground/80">
-        {title}
-      </h3>
-      <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
-        Not active yet. Sponsor this topic to activate it faster.
-      </p>
-      <span className="mt-auto inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-signal">
-        Coming soon · no live data
-      </span>
-    </motion.div>
-  );
-}
+
 
 
 
@@ -844,12 +850,6 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       {/* Live data panel (real Supabase data for mapped topics) */}
       {useLive && liveCfg && (
         <LiveAbrahamPanel rootKey={liveCfg.rootKey} headerLabel={liveCfg.headerLabel} />
-      )}
-
-      {/* Historical Context — collapsible, anchored at top */}
-
-      {(topic.historicalTimeline || topic.historicalContext) && (
-        <HistoricalContext timeline={topic.historicalTimeline} fallbackText={topic.historicalContext} />
       )}
 
       {!useLive && (
@@ -1698,100 +1698,6 @@ function SegmentedSentiment({
         Methodology · {methodology}
       </div>
     </section>
-  );
-}
-
-function HistoricalContext({
-  timeline,
-  fallbackText,
-}: {
-  timeline?: import("@/lib/feature-topics").HistoricalTimeline;
-  fallbackText?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const rootYear = timeline?.rootYear;
-  const milestoneCount = timeline?.milestones.length ?? 0;
-  return (
-    <section className="group rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/[0.06] to-transparent overflow-hidden transition-all duration-300 hover:border-cyan/70 hover:shadow-[0_0_24px_-4px_var(--cyan)] hover:-translate-y-0.5">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors"
-      >
-        <span className="inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-[0.22em] text-cyan group-hover:text-glow-cyan">
-          <Activity className="w-4 h-4" /> Historical Context
-          {rootYear && (
-            <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[10px] normal-case tracking-wider">
-              Root: {rootYear} · {timeline?.rootEvent}
-            </span>
-          )}
-          {milestoneCount > 0 && (
-            <span className="text-[10px] font-mono text-muted-foreground normal-case tracking-wider">
-              {milestoneCount} milestones
-            </span>
-          )}
-        </span>
-        <ChevronDown className={`w-4 h-4 text-cyan transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="px-5 pb-5 pt-3 border-t border-border space-y-4">
-              {timeline ? (
-                <>
-                  <div className="rounded-xl border border-cyan/30 bg-cyan/5 p-3">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan mb-1">
-                      Root of the problem · {timeline.rootYear}
-                    </div>
-                    <div className="text-sm font-display font-semibold">{timeline.rootEvent}</div>
-                    <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{timeline.rootNote}</div>
-                  </div>
-                  <Timeline milestones={timeline.milestones} />
-                  <p className="text-[13px] text-foreground/85 leading-relaxed">{timeline.summary}</p>
-                </>
-              ) : (
-                <p className="text-sm text-foreground/85 leading-relaxed">{fallbackText}</p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-}
-
-function Timeline({ milestones }: { milestones: import("@/lib/feature-topics").TimelineMilestone[] }) {
-  return (
-    <ol className="relative border-l border-border/70 ml-2 pl-5 space-y-3">
-      {milestones.map((m, i) => {
-        const accent = m.pivotal ? "var(--cyan)" : "var(--muted-foreground)";
-        return (
-          <li key={`${m.year}-${i}`} className="relative">
-            <span
-              className="absolute -left-[26px] top-1.5 w-2.5 h-2.5 rounded-full border-2"
-              style={{
-                borderColor: accent,
-                background: m.pivotal ? accent : "var(--background)",
-                boxShadow: m.pivotal ? `0 0 8px ${accent}` : undefined,
-              }}
-            />
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-[11px] font-mono tabular-nums tracking-wider" style={{ color: accent }}>
-                {m.year}
-              </span>
-              <span className={`text-[13px] ${m.pivotal ? "font-semibold text-foreground" : "text-foreground/90"}`}>
-                {m.event}
-              </span>
-            </div>
-            {m.note && <div className="text-[11.5px] text-muted-foreground leading-snug mt-0.5">{m.note}</div>}
-          </li>
-        );
-      })}
-    </ol>
   );
 }
 
