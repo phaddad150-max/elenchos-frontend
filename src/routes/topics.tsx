@@ -1,0 +1,2058 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { loadDashboardData, useSimMode, type TopicSnapshot, COMING_SOON_TOPICS } from "@/lib/dashboard-data";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  Brain,
+  ChevronDown,
+  
+  MessageSquare,
+  ThumbsDown,
+  ThumbsUp,
+  Sparkles,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Share2,
+  Lightbulb,
+  AlertTriangle,
+  Users,
+  Lock,
+  Heart,
+} from "lucide-react";
+
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
+import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  SPONSOR_LOCKED_TOPIC_IDS,
+  SPONSOR_PENDING_STORAGE_KEY,
+  SPONSOR_ENABLED,
+  isTopicSponsorLocked,
+  topicIdForBackendName,
+} from "@/lib/sponsor-topics";
+import { getUnlockedSponsorTopics } from "@/lib/sponsor-unlocks.functions";
+
+function avgDivergence(t: FeatureTopic) {
+  return Math.round(t.compare.reduce((s, r) => s + r.divergence, 0) / t.compare.length);
+}
+
+export const Route = createFileRoute("/topics")({
+  head: () => ({
+    meta: [
+      { title: "Topics — Elenchos" },
+      {
+        name: "description",
+        content:
+          "Explore what ordinary citizens are saying about major global issues. Real public conversations, analyzed with care and transparency.",
+      },
+      { property: "og:title", content: "Topics — Elenchos" },
+      {
+        property: "og:description",
+        content: "Live citizen sentiment from public X discourse, analyzed across nine dimensions per topic.",
+      },
+      { property: "og:url", content: "https://elenchos.live/topics" },
+    ],
+    links: [{ rel: "canonical", href: "https://elenchos.live/topics" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Live Topics: Public Square Sentiment",
+          description:
+            "Live citizen sentiment from public X discourse, analyzed across nine dimensions per topic.",
+          url: "https://elenchos.live/topics",
+        }),
+      },
+    ],
+  }),
+
+  component: TopicsPage,
+});
+
+function TopicsPage() {
+  const [, setTick] = useState(0);
+  const [simMode] = useSimMode();
+  useEffect(() => {
+    loadDashboardData().then(() => setTick((n) => n + 1));
+  }, []);
+  const [selectedId, setSelectedIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("topic");
+    return t && getTopic(t) ? t : null;
+  });
+  const setSelectedId = (id: string | null) => {
+    setSelectedIdState(id);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set("topic", id);
+    else url.searchParams.delete("topic");
+    window.history.pushState({}, "", url.toString());
+  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onPop = () => {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("topic");
+      setSelectedIdState(t && getTopic(t) ? t : null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const selected = selectedId ? getTopic(selectedId) : null;
+
+  return (
+    <div className="min-h-screen relative flex flex-col">
+      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+      <SiteNav />
+
+      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8 space-y-6 relative flex-1">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-4 py-2.5 text-[12px] font-mono text-cyan flex items-start gap-2 flex-1 min-w-[260px]">
+            <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-cyan pulse-dot shrink-0" />
+            <span>
+              <span className="uppercase tracking-[0.22em] text-[11px] font-semibold mr-1.5">
+                Live · Real Data
+              </span>
+              <span className="text-foreground/80">
+                small samples shown transparently.
+              </span>
+            </span>
+          </div>
+        </div>
+        <AnimatePresence mode="wait">
+          {!selected ? (
+            <motion.section
+              key="grid"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <header className="space-y-3">
+                <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
+                  <span className="w-1 h-3.5 bg-cyan rounded-sm" />
+                  Live Topics
+                </div>
+                <h1 className="text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.08] break-words">
+                  Live Topics:{" "}
+                  <span className="text-cyan">Public Square Sentiment</span>
+                </h1>
+                <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-none lg:whitespace-nowrap leading-relaxed">
+                  Real conversations from ordinary people on major global issues — what citizens actually think.
+                </p>
+              </header>
+
+              <h2 className="sr-only">All topics</h2>
+              <TopicsFilterableGrid simMode={simMode} onOpen={(id) => setSelectedId(id)} />
+
+            </motion.section>
+          ) : (
+            <TopicDetail key={selected.id} topic={selected} simMode={simMode} onBack={() => setSelectedId(null)} />
+          )}
+        </AnimatePresence>
+      </main>
+
+      <SiteFooter />
+    </div>
+  );
+}
+
+
+
+
+function readSnapshot(rootKey: string): TopicSnapshot | null {
+  if (typeof window === "undefined") return null;
+  const root = window.dashboardData;
+  if (!root) return null;
+  return (root[rootKey] as TopicSnapshot) ?? null;
+}
+
+type TopicCategory = "Political" | "Economic" | "Social";
+
+function topicCategory(id: string): TopicCategory {
+  if (
+    id === "crypto-regulation-financial-markets" ||
+    id === "global-ai-race" ||
+    id === "us-ai-economy-boom"
+  )
+    return "Economic";
+  if (id === "crime-safety-lawlessness" || id === "political-polarization-populism" || id === "fifa-world-cup-2026") return "Social";
+  return "Political";
+}
+
+
+function TopicsFilterableGrid({
+  simMode,
+  onOpen,
+}: {
+  simMode: boolean;
+  onOpen: (id: string) => void;
+}) {
+  const [category, setCategory] = useState<"all" | TopicCategory>("all");
+  const [unlocked, setUnlocked] = useState<string[]>([]);
+
+  // Server-verified unlocks: ask the server which topics have a real paid
+  // sponsorship row. The Stripe webhook (service role) is the only writer
+  // of `topic_sponsorships`, so localStorage can never forge an unlock.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!SPONSOR_ENABLED) return;
+    const params = new URLSearchParams(window.location.search);
+    const justReturned = params.get("success") === "true";
+    if (justReturned) {
+      try {
+        window.localStorage.removeItem(SPONSOR_PENDING_STORAGE_KEY);
+      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.delete("success");
+      window.history.replaceState({}, "", url.toString());
+    }
+
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const { topics } = await getUnlockedSponsorTopics();
+        if (cancelled) return;
+        const ids = topics
+          .map((name) => topicIdForBackendName(name))
+          .filter((v): v is string => !!v);
+        setUnlocked(ids);
+      } catch {
+        if (!cancelled) setUnlocked([]);
+      }
+    };
+    refresh();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    if (justReturned) timer = setTimeout(refresh, 3000);
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+
+  const isUnlocked = (id: string) => unlocked.includes(id);
+
+  const filtered = useMemo(() => {
+    return FEATURE_TOPICS.filter((t) => {
+      if (category !== "all" && topicCategory(t.id) !== category) return false;
+      // Sponsor-locked topics remain visible as "Sponsor me" cards even while
+      // the global Sponsor nav/CTA is hidden — clicking still routes to /sponsor.
+      return true;
+    });
+  }, [category]);
+
+  type Bucket = "live-data" | "live-empty" | "sponsor-locked" | "unavailable";
+  function bucketOf(t: FeatureTopic): Bucket {
+    const cfg = LIVE_TOPIC_KEYS[t.id];
+    const locked = isTopicSponsorLocked(t.id) && !isUnlocked(t.id);
+    if (locked) return "sponsor-locked";
+    if (!cfg) return "unavailable";
+    const snap = !simMode ? readSnapshot(cfg.rootKey) : null;
+    if (snap || simMode) return "live-data";
+    return "live-empty";
+  }
+
+  const bucketRank: Record<Bucket, number> = {
+    "live-data": 0,
+    "live-empty": 1,
+    "sponsor-locked": 2,
+    "unavailable": 3,
+  };
+
+  const ordered = useMemo(() => {
+    const PRIORITY = [
+      "fifa-world-cup-2026",
+      "us-ai-economy-boom",
+      "arab-israeli-normalization",
+      "iranian-voices-vs-regime",
+    ];
+    const prio = (id: string) => {
+      const i = PRIORITY.indexOf(id);
+      return i === -1 ? 99 : i;
+    };
+    return [...filtered].sort((a, b) => {
+      const ba = bucketRank[bucketOf(a)];
+      const bb = bucketRank[bucketOf(b)];
+      if (ba !== bb) return ba - bb;
+      return prio(a.id) - prio(b.id);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered, simMode, unlocked]);
+
+  const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-full border border-border bg-background/40 p-1 text-[11px] font-mono">
+          {cats.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c)}
+              className={`px-3 py-1 rounded-full uppercase tracking-[0.18em] transition-colors ${
+                category === c
+                  ? "bg-cyan/15 text-cyan border border-cyan/40"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {c === "all" ? "All categories" : c}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto text-[11px] font-mono text-muted-foreground">
+          {ordered.length} of {FEATURE_TOPICS.length} topics
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {ordered.map((t, i) => {
+          const bucket = bucketOf(t);
+          if (bucket === "sponsor-locked") {
+            return <SponsorMeCard key={t.id} topic={t} delay={i * 0.05} />;
+          }
+          const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
+          const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
+          const simOpen = simMode && Boolean(LIVE_TOPIC_KEYS[t.id]);
+          const canOpen = Boolean(LIVE_TOPIC_KEYS[t.id]) || simOpen;
+          return (
+            <TopicCard
+              key={t.id}
+              topic={t}
+              delay={i * 0.05}
+              comingSoon={!canOpen}
+              snapshot={snap}
+              onOpen={() => {
+                if (canOpen) onOpen(t.id);
+              }}
+            />
+          );
+        })}
+        {category === "all" &&
+          COMING_SOON_TOPICS.map((title: string, i: number) => (
+            <ComingSoonCard key={title} title={title} delay={(ordered.length + i) * 0.05} />
+          ))}
+        {ordered.length === 0 && (
+          <div className="col-span-full text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
+            No topics match these filters.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function shortTitle(t: string): string {
+  const map: Record<string, string> = {
+    "Arab–Israeli Normalization": "Arab–Israeli Normalization",
+    "Iranian Voices vs Islamic Regime": "Iranian Voices vs Regime",
+    "Maritime AI Industry & Greece's Global Role": "Greek Maritime AI",
+    "The Global AI Race": "Global AI Race",
+    "Trump Administration Actions & US Politics": "Trump Admin & US Politics",
+    "Crypto Regulation & Financial Markets Volatility": "Crypto & Markets",
+    "Eastern Mediterranean Alliance: Greece–Cyprus–Israel": "East Med Alliance",
+    "Migration, Green Policies & Internal EU Divisions": "EU Migration & Divisions",
+    "Government Performance, Corruption & Scandals": "Government & Corruption",
+    "Crime, Safety & Lawlessness": "Crime & Safety",
+    "Political Polarization & Populism Rise": "Polarization & Populism",
+    "Cuba Sanctions & the Domino Effect": "Cuba Sanctions",
+    "US AI Economy Boom & American Technological Renaissance": "US AI Economy Boom",
+    "FIFA World Cup 2026": "FIFA World Cup 2026",
+  };
+  return map[t] ?? t;
+}
+
+function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number }) {
+  const backendName = SPONSOR_LOCKED_TOPIC_IDS[topic.id];
+  const category = topicCategory(topic.id);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      className="group relative overflow-hidden rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-4 flex flex-col min-h-[240px] hover:border-cyan/60 hover:shadow-[0_0_30px_-12px_var(--cyan-glow)] transition-all"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: "radial-gradient(420px circle at 50% 0%, var(--cyan-glow), transparent 60%)" }}
+      />
+      <span
+        className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full pulse-dot"
+        style={{ background: "var(--cyan)", boxShadow: "0 0 8px var(--cyan-glow)" }}
+      />
+      {/* Header: category chip */}
+      <div className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80">
+        <Lock className="w-2.5 h-2.5" /> {category}
+      </div>
+      {/* Title: fixed 2 lines */}
+      <h3 className="mt-1.5 text-[15px] font-display font-semibold tracking-tight leading-snug pr-4 text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.6em]">
+        {shortTitle(topic.title)}
+      </h3>
+      {/* Middle: centered lock badge in place of score */}
+      <div className="flex-1 flex items-center justify-center py-3">
+        <div className="text-center">
+          <Lock className="w-6 h-6 mx-auto text-cyan/70" />
+          <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+            Sponsor to unlock
+          </div>
+        </div>
+      </div>
+      {/* CTA: pinned to bottom */}
+      <a
+        href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
+        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-mono uppercase tracking-[0.18em] font-semibold bg-cyan text-background hover:bg-cyan/90 shadow-[0_0_20px_var(--cyan-glow)] transition-all"
+      >
+        <Heart className="w-3.5 h-3.5" /> Sponsor me
+      </a>
+    </motion.div>
+  );
+}
+
+
+
+
+function TopicCard({
+  topic,
+  delay,
+  onOpen,
+  comingSoon = false,
+  snapshot = null,
+}: {
+  topic: FeatureTopic;
+  delay: number;
+  onOpen: () => void;
+  comingSoon?: boolean;
+  snapshot?: TopicSnapshot | null;
+}) {
+  const gap = avgDivergence(topic);
+  const gapTone = gap > 40 ? "var(--rose-signal)" : gap > 25 ? "var(--amber-signal)" : "var(--emerald-signal)";
+  const os = snapshot?.overall_sentiment;
+  const liveScore = typeof os === "object" && os ? os.score : undefined;
+  const liveLabel = typeof os === "object" && os ? os.label : undefined;
+  const liveTone =
+    typeof liveScore === "number"
+      ? liveScore >= 60
+        ? "var(--emerald-signal)"
+        : liveScore >= 40
+          ? "var(--amber-signal)"
+          : "var(--rose-signal)"
+      : null;
+  const category = topicCategory(topic.id);
+  const dotColor = comingSoon ? "var(--amber-signal)" : (liveTone ?? gapTone);
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={comingSoon ? undefined : { scale: 1.03, y: -3 }}
+      whileTap={comingSoon ? undefined : { scale: 0.98 }}
+      transition={{ delay }}
+      onClick={onOpen}
+      disabled={comingSoon}
+      className={`group relative overflow-hidden rounded-2xl border p-4 text-left flex flex-col min-h-[210px] transition-all ${
+        comingSoon
+          ? "border-amber-signal/40 bg-amber-signal/[0.06] hover:bg-amber-signal/[0.09] cursor-not-allowed"
+          : "border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] hover:border-cyan/60 hover:shadow-[0_0_30px_-12px_var(--cyan-glow)]"
+      }`}
+    >
+      {!comingSoon && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ background: `radial-gradient(420px circle at 50% 0%, ${dotColor}22, transparent 60%)` }}
+        />
+      )}
+      <span
+        className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full pulse-dot"
+        style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}` }}
+      />
+
+      {/* Header: category chip */}
+      <div
+        className={`inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.2em] ${
+          comingSoon ? "text-amber-signal/80" : "text-cyan/80"
+        }`}
+      >
+        {category}
+      </div>
+
+      {/* Title: fixed 2 lines, uniform height across cards */}
+      <h3
+        className={`mt-1.5 text-[15px] font-display font-semibold tracking-tight leading-snug pr-4 transition-colors line-clamp-2 min-h-[2.6em] ${
+          comingSoon ? "text-foreground/80" : "text-foreground group-hover:text-cyan"
+        }`}
+      >
+        {shortTitle(topic.title)}
+      </h3>
+
+      {/* Middle: score centered — same spot on every card */}
+      <div className="flex-1 flex items-center justify-center py-2">
+        {snapshot && typeof liveScore === "number" ? (
+          <div className="flex flex-col items-center gap-1.5 w-full">
+            <div className="flex items-baseline gap-1">
+              <motion.span
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: delay + 0.1, type: "spring" }}
+                className="text-4xl font-display font-bold tabular-nums leading-none"
+                style={{ color: liveTone ?? undefined, textShadow: `0 0 24px ${liveTone}55` }}
+              >
+                {liveScore}
+              </motion.span>
+              <span className="text-[11px] font-mono text-muted-foreground">/100</span>
+            </div>
+            {/* Single unified trend/sentiment pill (no duplicate indicators) */}
+            <UnifiedTrendPill snapshot={snapshot} tone={liveTone} label={liveLabel} />
+            {/* Animated score bar for visual life */}
+            <div className="w-full max-w-[140px] h-1 rounded-full bg-border/50 overflow-hidden mt-0.5">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.max(2, Math.min(100, liveScore))}%` }}
+                transition={{ delay: delay + 0.15, duration: 0.9, ease: "easeOut" }}
+                className="h-full rounded-full"
+                style={{ background: liveTone ?? "var(--cyan)", boxShadow: `0 0 10px ${liveTone ?? "var(--cyan)"}88` }}
+              />
+            </div>
+            {typeof gap === "number" && gap > 0 && (
+              <div className="text-[9.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                Δ Narrative gap <span style={{ color: gapTone }}>{Math.round(gap)}</span>
+              </div>
+            )}
+          </div>
+        ) : !comingSoon ? (
+          <div className="text-[11px] font-mono text-muted-foreground inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
+            Awaiting next cycle
+          </div>
+        ) : (
+          <div className="text-[11px] font-mono text-amber-signal/80 uppercase tracking-[0.22em]">
+            No live data
+          </div>
+        )}
+      </div>
+
+      {/* CTA: pinned to bottom, same spot on every card */}
+      <span
+        className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-mono uppercase tracking-[0.18em] font-semibold transition-all ${
+          comingSoon
+            ? "bg-amber-signal/15 text-amber-signal border border-amber-signal/30"
+            : "bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground group-hover:shadow-[0_0_20px_var(--cyan-glow)]"
+        }`}
+      >
+        {comingSoon ? "Coming soon" : "View Analysis →"}
+      </span>
+    </motion.button>
+  );
+}
+
+function UnifiedTrendPill({
+  snapshot,
+  tone,
+  label,
+}: {
+  snapshot: TopicSnapshot;
+  tone: string | null;
+  label?: string;
+}) {
+  const os = snapshot.overall_sentiment;
+  const trendStr =
+    typeof os === "object" && os && typeof os.trend === "string" ? os.trend.toLowerCase() : "";
+  const up = /(rising|improving|up|positive|growing|increasing)/.test(trendStr);
+  const down = /(declining|falling|down|negative|worsening|cooling|dropping)/.test(trendStr);
+  const Icon = up ? TrendingUp : down ? TrendingDown : Minus;
+  const color = tone ?? (up ? "var(--emerald-signal)" : down ? "var(--rose-signal)" : "var(--muted-foreground)");
+  const text = label || (up ? "Rising" : down ? "Falling" : "Stable");
+  return (
+    <motion.span
+      initial={{ opacity: 0, y: -2 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider"
+      style={{ color, background: `${color}1f`, border: `1px solid ${color}55` }}
+    >
+      <Icon className="w-3 h-3" />
+      {text}
+    </motion.span>
+  );
+}
+
+function TopicTrendArrow({ snapshot }: { snapshot: TopicSnapshot }) {
+  const os = snapshot.overall_sentiment;
+  const trendStr =
+    typeof os === "object" && os && typeof os.trend === "string" ? os.trend.toLowerCase() : "";
+  const up = /(rising|improving|up|positive|growing|increasing)/.test(trendStr);
+  const down = /(declining|falling|down|negative|worsening|cooling|dropping)/.test(trendStr);
+  const Icon = up ? TrendingUp : down ? TrendingDown : Minus;
+  const color = up
+    ? "var(--emerald-signal)"
+    : down
+      ? "var(--rose-signal)"
+      : "var(--muted-foreground)";
+  const label = up ? "Rising" : down ? "Falling" : "Stable";
+  return (
+    <motion.span
+      initial={{ opacity: 0, x: -4 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="inline-flex items-center gap-1 mb-1 px-1.5 py-0.5 rounded-md font-mono text-[10px] uppercase tracking-wider"
+      style={{ color, background: `${color}1f`, border: `1px solid ${color}55` }}
+      title={`Trend: ${label}`}
+    >
+      <Icon className="w-3 h-3" />
+      {label}
+    </motion.span>
+  );
+}
+
+function ComingSoonCard({ title, delay }: { title: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="relative overflow-hidden rounded-xl border border-amber-signal/40 bg-amber-signal/[0.06] p-4 flex flex-col gap-2 min-h-[140px]"
+      aria-disabled="true"
+    >
+      <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-amber-signal pulse-dot" />
+      <div className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.2em] text-amber-signal/80">
+        <Sparkles className="w-2.5 h-2.5" /> Coming soon
+      </div>
+      <h3 className="text-base font-display font-semibold tracking-tight leading-snug pr-4 text-foreground/80">
+        {title}
+      </h3>
+      <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
+        Not active yet. Sponsor this topic to activate it faster.
+      </p>
+      <span className="mt-auto inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-signal">
+        Coming soon · no live data
+      </span>
+    </motion.div>
+  );
+}
+
+
+
+
+
+// ────────────────────────────────────────────────────────────────
+// Intelligence-report style detail view
+// ────────────────────────────────────────────────────────────────
+
+// (Key Monitoring Terms removed per launch spec)
+
+function splitToBullets(text: string, max = 3): string[] {
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, max);
+}
+
+function readTopicOverride(topicId: string): Partial<FeatureTopic> | null {
+  if (typeof window === "undefined") return null;
+  const data = window.dashboardData as Record<string, unknown> | null | undefined;
+  if (!data) return null;
+  const topics = (data.topics ?? data.topic_data) as Record<string, unknown> | undefined;
+  if (!topics || typeof topics !== "object") return null;
+  return (topics[topicId] as Partial<FeatureTopic>) ?? null;
+}
+
+type SubGroupKey = "political" | "economic" | "social";
+
+function SubGroupBreakdown({ trackers }: { trackers: FeatureTopic["trackers"] }) {
+  const groups: { key: SubGroupKey; label: string; match: RegExp }[] = [
+    { key: "political", label: "Political", match: /political|stability/i },
+    { key: "economic", label: "Economic", match: /economic|growth/i },
+    { key: "social", label: "Social", match: /social|coherence|tolerance/i },
+  ];
+  const items = groups.map((g) => ({
+    ...g,
+    tracker: trackers.find((t) => g.match.test(t.label)) ?? null,
+  }));
+  const [active, setActive] = useState<SubGroupKey>("political");
+  const current = items.find((i) => i.key === active) ?? items[0];
+  const tracker = current.tracker;
+  const score = tracker?.score ?? 0;
+  const color =
+    score >= 65 ? "var(--emerald-signal)" : score >= 45 ? "var(--amber-signal)" : "var(--rose-signal)";
+
+  return (
+    <section className="glass rounded-2xl border border-cyan/20 p-5 space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
+          <Users className="w-3.5 h-3.5" /> Sub-group view · Political · Economic · Social
+        </div>
+        <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
+          Filter the alliance signal by dimension
+        </div>
+      </div>
+
+      <div className="inline-flex rounded-full border border-border bg-background/40 p-1 gap-1">
+        {items.map((g) => {
+          const isActive = g.key === active;
+          return (
+            <button
+              key={g.key}
+              type="button"
+              onClick={() => setActive(g.key)}
+              className={`px-3.5 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.18em] transition-colors ${
+                isActive
+                  ? "bg-cyan/15 text-cyan border border-cyan/40"
+                  : "text-muted-foreground hover:text-foreground border border-transparent"
+              }`}
+            >
+              {g.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {tracker ? (
+        <div
+          className="rounded-xl border bg-background/40 p-4 flex items-center gap-5"
+          style={{ borderColor: color }}
+        >
+          <div
+            className="w-20 h-20 rounded-full grid place-items-center shrink-0"
+            style={{ background: `conic-gradient(${color} ${score * 3.6}deg, transparent 0deg)` }}
+          >
+            <div className="w-[68px] h-[68px] rounded-full bg-background grid place-items-center">
+              <span className="text-2xl font-display font-semibold tabular-nums" style={{ color }}>
+                {score}
+              </span>
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color }}>
+              {current.label} sentiment
+            </div>
+            <div className="text-lg font-display font-semibold mt-0.5">{tracker.label}</div>
+            <p className="text-sm text-muted-foreground leading-relaxed mt-1">{tracker.caption}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground font-mono">
+          No {current.label.toLowerCase()} signal yet.
+        </div>
+      )}
+    </section>
+  );
+}
+
+function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: FeatureTopic; onBack: () => void; simMode?: boolean }) {
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const override = readTopicOverride(baseTopic.id);
+  const topic: FeatureTopic = override ? { ...baseTopic, ...override } : baseTopic;
+
+  const gap = avgDivergence(topic);
+  const overallSentiment = Math.round(topic.trackers.reduce((s, t) => s + t.score, 0) / topic.trackers.length);
+  const simA = topic.simulation.pathA.series;
+  const trend = simA[simA.length - 1] - simA[0];
+  const momentum = Math.max(0, Math.min(100, 50 + trend));
+  const negSignal = topic.trackers.find((t) => t.classification === "negative");
+  const emotionalIntensity = negSignal ? 100 - negSignal.score : Math.min(100, gap + 25);
+  const sampleNum = parseInt(topic.sampleSize.replace(/[^0-9]/g, ""), 10) || 0;
+  const engagementVelocity = Math.min(100, Math.round((sampleNum / 600) * 100));
+
+  const metrics = [
+    {
+      label: "Citizen ↔ Official Gap",
+      value: gap,
+      tone: gap > 40 ? "rose" : gap > 25 ? "amber" : "emerald",
+      hint: gap > 40 ? "Severe divergence" : gap > 25 ? "Notable divergence" : "Aligned",
+    },
+    {
+      label: "Emotional Intensity",
+      value: emotionalIntensity,
+      tone: emotionalIntensity > 65 ? "rose" : emotionalIntensity > 40 ? "amber" : "emerald",
+      hint: "Anger + urgency in citizen posts",
+    },
+    {
+      label: "Narrative Momentum",
+      value: momentum,
+      tone: momentum > 60 ? "emerald" : momentum < 40 ? "rose" : "amber",
+      hint: trend >= 0 ? `+${trend} pts trajectory` : `${trend} pts trajectory`,
+    },
+    {
+      label: "Engagement Velocity",
+      value: engagementVelocity,
+      tone: engagementVelocity > 60 ? "emerald" : engagementVelocity > 35 ? "amber" : "rose",
+      hint: topic.sampleSize,
+    },
+  ] as const;
+
+  const claims = topic.actionableIntel?.claims ?? splitToBullets(topic.insights.citizenSays, 3);
+  const warnings =
+    topic.actionableIntel?.warnings ?? splitToBullets(topic.insights.gap + " " + topic.insights.officialSays, 3);
+  const opportunities =
+    topic.actionableIntel?.opportunities ?? splitToBullets(topic.takeaway + " " + topic.insights.citizenSays, 3);
+
+  const liveCfg = LIVE_TOPIC_KEYS[topic.id];
+  const { data: liveData } = useLiveTopicData(liveCfg?.rootKey ?? "");
+  const useLive = !simMode && Boolean(liveCfg);
+  const liveScore = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.score : undefined;
+  const liveLabel = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.label : undefined;
+  const shareUrl = `https://elenchos.live/topics?topic=${encodeURIComponent(topic.id)}`;
+  const shareText = useLive && typeof liveScore === "number"
+    ? `${topic.title} — Live citizen sentiment: ${liveScore}/100${liveLabel ? ` (${liveLabel})` : ""}. Real voices, paraphrased. via @ElenchosPulse`
+    : `${topic.title} — Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
+  const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+
+  const sentimentTone = overallSentiment >= 60 ? "emerald" : overallSentiment >= 40 ? "amber" : "rose";
+
+  return (
+    <motion.section
+      key={topic.id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="space-y-5"
+    >
+      {/* Top bar */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Topics
+        </button>
+        <a
+          href={shareHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 transition-colors"
+        >
+          <Share2 className="w-3.5 h-3.5" /> Share on X
+        </a>
+      </div>
+
+      {/* Header */}
+      <header className="space-y-2">
+        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
+          <span className="w-1 h-3.5 bg-cyan rounded-sm" />
+          {topic.region}
+        </div>
+        <h1 className="text-4xl md:text-5xl font-display font-semibold tracking-tight leading-[1.05]">{topic.title}</h1>
+        <p className="text-base text-muted-foreground max-w-3xl leading-relaxed">{topic.description}</p>
+      </header>
+
+      {/* Live data panel (real Supabase data for mapped topics) */}
+      {useLive && liveCfg && (
+        <LiveAbrahamPanel rootKey={liveCfg.rootKey} headerLabel={liveCfg.headerLabel} />
+      )}
+
+      {/* Historical Context — collapsible, anchored at top */}
+
+      {(topic.historicalTimeline || topic.historicalContext) && (
+        <HistoricalContext timeline={topic.historicalTimeline} fallbackText={topic.historicalContext} />
+      )}
+
+      {!useLive && (
+        <>
+          {/* Overall Citizen Sentiment */}
+          <OverallSentiment score={overallSentiment} trend={trend} tone={sentimentTone} />
+
+          {/* Sub-group breakdown — Eastern Mediterranean alliance only */}
+          {topic.id === "levant-realignment" && <SubGroupBreakdown trackers={topic.trackers} />}
+
+          {/* Segmented sentiment (topic-aware) */}
+          {topic.segments && topic.segments.items.length > 0 && (
+            <SegmentedSentiment
+              overall={overallSentiment}
+              items={topic.segments.items}
+              methodology={topic.segments.methodology}
+            />
+          )}
+
+          {/* 4 metric cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {metrics.map((m) => (
+              <MetricCard key={m.label} {...m} />
+            ))}
+          </div>
+
+          {/* Path comparison — topic-specific */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <PathCard
+              kind="positive"
+              title={topic.pathExamples?.positive.title ?? "Positive Path"}
+              pathLabel={topic.pathExamples?.positive.pathLabel ?? topic.simulation.pathA.label}
+              series={topic.simulation.pathA.series}
+              exampleLabel={topic.pathExamples?.positive.exampleLabel}
+              example={
+                topic.pathExamples?.positive.exampleBody ??
+                "Pathway where citizen-aligned reform and openness compound."
+              }
+            />
+            <PathCard
+              kind="risk"
+              title={topic.pathExamples?.risk.title ?? "Risk Path"}
+              pathLabel={topic.pathExamples?.risk.pathLabel ?? topic.simulation.pathB.label}
+              series={topic.simulation.pathB.series}
+              exampleLabel={topic.pathExamples?.risk.exampleLabel}
+              example={
+                topic.pathExamples?.risk.exampleBody ??
+                "Pathway where elite paralysis or escalation overrides citizen sentiment."
+              }
+            />
+          </div>
+
+          {/* Actionable Insights */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
+                <Sparkles className="w-3 h-3" /> Actionable Intelligence
+              </div>
+              <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
+                For journalists · researchers · policy advocates
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <InsightCard
+                tone="emerald"
+                icon={<MessageSquare className="w-4 h-4" />}
+                title="Top Citizen Claims"
+                bullets={claims}
+              />
+              <InsightCard
+                tone="rose"
+                icon={<AlertTriangle className="w-4 h-4" />}
+                title="Warning Signals"
+                bullets={warnings}
+              />
+              <InsightCard
+                tone="amber"
+                icon={<Lightbulb className="w-4 h-4" />}
+                title="Opportunity Signals"
+                bullets={opportunities}
+              />
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* AI Synthesis — only for non-live (simulated) topics; live topics show narrative inline in LiveAbrahamPanel */}
+      {!useLive && (
+        <section className="glass rounded-2xl p-5 space-y-3 border-l-2 border-l-cyan">
+          <div className="flex items-center gap-2 text-cyan">
+            <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
+              <Brain className="w-4 h-4" />
+            </div>
+            <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">AI Synthesis</h2>
+          </div>
+          <p className="text-sm text-foreground/90 leading-relaxed">
+            <span className="text-cyan font-medium">Citizens:</span> {topic.insights.citizenSays}{" "}
+            <span className="text-muted-foreground font-medium">Officials & media:</span> {topic.insights.officialSays}{" "}
+            <span className="text-amber-signal font-medium">Bottom line —</span> {topic.takeaway}
+          </p>
+          <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground pt-1 border-t border-border">
+            Sample: {topic.sampleSize} · Confidence: {topic.confidence ?? (gap > 25 ? "High" : "Moderate")}
+          </div>
+        </section>
+      )}
+
+      {/* Feedback */}
+      <section className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 rounded-2xl border border-border bg-secondary/30">
+        <span className="text-sm text-muted-foreground">Was this intelligence brief useful?</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFeedback("up")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono border transition-colors ${
+              feedback === "up"
+                ? "bg-emerald-signal/15 text-emerald-signal border-emerald-signal/40"
+                : "border-border hover:border-emerald-signal/40"
+            }`}
+          >
+            <ThumbsUp className="w-3.5 h-3.5" /> Yes
+          </button>
+          <button
+            onClick={() => setFeedback("down")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono border transition-colors ${
+              feedback === "down"
+                ? "bg-rose-signal/15 text-rose-signal border-rose-signal/40"
+                : "border-border hover:border-rose-signal/40"
+            }`}
+          >
+            <ThumbsDown className="w-3.5 h-3.5" /> No
+          </button>
+        </div>
+      </section>
+    </motion.section>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
+// Live data panel — Arab-Israeli Normalization / Abraham Accords
+// ────────────────────────────────────────────────────────────────
+
+type SegmentValue = { score: number; label?: string };
+
+type QuestionAnalysis = {
+  question?: string;
+  answer?: string;
+  sentiment_score?: number;
+  sentiment_label?: string;
+  summary?: string;
+  key_points?: string[];
+  notable_variations?: string[] | string;
+};
+
+type AbrahamData = {
+  overall_sentiment?: { score?: number; label?: string; trend?: string };
+  segmented_sentiment?: Record<string, SegmentValue | number>;
+  narrative_summary?: string;
+  key_insights?: string[];
+  question_analysis?: QuestionAnalysis[];
+  sample_size?: number;
+  last_updated?: string;
+  month?: string;
+};
+
+function useLiveTopicData(rootKey: string): { data: AbrahamData | null; isFallback: boolean } {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    loadDashboardData().then(() => setTick((n) => n + 1));
+    const id = setInterval(() => {
+      if (typeof window !== "undefined" && window.dashboardData) {
+        setTick((n) => n + 1);
+        clearInterval(id);
+      }
+    }, 300);
+    return () => clearInterval(id);
+  }, [rootKey]);
+  if (typeof window === "undefined") return { data: null, isFallback: false };
+  const root = window.dashboardData as Record<string, AbrahamData> | null | undefined;
+  if (!root) return { data: null, isFallback: false };
+  const node = root[rootKey];
+  void tick;
+  return { data: node ?? null, isFallback: Boolean(window.dashboardMeta?.fallback) };
+}
+
+const LIVE_TOPIC_KEYS: Record<string, { rootKey: string; headerLabel: string }> = {
+  "arab-israeli-normalization": {
+    rootKey: "Arab-Israeli Normalization / Abraham Accords",
+    headerLabel: "Abraham Accords",
+  },
+  "iranian-voices-vs-regime": {
+    rootKey: "Iranian Voices vs Regime",
+    headerLabel: "Iranian Voices vs Islamic Regime",
+  },
+  "maritime-ai-greece-global-role": {
+    rootKey: "Maritime AI Industry & Greece's Global Role",
+    headerLabel: "Maritime AI Industry & Greece's Global Role",
+  },
+  "levant-realignment": {
+    rootKey: "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
+    headerLabel: "Eastern Mediterranean Alliance",
+  },
+  "new-us-foreign-policy": {
+    rootKey: "Trump Administration Actions & US Politics",
+    headerLabel: "Trump Administration Actions & US Politics",
+  },
+  "crypto-regulation-financial-markets": {
+    rootKey: "Crypto Regulation & Financial Markets Volatility",
+    headerLabel: "Crypto Regulation & Financial Markets",
+  },
+  "eu-migration-green-divisions": {
+    rootKey: "Migration, Green Policies & Internal EU Divisions",
+    headerLabel: "Migration, Green Policies & EU Divisions",
+  },
+  "government-performance-corruption": {
+    rootKey: "Government Performance, Corruption & Scandals",
+    headerLabel: "Government Performance & Corruption",
+  },
+  "crime-safety-lawlessness": {
+    rootKey: "Crime, Safety & Lawlessness",
+    headerLabel: "Crime, Safety & Lawlessness",
+  },
+  "political-polarization-populism": {
+    rootKey: "Political Polarization & Populism Rise",
+    headerLabel: "Political Polarization & Populism",
+  },
+  "global-ai-race": {
+    rootKey: "Global AI Race",
+    headerLabel: "The Global AI Race",
+  },
+  "cuba-sanctions-domino": {
+    rootKey: "Cuba Sanctions & the Domino Effect",
+    headerLabel: "Cuba Sanctions & the Domino Effect",
+  },
+  "fifa-world-cup-2026": {
+    rootKey: "fifa-world-cup-2026",
+    headerLabel: "FIFA World Cup 2026",
+  },
+  "us-ai-economy-boom": {
+    rootKey: "US AI Economy Boom & American Technological Renaissance",
+    headerLabel: "US AI Economy Boom",
+  },
+};
+
+
+
+function segScore(v: SegmentValue | number): number {
+  return typeof v === "number" ? v : (v?.score ?? 0);
+}
+function segLabel(v: SegmentValue | number): string | undefined {
+  return typeof v === "number" ? undefined : v?.label;
+}
+function prettySegmentName(k: string): string {
+  return k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+
+function sentimentColor(score: number): string {
+  if (score >= 65) return "var(--emerald-signal)";
+  if (score >= 45) return "var(--amber-signal)";
+  return "var(--rose-signal)";
+}
+
+// Higher divergence == more concern. Color-coded with the same palette
+// used across the dashboard: green low, amber medium, red high.
+function divergenceColor(score: number): string {
+  if (score >= 60) return "var(--rose-signal)";
+  if (score >= 35) return "var(--amber-signal)";
+  return "var(--emerald-signal)";
+}
+
+function divergenceBand(score: number): string {
+  if (score >= 60) return "Severe divergence";
+  if (score >= 35) return "Notable divergence";
+  return "Aligned";
+}
+
+function HeroSentimentCard({
+  score,
+  label,
+  trend,
+  color,
+  sample,
+}: {
+  score: number;
+  label: string;
+  trend: string;
+  color: string;
+  sample: string;
+}) {
+  return (
+    <div className="rounded-xl border bg-background/40 backdrop-blur p-5 relative overflow-hidden flex flex-col gap-4 min-h-[240px]" style={{ borderColor: `${color}55` }}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-70"
+        style={{ background: `radial-gradient(280px circle at 50% 0%, ${color}1f, transparent 65%)` }}
+      />
+      <div className="relative flex items-center justify-between gap-2 flex-wrap">
+        <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color }}>
+          <Activity className="w-3 h-3" /> Overall Sentiment
+        </div>
+        {trend && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono border" style={{ color, borderColor: `${color}55`, background: `${color}14` }}>
+            <TrendingUp className="w-3 h-3" /> {trend}
+          </span>
+        )}
+      </div>
+
+      <div className="relative flex items-center gap-5">
+        <div className="relative w-28 h-28 shrink-0">
+          <div
+            className="absolute inset-0 rounded-full grid place-items-center"
+            style={{ background: `conic-gradient(${color} ${score * 3.6}deg, var(--border) 0deg)` }}
+          >
+            <div className="absolute inset-1.5 rounded-full bg-background grid place-items-center">
+              <span className="text-4xl font-display font-semibold tabular-nums" style={{ color }}>
+                {score}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="min-w-0">
+          <div className="text-2xl font-display font-semibold leading-tight" style={{ color }}>
+            {label}
+          </div>
+          <div className="mt-1 text-[12px] font-mono text-muted-foreground">
+            Citizen sentiment score · 0–100 scale
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mt-auto text-[11px] font-mono text-muted-foreground border-t border-border pt-2 flex items-center justify-between">
+        <span>Sample · <span className="text-foreground/80 tabular-nums">{sample}</span></span>
+        <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: color }} /> Live</span>
+      </div>
+    </div>
+  );
+}
+
+function HeroDivergenceCard({ data }: { data: AbrahamData & { narrative_divergence?: unknown; divergence_score?: unknown } }) {
+  // Prefer `divergence_score` (latest_topic_snapshots), fall back to legacy
+  // `narrative_divergence` block. Accepts object `{ score, label, summary }`,
+  // a bare number, or null when absent.
+  const d = data as unknown as { narrative_divergence?: unknown; divergence_score?: unknown };
+  let score: number | null = null;
+  let label: string | null = null;
+  let summary: string | null = null;
+  if (typeof d.divergence_score === "number") {
+    score = Math.round(d.divergence_score);
+  }
+  const raw = d.narrative_divergence;
+  if (raw && typeof raw === "object") {
+    const r = raw as { score?: number; label?: string; summary?: string };
+    if (score === null && typeof r.score === "number") score = Math.round(r.score);
+    if (typeof r.label === "string") label = r.label;
+    if (typeof r.summary === "string") summary = r.summary;
+  } else if (score === null && typeof raw === "number") {
+    score = Math.round(raw);
+  }
+
+  const hasData = score !== null;
+  const color = hasData ? divergenceColor(score!) : "var(--muted-foreground)";
+  const band = hasData ? (label ?? divergenceBand(score!)) : "Awaiting backend data";
+
+  return (
+    <div className="rounded-xl border bg-background/40 backdrop-blur p-5 relative overflow-hidden flex flex-col gap-4 min-h-[240px]" style={{ borderColor: `${color}55` }}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-70"
+        style={{ background: `radial-gradient(280px circle at 50% 0%, ${color}1f, transparent 65%)` }}
+      />
+      <div className="relative flex items-center justify-between gap-2 flex-wrap">
+        <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color }}>
+          <AlertTriangle className="w-3 h-3" /> Narrative Divergence
+        </div>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono border" style={{ color, borderColor: `${color}55`, background: `${color}14` }}>
+          {band}
+        </span>
+      </div>
+
+      <div className="relative flex items-center gap-5">
+        <div className="relative w-28 h-28 shrink-0">
+          <div
+            className="absolute inset-0 rounded-full grid place-items-center"
+            style={{ background: hasData ? `conic-gradient(${color} ${(score! ) * 3.6}deg, var(--border) 0deg)` : "var(--border)" }}
+          >
+            <div className="absolute inset-1.5 rounded-full bg-background grid place-items-center">
+              <span className="text-4xl font-display font-semibold tabular-nums" style={{ color }}>
+                {hasData ? score : "—"}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="min-w-0">
+          <div className="text-2xl font-display font-semibold leading-tight" style={{ color }}>
+            {hasData ? (label ?? divergenceBand(score!)) : "No divergence score yet"}
+          </div>
+          <div className="mt-1 text-[12px] font-mono text-muted-foreground">
+            Gap between citizen narrative and official narrative
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mt-auto text-[12px] leading-relaxed text-foreground/85 border-t border-border pt-2">
+        {summary
+          ? summary
+          : hasData
+            ? "Summary will appear here when the backend publishes a narrative-divergence note for this topic."
+            : "This metric appears as soon as the backend workflow publishes a narrative-divergence score for this topic."}
+      </div>
+    </div>
+  );
+}
+
+
+function LiveAbrahamPanel({
+  rootKey = "Arab-Israeli Normalization / Abraham Accords",
+  headerLabel = "Abraham Accords",
+}: { rootKey?: string; headerLabel?: string } = {}) {
+  const { data, isFallback } = useLiveTopicData(rootKey);
+  if (!data) {
+    const loaded = typeof window !== "undefined" && Boolean(window.dashboardData);
+    if (loaded) {
+      return (
+        <section className="glass rounded-2xl p-6 border border-amber-signal/30 bg-amber-signal/[0.04] space-y-2">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.24em] text-amber-signal">
+            <AlertTriangle className="w-3.5 h-3.5" /> {headerLabel}
+          </div>
+          <h3 className="text-lg font-display font-semibold text-foreground/90">
+            No data yet for this month
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            This topic is queued for analysis. New citizen-sentiment data will
+            appear here automatically as soon as the next scheduled run completes.
+          </p>
+        </section>
+      );
+    }
+    return (
+      <section className="glass rounded-2xl p-5 border border-cyan/20 text-sm font-mono text-muted-foreground">
+        Loading live analysis…
+      </section>
+    );
+  }
+  const score = data.overall_sentiment?.score ?? 0;
+  const label = data.overall_sentiment?.label ?? "—";
+  const trend = data.overall_sentiment?.trend ?? "";
+  const color = sentimentColor(score);
+  const segments = Object.entries(data.segmented_sentiment ?? {});
+  const insights = data.key_insights ?? [];
+  const sample = data.sample_size ? data.sample_size.toLocaleString() : "—";
+  const narrative = data.narrative_summary ?? "";
+  const month = data.month;
+  const questions = data.question_analysis ?? [];
+
+  return (
+    <section className="glass rounded-2xl p-5 space-y-5 border border-cyan/30 relative overflow-hidden">
+      {/* Animated OSINT grid backdrop */}
+      <div className="absolute inset-0 grid-drift pointer-events-none" />
+      {/* Scanning line */}
+      <div className="absolute inset-0 scan-line pointer-events-none opacity-30" />
+
+      {/* Header strip */}
+      <div className="relative flex items-center justify-between gap-3 flex-wrap">
+        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
+          <Brain className="w-3.5 h-3.5" /> Live Citizen Pulse · Public Discourse · {headerLabel}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isFallback ? (
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Fallback data</span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-emerald-signal">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-signal pulse-dot" /> Live · streaming
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Small-sample warning — identical generic copy on every topic */}
+      <div className="relative rounded-xl border border-amber-signal/30 bg-amber-signal/[0.06] px-4 py-3 text-[12px] font-mono text-foreground/80 leading-relaxed flex gap-2.5 items-start">
+        <AlertTriangle className="w-4 h-4 text-amber-signal mt-0.5 shrink-0" />
+        <span>
+          Based on <span className="text-foreground font-medium tabular-nums">{sample}</span>{" "}
+          recent public posts after authenticity &amp; quality filters. Samples can be smaller than
+          traditional polls due to regional factors, speech realities, and quality/spam filters.
+          All citizen views are paraphrased aggregates — no usernames, direct quotes, or individual
+          accounts are stored. Interpret with appropriate caution. See methodology in About.
+        </span>
+      </div>
+
+      {/* Two equal hero cards — Overall Sentiment + Narrative Divergence */}
+      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4">
+        <HeroSentimentCard score={score} label={label} trend={trend} color={color} sample={sample} />
+        <HeroDivergenceCard data={data} />
+      </div>
+
+      {/* Segmented sentiment */}
+      {segments.length > 0 && (
+        <div className="relative">
+          <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-2 flex items-center gap-2">
+            <Users className="w-3 h-3" /> Segmented Sentiment
+            <span className="text-muted-foreground normal-case tracking-wider">· public X discourse</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {segments.map(([k, raw]) => {
+              const v = segScore(raw);
+              const segLbl = segLabel(raw);
+              const c = sentimentColor(v);
+              const display = prettySegmentName(k);
+              return (
+                <div
+                  key={k}
+                  className="rounded-xl border border-border bg-background/40 backdrop-blur p-3 relative overflow-hidden"
+                  style={{ borderTop: `2px solid ${c}` }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
+                      {display}
+                    </div>
+                    <span
+                      className="w-1 h-1 rounded-full pulse-dot"
+                      style={{ background: c, boxShadow: `0 0 6px ${c}` }}
+                    />
+                  </div>
+                  <div className="flex items-baseline justify-between mt-1">
+                    <div
+                      className="text-3xl font-display font-semibold tabular-nums data-pulse"
+                      style={{ color: c }}
+                    >
+                      {v}
+                    </div>
+                    {segLbl && (
+                      <div className="text-[10.5px] font-mono uppercase tracking-wider" style={{ color: c }}>
+                        {segLbl}
+                      </div>
+                    )}
+                  </div>
+                  {/* mini sparkline */}
+                  <svg viewBox="0 0 80 24" className="w-full h-6 mt-1">
+                    <polyline
+                      points={Array.from({ length: 12 })
+                        .map((_, i) => {
+                          const seed = (v + i * 7) % 17;
+                          const y = 22 - ((v + seed - 8) / 100) * 18;
+                          return `${(i * 80) / 11},${Math.max(2, Math.min(22, y)).toFixed(1)}`;
+                        })
+                        .join(" ")}
+                      fill="none"
+                      stroke={c}
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeDasharray="200"
+                      className="dash-flow"
+                    />
+                  </svg>
+                  <div className="mt-1 h-1 rounded-full bg-border overflow-hidden relative">
+                    <motion.div
+                      className="h-full rounded-full bar-sweep relative"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${v}%` }}
+                      transition={{ duration: 1.1, ease: "easeOut" }}
+                      style={{ background: c, boxShadow: `0 0 8px ${c}` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Key insights */}
+      {insights.length > 0 && (
+        <div className="relative">
+          <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-2">Key Insights</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {insights.map((ins, i) => (
+              <div key={i} className="rounded-xl border border-border bg-secondary/30 p-3 flex gap-2 items-start">
+                <Sparkles className="w-3.5 h-3.5 text-cyan mt-0.5 shrink-0" />
+                <p className="text-sm text-foreground/90 leading-relaxed">{ins}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
+      {/* Per-question sentiment analysis — visual grid */}
+      {questions.length > 0 && (
+        <div className="relative space-y-3">
+          <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
+            <Sparkles className="w-3 h-3" /> Citizen Sentiment Insights
+            <span className="text-muted-foreground normal-case tracking-wider">
+              · {questions.length} dimensions
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+            {questions.map((q, i) => (
+              <QuestionThemeCard key={i} q={q} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Narrative summary */}
+      {narrative && (
+        <div className="relative rounded-xl border border-cyan/30 bg-cyan/[0.04] p-4 space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
+            <Brain className="w-3 h-3" /> Narrative Summary
+          </div>
+          <p className="text-sm text-foreground/90 leading-relaxed">{narrative}</p>
+        </div>
+      )}
+
+      {/* Footer meta */}
+      <div className="relative flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border text-[11px] font-mono text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <Users className="w-3 h-3 text-cyan" /> Sample size: <span className="text-foreground/90">{sample}</span>
+        </span>
+        <span>
+          Last updated: <span className="text-foreground/90">{data.last_updated ?? "—"}</span>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+
+// ────────────────────────────────────────────────────────────────
+// Sub-components
+// ────────────────────────────────────────────────────────────────
+
+type Tone = "emerald" | "rose" | "amber" | "cyan";
+
+function toneVar(t: Tone): string {
+  if (t === "emerald") return "var(--emerald-signal)";
+  if (t === "rose") return "var(--rose-signal)";
+  if (t === "amber") return "var(--amber-signal)";
+  return "var(--cyan)";
+}
+
+function OverallSentiment({ score, trend, tone }: { score: number; trend: number; tone: Tone }) {
+  const color = toneVar(tone);
+  const TrendIcon = trend > 2 ? TrendingUp : trend < -2 ? TrendingDown : Minus;
+  return (
+    <section className="glass rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-5">
+        <div
+          className="relative w-24 h-24 rounded-full grid place-items-center"
+          style={{
+            background: `conic-gradient(${color} ${score * 3.6}deg, var(--border) 0deg)`,
+          }}
+        >
+          <div className="absolute inset-1.5 rounded-full bg-background grid place-items-center">
+            <span
+              className="text-3xl font-display font-semibold tabular-nums"
+              style={{ color, textShadow: `0 0 18px ${color}55` }}
+            >
+              {score}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">Overall Citizen Sentiment</div>
+          <div className="text-lg font-display font-semibold mt-1">
+            {score >= 60 ? "Net positive" : score >= 40 ? "Mixed signal" : "Net negative"}
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            Weighted average of stability, economy & social trackers
+          </div>
+        </div>
+      </div>
+      <div
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono border"
+        style={{ background: `${color}1f`, color, borderColor: `${color}55` }}
+      >
+        <TrendIcon className="w-3.5 h-3.5" />
+        {trend >= 0 ? `+${trend}` : trend} pts · 12-mo trajectory
+      </div>
+    </section>
+  );
+}
+
+function MetricCard({ label, value, tone, hint }: { label: string; value: number; tone: Tone; hint: string }) {
+  const color = toneVar(tone);
+  return (
+    <div className="glass rounded-2xl p-4 space-y-2.5 border-l-4" style={{ borderLeftColor: color }}>
+      <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+      <div className="flex items-baseline gap-1">
+        <div
+          className="text-4xl font-display font-semibold tabular-nums leading-none"
+          style={{ color, textShadow: `0 0 14px ${color}66` }}
+        >
+          {value}
+        </div>
+        <span className="text-xs text-muted-foreground font-mono">/100</span>
+      </div>
+      <div className="h-2.5 rounded-full bg-border/60 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{
+            width: `${value}%`,
+            background: `linear-gradient(90deg, ${color}aa, ${color})`,
+            boxShadow: `0 0 10px ${color}aa`,
+          }}
+        />
+      </div>
+      <div className="text-[11px] text-muted-foreground leading-snug">{hint}</div>
+    </div>
+  );
+}
+
+function PathCard({
+  kind,
+  title,
+  pathLabel,
+  series,
+  example,
+  exampleLabel,
+}: {
+  kind: "positive" | "risk";
+  title: string;
+  pathLabel: string;
+  series: number[];
+  example: string;
+  exampleLabel?: string;
+}) {
+  const color = kind === "positive" ? toneVar("emerald") : toneVar("rose");
+  const Icon = kind === "positive" ? TrendingUp : TrendingDown;
+  const last = series[series.length - 1];
+  const first = series[0];
+  const delta = last - first;
+  const w = 320;
+  const h = 80;
+  const min = Math.min(...series);
+  const max = Math.max(...series);
+  const stepX = w / (series.length - 1);
+  const points = series
+    .map((v, i) => {
+      const x = i * stepX;
+      const y = h - ((v - min) / Math.max(max - min, 1)) * (h - 8) - 4;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <div className="glass rounded-2xl p-5 space-y-3 border-l-2" style={{ borderLeftColor: color }}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div
+            className="p-1.5 rounded-md border"
+            style={{ background: `${color}22`, borderColor: `${color}55`, color }}
+          >
+            <Icon className="w-4 h-4" />
+          </div>
+          <h3 className="font-display font-semibold text-lg" style={{ color }}>
+            {title}
+          </h3>
+        </div>
+        <span
+          className="text-[11px] font-mono px-2 py-0.5 rounded-full border"
+          style={{ background: `${color}1f`, color, borderColor: `${color}55` }}
+        >
+          {delta >= 0 ? `+${delta}` : delta} pts
+        </span>
+      </div>
+      <div className="text-sm text-foreground/90 font-medium">{pathLabel}</div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[80px]">
+        <polyline points={points} fill="none" stroke={color} strokeWidth="2.5" />
+      </svg>
+      {exampleLabel && (
+        <div className="text-[11px] font-mono uppercase tracking-[0.18em]" style={{ color }}>
+          {exampleLabel}
+        </div>
+      )}
+      <p className="text-[12px] text-muted-foreground leading-relaxed">{example}</p>
+    </div>
+  );
+}
+
+function SegmentedSentiment({
+  overall,
+  items,
+  methodology,
+}: {
+  overall: number;
+  items: { label: string; score: number; note?: string; highlight?: "high" | "low" }[];
+  methodology: string;
+}) {
+  return (
+    <section className="glass rounded-2xl p-5 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
+          <Users className="w-3.5 h-3.5" /> Segmented Sentiment
+        </div>
+        <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
+          Overall {overall}/100
+        </div>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+        {items.map((seg) => {
+          const tone: Tone =
+            seg.highlight === "high"
+              ? "emerald"
+              : seg.highlight === "low"
+                ? "rose"
+                : seg.score >= 60
+                  ? "emerald"
+                  : seg.score >= 40
+                    ? "amber"
+                    : "rose";
+          const color = toneVar(tone);
+          return (
+            <div
+              key={seg.label}
+              className="rounded-xl border border-border bg-secondary/30 p-3 space-y-1.5"
+              style={{ borderTop: `2px solid ${color}` }}
+            >
+              <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-foreground/80 leading-tight">
+                {seg.label.replace(/_/g, " ")}
+              </div>
+              <div className="flex items-baseline gap-1">
+                <div
+                  className="text-2xl font-display font-semibold tabular-nums leading-none"
+                  style={{ color, textShadow: `0 0 10px ${color}66` }}
+                >
+                  {seg.score}
+                </div>
+                <span className="text-[11px] font-mono text-muted-foreground">%</span>
+              </div>
+              <div className="h-2 rounded-full bg-border/60 overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${seg.score}%`,
+                    background: `linear-gradient(90deg, ${color}aa, ${color})`,
+                    boxShadow: `0 0 6px ${color}88`,
+                  }}
+                />
+              </div>
+              {seg.note && <div className="text-[10.5px] text-muted-foreground leading-snug">{seg.note}</div>}
+            </div>
+          );
+        })}
+      </div>
+      <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground pt-1 border-t border-border">
+        Methodology · {methodology}
+      </div>
+    </section>
+  );
+}
+
+function HistoricalContext({
+  timeline,
+  fallbackText,
+}: {
+  timeline?: import("@/lib/feature-topics").HistoricalTimeline;
+  fallbackText?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootYear = timeline?.rootYear;
+  const milestoneCount = timeline?.milestones.length ?? 0;
+  return (
+    <section className="group rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/[0.06] to-transparent overflow-hidden transition-all duration-300 hover:border-cyan/70 hover:shadow-[0_0_24px_-4px_var(--cyan)] hover:-translate-y-0.5">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors"
+      >
+        <span className="inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-[0.22em] text-cyan group-hover:text-glow-cyan">
+          <Activity className="w-4 h-4" /> Historical Context
+          {rootYear && (
+            <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[10px] normal-case tracking-wider">
+              Root: {rootYear} · {timeline?.rootEvent}
+            </span>
+          )}
+          {milestoneCount > 0 && (
+            <span className="text-[10px] font-mono text-muted-foreground normal-case tracking-wider">
+              {milestoneCount} milestones
+            </span>
+          )}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-cyan transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="px-5 pb-5 pt-3 border-t border-border space-y-4">
+              {timeline ? (
+                <>
+                  <div className="rounded-xl border border-cyan/30 bg-cyan/5 p-3">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan mb-1">
+                      Root of the problem · {timeline.rootYear}
+                    </div>
+                    <div className="text-sm font-display font-semibold">{timeline.rootEvent}</div>
+                    <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{timeline.rootNote}</div>
+                  </div>
+                  <Timeline milestones={timeline.milestones} />
+                  <p className="text-[13px] text-foreground/85 leading-relaxed">{timeline.summary}</p>
+                </>
+              ) : (
+                <p className="text-sm text-foreground/85 leading-relaxed">{fallbackText}</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
+
+function Timeline({ milestones }: { milestones: import("@/lib/feature-topics").TimelineMilestone[] }) {
+  return (
+    <ol className="relative border-l border-border/70 ml-2 pl-5 space-y-3">
+      {milestones.map((m, i) => {
+        const accent = m.pivotal ? "var(--cyan)" : "var(--muted-foreground)";
+        return (
+          <li key={`${m.year}-${i}`} className="relative">
+            <span
+              className="absolute -left-[26px] top-1.5 w-2.5 h-2.5 rounded-full border-2"
+              style={{
+                borderColor: accent,
+                background: m.pivotal ? accent : "var(--background)",
+                boxShadow: m.pivotal ? `0 0 8px ${accent}` : undefined,
+              }}
+            />
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-[11px] font-mono tabular-nums tracking-wider" style={{ color: accent }}>
+                {m.year}
+              </span>
+              <span className={`text-[13px] ${m.pivotal ? "font-semibold text-foreground" : "text-foreground/90"}`}>
+                {m.event}
+              </span>
+            </div>
+            {m.note && <div className="text-[11.5px] text-muted-foreground leading-snug mt-0.5">{m.note}</div>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function InsightCard({
+  tone,
+  icon,
+  title,
+  bullets,
+  chips,
+}: {
+  tone: Tone;
+  icon: React.ReactNode;
+  title: string;
+  bullets?: string[];
+  chips?: string[];
+}) {
+  const color = toneVar(tone);
+  return (
+    <div className="glass rounded-2xl p-4 space-y-3 border-l-2" style={{ borderLeftColor: color }}>
+      <div className="flex items-center gap-2" style={{ color }}>
+        <div className="p-1.5 rounded-md border" style={{ background: `${color}1f`, borderColor: `${color}55` }}>
+          {icon}
+        </div>
+        <h3 className="font-display font-semibold text-sm tracking-[0.12em] uppercase">{title}</h3>
+      </div>
+      {bullets && bullets.length > 0 && (
+        <ul className="space-y-1.5">
+          {bullets.map((b, i) => (
+            <li key={i} className="flex gap-2 text-sm text-foreground/90 leading-relaxed">
+              <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ background: color }} />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {chips && chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((c) => (
+            <span
+              key={c}
+              className="text-[11px] font-mono px-2 py-1 rounded-full border"
+              style={{ background: `${color}14`, color, borderColor: `${color}44` }}
+            >
+              #{c.replace(/\s+/g, "")}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- Insight card for question_analysis -------------------------------
+
+function deriveInsightTitle(q: QuestionAnalysis): string {
+  const first = (q.key_points ?? [])[0];
+  const src = (first && first.trim()) || (q.summary ?? "").trim() || (q.answer ?? "").trim();
+  if (!src) return (q.question ?? "").replace(/\?+$/, "").trim();
+  // First sentence, strip trailing punctuation, cap length
+  const firstSentence = src.split(/(?<=[.!?])\s+/)[0] ?? src;
+  const cleaned = firstSentence.replace(/[.!?;:]+$/, "").trim();
+  return cleaned.length > 110 ? cleaned.slice(0, 107).trimEnd() + "…" : cleaned;
+}
+
+function QuestionThemeCard({ q }: { q: QuestionAnalysis }) {
+  const score = Math.max(0, Math.min(100, q.sentiment_score ?? 0));
+  const color = sentimentColor(score);
+  const summary = q.summary ?? "";
+  const points = (q.key_points ?? []).slice(0, 2);
+  const title = deriveInsightTitle(q);
+  const variations = Array.isArray(q.notable_variations)
+    ? q.notable_variations
+    : q.notable_variations
+      ? [q.notable_variations]
+      : [];
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="group relative h-full text-left flex flex-col rounded-2xl bg-background/40 backdrop-blur border border-border/60 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/60"
+          style={{
+            ["--glow" as any]: color,
+          }}
+        >
+          {/* Sentiment-colored glow on hover */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{
+              boxShadow: `0 8px 28px -8px ${color}, 0 0 0 1px color-mix(in oklab, ${color} 45%, transparent) inset`,
+            }}
+          />
+
+          {/* Progress bar at the very top */}
+          <div className="relative h-1 w-full bg-border/50">
+            <motion.div
+              className="h-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${score}%` }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+              style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+            />
+          </div>
+
+          {/* Left accent bar */}
+          <div
+            className="absolute left-0 top-1 bottom-0 w-[3px]"
+            style={{ background: color, opacity: 0.9 }}
+          />
+
+          <div className="relative flex-1 flex flex-col gap-3 p-5 pl-6">
+            {/* Score + sentiment pill */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-baseline gap-1.5">
+                <span
+                  className="text-4xl font-display font-semibold tabular-nums leading-none"
+                  style={{ color }}
+                >
+                  {score}
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  / 100
+                </span>
+              </div>
+              {q.sentiment_label && (
+                <span
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.16em] border whitespace-nowrap"
+                  style={{
+                    background: `color-mix(in oklab, ${color} 14%, transparent)`,
+                    color,
+                    borderColor: `color-mix(in oklab, ${color} 38%, transparent)`,
+                  }}
+                >
+                  {q.sentiment_label}
+                </span>
+              )}
+            </div>
+
+            {/* Punchy paraphrased insight title */}
+            <h4 className="text-[14.5px] font-display font-semibold leading-snug text-foreground/95 line-clamp-3">
+              {title}
+            </h4>
+
+            {/* 1-line summary teaser */}
+            {summary && (
+              <p className="text-[12px] text-foreground/65 leading-relaxed line-clamp-1">
+                {summary}
+              </p>
+            )}
+
+            {/* Key-point teaser pills */}
+            {points.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {points.map((p, j) => (
+                  <span
+                    key={j}
+                    title={p}
+                    className="inline-flex max-w-full items-center text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-cyan/[0.08] border border-cyan/25 text-cyan/90 truncate"
+                  >
+                    {p.length > 42 ? p.slice(0, 40) + "…" : p}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Footer hint */}
+            <div className="mt-auto pt-2 flex justify-end">
+              <span className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-cyan/70 group-hover:text-cyan transition-colors">
+                Click for full details →
+              </span>
+            </div>
+          </div>
+        </button>
+      </DialogTrigger>
+
+
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className="text-2xl font-display font-semibold tabular-nums"
+              style={{ color }}
+            >
+              {score}
+            </span>
+            {q.sentiment_label && (
+              <span
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.16em] border"
+                style={{
+                  background: `color-mix(in oklab, ${color} 14%, transparent)`,
+                  color,
+                  borderColor: `color-mix(in oklab, ${color} 38%, transparent)`,
+                }}
+              >
+                {q.sentiment_label}
+              </span>
+            )}
+          </div>
+          {q.question && (
+            <>
+              <div className="text-cyan font-mono uppercase tracking-wider text-[10px] mb-1">
+                Original question
+              </div>
+              <DialogTitle className="text-base font-display font-semibold leading-snug text-foreground/95">
+                {q.question}
+              </DialogTitle>
+            </>
+          )}
+          {!q.question && (
+            <DialogTitle className="text-base font-display font-semibold leading-snug text-foreground/95">
+              {deriveInsightTitle(q)}
+            </DialogTitle>
+          )}
+        </DialogHeader>
+
+        <div className="space-y-4 pt-2">
+          {(q.summary || q.answer) && (
+            <div>
+              <div className="text-cyan font-mono uppercase tracking-wider text-[10px] mb-1.5">
+                {q.summary ? "Summary" : "Insight"}
+              </div>
+              <p className="text-[13px] text-foreground/85 leading-relaxed">{q.summary ?? q.answer}</p>
+            </div>
+          )}
+          {q.key_points && q.key_points.length > 0 && (
+            <div>
+              <div className="text-cyan font-mono uppercase tracking-wider text-[10px] mb-1.5">
+                Key points
+              </div>
+              <ul className="space-y-1.5 text-[13px] text-foreground/85 leading-relaxed">
+                {q.key_points.map((p, j) => (
+                  <li key={j} className="flex gap-2">
+                    <span style={{ color }} className="font-mono shrink-0 mt-0.5">
+                      •
+                    </span>
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {variations.length > 0 && (
+            <div>
+              <div className="text-cyan font-mono uppercase tracking-wider text-[10px] mb-1.5">
+                Notable variations
+              </div>
+              <ul className="space-y-1.5 text-[13px] text-foreground/85 leading-relaxed">
+                {variations.map((p, j) => (
+                  <li key={j} className="flex gap-2">
+                    <span className="font-mono shrink-0 mt-0.5 text-amber-signal">▸</span>
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+

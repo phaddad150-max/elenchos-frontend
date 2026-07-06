@@ -1,0 +1,16 @@
+# Elenchos
+
+> Decode public discourse: citizen voices on X versus media and government narratives. Sentiment and narrative-divergence analysis across live geopolitical, economic, and social topics.
+
+Elenchos applies the Socratic method (elenchos) to public discourse — surfacing contradictions between official narratives and what citizens actually say, with a focus on suppressed or under-covered regions.
+
+## Pages
+
+- [Dashboard](/): Live overview of citizen sentiment, narrative divergence, signals, and regions monitored.
+- [Topics](/topics): All live topics — public-square sentiment scores and trends per topic.
+- [About](/about): What Elenchos is, the Socratic method behind it, and the mission.
+- [Privacy](/privacy): Privacy notice and OAuth data handling (GDPR).
+
+## Optional
+
+- [Sponsor](/sponsor): Sponsorship program (currently paused).

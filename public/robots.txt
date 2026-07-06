@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /sponsor
+Disallow: /sponsor/success
+
+Sitemap: https://elenchos.live/sitemap.xml
