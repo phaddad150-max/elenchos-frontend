@@ -42,13 +42,13 @@ import {
 } from "@/lib/sponsor-topics";
 import { getUnlockedSponsorTopics } from "@/lib/sponsor-unlocks.functions";
 
-const NEAR_REALTIME_TOPIC_ID = "arab-israeli-normalization";
+const NEAR_REALTIME_TOPIC_ID = "fifa-world-cup-2026";
 const SPONSOR_VISIBLE_COUNT = 4;
 
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly"> = {
-  "arab-israeli-normalization": "realtime",
+  "fifa-world-cup-2026": "realtime",
+  "arab-israeli-normalization": "weekly",
   "iranian-voices-vs-regime": "weekly",
-  "fifa-world-cup-2026": "weekly",
   "us-ai-economy-boom": "weekly",
   "new-us-foreign-policy": "weekly",
   "crypto-regulation-financial-markets": "weekly",
@@ -325,8 +325,8 @@ function TopicsFilterableGrid({
   const ordered = useMemo(() => {
     const PRIORITY = [
       NEAR_REALTIME_TOPIC_ID,
+      "arab-israeli-normalization",
       "iranian-voices-vs-regime",
-      "fifa-world-cup-2026",
       "us-ai-economy-boom",
     ];
     const prio = (id: string) => {
