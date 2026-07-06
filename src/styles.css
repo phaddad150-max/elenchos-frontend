@@ -496,3 +496,71 @@
   background: linear-gradient(90deg, transparent, var(--color-cyan), transparent);
   filter: blur(0.5px);
 }
+
+/* === Premium tracker cards === */
+.tracker-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-1);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.tracker-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, var(--color-cyan)), transparent);
+  opacity: 0.85;
+}
+.tracker-card::after {
+  content: "";
+  position: absolute;
+  inset: -40% -20% auto -20%;
+  height: 55%;
+  background: radial-gradient(ellipse at 50% 0%, var(--card-glow, oklch(0.82 0.16 200 / 0.14)), transparent 68%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.tracker-card:hover {
+  transform: translateY(-6px);
+}
+.tracker-card:hover::after {
+  opacity: 1;
+}
+.tracker-row {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.tracker-row:hover {
+  transform: translateX(4px);
+  border-color: oklch(0.82 0.16 200 / 0.35);
+  box-shadow: 0 8px 24px -12px oklch(0 0 0 / 0.45);
+}
+.tracker-row-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  transform-origin: left;
+}
+@keyframes tracker-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.tracker-shimmer {
+  background: linear-gradient(90deg, transparent 0%, var(--color-cyan-glow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: tracker-shimmer 3s linear infinite;
+}

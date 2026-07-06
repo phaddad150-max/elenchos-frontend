@@ -279,6 +279,74 @@ function DimensionBar({ label, value }: { label: string; value?: number }) {
 
 /* ---------------- Overview cards (landing) ---------------- */
 
+const TRACKER_CARD_CYAN = {
+  "--card-accent": "var(--color-cyan)",
+  "--card-glow": "oklch(0.82 0.16 200 / 0.18)",
+} as React.CSSProperties;
+
+const TRACKER_CARD_VIOLET = {
+  "--card-accent": "#8B5CF6",
+  "--card-glow": "oklch(0.62 0.22 300 / 0.18)",
+} as React.CSSProperties;
+
+function LivePulseBadge({ label, accent = "cyan" }: { label: string; accent?: "cyan" | "violet" }) {
+  const color = accent === "violet" ? "#8B5CF6" : "var(--color-cyan)";
+  return (
+    <span
+      className="relative inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.18em]"
+      style={{
+        color,
+        background: `${accent === "violet" ? "#8B5CF6" : "var(--color-cyan)"}1A`,
+        boxShadow: `inset 0 0 0 1px ${accent === "violet" ? "#8B5CF6" : "var(--color-cyan)"}44`,
+      }}
+    >
+      <motion.span
+        animate={{ scale: [1, 1.35, 1], opacity: [1, 0.55, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="w-1.5 h-1.5 rounded-full shrink-0"
+        style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+      />
+      {label}
+    </span>
+  );
+}
+
+function TrackerOverviewRow({
+  index,
+  score,
+  children,
+}: {
+  index: number;
+  score?: number | null;
+  children: React.ReactNode;
+}) {
+  const v = typeof score === "number" ? Math.max(0, Math.min(100, score)) : 0;
+  const hex = scoreHex(score);
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -14 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.22 + index * 0.09, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.012 }}
+      className="tracker-row flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-background/50 border border-border/40"
+    >
+      {children}
+      {typeof score === "number" && (
+        <motion.div
+          className="tracker-row-bar"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: v / 100 }}
+          transition={{ delay: 0.4 + index * 0.09, duration: 0.65, ease: "easeOut" }}
+          style={{
+            background: `linear-gradient(90deg, ${hex}66, ${hex})`,
+            boxShadow: `0 0 10px ${hex}55`,
+          }}
+        />
+      )}
+    </motion.div>
+  );
+}
+
 function LeaderOverviewCard({
   def,
   row,
@@ -296,22 +364,30 @@ function LeaderOverviewCard({
   return (
     <Link
       to="/trackers/leaders"
-      className="group text-left w-full rounded-2xl border border-border/60 bg-card/60 hover:bg-card/80 hover:border-cyan/40 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(0,200,200,0.35)] transition-all duration-300 overflow-hidden block cursor-pointer"
+      style={TRACKER_CARD_CYAN}
+      className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-cyan/45 hover:shadow-[0_28px_64px_-28px_rgba(0,200,200,0.45)] overflow-hidden block cursor-pointer"
     >
-
-
-
-      <div className="p-5 md:p-6">
+      <div className="tracker-shimmer absolute top-0 left-0 right-0 h-px opacity-50 pointer-events-none" />
+      <div className="relative p-5 md:p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-cyan" />
-            <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em]">
-              Live Leaderboard
-            </span>
+            <motion.div
+              whileHover={{ rotate: [0, -8, 8, 0] }}
+              transition={{ duration: 0.4 }}
+            >
+              <Trophy className="w-4 h-4 text-cyan" />
+            </motion.div>
+            <LivePulseBadge label="Live Leaderboard" />
           </div>
-          <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan transition-colors" />
+          <motion.span
+            className="inline-flex"
+            initial={{ x: 0, y: 0 }}
+            whileHover={{ x: 2, y: -2 }}
+          >
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan transition-colors" />
+          </motion.span>
         </div>
-        <h3 className="text-xl md:text-2xl font-display font-semibold text-foreground leading-tight">
+        <h3 className="text-xl md:text-2xl font-display font-semibold text-foreground leading-tight group-hover:text-cyan/95 transition-colors duration-300">
           {def.title}
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
@@ -320,14 +396,12 @@ function LeaderOverviewCard({
 
         {top.length > 0 ? (
           <div className="mt-5 space-y-2">
-            <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2">
+            <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2 flex items-center gap-2">
+              <Activity className="w-3 h-3 text-cyan/70" />
               Top performers
             </div>
             {top.map((l, i) => (
-              <div
-                key={`${l.name}-${l.rank}`}
-                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-background/50 border border-border/40"
-              >
+              <TrackerOverviewRow key={`${l.name}-${l.rank}`} index={i} score={l.overall_score}>
                 <div className="flex items-center gap-3 min-w-0">
                   <RankBadge rank={l.rank ?? i + 1} highlight={i === 0} />
                   <FlagAvatar flag={l.flag} country={l.country || l.name} size="sm" />
@@ -343,7 +417,7 @@ function LeaderOverviewCard({
                   </div>
                 </div>
                 <ScorePill value={l.overall_score} size="sm" />
-              </div>
+              </TrackerOverviewRow>
             ))}
           </div>
         ) : (
@@ -352,13 +426,14 @@ function LeaderOverviewCard({
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-between">
+        <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
           <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
             {leaders.length > 0 ? `${leaders.length} leaders ranked` : "—"}
             {snapshotDate ? ` · ${snapshotDate}` : ""}
           </span>
-          <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan group-hover:gap-2 transition-all">
-            Open leaderboard <ArrowUpRight className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan group-hover:gap-2.5 transition-all duration-300">
+            Open leaderboard
+            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </span>
         </div>
       </div>
@@ -396,36 +471,47 @@ function PeaceOverviewCard({
   return (
     <Link
       to="/trackers/peace"
-      className="group text-left w-full rounded-2xl border border-border/60 bg-card/60 hover:bg-card/80 hover:border-cyan/40 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(0,200,200,0.35)] transition-all duration-300 overflow-hidden block cursor-pointer"
+      style={TRACKER_CARD_CYAN}
+      className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-cyan/45 hover:shadow-[0_28px_64px_-28px_rgba(0,200,200,0.45)] overflow-hidden block cursor-pointer"
     >
-
-      <div className="p-5 md:p-6">
+      <div className="tracker-shimmer absolute top-0 left-0 right-0 h-px opacity-50 pointer-events-none" />
+      <div className="relative p-5 md:p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cyan" />
-            <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em]">
-              Diagnostic Index
-            </span>
+            <motion.div animate={{ rotate: [0, 12, -12, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+              <Sparkles className="w-4 h-4 text-cyan" />
+            </motion.div>
+            <LivePulseBadge label="Diagnostic Index" />
           </div>
           <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan transition-colors" />
         </div>
-        <h3 className="text-xl md:text-2xl font-display font-semibold text-foreground leading-tight">
+        <h3 className="text-xl md:text-2xl font-display font-semibold text-foreground leading-tight group-hover:text-cyan/95 transition-colors duration-300">
           {def.title}
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
           Peace health, momentum, and the gap between governments and their publics — country by country.
         </p>
 
+        {typeof avg === "number" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            className="mt-4 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border border-border/50 bg-background/40"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">Avg health</span>
+            <ScorePill value={avg} size="sm" />
+          </motion.div>
+        )}
+
         {top.length > 0 ? (
           <div className="mt-5 space-y-2">
-            <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2">
+            <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2 flex items-center gap-2">
+              <TrendingUp className="w-3 h-3 text-cyan/70" />
               Healthiest peace climate
             </div>
             {top.map((c, i) => (
-              <div
-                key={`${c.name}-${c.rank}`}
-                className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-background/50 border border-border/40"
-              >
+              <TrackerOverviewRow key={`${c.name}-${c.rank}`} index={i} score={c.peace_health_score}>
                 <div className="flex items-center gap-3 min-w-0">
                   <RankBadge rank={i + 1} highlight={i === 0} />
                   <FlagAvatar flag={c.flag} country={c.name} size="sm" />
@@ -437,7 +523,7 @@ function PeaceOverviewCard({
                   {c.momentum && <MomentumChip momentum={c.momentum} compact />}
                   <ScorePill value={c.peace_health_score} size="sm" />
                 </div>
-              </div>
+              </TrackerOverviewRow>
             ))}
           </div>
         ) : (
@@ -446,13 +532,14 @@ function PeaceOverviewCard({
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-between">
+        <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
           <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
             {countries.length > 0 ? `${countries.length} countries · avg health ${avg ?? "—"}` : "—"}
             {snapshotDate ? ` · ${snapshotDate}` : ""}
           </span>
-          <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan group-hover:gap-2 transition-all">
-            Open index <ArrowUpRight className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan group-hover:gap-2.5 transition-all duration-300">
+            Open index
+            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </span>
         </div>
       </div>
@@ -614,9 +701,15 @@ function ComingSoonOverviewCard({ def, index }: { def: TrackerDefinition; index:
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.05 }}
-      className="rounded-2xl border border-border/60 bg-card/30 overflow-hidden"
+      className="tracker-card rounded-2xl border border-border/60 overflow-hidden"
+      style={
+        {
+          "--card-accent": "hsl(var(--muted-foreground))",
+          "--card-glow": "oklch(0.5 0 0 / 0.08)",
+        } as React.CSSProperties
+      }
     >
-      <div className="p-5 md:p-6">
+      <div className="relative p-5 md:p-6">
         <div className="flex items-center justify-between mb-3">
           <span className="px-2 py-0.5 rounded-full border border-border bg-secondary/60 text-muted-foreground text-[10px] font-mono uppercase tracking-[0.18em] inline-flex items-center gap-1">
             <Lock className="w-2.5 h-2.5" /> Coming soon
@@ -626,8 +719,13 @@ function ComingSoonOverviewCard({ def, index }: { def: TrackerDefinition; index:
           {def.title}
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{def.tagline}</p>
-        <div className="mt-5 h-1 rounded-full bg-secondary overflow-hidden">
-          <div className="h-full w-1/5 bg-cyan/60" />
+        <div className="mt-5 h-1.5 rounded-full bg-secondary overflow-hidden">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-cyan/40 via-cyan/70 to-cyan/40 tracker-shimmer"
+            initial={{ width: "12%" }}
+            animate={{ width: ["12%", "28%", "18%", "32%"] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
         </div>
       </div>
     </motion.article>
@@ -1356,28 +1454,26 @@ function MediaTrustOverviewCard({
   return (
     <Link
       to="/trackers/media"
-      className="group text-left w-full rounded-2xl border border-border/60 bg-card/60 hover:bg-card/80 hover:border-violet-500/40 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(139,92,246,0.35)] transition-all duration-300 overflow-hidden block cursor-pointer"
+      style={TRACKER_CARD_VIOLET}
+      className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-violet-500/45 hover:shadow-[0_28px_64px_-28px_rgba(139,92,246,0.42)] overflow-hidden block cursor-pointer"
     >
-      <div className="p-5 md:p-6">
+      <div
+        className="tracker-shimmer absolute top-0 left-0 right-0 h-px opacity-50 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, transparent, ${MEDIA_ACCENT}88, transparent)` }}
+      />
+      <div className="relative p-5 md:p-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Newspaper className="w-4 h-4" style={{ color: MEDIA_ACCENT }} />
-            <span
-              className="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.18em]"
-              style={{
-                color: MEDIA_ACCENT,
-                background: `${MEDIA_ACCENT}1A`,
-                boxShadow: `inset 0 0 0 1px ${MEDIA_ACCENT}55`,
-              }}
-            >
-              Media Trust
-            </span>
+            <LivePulseBadge label="Media Trust" accent="violet" />
           </div>
           <ArrowUpRight
             className="w-4 h-4 text-muted-foreground group-hover:text-violet-400 transition-colors"
           />
         </div>
-        <h3 className="text-xl md:text-2xl font-display font-semibold text-foreground leading-tight">
+        <h3
+          className="text-xl md:text-2xl font-display font-semibold text-foreground leading-tight transition-colors duration-300 group-hover:text-violet-300/95"
+        >
           {def.title}
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
@@ -1385,20 +1481,23 @@ function MediaTrustOverviewCard({
           in their local language?
         </p>
 
-        {/* Overall gauge + top outlets */}
         {typeof overall === "number" ? (
           <div className="mt-5 flex items-center gap-4 sm:gap-5">
-            <CircularGauge value={overall} label="Overall Trust" size={80} />
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+            >
+              <CircularGauge value={overall} label="Overall Trust" size={80} />
+            </motion.div>
             <div className="flex-1 min-w-0 space-y-2">
-              <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-2">
+                <Newspaper className="w-3 h-3 opacity-60" style={{ color: MEDIA_ACCENT }} />
                 Most trusted outlets
               </div>
               {topOutlets.length > 0 ? (
                 topOutlets.map((o, i) => (
-                  <div
-                    key={`${o.name}-${i}`}
-                    className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-background/50 border border-border/40"
-                  >
+                  <TrackerOverviewRow key={`${o.name}-${i}`} index={i} score={o.trust_score}>
                     <div className="flex items-center gap-2 min-w-0">
                       <RankBadge rank={i + 1} highlight={i === 0} />
                       <span className="text-[13px] font-display font-semibold text-foreground truncate">
@@ -1406,7 +1505,7 @@ function MediaTrustOverviewCard({
                       </span>
                     </div>
                     <ScorePill value={o.trust_score} size="sm" />
-                  </div>
+                  </TrackerOverviewRow>
                 ))
               ) : (
                 <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
@@ -1421,13 +1520,14 @@ function MediaTrustOverviewCard({
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-between">
+        <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
           <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
             {outletCount > 0 ? `${outletCount} outlets tracked` : "—"}
             {snapshotDate ? ` · ${snapshotDate}` : ""}
           </span>
-          <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-violet-400 group-hover:gap-2 transition-all">
-            Open index <ArrowUpRight className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-violet-400 group-hover:gap-2.5 transition-all duration-300">
+            Open index
+            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </span>
         </div>
       </div>
@@ -1939,7 +2039,6 @@ function TrackersPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + idx * 0.08, duration: 0.55, ease: "easeOut" }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
               >
                 {inner}
               </motion.div>
@@ -1962,7 +2061,6 @@ function TrackersPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + i * 0.06, duration: 0.5, ease: "easeOut" }}
-              whileHover={{ y: -3, scale: 1.01, transition: { duration: 0.2 } }}
             >
               <ComingSoonOverviewCard def={def} index={i} />
             </motion.div>
