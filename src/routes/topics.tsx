@@ -79,7 +79,12 @@ function scoreTone(score: number, kind: "sentiment" | "divergence"): string {
   return score >= 60 ? "var(--rose-signal)" : score >= 35 ? "var(--amber-signal)" : "var(--emerald-signal)";
 }
 
-function cadenceLabel(cadence: "realtime" | "weekly" | "monthly"): string {
+function cadenceLabel(cadence: "realtime" | "weekly" | "monthly", short = false): string {
+  if (short) {
+    if (cadence === "realtime") return "Live";
+    if (cadence === "weekly") return "Weekly";
+    return "Monthly";
+  }
   if (cadence === "realtime") return "Live · Near real-time";
   if (cadence === "weekly") return "Weekly refresh";
   return "Monthly refresh";
@@ -162,9 +167,9 @@ function TopicsPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8 space-y-6 relative flex-1">
+      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-4 py-2.5 text-[12px] font-mono text-cyan flex items-start gap-2 flex-1 min-w-[260px]">
+          <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-3 sm:px-4 py-2.5 text-[11px] sm:text-[12px] font-mono text-cyan flex items-start gap-2 w-full sm:flex-1 sm:min-w-0">
             <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-cyan pulse-dot shrink-0" />
             <span>
               <span className="uppercase tracking-[0.22em] text-[11px] font-semibold mr-1.5">
@@ -190,7 +195,7 @@ function TopicsPage() {
                   <span className="w-1 h-3.5 bg-cyan rounded-sm" />
                   Live Topics
                 </div>
-                <h1 className="text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.08] break-words">
+                <h1 className="text-[1.55rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.1] break-words">
                   Live Topics:{" "}
                   <span className="text-cyan">Public Square Sentiment</span>
                 </h1>
@@ -355,7 +360,8 @@ function TopicsFilterableGrid({
 
   const visibleCount = activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
-  const topicGridClass = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3";
+  const topicGridClass =
+    "grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3";
 
   const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
@@ -373,24 +379,26 @@ function TopicsFilterableGrid({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-full border border-border bg-background/40 p-1 text-[11px] font-mono">
-          {cats.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className={`px-3 py-1 rounded-full uppercase tracking-[0.18em] transition-colors ${
-                category === c
-                  ? "bg-cyan/15 text-cyan border border-cyan/40"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {c === "all" ? "All categories" : c}
-            </button>
-          ))}
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 pb-0.5 custom-scroll">
+          <div className="inline-flex rounded-full border border-border bg-background/40 p-1 text-[10px] sm:text-[11px] font-mono min-w-max">
+            {cats.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={`px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-full uppercase tracking-[0.16em] sm:tracking-[0.18em] transition-colors whitespace-nowrap min-h-[36px] sm:min-h-0 ${
+                  category === c
+                    ? "bg-cyan/15 text-cyan border border-cyan/40"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {c === "all" ? "All" : c}
+              </button>
+            ))}
+          </div>
         </div>
-        <span className="ml-auto text-[11px] font-mono text-muted-foreground">
+        <span className="text-[10px] sm:text-[11px] font-mono text-muted-foreground sm:ml-auto shrink-0">
           {visibleCount} topics
         </span>
       </div>
@@ -408,7 +416,7 @@ function TopicsFilterableGrid({
             <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
               Topics
             </h2>
-            <span className="text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
+            <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
               · Live, weekly &amp; monthly · sponsor to unlock
             </span>
           </div>
@@ -430,17 +438,19 @@ function TopicsFilterableGrid({
             <button
               type="button"
               onClick={() => setSponsorExpanded((v) => !v)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-cyan/35 bg-cyan/[0.04] hover:bg-cyan/[0.08] hover:border-cyan/50 text-[11px] font-mono uppercase tracking-[0.2em] text-cyan transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 sm:py-2.5 rounded-xl border border-dashed border-cyan/35 bg-cyan/[0.04] hover:bg-cyan/[0.08] hover:border-cyan/50 active:bg-cyan/[0.12] text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] sm:tracking-[0.2em] text-cyan transition-colors min-h-[44px] touch-manipulation"
             >
               {sponsorExpanded ? (
                 <>
                   <ChevronDown className="w-4 h-4 rotate-180" />
-                  Show fewer sponsor topics
+                  <span className="sm:hidden">Show fewer</span>
+                  <span className="hidden sm:inline">Show fewer sponsor topics</span>
                 </>
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4" />
-                  Show {sponsorMore.length} more sponsor topics
+                  <span className="sm:hidden">+{sponsorMore.length} more topics</span>
+                  <span className="hidden sm:inline">Show {sponsorMore.length} more sponsor topics</span>
                 </>
               )}
             </button>
@@ -472,7 +482,8 @@ function shortTitle(t: string): string {
   return map[t] ?? t;
 }
 
-const TOPIC_CARD_HEIGHT = "h-[176px]";
+const TOPIC_CARD_SHELL =
+  "group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 sm:p-3 flex flex-col min-h-[188px] sm:min-h-[176px] sm:h-[176px] hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation";
 
 function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number }) {
   const backendName = SPONSOR_LOCKED_TOPIC_IDS[topic.id];
@@ -482,8 +493,8 @@ function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number })
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      className={`group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col ${TOPIC_CARD_HEIGHT} hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all`}
+      whileHover={{ scale: 1.01, y: -1 }}
+      className={TOPIC_CARD_SHELL}
     >
       <div className="shrink-0 flex items-center justify-center gap-1 text-[9px] font-mono uppercase tracking-[0.18em] text-cyan/80">
         <Lock className="w-2.5 h-2.5" /> {category}
@@ -496,7 +507,7 @@ function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number })
       </div>
       <a
         href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-        className="shrink-0 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 transition-all"
+        className="shrink-0 inline-flex items-center justify-center gap-1 px-2.5 py-2 sm:py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 active:bg-cyan/80 transition-all min-h-[40px] sm:min-h-0"
       >
         <Heart className="w-3 h-3" /> Sponsor me
       </a>
@@ -532,47 +543,54 @@ function TopicCard({
     <motion.button
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02, y: -2 }}
+      whileHover={{ scale: 1.01, y: -1 }}
       whileTap={{ scale: 0.98 }}
       transition={{ delay }}
       onClick={onOpen}
-      className={`group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col ${TOPIC_CARD_HEIGHT} hover:border-cyan/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all w-full text-center`}
+      className={`${TOPIC_CARD_SHELL} w-full text-center`}
     >
-      <div className="shrink-0 flex items-center justify-between gap-1">
-        <span className="text-[9px] font-mono uppercase tracking-[0.16em] text-cyan/75 truncate">{category}</span>
+      <div className="shrink-0 flex items-start justify-between gap-1">
+        <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] text-cyan/75 truncate max-w-[45%]">
+          {category}
+        </span>
         <span
-          className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-[0.12em] ${
+          className={`shrink-0 inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-mono uppercase tracking-[0.1em] sm:tracking-[0.12em] max-w-[55%] ${
             cadence === "realtime" ? "text-cyan bg-cyan/10 border border-cyan/30" : "text-muted-foreground bg-background/50 border border-border/50"
           }`}
         >
-          {cadence === "realtime" && <span className="w-1 h-1 rounded-full bg-cyan pulse-dot" />}
-          {cadenceLabel(cadence)}
+          {cadence === "realtime" && <span className="w-1 h-1 rounded-full bg-cyan pulse-dot shrink-0" />}
+          <span className="truncate sm:hidden">{cadenceLabel(cadence, true)}</span>
+          <span className="truncate hidden sm:inline">{cadenceLabel(cadence)}</span>
         </span>
       </div>
 
-      <div className="shrink-0 flex items-center justify-center min-h-[2.75rem] px-1 py-0.5">
-        <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center">
+      <div className="shrink-0 flex items-center justify-center min-h-[2.25rem] sm:min-h-[2.75rem] px-1 py-0.5">
+        <h3 className="text-[12px] sm:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center">
           {shortTitle(topic.title)}
         </h3>
       </div>
 
-      <div className="flex-1 flex items-center justify-center gap-2.5 py-0.5">
+      <div className="flex-1 flex items-center justify-center gap-2 sm:gap-2.5 py-0.5">
         {hasScores ? (
           <>
-            <div className="text-center min-w-[2.75rem]">
-              <div className="text-[8px] font-mono uppercase tracking-[0.14em] text-muted-foreground">Sentiment</div>
+            <div className="text-center min-w-[2.5rem] sm:min-w-[2.75rem]">
+              <div className="text-[7px] sm:text-[8px] font-mono uppercase tracking-[0.12em] sm:tracking-[0.14em] text-muted-foreground">
+                Sentiment
+              </div>
               <div
-                className="text-2xl font-display font-bold tabular-nums leading-none"
+                className="text-xl sm:text-2xl font-display font-bold tabular-nums leading-none"
                 style={{ color: sentimentTone }}
               >
                 {typeof sentiment === "number" ? sentiment : "—"}
               </div>
             </div>
-            <div className="w-px h-8 bg-border/70" />
-            <div className="text-center min-w-[2.75rem]">
-              <div className="text-[8px] font-mono uppercase tracking-[0.14em] text-muted-foreground">Divergence</div>
+            <div className="w-px h-7 sm:h-8 bg-border/70" />
+            <div className="text-center min-w-[2.5rem] sm:min-w-[2.75rem]">
+              <div className="text-[7px] sm:text-[8px] font-mono uppercase tracking-[0.12em] sm:tracking-[0.14em] text-muted-foreground">
+                Divergence
+              </div>
               <div
-                className="text-2xl font-display font-bold tabular-nums leading-none"
+                className="text-xl sm:text-2xl font-display font-bold tabular-nums leading-none"
                 style={{ color: divergenceTone }}
               >
                 {typeof divergence === "number" ? divergence : "—"}
@@ -580,14 +598,14 @@ function TopicCard({
             </div>
           </>
         ) : (
-          <div className="text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1">
+          <div className="text-[8px] sm:text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
             Awaiting cycle
           </div>
         )}
       </div>
 
-      <span className="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground transition-all">
+      <span className="shrink-0 inline-flex items-center justify-center px-2.5 py-2 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all min-h-[40px] sm:min-h-0">
         View Analysis →
       </span>
     </motion.button>
@@ -777,10 +795,10 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       className="space-y-5"
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 active:bg-cyan/15 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Topics
         </button>
@@ -788,7 +806,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           href={shareHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 transition-colors"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 active:bg-cyan/15 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
         >
           <Share2 className="w-3.5 h-3.5" /> Share on X
         </a>
@@ -796,12 +814,14 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
 
       {/* Header */}
       <header className="space-y-2">
-        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
+        <div className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.22em] sm:tracking-[0.28em] text-cyan">
           <span className="w-1 h-3.5 bg-cyan rounded-sm" />
           {topic.region}
         </div>
-        <h1 className="text-4xl md:text-5xl font-display font-semibold tracking-tight leading-[1.05]">{topic.title}</h1>
-        <p className="text-base text-muted-foreground max-w-3xl leading-relaxed">{topic.description}</p>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-display font-semibold tracking-tight leading-[1.08] break-words">
+          {shortTitle(topic.title)}
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">{topic.description}</p>
       </header>
 
       {/* Live data panel (real Supabase data for mapped topics) */}
@@ -1096,7 +1116,7 @@ function HeroSentimentCard({
   sample: string;
 }) {
   return (
-    <div className="rounded-xl border bg-background/40 backdrop-blur p-5 relative overflow-hidden flex flex-col gap-4 min-h-[240px]" style={{ borderColor: `${color}55` }}>
+    <div className="rounded-xl border bg-background/40 backdrop-blur p-4 sm:p-5 relative overflow-hidden flex flex-col gap-3 sm:gap-4 min-h-[200px] sm:min-h-[240px]" style={{ borderColor: `${color}55` }}>
       <span
         aria-hidden
         className="pointer-events-none absolute -inset-px rounded-xl opacity-70"
@@ -1113,30 +1133,30 @@ function HeroSentimentCard({
         )}
       </div>
 
-      <div className="relative flex items-center gap-5">
-        <div className="relative w-28 h-28 shrink-0">
+      <div className="relative flex flex-col sm:flex-row items-center gap-3 sm:gap-5 text-center sm:text-left">
+        <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
           <div
             className="absolute inset-0 rounded-full grid place-items-center"
             style={{ background: `conic-gradient(${color} ${score * 3.6}deg, var(--border) 0deg)` }}
           >
             <div className="absolute inset-1.5 rounded-full bg-background grid place-items-center">
-              <span className="text-4xl font-display font-semibold tabular-nums" style={{ color }}>
+              <span className="text-3xl sm:text-4xl font-display font-semibold tabular-nums" style={{ color }}>
                 {score}
               </span>
             </div>
           </div>
         </div>
         <div className="min-w-0">
-          <div className="text-2xl font-display font-semibold leading-tight" style={{ color }}>
+          <div className="text-xl sm:text-2xl font-display font-semibold leading-tight" style={{ color }}>
             {label}
           </div>
-          <div className="mt-1 text-[12px] font-mono text-muted-foreground">
+          <div className="mt-1 text-[11px] sm:text-[12px] font-mono text-muted-foreground">
             Citizen sentiment score · 0–100 scale
           </div>
         </div>
       </div>
 
-      <div className="relative mt-auto text-[11px] font-mono text-muted-foreground border-t border-border pt-2 flex items-center justify-between">
+      <div className="relative mt-auto text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border pt-2 flex flex-col sm:flex-row items-center sm:justify-between gap-1 sm:gap-0">
         <span>Sample · <span className="text-foreground/80 tabular-nums">{sample}</span></span>
         <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: color }} /> Live</span>
       </div>
@@ -1170,7 +1190,7 @@ function HeroDivergenceCard({ data }: { data: AbrahamData & { narrative_divergen
   const band = hasData ? (label ?? divergenceBand(score!)) : "Awaiting backend data";
 
   return (
-    <div className="rounded-xl border bg-background/40 backdrop-blur p-5 relative overflow-hidden flex flex-col gap-4 min-h-[240px]" style={{ borderColor: `${color}55` }}>
+    <div className="rounded-xl border bg-background/40 backdrop-blur p-4 sm:p-5 relative overflow-hidden flex flex-col gap-3 sm:gap-4 min-h-[200px] sm:min-h-[240px]" style={{ borderColor: `${color}55` }}>
       <span
         aria-hidden
         className="pointer-events-none absolute -inset-px rounded-xl opacity-70"
@@ -1185,30 +1205,30 @@ function HeroDivergenceCard({ data }: { data: AbrahamData & { narrative_divergen
         </span>
       </div>
 
-      <div className="relative flex items-center gap-5">
-        <div className="relative w-28 h-28 shrink-0">
+      <div className="relative flex flex-col sm:flex-row items-center gap-3 sm:gap-5 text-center sm:text-left">
+        <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
           <div
             className="absolute inset-0 rounded-full grid place-items-center"
             style={{ background: hasData ? `conic-gradient(${color} ${(score! ) * 3.6}deg, var(--border) 0deg)` : "var(--border)" }}
           >
             <div className="absolute inset-1.5 rounded-full bg-background grid place-items-center">
-              <span className="text-4xl font-display font-semibold tabular-nums" style={{ color }}>
+              <span className="text-3xl sm:text-4xl font-display font-semibold tabular-nums" style={{ color }}>
                 {hasData ? score : "—"}
               </span>
             </div>
           </div>
         </div>
         <div className="min-w-0">
-          <div className="text-2xl font-display font-semibold leading-tight" style={{ color }}>
+          <div className="text-xl sm:text-2xl font-display font-semibold leading-tight" style={{ color }}>
             {hasData ? (label ?? divergenceBand(score!)) : "No divergence score yet"}
           </div>
-          <div className="mt-1 text-[12px] font-mono text-muted-foreground">
+          <div className="mt-1 text-[11px] sm:text-[12px] font-mono text-muted-foreground">
             Gap between citizen narrative and official narrative
           </div>
         </div>
       </div>
 
-      <div className="relative mt-auto text-[12px] leading-relaxed text-foreground/85 border-t border-border pt-2">
+      <div className="relative mt-auto text-[11px] sm:text-[12px] leading-relaxed text-foreground/85 border-t border-border pt-2">
         {summary
           ? summary
           : hasData
@@ -1261,16 +1281,19 @@ function LiveAbrahamPanel({
   const questions = data.question_analysis ?? [];
 
   return (
-    <section className="glass rounded-2xl p-5 space-y-5 border border-cyan/30 relative overflow-hidden">
+    <section className="glass rounded-2xl p-4 sm:p-5 space-y-4 sm:space-y-5 border border-cyan/30 relative overflow-hidden">
       {/* Animated OSINT grid backdrop */}
       <div className="absolute inset-0 grid-drift pointer-events-none" />
       {/* Scanning line */}
       <div className="absolute inset-0 scan-line pointer-events-none opacity-30" />
 
       {/* Header strip */}
-      <div className="relative flex items-center justify-between gap-3 flex-wrap">
-        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
-          <Brain className="w-3.5 h-3.5" /> Live Citizen Pulse · Public Discourse · {headerLabel}
+      <div className="relative flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
+        <div className="inline-flex items-center gap-2 text-[9px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.24em] text-cyan leading-snug">
+          <Brain className="w-3.5 h-3.5 shrink-0" />
+          <span className="break-words">
+            Live Pulse · {headerLabel}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
