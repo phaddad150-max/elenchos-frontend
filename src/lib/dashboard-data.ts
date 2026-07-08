@@ -66,13 +66,77 @@ export type TopicSnapshot = {
   raw_analysis?: Record<string, unknown>;
   // Backend-published divergence score (0–100) from latest_topic_snapshots.
   divergence_score?: number | null;
+  // Grok narrative-gap prose from analyze_divergence() (Pass 1).
+  divergence_gap?: string | null;
   // Backend-published signals block from latest_topic_snapshots.
   signals?: TopicSignals | null;
+  // Top headlines derived from key_insights (Pass 1).
+  top_3_key_stories?: string[] | null;
+  analysis_version?: string;
+  is_live?: boolean;
   // Narrative-divergence block, when published by the backend.
   narrative_divergence?:
     | { score?: number; label?: string; summary?: string }
     | number
     | null;
+};
+
+/** Content layer precedence: Live (Pass 1) > Curated (Pass 2) > Static (illustrative). */
+export type ContentSource = "live" | "curated" | "static" | "loading";
+
+export type InsightThread = {
+  theme?: string;
+  headline?: string;
+  summary?: string;
+  confidence?: string;
+  divergence_note?: string;
+  rank?: number;
+};
+
+export type CuratedTopicInsights = {
+  id?: number;
+  topic?: string;
+  snapshot_month?: string;
+  generated_at?: string;
+  comparison_window?: string;
+  hero_headline?: string;
+  hero_summary?: string;
+  hero_confidence?: string;
+  insight_threads?: InsightThread[];
+  sentiment_delta?: number | null;
+  divergence_delta?: number | null;
+  evolution_note?: string | null;
+};
+
+export type CuratedQaEvidence = { point?: string; confidence?: string };
+
+export type CuratedQaPair = {
+  id?: number;
+  topic?: string;
+  question_slug?: string;
+  snapshot_month?: string;
+  generated_at?: string;
+  comparison_window?: string;
+  card_title?: string;
+  card_summary?: string;
+  key_evidence?: CuratedQaEvidence[];
+  sentiment_score?: number;
+  sentiment_label?: string;
+  divergence_note?: string;
+  theme?: string;
+  confidence?: string;
+  rank?: number;
+  wow_delta?: number | null;
+  mom_delta?: number | null;
+  source_question?: string;
+};
+
+export type TopicHistoryPoint = {
+  month?: string;
+  last_updated?: string;
+  overall_sentiment?: { score?: number; label?: string };
+  divergence_score?: number | null;
+  segmented_sentiment?: Record<string, SegmentValue | number>;
 };
 
 export type IntelFeedItem = {
@@ -168,9 +232,15 @@ declare global {
     dashboardOverview?: DashboardOverview | null;
     dashboardMeta?: { empty?: boolean; fallback?: boolean } | null;
     citizenSignals?: CitizenSignal[] | null;
+    curatedInsights?: Record<string, CuratedTopicInsights | null> | null;
+    curatedQaPairs?: Record<string, CuratedQaPair[]> | null;
+    topicHistory?: Record<string, TopicHistoryPoint[]> | null;
     __dashboardDataPromise?: Promise<Record<string, TopicSnapshot> | null>;
     __dashboardOverviewPromise?: Promise<DashboardOverview | null>;
     __citizenSignalsPromise?: Promise<CitizenSignal[] | null>;
+    __curatedInsightsPromises?: Record<string, Promise<CuratedTopicInsights | null>>;
+    __curatedQaPromises?: Record<string, Promise<CuratedQaPair[]>>;
+    __topicHistoryPromises?: Record<string, Promise<TopicHistoryPoint[]>>;
   }
 }
 
@@ -240,6 +310,101 @@ export async function loadDashboardOverview(): Promise<DashboardOverview | null>
   })();
 
   return window.__dashboardOverviewPromise;
+}
+
+const supabaseHeaders = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
+
+export async function loadCuratedTopicInsights(
+  topic: string,
+  window: string = "wow",
+): Promise<CuratedTopicInsights | null> {
+  if (typeof window === "undefined" || !topic) return null;
+  const cacheKey = `${topic}::${window}`;
+  window.curatedInsights ??= {};
+  if (window.curatedInsights[cacheKey] !== undefined) {
+    return window.curatedInsights[cacheKey];
+  }
+  window.__curatedInsightsPromises ??= {};
+  if (!window.__curatedInsightsPromises[cacheKey]) {
+    window.__curatedInsightsPromises[cacheKey] = (async () => {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?topic=eq.${encodeURIComponent(topic)}&comparison_window=eq.${encodeURIComponent(window)}&select=*&limit=1`,
+          { headers: supabaseHeaders },
+        );
+        if (!res.ok) {
+          // View may not exist until migration is applied
+          if (res.status === 404 || res.status === 400) return null;
+          throw new Error("HTTP " + res.status);
+        }
+        const rows = (await res.json()) as CuratedTopicInsights[];
+        const row = rows?.[0] ?? null;
+        window.curatedInsights![cacheKey] = row;
+        return row;
+      } catch (e) {
+        console.warn("curated_topic_insights fetch failed (table may not exist yet)", e);
+        window.curatedInsights![cacheKey] = null;
+        return null;
+      }
+    })();
+  }
+  return window.__curatedInsightsPromises[cacheKey];
+}
+
+export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]> {
+  if (typeof window === "undefined" || !topic) return [];
+  window.curatedQaPairs ??= {};
+  if (window.curatedQaPairs[topic]) return window.curatedQaPairs[topic]!;
+  window.__curatedQaPromises ??= {};
+  if (!window.__curatedQaPromises[topic]) {
+    window.__curatedQaPromises[topic] = (async () => {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/latest_curated_qa_pairs?topic=eq.${encodeURIComponent(topic)}&select=*&order=rank.asc&limit=50`,
+          { headers: supabaseHeaders },
+        );
+        if (!res.ok) {
+          if (res.status === 404 || res.status === 400) return [];
+          throw new Error("HTTP " + res.status);
+        }
+        const rows = (await res.json()) as CuratedQaPair[];
+        const sorted = [...(rows ?? [])].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+        window.curatedQaPairs![topic] = sorted;
+        return sorted;
+      } catch (e) {
+        console.warn("curated_qa_pairs fetch failed (table may not exist yet)", e);
+        window.curatedQaPairs![topic] = [];
+        return [];
+      }
+    })();
+  }
+  return window.__curatedQaPromises[topic];
+}
+
+export async function loadTopicHistory(topic: string, limit = 6): Promise<TopicHistoryPoint[]> {
+  if (typeof window === "undefined" || !topic) return [];
+  window.topicHistory ??= {};
+  if (window.topicHistory[topic]) return window.topicHistory[topic]!;
+  window.__topicHistoryPromises ??= {};
+  if (!window.__topicHistoryPromises[topic]) {
+    window.__topicHistoryPromises[topic] = (async () => {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/topic_snapshots?topic=eq.${encodeURIComponent(topic)}&select=month,last_updated,overall_sentiment,divergence_score,segmented_sentiment&order=last_updated.desc&limit=${limit}`,
+          { headers: supabaseHeaders },
+        );
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const rows = (await res.json()) as TopicHistoryPoint[];
+        window.topicHistory![topic] = rows ?? [];
+        return rows ?? [];
+      } catch (e) {
+        console.warn("topic_snapshots history fetch failed", e);
+        window.topicHistory![topic] = [];
+        return [];
+      }
+    })();
+  }
+  return window.__topicHistoryPromises[topic];
 }
 
 export async function loadCitizenSignals(): Promise<CitizenSignal[] | null> {

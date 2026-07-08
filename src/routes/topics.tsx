@@ -1,13 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { loadDashboardData, useSimMode, type TopicSnapshot } from "@/lib/dashboard-data";
+import {
+  loadCuratedQaPairs,
+  loadCuratedTopicInsights,
+  loadDashboardData,
+  loadTopicHistory,
+  useSimMode,
+  type ContentSource,
+  type CuratedQaPair,
+  type CuratedTopicInsights,
+  type InsightThread,
+  type TopicHistoryPoint,
+  type TopicSignals,
+  type TopicSnapshot,
+} from "@/lib/dashboard-data";
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Brain,
   ChevronDown,
-  
   MessageSquare,
   ThumbsDown,
   ThumbsUp,
@@ -22,6 +34,8 @@ import {
   Users,
   Lock,
   Heart,
+  Radio,
+  Flame,
 } from "lucide-react";
 
 import { SiteNav } from "@/components/SiteNav";
@@ -775,7 +789,14 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
 
   const liveCfg = LIVE_TOPIC_KEYS[topic.id];
   const { data: liveData } = useLiveTopicData(liveCfg?.rootKey ?? "");
+  const { hasCurated } = useCuratedTopicData(liveCfg?.rootKey ?? "");
   const useLive = !simMode && Boolean(liveCfg);
+  const contentSource = resolveContentSource({
+    hasLiveConfig: Boolean(liveCfg),
+    hasLiveData: Boolean(liveData),
+    simMode,
+    hasCurated,
+  });
   const liveScore = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.score : undefined;
   const liveLabel = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.label : undefined;
   const shareUrl = `https://elenchos.live/topics?topic=${encodeURIComponent(topic.id)}`;
@@ -822,6 +843,14 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           {shortTitle(topic.title)}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">{topic.description}</p>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <ContentSourceBadge source={contentSource} />
+          {contentSource === "static" && (
+            <span className="text-[10px] font-mono text-muted-foreground normal-case tracking-normal">
+              Simulated editorial data — not live Supabase analysis
+            </span>
+          )}
+        </div>
       </header>
 
       {/* Live data panel (real Supabase data for mapped topics) */}
@@ -885,8 +914,11 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
               <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
                 <Sparkles className="w-3 h-3" /> Actionable Intelligence
               </div>
-              <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
-                For journalists · researchers · policy advocates
+              <div className="flex items-center gap-2 flex-wrap">
+                <ContentSourceBadge source="static" compact />
+                <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
+                  For journalists · researchers · policy advocates
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -916,11 +948,14 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       {/* AI Synthesis — only for non-live (simulated) topics; live topics show narrative inline in LiveAbrahamPanel */}
       {!useLive && (
         <section className="glass rounded-2xl p-5 space-y-3 border-l-2 border-l-cyan">
-          <div className="flex items-center gap-2 text-cyan">
-            <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
-              <Brain className="w-4 h-4" />
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2 text-cyan">
+              <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
+                <Brain className="w-4 h-4" />
+              </div>
+              <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">AI Synthesis</h2>
             </div>
-            <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">AI Synthesis</h2>
+            <ContentSourceBadge source="static" compact />
           </div>
           <p className="text-sm text-foreground/90 leading-relaxed">
             <span className="text-cyan font-medium">Citizens:</span> {topic.insights.citizenSays}{" "}
@@ -979,16 +1014,49 @@ type QuestionAnalysis = {
   notable_variations?: string[] | string;
 };
 
-type AbrahamData = {
-  overall_sentiment?: { score?: number; label?: string; trend?: string };
-  segmented_sentiment?: Record<string, SegmentValue | number>;
-  narrative_summary?: string;
-  key_insights?: string[];
-  question_analysis?: QuestionAnalysis[];
-  sample_size?: number;
-  last_updated?: string;
-  month?: string;
-};
+type AbrahamData = Pick<
+  TopicSnapshot,
+  | "overall_sentiment"
+  | "segmented_sentiment"
+  | "narrative_summary"
+  | "key_insights"
+  | "question_analysis"
+  | "sample_size"
+  | "last_updated"
+  | "month"
+  | "divergence_score"
+  | "divergence_gap"
+  | "signals"
+  | "top_3_key_stories"
+  | "narrative_divergence"
+>;
+
+function useCuratedTopicData(rootKey: string): {
+  insights: CuratedTopicInsights | null;
+  qaPairs: CuratedQaPair[];
+  hasCurated: boolean;
+} {
+  const [insights, setInsights] = useState<CuratedTopicInsights | null>(null);
+  const [qaPairs, setQaPairs] = useState<CuratedQaPair[]>([]);
+  useEffect(() => {
+    if (!rootKey) return;
+    let cancelled = false;
+    Promise.all([loadCuratedTopicInsights(rootKey), loadCuratedQaPairs(rootKey)]).then(
+      ([ins, qa]) => {
+        if (cancelled) return;
+        setInsights(ins);
+        setQaPairs(qa);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [rootKey]);
+  const hasCurated = Boolean(
+    insights?.hero_headline || insights?.hero_summary || (qaPairs?.length ?? 0) > 0,
+  );
+  return { insights, qaPairs, hasCurated };
+}
 
 function useLiveTopicData(rootKey: string): { data: AbrahamData | null; isFallback: boolean } {
   const [tick, setTick] = useState(0);
@@ -1164,18 +1232,395 @@ function HeroSentimentCard({
   );
 }
 
-function HeroDivergenceCard({ data }: { data: AbrahamData & { narrative_divergence?: unknown; divergence_score?: unknown } }) {
+function resolveContentSource(opts: {
+  hasLiveConfig: boolean;
+  hasLiveData: boolean;
+  simMode: boolean;
+  hasCurated?: boolean;
+}): ContentSource {
+  if (opts.hasCurated) return "curated";
+  if (opts.hasLiveConfig && !opts.simMode) {
+    return opts.hasLiveData ? "live" : "loading";
+  }
+  return "static";
+}
+
+function ContentSourceBadge({ source, compact }: { source: ContentSource; compact?: boolean }) {
+  const styles: Record<ContentSource, { label: string; color: string; dot?: boolean }> = {
+    live: { label: compact ? "Live" : "Live · streaming", color: "var(--emerald-signal)", dot: true },
+    curated: { label: compact ? "Curated" : "Curated synthesis", color: "var(--cyan)", dot: true },
+    static: { label: compact ? "Preview" : "Illustrative preview", color: "var(--amber-signal)" },
+    loading: { label: compact ? "Queued" : "Awaiting live data", color: "var(--muted-foreground)" },
+  };
+  const s = styles[source];
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider"
+      style={{ color: s.color }}
+    >
+      {s.dot && <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: s.color }} />}
+      {s.label}
+    </span>
+  );
+}
+
+function SignalsStrip({ signals }: { signals: TopicSignals }) {
+  const total = signals.total_signals;
+  const pos = signals.positive_signals;
+  const neg = signals.negative_signals;
+  const neu = signals.neutral_signals;
+  const keys = signals.key_signals ?? [];
+  const hasCounts =
+    typeof total === "number" ||
+    typeof pos === "number" ||
+    typeof neg === "number" ||
+    typeof neu === "number";
+  if (!hasCounts && keys.length === 0) return null;
+
+  return (
+    <div className="relative rounded-xl border border-border bg-background/40 backdrop-blur p-4 space-y-3">
+      <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
+        <Radio className="w-3 h-3" /> Citizen Signals
+        <span className="text-muted-foreground normal-case tracking-wider">· extracted from discourse</span>
+      </div>
+      {hasCounts && (
+        <div className="flex flex-wrap gap-2">
+          {typeof total === "number" && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-mono border border-cyan/40 bg-cyan/10 text-cyan">
+              Total <span className="tabular-nums font-semibold">{total}</span>
+            </span>
+          )}
+          {typeof pos === "number" && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-mono border border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal">
+              Positive <span className="tabular-nums font-semibold">{pos}</span>
+            </span>
+          )}
+          {typeof neg === "number" && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-mono border border-rose-signal/40 bg-rose-signal/10 text-rose-signal">
+              Negative <span className="tabular-nums font-semibold">{neg}</span>
+            </span>
+          )}
+          {typeof neu === "number" && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-mono border border-border bg-secondary/40 text-muted-foreground">
+              Neutral <span className="tabular-nums font-semibold text-foreground/80">{neu}</span>
+            </span>
+          )}
+        </div>
+      )}
+      {keys.length > 0 && (
+        <ul className="space-y-1.5">
+          {keys.slice(0, 5).map((sig, i) => (
+            <li key={i} className="flex gap-2 text-sm text-foreground/90 leading-relaxed">
+              <span className="mt-1.5 w-1 h-1 rounded-full shrink-0 bg-cyan" />
+              <span>{sig}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function confidenceColor(c?: string): string {
+  const v = (c ?? "").toLowerCase();
+  if (v === "high") return "var(--emerald-signal)";
+  if (v === "low") return "var(--rose-signal)";
+  return "var(--amber-signal)";
+}
+
+function formatDelta(delta?: number | null): string | null {
+  if (typeof delta !== "number" || Number.isNaN(delta) || delta === 0) return null;
+  const rounded = Math.round(delta);
+  return `${rounded > 0 ? "+" : ""}${rounded}pt`;
+}
+
+function CuratedHeroSection({ insights }: { insights: CuratedTopicInsights }) {
+  const confColor = confidenceColor(insights.hero_confidence);
+  const sentDelta = formatDelta(insights.sentiment_delta);
+  const divDelta = formatDelta(insights.divergence_delta);
+
+  return (
+    <div className="relative rounded-xl border border-cyan/40 bg-cyan/[0.06] p-4 sm:p-5 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
+          <Sparkles className="w-3.5 h-3.5" /> Curated Synthesis
+        </div>
+        <ContentSourceBadge source="curated" compact />
+      </div>
+      {insights.hero_headline && (
+        <h3 className="text-xl sm:text-2xl font-display font-semibold leading-tight text-foreground">
+          {insights.hero_headline}
+        </h3>
+      )}
+      {insights.hero_summary && (
+        <p className="text-sm sm:text-[15px] text-foreground/90 leading-relaxed">{insights.hero_summary}</p>
+      )}
+      <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
+        {insights.hero_confidence && (
+          <span
+            className="px-2 py-0.5 rounded-full border uppercase tracking-wider"
+            style={{ color: confColor, borderColor: `${confColor}55`, background: `${confColor}14` }}
+          >
+            {insights.hero_confidence} confidence
+          </span>
+        )}
+        {sentDelta && (
+          <span className="px-2 py-0.5 rounded-full border border-border text-muted-foreground">
+            Sentiment {sentDelta}
+          </span>
+        )}
+        {divDelta && (
+          <span className="px-2 py-0.5 rounded-full border border-border text-muted-foreground">
+            Divergence {divDelta}
+          </span>
+        )}
+        {insights.comparison_window && (
+          <span className="text-muted-foreground uppercase tracking-wider">
+            vs {insights.comparison_window}
+          </span>
+        )}
+      </div>
+      {insights.evolution_note && (
+        <p className="text-[12px] sm:text-sm text-muted-foreground leading-relaxed border-t border-border pt-2">
+          {insights.evolution_note}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function InsightThreadsSection({ threads }: { threads: InsightThread[] }) {
+  const sorted = [...threads].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+  if (!sorted.length) return null;
+
+  return (
+    <div className="relative space-y-3">
+      <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
+        <Lightbulb className="w-3 h-3" /> Insight Threads
+        <span className="text-muted-foreground normal-case tracking-wider">· ranked by quality</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {sorted.map((t, i) => {
+          const c = confidenceColor(t.confidence);
+          return (
+            <div
+              key={`${t.theme}-${i}`}
+              className="rounded-xl border border-border bg-background/40 backdrop-blur p-4 space-y-2"
+              style={{ borderTop: `2px solid ${c}` }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  {t.theme ?? "Insight"}
+                </span>
+                {t.confidence && (
+                  <span className="text-[10px] font-mono uppercase" style={{ color: c }}>
+                    {t.confidence}
+                  </span>
+                )}
+              </div>
+              {t.headline && (
+                <h4 className="font-display font-semibold text-sm leading-snug">{t.headline}</h4>
+              )}
+              {t.summary && (
+                <p className="text-sm text-foreground/85 leading-relaxed">{t.summary}</p>
+              )}
+              {t.divergence_note && (
+                <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
+                  Gap: {t.divergence_note}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CuratedQaCard({ card }: { card: CuratedQaPair }) {
+  const score = Math.max(0, Math.min(100, card.sentiment_score ?? 0));
+  const color = sentimentColor(score);
+  const evidence = card.key_evidence ?? [];
+  const wow = formatDelta(card.wow_delta);
+  const mom = formatDelta(card.mom_delta);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="group relative h-full text-left flex flex-col rounded-2xl bg-background/40 backdrop-blur border border-border/60 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-cyan/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/60"
+        >
+          <div className="relative h-1 w-full bg-border/50">
+            <motion.div
+              className="h-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${score}%` }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+              style={{ background: color }}
+            />
+          </div>
+          <div className="relative flex-1 flex flex-col gap-3 p-5">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                {card.theme ?? "Analysis"}
+              </span>
+              <div className="flex gap-1">
+                {wow && <span className="text-[10px] font-mono text-emerald-signal">{wow}</span>}
+                {mom && <span className="text-[10px] font-mono text-cyan">{mom}</span>}
+              </div>
+            </div>
+            <h4 className="font-display font-semibold text-[15px] leading-snug text-foreground/95">
+              {card.card_title ?? "Insight"}
+            </h4>
+            {card.card_summary && (
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{card.card_summary}</p>
+            )}
+            <div className="mt-auto flex items-center justify-between gap-2">
+              <span className="text-2xl font-display font-semibold tabular-nums" style={{ color }}>
+                {score}
+              </span>
+              {card.confidence && (
+                <span className="text-[10px] font-mono uppercase" style={{ color: confidenceColor(card.confidence) }}>
+                  {card.confidence}
+                </span>
+              )}
+            </div>
+          </div>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="font-display text-lg leading-snug pr-6">
+            {card.card_title ?? "Curated insight"}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 text-sm">
+          {card.card_summary && <p className="leading-relaxed text-foreground/90">{card.card_summary}</p>}
+          {evidence.length > 0 && (
+            <ul className="space-y-2">
+              {evidence.map((e, i) => (
+                <li key={i} className="flex gap-2 leading-relaxed">
+                  <span className="mt-1.5 w-1 h-1 rounded-full shrink-0 bg-cyan" />
+                  <span>{e.point}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {card.divergence_note && (
+            <p className="text-[12px] font-mono text-muted-foreground border-t border-border pt-3">
+              Divergence: {card.divergence_note}
+            </p>
+          )}
+          {card.source_question && (
+            <p className="text-[11px] font-mono text-muted-foreground border-t border-border pt-3">
+              Socratic source: {card.source_question}
+            </p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ThemedQaSection({ cards }: { cards: CuratedQaPair[] }) {
+  const byTheme = useMemo(() => {
+    const map = new Map<string, CuratedQaPair[]>();
+    for (const c of cards) {
+      const theme = c.theme ?? "Analysis";
+      if (!map.has(theme)) map.set(theme, []);
+      map.get(theme)!.push(c);
+    }
+    for (const [, arr] of map) {
+      arr.sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+    }
+    return [...map.entries()];
+  }, [cards]);
+
+  if (!cards.length) return null;
+
+  return (
+    <div className="relative space-y-4">
+      <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
+        <Brain className="w-3 h-3" /> Curated Q&amp;A Insights
+        <span className="text-muted-foreground normal-case tracking-wider">· grouped by theme</span>
+      </div>
+      {byTheme.map(([theme, themeCards]) => (
+        <div key={theme} className="space-y-2">
+          <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">{theme}</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+            {themeCards.map((c) => (
+              <CuratedQaCard key={`${c.question_slug}-${c.id ?? c.rank}`} card={c} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function historySparklinePoints(
+  history: TopicHistoryPoint[],
+  segmentKey?: string,
+): string | null {
+  const pts = [...history].reverse();
+  if (pts.length < 2) return null;
+  const values = pts.map((h) => {
+    if (segmentKey && h.segmented_sentiment) {
+      const raw = h.segmented_sentiment[segmentKey];
+      if (typeof raw === "number") return raw;
+      if (raw && typeof raw === "object" && typeof raw.score === "number") return raw.score;
+    }
+    return typeof h.overall_sentiment?.score === "number" ? h.overall_sentiment.score : 50;
+  });
+  const w = 80;
+  const max = values.length - 1;
+  return values
+    .map((v, i) => {
+      const y = 22 - (v / 100) * 18;
+      return `${((i * w) / max).toFixed(1)},${Math.max(2, Math.min(22, y)).toFixed(1)}`;
+    })
+    .join(" ");
+}
+
+function KeyStoriesRow({ stories }: { stories: string[] }) {
+  const items = stories.filter((s) => typeof s === "string" && s.trim()).slice(0, 3);
+  if (!items.length) return null;
+
+  return (
+    <div className="relative space-y-3">
+      <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
+        <Flame className="w-3 h-3" /> Key Stories
+        <span className="text-muted-foreground normal-case tracking-wider">· top narratives this cycle</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {items.map((story, i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-border bg-secondary/30 p-3 flex gap-2.5 items-start"
+          >
+            <span className="text-[10px] font-mono tabular-nums text-cyan/80 mt-0.5 shrink-0">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <p className="text-sm text-foreground/90 leading-relaxed">{story}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HeroDivergenceCard({ data }: { data: AbrahamData }) {
   // Prefer `divergence_score` (latest_topic_snapshots), fall back to legacy
-  // `narrative_divergence` block. Accepts object `{ score, label, summary }`,
-  // a bare number, or null when absent.
-  const d = data as unknown as { narrative_divergence?: unknown; divergence_score?: unknown };
+  // `narrative_divergence` block. Summary from narrative_divergence.summary,
+  // then divergence_gap (Pass 1 Grok prose).
   let score: number | null = null;
   let label: string | null = null;
   let summary: string | null = null;
-  if (typeof d.divergence_score === "number") {
-    score = Math.round(d.divergence_score);
+  if (typeof data.divergence_score === "number") {
+    score = Math.round(data.divergence_score);
   }
-  const raw = d.narrative_divergence;
+  const raw = data.narrative_divergence;
   if (raw && typeof raw === "object") {
     const r = raw as { score?: number; label?: string; summary?: string };
     if (score === null && typeof r.score === "number") score = Math.round(r.score);
@@ -1183,6 +1628,9 @@ function HeroDivergenceCard({ data }: { data: AbrahamData & { narrative_divergen
     if (typeof r.summary === "string") summary = r.summary;
   } else if (score === null && typeof raw === "number") {
     score = Math.round(raw);
+  }
+  if (!summary && typeof data.divergence_gap === "string" && data.divergence_gap.trim()) {
+    summary = data.divergence_gap.trim();
   }
 
   const hasData = score !== null;
@@ -1245,6 +1693,14 @@ function LiveAbrahamPanel({
   headerLabel = "Abraham Accords",
 }: { rootKey?: string; headerLabel?: string } = {}) {
   const { data, isFallback } = useLiveTopicData(rootKey);
+  const { insights: curated, qaPairs: curatedQa } = useCuratedTopicData(rootKey);
+  const [history, setHistory] = useState<TopicHistoryPoint[]>([]);
+  const [showRawQa, setShowRawQa] = useState(false);
+
+  useEffect(() => {
+    if (!rootKey) return;
+    loadTopicHistory(rootKey, 6).then(setHistory);
+  }, [rootKey]);
   if (!data) {
     const loaded = typeof window !== "undefined" && Boolean(window.dashboardData);
     if (loaded) {
@@ -1277,8 +1733,9 @@ function LiveAbrahamPanel({
   const insights = data.key_insights ?? [];
   const sample = data.sample_size ? data.sample_size.toLocaleString() : "—";
   const narrative = data.narrative_summary ?? "";
-  const month = data.month;
   const questions = data.question_analysis ?? [];
+  const signals = data.signals ?? null;
+  const keyStories = data.top_3_key_stories ?? [];
 
   return (
     <section className="glass rounded-2xl p-4 sm:p-5 space-y-4 sm:space-y-5 border border-cyan/30 relative overflow-hidden">
@@ -1300,12 +1757,15 @@ function LiveAbrahamPanel({
           {isFallback ? (
             <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Fallback data</span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-emerald-signal">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-signal pulse-dot" /> Live · streaming
-            </span>
+            <ContentSourceBadge source="live" />
           )}
         </div>
       </div>
+
+      {/* Pass 2 curated hero (when available) */}
+      {curated && (curated.hero_headline || curated.hero_summary) && (
+        <CuratedHeroSection insights={curated} />
+      )}
 
       {/* Small-sample warning — identical generic copy on every topic */}
       <div className="relative rounded-xl border border-amber-signal/30 bg-amber-signal/[0.06] px-4 py-3 text-[12px] font-mono text-foreground/80 leading-relaxed flex gap-2.5 items-start">
@@ -1366,23 +1826,22 @@ function LiveAbrahamPanel({
                       </div>
                     )}
                   </div>
-                  {/* mini sparkline */}
+                  {/* mini sparkline — real history when available */}
                   <svg viewBox="0 0 80 24" className="w-full h-6 mt-1">
-                    <polyline
-                      points={Array.from({ length: 12 })
-                        .map((_, i) => {
-                          const seed = (v + i * 7) % 17;
-                          const y = 22 - ((v + seed - 8) / 100) * 18;
-                          return `${(i * 80) / 11},${Math.max(2, Math.min(22, y)).toFixed(1)}`;
-                        })
-                        .join(" ")}
-                      fill="none"
-                      stroke={c}
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                      strokeDasharray="200"
-                      className="dash-flow"
-                    />
+                    {(() => {
+                      const pts = historySparklinePoints(history, k);
+                      return pts ? (
+                        <polyline
+                          points={pts}
+                          fill="none"
+                          stroke={c}
+                          strokeWidth="1.4"
+                          strokeLinecap="round"
+                        />
+                      ) : (
+                        <line x1="4" y1="12" x2="76" y2="12" stroke="var(--border)" strokeWidth="1.4" strokeDasharray="4 4" />
+                      );
+                    })()}
                   </svg>
                   <div className="mt-1 h-1 rounded-full bg-border overflow-hidden relative">
                     <motion.div
@@ -1400,37 +1859,71 @@ function LiveAbrahamPanel({
         </div>
       )}
 
-      {/* Key insights */}
-      {insights.length > 0 && (
-        <div className="relative">
-          <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-2">Key Insights</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {insights.map((ins, i) => (
-              <div key={i} className="rounded-xl border border-border bg-secondary/30 p-3 flex gap-2 items-start">
-                <Sparkles className="w-3.5 h-3.5 text-cyan mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground/90 leading-relaxed">{ins}</p>
-              </div>
-            ))}
+      {/* Pass 2 insight threads, or Pass 1 key insights fallback */}
+      {curated?.insight_threads && curated.insight_threads.length > 0 ? (
+        <InsightThreadsSection threads={curated.insight_threads} />
+      ) : (
+        insights.length > 0 && (
+          <div className="relative">
+            <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-2">Key Insights</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {insights.map((ins, i) => (
+                <div key={i} className="rounded-xl border border-border bg-secondary/30 p-3 flex gap-2 items-start">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan mt-0.5 shrink-0" />
+                  <p className="text-sm text-foreground/90 leading-relaxed">{ins}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )
       )}
 
+      {/* Key stories (Pass 1 top_3_key_stories) */}
+      {keyStories.length > 0 && <KeyStoriesRow stories={keyStories} />}
 
-      {/* Per-question sentiment analysis — visual grid */}
-      {questions.length > 0 && (
-        <div className="relative space-y-3">
-          <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> Citizen Sentiment Insights
-            <span className="text-muted-foreground normal-case tracking-wider">
-              · {questions.length} dimensions
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-            {questions.map((q, i) => (
-              <QuestionThemeCard key={i} q={q} />
-            ))}
-          </div>
+      {/* Citizen signals (Pass 1 signals block) */}
+      {signals && <SignalsStrip signals={signals} />}
+
+      {/* Pass 2 themed Q&A, with collapsible Pass 1 raw grid */}
+      {curatedQa.length > 0 ? (
+        <div className="relative space-y-4">
+          <ThemedQaSection cards={curatedQa} />
+          {questions.length > 0 && (
+            <div className="border border-border rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowRawQa((v) => !v)}
+                className="w-full flex items-center justify-between gap-2 px-4 py-3 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground hover:bg-secondary/30 transition-colors"
+              >
+                <span>Raw Socratic analysis (Pass 1)</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showRawQa ? "rotate-180" : ""}`} />
+              </button>
+              {showRawQa && (
+                <div className="p-4 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+                  {questions.map((q, i) => (
+                    <QuestionThemeCard key={i} q={q} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
+      ) : (
+        questions.length > 0 && (
+          <div className="relative space-y-3">
+            <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan flex items-center gap-2">
+              <Sparkles className="w-3 h-3" /> Citizen Sentiment Insights
+              <span className="text-muted-foreground normal-case tracking-wider">
+                · {questions.length} dimensions
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+              {questions.map((q, i) => (
+                <QuestionThemeCard key={i} q={q} />
+              ))}
+            </div>
+          </div>
+        )
       )}
 
       {/* Narrative summary */}
