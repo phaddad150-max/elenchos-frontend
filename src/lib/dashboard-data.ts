@@ -106,6 +106,11 @@ export type CuratedTopicInsights = {
   sentiment_delta?: number | null;
   divergence_delta?: number | null;
   evolution_note?: string | null;
+  lens_scores?: Partial<Record<
+    "geopolitical" | "economic" | "social" | "governance" | "security",
+    number
+  >>;
+  status?: "draft" | "published" | "archived";
 };
 
 export type CuratedQaEvidence = { point?: string; confidence?: string };
@@ -379,6 +384,30 @@ export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]
     })();
   }
   return window.__curatedQaPromises[topic];
+}
+
+export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsights[]> {
+  if (typeof window === "undefined") return [];
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?comparison_window=eq.wow&select=*&order=generated_at.desc&limit=${limit * 3}`,
+      { headers: supabaseHeaders },
+    );
+    if (!res.ok) return [];
+    const rows = (await res.json()) as CuratedTopicInsights[];
+    const seen = new Set<string>();
+    const out: CuratedTopicInsights[] = [];
+    for (const row of rows ?? []) {
+      if (!row.topic || seen.has(row.topic)) continue;
+      if (!row.hero_headline && !row.hero_summary) continue;
+      seen.add(row.topic);
+      out.push(row);
+      if (out.length >= limit) break;
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 export async function loadTopicHistory(topic: string, limit = 6): Promise<TopicHistoryPoint[]> {

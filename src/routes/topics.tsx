@@ -41,6 +41,8 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
+import { LIVE_TOPIC_KEYS, isLiveTopicId, liveTopicConfig } from "@/lib/topic-catalog";
+import { TopicLensRadar } from "@/components/TopicLensRadar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   SPONSOR_LOCKED_TOPIC_IDS,
@@ -787,10 +789,10 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   const opportunities =
     topic.actionableIntel?.opportunities ?? splitToBullets(topic.takeaway + " " + topic.insights.citizenSays, 3);
 
-  const liveCfg = LIVE_TOPIC_KEYS[topic.id];
+  const liveCfg = liveTopicConfig(topic.id);
   const { data: liveData } = useLiveTopicData(liveCfg?.rootKey ?? "");
   const { hasCurated } = useCuratedTopicData(liveCfg?.rootKey ?? "");
-  const useLive = !simMode && Boolean(liveCfg);
+  const useLive = !simMode && isLiveTopicId(topic.id);
   const contentSource = resolveContentSource({
     hasLiveConfig: Boolean(liveCfg),
     hasLiveData: Boolean(liveData),
@@ -1077,67 +1079,6 @@ function useLiveTopicData(rootKey: string): { data: AbrahamData | null; isFallba
   void tick;
   return { data: node ?? null, isFallback: Boolean(window.dashboardMeta?.fallback) };
 }
-
-const LIVE_TOPIC_KEYS: Record<string, { rootKey: string; headerLabel: string }> = {
-  "arab-israeli-normalization": {
-    rootKey: "Arab-Israeli Normalization / Abraham Accords",
-    headerLabel: "Abraham Accords",
-  },
-  "iranian-voices-vs-regime": {
-    rootKey: "Iranian Voices vs Regime",
-    headerLabel: "Iranian Voices",
-  },
-  "maritime-ai-greece-global-role": {
-    rootKey: "Maritime AI Industry & Greece's Global Role",
-    headerLabel: "Maritime AI Industry & Greece's Global Role",
-  },
-  "levant-realignment": {
-    rootKey: "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
-    headerLabel: "Eastern Mediterranean Alliance",
-  },
-  "new-us-foreign-policy": {
-    rootKey: "Trump Administration Actions & US Politics",
-    headerLabel: "Trump Administration Actions & US Politics",
-  },
-  "crypto-regulation-financial-markets": {
-    rootKey: "Crypto Regulation & Financial Markets Volatility",
-    headerLabel: "Crypto Regulation & Financial Markets",
-  },
-  "eu-migration-green-divisions": {
-    rootKey: "Migration, Green Policies & Internal EU Divisions",
-    headerLabel: "Migration, Green Policies & EU Divisions",
-  },
-  "government-performance-corruption": {
-    rootKey: "Government Performance, Corruption & Scandals",
-    headerLabel: "Government Performance & Corruption",
-  },
-  "crime-safety-lawlessness": {
-    rootKey: "Crime, Safety & Lawlessness",
-    headerLabel: "Crime, Safety & Lawlessness",
-  },
-  "political-polarization-populism": {
-    rootKey: "Political Polarization & Populism Rise",
-    headerLabel: "Political Polarization & Populism",
-  },
-  "global-ai-race": {
-    rootKey: "Global AI Race",
-    headerLabel: "The Global AI Race",
-  },
-  "cuba-sanctions-domino": {
-    rootKey: "Cuba Sanctions & the Domino Effect",
-    headerLabel: "Cuba Sanctions & the Domino Effect",
-  },
-  "fifa-world-cup-2026": {
-    rootKey: "fifa-world-cup-2026",
-    headerLabel: "FIFA World Cup 2026",
-  },
-  "us-ai-economy-boom": {
-    rootKey: "US AI Economy Boom & American Technological Renaissance",
-    headerLabel: "US AI Economy Boom",
-  },
-};
-
-
 
 function segScore(v: SegmentValue | number): number {
   return typeof v === "number" ? v : (v?.score ?? 0);
@@ -1784,6 +1725,11 @@ function LiveAbrahamPanel({
         <HeroSentimentCard score={score} label={label} trend={trend} color={color} sample={sample} />
         <HeroDivergenceCard data={data} />
       </div>
+
+      <TopicLensRadar
+        lensScores={curated?.lens_scores}
+        snapshot={data as TopicSnapshot}
+      />
 
       {/* Segmented sentiment */}
       {segments.length > 0 && (

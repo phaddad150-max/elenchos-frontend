@@ -46,16 +46,19 @@ import { TeaserLock } from "@/components/TeaserLock";
 
 import { CookieConsent } from "@/components/CookieConsent";
 import {
+  loadCuratedHighlights,
   loadDashboardData,
   loadDashboardOverview,
   loadCitizenSignals,
   useSimMode,
   CANONICAL_TOPICS,
+  type CuratedTopicInsights,
   type DashboardOverview,
   type IntelFeedItem,
   type TopicSnapshot,
   type CitizenSignal,
 } from "@/lib/dashboard-data";
+import { topicIdForBackendName } from "@/lib/topic-catalog";
 import { Compass } from "lucide-react";
 import {
   extractPeaceCountries,
@@ -232,6 +235,7 @@ function Dashboard() {
     leadersRanked?: number;
     peaceHealthIndex?: number;
   }>({});
+  const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [simMode] = useSimMode();
 
   const [, setTickKey] = useState(0);
@@ -243,6 +247,7 @@ function Dashboard() {
     });
     loadDashboardOverview().then((o) => setOverview(o));
     loadCitizenSignals().then((s) => setCitizenSignals(s ?? []));
+    loadCuratedHighlights(6).then(setCuratedHighlights);
     fetchLatestTrackers().then((rows) => {
       const byType = new Map(rows.map((r) => [r.tracker_type, r]));
       const leaderRow = byType.get("global_leader_trust");
@@ -556,6 +561,7 @@ function Dashboard() {
         {/* HERO: 5 KPI tiles — strictly from dashboard_overviews.kpis */}
         <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
 
+        <CuratedHighlightsRow highlights={curatedHighlights} />
 
         {/* CoreTopicsRow removed — topics are surfaced via the Latest Citizen Signals topic filter
             chips below (real data from dashboard_overviews.intel_feed). */}
@@ -1651,6 +1657,52 @@ function avgDivergenceFromSnapshots(
     .filter((v): v is number => typeof v === "number");
   if (!sentimentSpread.length) return undefined;
   return sentimentSpread.reduce((sum, v) => sum + v, 0) / sentimentSpread.length;
+}
+
+function CuratedHighlightsRow({ highlights }: { highlights: CuratedTopicInsights[] }) {
+  if (!highlights.length) return null;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
+        <Sparkles className="w-3.5 h-3.5" />
+        Curated Intelligence Highlights
+        <span className="text-muted-foreground normal-case tracking-normal text-[10px]">
+          Pass 2 synthesis across topics
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {highlights.map((h) => {
+          const topicId = h.topic ? topicIdForBackendName(h.topic) : null;
+          const href = topicId ? `/topics?topic=${encodeURIComponent(topicId)}` : "/topics";
+          return (
+            <Link
+              key={`${h.topic}-${h.id}`}
+              to={href}
+              className="glass rounded-xl p-4 border border-cyan/25 hover:border-cyan/50 transition-colors block space-y-2"
+            >
+              <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                {h.topic}
+              </div>
+              {h.hero_headline && (
+                <h3 className="font-display font-semibold text-sm leading-snug line-clamp-2">
+                  {h.hero_headline}
+                </h3>
+              )}
+              {h.hero_summary && (
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                  {h.hero_summary}
+                </p>
+              )}
+              {h.evolution_note && (
+                <p className="text-[10px] font-mono text-cyan/80 line-clamp-1">{h.evolution_note}</p>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
 
 function DashboardKpiGrid({

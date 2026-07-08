@@ -23,6 +23,7 @@ import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
+import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 
 const TopicsRoute = TopicsRouteImport.update({
@@ -95,6 +96,11 @@ const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => SponsorRoute,
 } as any)
+const AdminCurationRoute = AdminCurationRouteImport.update({
+  id: '/admin/curation',
+  path: '/admin/curation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   id: '/api/public/contact',
   path: '/api/public/contact',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/topics': typeof TopicsRoute
+  '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/topics': typeof TopicsRoute
+  '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/topics': typeof TopicsRoute
+  '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sponsor'
     | '/topics'
+    | '/admin/curation'
     | '/sponsor/success'
     | '/trackers/leaders'
     | '/trackers/media'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sponsor'
     | '/topics'
+    | '/admin/curation'
     | '/sponsor/success'
     | '/trackers/leaders'
     | '/trackers/media'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sponsor'
     | '/topics'
+    | '/admin/curation'
     | '/sponsor/success'
     | '/trackers/leaders'
     | '/trackers/media'
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SponsorRoute: typeof SponsorRouteWithChildren
   TopicsRoute: typeof TopicsRoute
+  AdminCurationRoute: typeof AdminCurationRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SponsorSuccessRouteImport
       parentRoute: typeof SponsorRoute
     }
+    '/admin/curation': {
+      id: '/admin/curation'
+      path: '/admin/curation'
+      fullPath: '/admin/curation'
+      preLoaderRoute: typeof AdminCurationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/contact': {
       id: '/api/public/contact'
       path: '/api/public/contact'
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SponsorRoute: SponsorRouteWithChildren,
   TopicsRoute: TopicsRoute,
+  AdminCurationRoute: AdminCurationRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
