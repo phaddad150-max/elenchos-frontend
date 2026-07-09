@@ -49,9 +49,6 @@ export const SPONSOR_CUSTOM_QUESTIONS: { id: string; label: string; placeholder:
 // Keys are FEATURE_TOPICS ids; values are the matching backend topic name
 // strings (same value as LIVE_TOPIC_KEYS[id].rootKey).
 export const SPONSOR_LOCKED_TOPIC_IDS: Record<string, string> = {
-  "maritime-ai-greece-global-role": "Maritime AI Industry & Greece's Global Role",
-  "global-ai-race": "Global AI Race",
-  "new-us-foreign-policy": "Trump Administration Actions & US Politics",
   "crypto-regulation-financial-markets": "Crypto Regulation & Financial Markets Volatility",
   "levant-realignment": "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
   "eu-migration-green-divisions": "Migration, Green Policies & Internal EU Divisions",
