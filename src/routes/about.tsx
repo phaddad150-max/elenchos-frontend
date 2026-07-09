@@ -17,9 +17,15 @@ import {
   Monitor,
   ArrowRight,
   Quote,
+  Radio,
+  ChevronDown,
+  Github,
+  Database,
+  Cpu,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -72,7 +78,6 @@ function AboutPage() {
 function Hero() {
   return (
     <section className="relative">
-      {/* breadcrumb / back nav */}
       <div className="mb-6 flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
         <Link to="/" className="hover:text-cyan transition-colors inline-flex items-center gap-1.5">
           <ArrowRight className="w-3 h-3 rotate-180" />
@@ -82,7 +87,6 @@ function Hero() {
         <span className="text-foreground/70">About</span>
       </div>
 
-      {/* aurora backdrop */}
       <div
         aria-hidden
         className="absolute -inset-x-20 -top-20 h-[360px] opacity-60 pointer-events-none blur-3xl"
@@ -92,38 +96,75 @@ function Hero() {
         }}
       />
 
-      <div className="relative">
+      <div className="relative flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="relative shrink-0 w-24 h-24 md:w-28 md:h-28"
         >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan" />
-          </span>
-          About Elenchos
+          <div className="brand-mark w-full h-full rounded-full grid place-items-center relative overflow-hidden">
+            <Radio className="w-8 h-8 text-cyan relative z-10" strokeWidth={2.5} />
+            <motion.div
+              aria-hidden
+              className="absolute inset-2 rounded-full border border-cyan/25"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              aria-hidden
+              className="absolute inset-0 rounded-full"
+              style={{
+                background:
+                  "conic-gradient(from 0deg, transparent 0deg, transparent 300deg, color-mix(in oklab, var(--cyan) 55%, transparent) 360deg)",
+              }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 rounded-full opacity-40"
+              style={{
+                background:
+                  "repeating-conic-gradient(from 0deg, transparent 0deg 8deg, color-mix(in oklab, var(--cyan) 12%, transparent) 8deg 9deg)",
+              }}
+            />
+          </div>
         </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.05 }}
-          className="mt-4 font-display font-semibold tracking-tight leading-[1.08] text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl break-words"
-        >
-          Elenchos <span className="text-cyan">ἔλεγχος</span>
-        </motion.h1>
+        <div className="min-w-0 flex-1">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan" />
+            </span>
+            About Elenchos
+          </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.1 }}
-          className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed"
-        >
-          <span className="text-cyan font-mono text-[11.5px] uppercase tracking-[0.18em] mr-1.5">Ancient Greek</span>
-          for cross-examination, aka Socratic Method, applied on X. Testing what people claim against what they believe, measuring gaps with official narratives & more
-        </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.05 }}
+            className="mt-4 font-display font-semibold tracking-tight leading-[1.08] text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl break-words"
+          >
+            Elenchos <span className="text-cyan">ἔλεγχος</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.1 }}
+            className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed max-w-2xl"
+          >
+            <span className="text-cyan font-mono text-[11.5px] uppercase tracking-[0.18em] mr-1.5">Ancient Greek</span>
+            for cross-examination — the Socratic method applied to X. Testing what people claim against what they believe, and measuring gaps with official narratives.
+          </motion.p>
+        </div>
       </div>
     </section>
   );
@@ -158,7 +199,27 @@ const PILLARS = [
   },
 ] as const;
 
+const PILLAR_DETAILS: Record<string, string[]> = {
+  "Dashboard Overview": [
+    "Live KPI tiles with narrative divergence and peace indices",
+    "Citizen signal feed with curated Pass 2 highlights",
+    "3D globe heatmap anchored to real topic data",
+  ],
+  Topics: [
+    "Nine balanced questions scored 0–100 per topic",
+    "Pass 2 curated insight threads and Q&A pairs",
+    "Historical sentiment sparklines across snapshots",
+  ],
+  Trackers: [
+    "Global leader trust ranked by citizen discourse",
+    "Peace & normalization index by country",
+    "Football player index during World Cup cycles",
+  ],
+};
+
 function Pillars() {
+  const [hovered, setHovered] = useState<string | null>(null);
+
   return (
     <section>
       <SectionHeading
@@ -175,6 +236,8 @@ function Pillars() {
               : p.accent === "emerald"
                 ? "var(--emerald-signal)"
                 : "var(--amber-signal)";
+          const active = hovered === p.title;
+          const details = PILLAR_DETAILS[p.title] ?? [];
           return (
             <motion.div
               key={p.title}
@@ -182,6 +245,8 @@ function Pillars() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: i * 0.08 }}
+              onMouseEnter={() => setHovered(p.title)}
+              onMouseLeave={() => setHovered(null)}
             >
               <Link
                 to={p.to}
@@ -209,6 +274,20 @@ function Pillars() {
                 <p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
                   {p.blurb}
                 </p>
+                <motion.div
+                  initial={false}
+                  animate={{ height: active ? "auto" : 0, opacity: active ? 1 : 0 }}
+                  className="overflow-hidden"
+                >
+                  <ul className="mt-3 pt-3 border-t border-border/60 space-y-1.5">
+                    {details.map((d) => (
+                      <li key={d} className="flex gap-2 text-[12px] text-foreground/85 leading-snug">
+                        <span className="text-cyan font-mono shrink-0">›</span>
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
                 <div
                   className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.2em] opacity-80 group-hover:opacity-100"
                   style={{ color }}
@@ -254,6 +333,8 @@ const STEPS = [
 ] as const;
 
 function Method() {
+  const [activeStep, setActiveStep] = useState<string | null>(null);
+
   return (
     <section>
       <SectionHeading
@@ -270,6 +351,7 @@ function Method() {
         <ol className="grid md:grid-cols-4 gap-3.5">
           {STEPS.map((s, i) => {
             const Icon = s.icon;
+            const active = activeStep === s.title;
             return (
               <motion.li
                 key={s.title}
@@ -277,18 +359,36 @@ function Method() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.45, delay: i * 0.08 }}
-                className="relative glass rounded-xl p-6"
+                whileHover={{ y: -4 }}
+                onMouseEnter={() => setActiveStep(s.title)}
+                onMouseLeave={() => setActiveStep(null)}
+                onClick={() => setActiveStep(active ? null : s.title)}
+                className={`relative glass rounded-xl p-6 cursor-pointer transition-all border ${
+                  active ? "border-cyan/50 shadow-[0_0_28px_-12px_var(--cyan-glow)]" : "border-transparent"
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="relative w-11 h-11 rounded-full grid place-items-center bg-background border border-cyan/40 text-cyan shadow-[0_0_18px_var(--cyan-glow)]">
+                  <motion.div
+                    animate={active ? { scale: 1.06 } : { scale: 1 }}
+                    className="relative w-11 h-11 rounded-full grid place-items-center bg-background border border-cyan/40 text-cyan shadow-[0_0_18px_var(--cyan-glow)]"
+                  >
                     <Icon className="w-4 h-4" />
                     <span className="absolute -top-1.5 -right-1.5 text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-cyan text-background">
                       0{i + 1}
                     </span>
-                  </div>
+                  </motion.div>
                   <div className="font-display font-semibold tracking-tight">{s.title}</div>
                 </div>
                 <p className="mt-3 text-[13px] text-muted-foreground leading-relaxed">{s.body}</p>
+                <motion.div
+                  initial={false}
+                  animate={{ opacity: active ? 1 : 0, height: active ? "auto" : 0 }}
+                  className="overflow-hidden"
+                >
+                  <p className="mt-3 pt-3 border-t border-border/60 text-[11px] font-mono uppercase tracking-[0.18em] text-cyan">
+                    Move {i + 1} · {s.title}
+                  </p>
+                </motion.div>
               </motion.li>
             );
           })}
@@ -420,7 +520,53 @@ function Audience() {
 
 // ───────────────────────── Why X / Stack ─────────────────────────
 
+const STACK_ITEMS = [
+  {
+    id: "x-api",
+    label: "X API",
+    color: "cyan",
+    icon: Globe2,
+    blurb: "Raw public posts — the unfiltered public square at global scale.",
+  },
+  {
+    id: "grok",
+    label: "xAI · Grok",
+    color: "cyan",
+    icon: Cpu,
+    blurb: "Reasoning layer: sentiment, divergence, and narrative synthesis.",
+  },
+  {
+    id: "supabase",
+    label: "Supabase",
+    color: "emerald",
+    icon: Database,
+    blurb: "Single source of truth — snapshots, trackers, and curated insights.",
+  },
+  {
+    id: "github",
+    label: "GitHub",
+    color: "muted",
+    icon: Github,
+    blurb: "Scheduled workflows for Pass 1 snapshots and Pass 2 curation.",
+  },
+  {
+    id: "cursor",
+    label: "Cursor",
+    color: "muted",
+    icon: Sparkles,
+    blurb: "Frontend and pipeline development environment.",
+  },
+  {
+    id: "stripe",
+    label: "Stripe",
+    color: "violet",
+    icon: HandCoins,
+    blurb: "Topic sponsorship checkout — funds API and infrastructure costs.",
+  },
+] as const;
+
 function WhyX() {
+  const [stackHover, setStackHover] = useState<string | null>(null);
   return (
     <section className="grid md:grid-cols-2 gap-4">
       <div className="glass rounded-2xl p-6 md:p-7 relative overflow-hidden">
@@ -467,14 +613,46 @@ function WhyX() {
           into <span className="text-cyan font-semibold">Supabase</span> as the single source of
           truth — no hand-edited numbers, no other models in the loop.
         </p>
-        <div className="mt-5 flex flex-wrap items-center gap-1.5 text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-          <span className="px-2.5 py-1 rounded-full border border-cyan/40 bg-cyan/10 text-cyan">X API</span>
-          <span className="px-2.5 py-1 rounded-full border border-cyan/40 bg-cyan/10 text-cyan">xAI · Grok</span>
-          <span className="px-2.5 py-1 rounded-full border border-border bg-secondary/60">Cursor</span>
-          <span className="px-2.5 py-1 rounded-full border border-border bg-secondary/60">GitHub</span>
-          <span className="px-2.5 py-1 rounded-full border border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal">Supabase</span>
-          <span className="px-2.5 py-1 rounded-full border border-violet-400/40 bg-violet-400/10 text-violet-400">Stripe</span>
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {STACK_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const active = stackHover === item.id;
+            const colorClass =
+              item.color === "cyan"
+                ? "border-cyan/40 bg-cyan/10 text-cyan"
+                : item.color === "emerald"
+                  ? "border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal"
+                  : item.color === "violet"
+                    ? "border-violet-400/40 bg-violet-400/10 text-violet-400"
+                    : "border-border bg-secondary/60 text-muted-foreground";
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onMouseEnter={() => setStackHover(item.id)}
+                onMouseLeave={() => setStackHover(null)}
+                onFocus={() => setStackHover(item.id)}
+                onBlur={() => setStackHover(null)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10.5px] font-mono uppercase tracking-[0.18em] transition-all hover:-translate-y-0.5 ${colorClass} ${
+                  active ? "ring-1 ring-cyan/40 shadow-[0_0_20px_-10px_var(--cyan-glow)]" : ""
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                {item.label}
+              </button>
+            );
+          })}
         </div>
+        <motion.p
+          key={stackHover ?? "default"}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-3 text-[12.5px] text-muted-foreground leading-relaxed min-h-[2.5rem]"
+        >
+          {stackHover
+            ? STACK_ITEMS.find((s) => s.id === stackHover)?.blurb
+            : "Hover a layer to see how it fits the pipeline."}
+        </motion.p>
       </div>
     </section>
   );
@@ -518,30 +696,35 @@ function SponsorAndLegal() {
         </Link>
       </div>
 
-      <div className="glass rounded-2xl p-6 md:p-7">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="p-1.5 rounded-md bg-secondary border border-border">
-            <ScrollText className="w-4 h-4" />
+      <Collapsible defaultOpen={false} className="glass rounded-2xl p-6 md:p-7">
+        <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 text-left group">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="p-1.5 rounded-md bg-secondary border border-border">
+              <ScrollText className="w-4 h-4" />
+            </div>
+            <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">
+              Legal Disclaimer
+            </h2>
           </div>
-          <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">
-            Legal Disclaimer
-          </h2>
-        </div>
-        <ul className="mt-4 space-y-2">
-          {DISCLAIMER_POINTS.map((p) => (
-            <li
-              key={p}
-              className="flex gap-2.5 text-[13px] text-foreground/85 leading-relaxed"
-            >
-              <span className="text-cyan font-mono mt-0.5 shrink-0">›</span>
-              <span>{p}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">
-          Status: Live · independent research
-        </p>
-      </div>
+          <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <ul className="mt-4 space-y-2">
+            {DISCLAIMER_POINTS.map((p) => (
+              <li
+                key={p}
+                className="flex gap-2.5 text-[13px] text-foreground/85 leading-relaxed"
+              >
+                <span className="text-cyan font-mono mt-0.5 shrink-0">›</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">
+            Status: Live · independent research
+          </p>
+        </CollapsibleContent>
+      </Collapsible>
     </section>
   );
 }

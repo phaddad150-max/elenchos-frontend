@@ -43,6 +43,11 @@ import { TopicRequestModal } from "@/components/TopicRequestModal";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TeaserLock } from "@/components/TeaserLock";
+import { DataFreshnessBar } from "@/components/DataFreshnessBar";
+import { MiniSparkline } from "@/components/MiniSparkline";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { clearDashboardCaches } from "@/lib/data-cache";
+import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
 
 import { CookieConsent } from "@/components/CookieConsent";
 import {
@@ -218,7 +223,6 @@ function topicGeo(topic: string) {
 
 function Dashboard() {
   const [refreshedAt, setRefreshedAt] = useState<Date>(() => new Date());
-  const [isAdmin, setIsAdmin] = useState(false);
   const [signals, setSignals] = useState<Signal[]>([]);
   const [flips, setFlips] = useState<ReturnType<typeof generateFlips>>([]);
   const [picked, setPicked] = useState<Signal | null>(null);
@@ -264,33 +268,39 @@ function Dashboard() {
           : undefined,
       });
     });
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.removeItem("cp_admin");
-      } catch {
-        /* ignore */
-      }
-    }
-    setIsAdmin(false);
   }, []);
 
   const handleManualRefresh = async () => {
-    if (typeof window !== "undefined") {
-      window.dashboardData = undefined as never;
-      window.__dashboardDataPromise = undefined;
-      window.dashboardOverview = undefined as never;
-      window.__dashboardOverviewPromise = undefined;
-    }
-    if (typeof window !== "undefined") {
-      window.__citizenSignalsPromise = undefined;
-      window.citizenSignals = undefined as never;
-    }
-    await Promise.all([loadDashboardData(), loadDashboardOverview(), loadCitizenSignals()]);
-    setOverview(window.dashboardOverview ?? null);
-    setCitizenSignals((await loadCitizenSignals()) ?? []);
+    clearDashboardCaches();
+    const [snap, ov, cs] = await Promise.all([
+      loadDashboardData(true),
+      loadDashboardOverview(),
+      loadCitizenSignals(),
+    ]);
+    setSnapshots(snap ?? null);
+    setOverview(ov);
+    setCitizenSignals(cs ?? []);
     loadCuratedHighlights(6).then(setCuratedHighlights);
-    setSignals(seedSignals(28));
-    setFlips(generateFlips(4));
+    fetchLatestTrackers().then((rows) => {
+      const byType = new Map(rows.map((r) => [r.tracker_type, r]));
+      const leaderRow = byType.get("global_leader_trust");
+      const peaceRow = byType.get("peace_normalization");
+      const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
+      const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
+      const peaceScores = peaceCountries
+        .map((c) => c.peace_health_score)
+        .filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
+      setTrackerKpis({
+        leadersRanked: leaders.length || undefined,
+        peaceHealthIndex: peaceScores.length
+          ? peaceScores.reduce((sum, v) => sum + v, 0) / peaceScores.length
+          : undefined,
+      });
+    });
+    if (simMode) {
+      setSignals(seedSignals(28));
+      setFlips(generateFlips(4));
+    }
     setRefreshedAt(new Date());
   };
 
@@ -554,24 +564,11 @@ function Dashboard() {
 
               {/* CTA row removed — KPI grid below is the primary entry point. */}
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border bg-secondary/40">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-signal pulse-dot" />
-                Last updated{" "}
-                <span className="text-foreground tabular-nums" suppressHydrationWarning>
-                  {refreshedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                </span>
-              </span>
-              {isAdmin && (
-                <button
-                  onClick={handleManualRefresh}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-cyan/40 text-cyan bg-cyan/10 hover:bg-cyan/20 transition-colors"
-                  title="Admin: refresh cached data"
-                >
-                  <RefreshCw className="w-3 h-3" /> Refresh
-                </button>
-              )}
-            </div>
+            <DataFreshnessBar
+              sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
+              refreshedAt={refreshedAt}
+              onRefresh={handleManualRefresh}
+            />
           </div>
         </section>
 
@@ -597,19 +594,21 @@ function Dashboard() {
               <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
             </div>
 
-            <CitizenSignalsFeed
-              onPick={setPickedCitizen}
-              signals={mergedFeedSignals}
-              groupFilter={topicFilter}
-              fallback={
-                <div className="space-y-1.5">
-                  <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
-                  <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
-                  <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
-                </div>
-              }
-              useFallback={false}
-            />
+            <TooltipProvider delayDuration={200}>
+              <CitizenSignalsFeed
+                onPick={setPickedCitizen}
+                signals={mergedFeedSignals}
+                groupFilter={topicFilter}
+                fallback={
+                  <div className="space-y-1.5">
+                    <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
+                    <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
+                    <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
+                  </div>
+                }
+                useFallback={false}
+              />
+            </TooltipProvider>
 
           </section>
 
@@ -1136,7 +1135,17 @@ function CitizenSignalRow({
     typeof delta === "number"
       ? `${delta > 0 ? "Progressing" : delta < 0 ? "Regressing" : "Stable"} · ${windowLabel} ${delta > 0 ? "+" : ""}${delta}`
       : signal.trend ?? "Stable";
+  const tooltipDetail = [
+    signal.sample_size != null ? `Sample: ${signal.sample_size.toLocaleString()} posts` : null,
+    signal.last_updated ? `Updated ${timeAgo(signal.last_updated)}` : null,
+    divergence !== null ? `Narrative divergence: ${Math.round(divergence)}` : null,
+    signal.summary?.trim() || signal.excerpt?.trim() || null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
+    <Tooltip>
+      <TooltipTrigger asChild>
     <motion.button
       type="button"
       layout
@@ -1224,6 +1233,13 @@ function CitizenSignalRow({
         {score ?? "—"}
       </span>
     </motion.button>
+      </TooltipTrigger>
+      {tooltipDetail && (
+        <TooltipContent side="top" className="max-w-xs bg-background border border-cyan/30 text-foreground text-[11px] leading-relaxed">
+          {tooltipDetail}
+        </TooltipContent>
+      )}
+    </Tooltip>
   );
 }
 
@@ -1458,7 +1474,17 @@ function IntelRow({
       : signal.intensityScore > 0.6
         ? "var(--amber-signal)"
         : "var(--emerald-signal)";
+  const tooltipDetail = [
+    signal.headline || signal.excerpt,
+    `${fmtNum(signal.posts)} posts · ${signal.region}`,
+    `Intensity ${intensityPct} · Divergence ${divergencePct}%`,
+    signal.sentiment ? `Sentiment: ${signal.sentiment}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
+    <Tooltip>
+      <TooltipTrigger asChild>
     <motion.button
       layout
       initial={{ opacity: 0, y: -4 }}
@@ -1533,6 +1559,11 @@ function IntelRow({
         </span>
       </span>
     </motion.button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-sm bg-background border border-cyan/30 text-foreground text-[11px] leading-relaxed">
+        {tooltipDetail}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -1940,28 +1971,24 @@ function DashboardKpiGrid({
   };
 
 
-  // Trend arrows: compare each tile's value to the last persisted snapshot.
-  // Subtle delta indicator (+/-) only when historical data exists.
-  const KPI_HISTORY_KEY = "cp_kpi_history_v1";
   const [deltas, setDeltas] = useState<Record<string, number>>({});
+  const [history, setHistory] = useState<Record<string, number[]>>({});
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const prev = JSON.parse(window.localStorage.getItem(KPI_HISTORY_KEY) || "{}") as Record<string, number>;
-      const next: Record<string, number> = {};
-      const out: Record<string, number> = {};
-      for (const t of tiles) {
-        if (typeof t.value !== "number" || Number.isNaN(t.value)) continue;
-        next[t.label] = t.value;
-        if (typeof prev[t.label] === "number" && prev[t.label] !== t.value) {
-          out[t.label] = t.value - prev[t.label];
-        }
+    const prev = readKpiHistory();
+    const out: Record<string, number> = {};
+    const values: Record<string, number> = {};
+    for (const t of tiles) {
+      if (typeof t.value !== "number" || Number.isNaN(t.value)) continue;
+      values[t.label] = t.value;
+      const series = prev[t.label] ?? [];
+      const last = series[series.length - 1];
+      if (typeof last === "number" && last !== t.value) {
+        out[t.label] = t.value - last;
       }
-      setDeltas(out);
-      window.localStorage.setItem(KPI_HISTORY_KEY, JSON.stringify(next));
-    } catch {
-      /* ignore */
     }
+    setDeltas(out);
+    setHistory(appendKpiHistory(values));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(tiles.map((t) => t.value))]);
 
@@ -2004,16 +2031,21 @@ function DashboardKpiGrid({
                 <Icon className="w-3 h-3 mt-0.5 shrink-0" />
                 <span className="break-words">{t.label}</span>
               </span>
-              {hasDelta && display && (
-                <span
-                  title={`Change since last refresh: ${deltaLabel}`}
-                  className="inline-flex items-center gap-0.5 text-[10px] font-mono tabular-nums shrink-0"
-                  style={{ color: deltaColor }}
-                >
-                  {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {deltaLabel}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {(history[t.label]?.length ?? 0) >= 2 && (
+                  <MiniSparkline values={history[t.label]!} color={brand} />
+                )}
+                {hasDelta && display && (
+                  <span
+                    title={`Change since last refresh: ${deltaLabel}`}
+                    className="inline-flex items-center gap-0.5 text-[10px] font-mono tabular-nums"
+                    style={{ color: deltaColor }}
+                  >
+                    {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {deltaLabel}
+                  </span>
+                )}
+              </div>
             </div>
             {display ? (
               <div

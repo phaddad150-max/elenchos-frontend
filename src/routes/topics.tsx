@@ -4,6 +4,7 @@ import {
   loadCuratedQaPairs,
   loadCuratedTopicInsights,
   loadDashboardData,
+  loadDashboardOverview,
   loadTopicHistory,
   useSimMode,
   type ContentSource,
@@ -40,6 +41,8 @@ import {
 
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DataFreshnessBar } from "@/components/DataFreshnessBar";
+import { clearDashboardCaches } from "@/lib/data-cache";
 import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
 import { LIVE_TOPIC_KEYS, isLiveTopicId, liveTopicConfig } from "@/lib/topic-catalog";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
@@ -148,10 +151,24 @@ export const Route = createFileRoute("/topics")({
 
 function TopicsPage() {
   const [, setTick] = useState(0);
+  const [refreshedAt, setRefreshedAt] = useState(() => new Date());
+  const [sourceUpdatedAt, setSourceUpdatedAt] = useState<string | null>(null);
   const [simMode] = useSimMode();
   useEffect(() => {
     loadDashboardData().then(() => setTick((n) => n + 1));
+    loadDashboardOverview().then((o) =>
+      setSourceUpdatedAt(o?.generated_at ?? o?.last_updated ?? null),
+    );
   }, []);
+
+  const handleRefresh = async () => {
+    clearDashboardCaches();
+    await loadDashboardData(true);
+    const overview = await loadDashboardOverview();
+    setSourceUpdatedAt(overview?.generated_at ?? overview?.last_updated ?? null);
+    setTick((n) => n + 1);
+    setRefreshedAt(new Date());
+  };
   const [selectedId, setSelectedIdState] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     const params = new URLSearchParams(window.location.search);
@@ -204,6 +221,11 @@ function TopicsPage() {
               </span>
             </span>
           </div>
+          <DataFreshnessBar
+            sourceUpdatedAt={sourceUpdatedAt}
+            refreshedAt={refreshedAt}
+            onRefresh={handleRefresh}
+          />
         </div>
         <AnimatePresence mode="wait">
           {!selected ? (
@@ -1674,9 +1696,11 @@ function LiveAbrahamPanel({
       </section>
     );
   }
-  const score = data.overall_sentiment?.score ?? 0;
-  const label = data.overall_sentiment?.label ?? "—";
-  const trend = data.overall_sentiment?.trend ?? "";
+  const os = data.overall_sentiment;
+  const score = typeof os === "object" && os ? (os.score ?? 0) : 0;
+  const label =
+    typeof os === "object" && os ? (os.label ?? "—") : typeof os === "string" ? os : "—";
+  const trend = typeof os === "object" && os ? (os.trend ?? "") : "";
   const color = sentimentColor(score);
   const segments = Object.entries(data.segmented_sentiment ?? {});
   const insights = data.key_insights ?? [];

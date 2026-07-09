@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DataFreshnessBar } from "@/components/DataFreshnessBar";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import {
   LEADER_DIMENSIONS,
@@ -2033,13 +2034,26 @@ function MediaTrustDetail({ row }: { row?: TrackerRow }) {
 function TrackersPage() {
   const [rows, setRows] = useState<TrackerRow[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [refreshedAt, setRefreshedAt] = useState(() => new Date());
 
   useEffect(() => {
     fetchLatestTrackers().then((r) => {
       setRows(r);
       setLoaded(true);
+      setRefreshedAt(new Date());
     });
   }, []);
+
+  const sourceUpdatedAt = useMemo(() => {
+    const stamps = rows.map((r) => r.last_updated).filter((v): v is string => !!v);
+    return stamps.sort().reverse()[0] ?? null;
+  }, [rows]);
+
+  const handleRefresh = async () => {
+    const r = await fetchLatestTrackers();
+    setRows(r);
+    setRefreshedAt(new Date());
+  };
 
   const byType = useMemo(() => {
     const m = new Map<string, TrackerRow>();
@@ -2083,8 +2097,13 @@ function TrackersPage() {
           <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
             Rankings and performance scores for leaders, peace efforts, immigration, crime, and more — based purely on real citizen discourse on X.
           </p>
-          <div className="pt-1">
+          <div className="pt-1 flex flex-wrap items-center gap-3">
             <SimulatedDataBadge />
+            <DataFreshnessBar
+              sourceUpdatedAt={sourceUpdatedAt}
+              refreshedAt={refreshedAt}
+              onRefresh={handleRefresh}
+            />
           </div>
         </motion.header>
 

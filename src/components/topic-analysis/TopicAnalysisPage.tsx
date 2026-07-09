@@ -53,6 +53,8 @@ import {
   sentimentColor,
   timeAgo,
 } from "./utils";
+import { DataFreshnessBar } from "@/components/DataFreshnessBar";
+import { clearDashboardCaches } from "@/lib/data-cache";
 
 type LiveData = TopicSnapshot;
 
@@ -215,6 +217,11 @@ export function TopicAnalysisPage({
       ? TrendingDown
       : Minus;
 
+  const handleRefresh = async () => {
+    clearDashboardCaches();
+    retry();
+  };
+
   return (
     <div className="space-y-5 sm:space-y-6">
       {loadError && (
@@ -246,6 +253,11 @@ export function TopicAnalysisPage({
             <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
             <div className="font-display font-semibold text-lg sm:text-xl truncate">Intelligence Briefing</div>
           </div>
+          <DataFreshnessBar
+            sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
+            onRefresh={handleRefresh}
+            className="shrink-0"
+          />
           <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
           <HeroMetric
             label="Divergence"
@@ -399,7 +411,7 @@ export function TopicAnalysisPage({
                   <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                   <Tooltip
                     contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }}
-                    formatter={(v: number) => [v, "Score"]}
+                    formatter={(v) => [v, "Score"]}
                     labelFormatter={(_, payload) => payload?.[0]?.payload?.full ?? ""}
                   />
                   <Bar dataKey="score" radius={[4, 4, 0, 0]}>

@@ -6,6 +6,7 @@ import { SponsorModal } from "@/components/SponsorModal";
 import { UserMenu } from "@/components/UserMenu";
 import { SPONSOR_ENABLED } from "@/lib/sponsor-topics";
 import { MobileTabBar } from "@/components/MobileTabBar";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import type { ReactNode } from "react";
 
 
@@ -76,6 +77,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2">
+            <GlobalSearch />
             <UserMenu />
             {rightSlot}
             <a

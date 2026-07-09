@@ -64,7 +64,7 @@ export function buildAudienceLenses(
         insights: al.policymaker?.insights?.slice(0, 4) ?? [],
         accent: "var(--amber-signal)",
       },
-    ].filter((l) => l.summary || l.insights.length);
+    ].filter((l) => l.summary || l.insights.length) as AudienceLens[];
   }
 
   const threads = curated?.insight_threads ?? [];

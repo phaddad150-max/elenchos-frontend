@@ -1,0 +1,301 @@
+﻿
+> build
+> vite build
+
+vite v7.3.5 building client environment for production...
+transforming...
+node.exe : [plugin tanstack-start-core::server-fn:client] src/lib/compare-dispatch.functions.ts: 
+C:/Projects/elenchos-frontend/src/lib/compare-dispatch.functions.ts:62:34 createServerFn().inputValidator() is 
+deprecated. Use createServerFn().validator() instead.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([plugin tanstac...ator() instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Ô£ô 3356 modules transformed.
+rendering chunks...
+computing gzip size...
+.output/public/assets/styles-DsziywZK.css               141.42 kB Ôöé gzip:  22.53 kB
+.output/public/assets/loader-circle-BhJmVqBo.js           0.14 kB Ôöé gzip:   0.15 kB
+.output/public/assets/arrow-right-CP_JH6Gz.js             0.17 kB Ôöé gzip:   0.16 kB
+.output/public/assets/arrow-up-right-mUgMd763.js          0.17 kB Ôöé gzip:   0.16 kB
+.output/public/assets/lock-DZnnEDx-.js                    0.20 kB Ôöé gzip:   0.19 kB
+.output/public/assets/users-DDfF8_AH.js                   0.31 kB Ôöé gzip:   0.22 kB
+.output/public/assets/refresh-cw-Bl2q2KVM.js              0.32 kB Ôöé gzip:   0.23 kB
+.output/public/assets/newspaper-BFcMgwPn.js               0.35 kB Ôöé gzip:   0.25 kB
+.output/public/assets/cookie-Dt7ytpt7.js                  0.36 kB Ôöé gzip:   0.22 kB
+.output/public/assets/heart-pnJnyFkN.js                   0.38 kB Ôöé gzip:   0.27 kB
+.output/public/assets/earth-Bzv7beeR.js                   0.39 kB Ôöé gzip:   0.27 kB
+.output/public/assets/trophy-IcqdtNez.js                  0.48 kB Ôöé gzip:   0.28 kB
+.output/public/assets/sponsor-BGCk52-6.js                 0.55 kB Ôöé gzip:   0.37 kB
+.output/public/assets/SimulatedDataBadge-AKWhfnS2.js      0.78 kB Ôöé gzip:   0.52 kB
+.output/public/assets/share-2-WPInGPLM.js                 1.07 kB Ôöé gzip:   0.53 kB
+.output/public/assets/sponsor.success-BU1qh6fA.js         1.31 kB Ôöé gzip:   0.67 kB
+.output/public/assets/trackers.peace-DCKsh-bB.js          2.31 kB Ôöé gzip:   0.96 kB
+.output/public/assets/trackers.leaders-DGMGrA4c.js        2.35 kB Ôöé gzip:   0.99 kB
+.output/public/assets/trackers.media-CMso7fe-.js          2.36 kB Ôöé gzip:   0.98 kB
+.output/public/assets/admin.curation-CfhMBHJ4.js          5.29 kB Ôöé gzip:   2.28 kB
+.output/public/assets/privacy-BR3Lx6Bh.js                 5.60 kB Ôöé gzip:   2.23 kB
+.output/public/assets/index-C4lbXCzN.js                   6.69 kB Ôöé gzip:   2.78 kB
+.output/public/assets/trackers.football-CLUCNwbM.js       7.74 kB Ôöé gzip:   2.62 kB
+.output/public/assets/about-WaQN8Y_J.js                  18.37 kB Ôöé gzip:   5.74 kB
+.output/public/assets/index-CJLpl_83.js                  21.14 kB Ôöé gzip:   8.78 kB
+.output/public/assets/compare-BfAORxex.js                21.99 kB Ôöé gzip:   6.91 kB
+.output/public/assets/utils-Btgpx3zG.js                  27.62 kB Ôöé gzip:   8.74 kB
+.output/public/assets/SiteFooter-KPF5GXfO.js             37.61 kB Ôöé gzip:  11.24 kB
+.output/public/assets/trackers.index-DzspMnhy.js         53.32 kB Ôöé gzip:  11.74 kB
+.output/public/assets/index-C1N1EaSD.js                  66.41 kB Ôöé gzip:  19.74 kB
+.output/public/assets/topics-B94bP3jI.js                552.15 kB Ôöé gzip: 146.62 kB
+.output/public/assets/index-I3d_by63.js                 802.22 kB Ôöé gzip: 236.83 kB
+.output/public/assets/react-globe.gl-B_WqVRc1.js      1,817.32 kB Ôöé gzip: 513.31 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: 
+https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+Ô£ô built in 36m 24s
+vite v7.3.5 building ssr environment for production...
+transforming...
+[plugin tanstack-start-core::server-fn:ssr] src/lib/compare-dispatch.functions.ts?tss-serverfn-split: 
+C:/Projects/elenchos-frontend/src/lib/compare-dispatch.functions.ts?tss-serverfn-split:62:34 
+createServerFn().inputValidator() is deprecated. Use createServerFn().validator() instead.
+[plugin tanstack-start-core::server-fn:ssr] src/lib/compare-dispatch.functions.ts: 
+C:/Projects/elenchos-frontend/src/lib/compare-dispatch.functions.ts:62:34 createServerFn().inputValidator() is 
+deprecated. Use createServerFn().validator() instead.
+"createRequestHandler", "defineHandlerCallback", "transformPipeableStreamWithRouter" and 
+"transformReadableStreamWithRouter" are imported from external module "@tanstack/router-core/ssr/server" but never 
+used in "node_modules/@tanstack/start-server-core/dist/esm/index.js".
+"RawStream" is imported from external module "@tanstack/router-core" but never used in 
+"node_modules/@tanstack/start-client-core/dist/esm/index.js".
+"hydrate" and "json" are imported from external module "@tanstack/router-core/ssr/client" but never used in 
+"node_modules/@tanstack/start-client-core/dist/esm/index.js".
+Ô£ô 123 modules transformed.
+rendering chunks...
+node_modules/.nitro/vite/services/ssr/assets/styles-DsziywZK.css                     141.42 kB
+node_modules/.nitro/vite/services/ssr/assets/empty-plugin-adapters-BFgPZ6_d.js         0.13 kB
+node_modules/.nitro/vite/services/ssr/assets/utils-DFoyPK36.js                         0.29 kB
+node_modules/.nitro/vite/services/ssr/assets/createServerRpc-LePmVLPl.js               0.31 kB
+node_modules/.nitro/vite/services/ssr/assets/createSsrRpc-CzWLZnEX.js                  0.43 kB
+node_modules/.nitro/vite/services/ssr/assets/SimulatedDataBadge-Db8xl9v9.js            0.76 kB
+node_modules/.nitro/vite/services/ssr/assets/sponsor-bNJh4jaq.js                       1.09 kB
+node_modules/.nitro/vite/services/ssr/assets/client-1tbKsSn0.js                        1.60 kB
+node_modules/.nitro/vite/services/ssr/assets/sponsor.success-GLchehTH.js               1.64 kB
+node_modules/.nitro/vite/services/ssr/assets/sponsor-unlocks.functions-DWmf0zcW.js     1.66 kB
+node_modules/.nitro/vite/services/ssr/assets/start-B2Tamj5N.js                         2.22 kB
+node_modules/.nitro/vite/services/ssr/assets/compare-dispatch.functions-Bafa-jUL.js    3.58 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.peace-DbsVuJ24.js                3.64 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.leaders-RP1gLbwa.js              3.65 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.media-CH_Oaos8.js                3.67 kB
+node_modules/.nitro/vite/services/ssr/index.js                                         3.86 kB
+node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-QNkvpNnt.js    4.63 kB
+node_modules/.nitro/vite/services/ssr/assets/privacy-8qeXZojE.js                       7.60 kB
+node_modules/.nitro/vite/services/ssr/assets/admin.curation-B_zFDJxG.js                7.88 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.football-BnV4iIRB.js            11.18 kB
+node_modules/.nitro/vite/services/ssr/assets/about-BAhXxGWd.js                        22.15 kB
+node_modules/.nitro/vite/services/ssr/assets/compare-C3ZwR_G2.js                      27.90 kB
+node_modules/.nitro/vite/services/ssr/assets/SiteFooter-B03Fe2Xc.js                   53.32 kB
+node_modules/.nitro/vite/services/ssr/assets/server-CybCAokI.js                       65.72 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.index-CC8w-Gwd.js               79.30 kB
+node_modules/.nitro/vite/services/ssr/assets/router-BscOkqMk.js                       93.65 kB
+node_modules/.nitro/vite/services/ssr/assets/index-BRVXkhB0.js                        99.96 kB
+node_modules/.nitro/vite/services/ssr/assets/topics-T_AwxWRG.js                      175.98 kB
+Ô£ô built in 5m 32s
+
+[nitro] o Building [Nitro] (preset: cloudflare-module, compatibility: 2026-07-09)
+[nitro] ÔêÜ Generated public .output/public
+vite v7.3.5 building nitro environment for production...
+Unknown input options: platform. Allowed options: cache, context, experimentalCacheExpiry, experimentalLogSideEffects, 
+external, fs, input, jsx, logLevel, makeAbsoluteExternalsRelative, maxParallelFileOps, moduleContext, onLog, onwarn, 
+perf, plugins, preserveEntrySignatures, preserveSymlinks, shimMissingExports, strictDeprecations, treeshake, watch
+transforming...
+node_modules/@tanstack/react-router/dist/esm/index.js (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@tanstack/react-router/dist/esm/index.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/utils.js (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@tanstack/react-router/dist/esm/utils.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/ClientOnly.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/ClientOnly.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/RouterProvider.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-router/dist/esm/RouterProvider.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/useNavigate.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/useNavigate.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/useRouterState.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-router/dist/esm/useRouterState.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/useBlocker.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/useBlocker.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/HeadContent.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/HeadContent.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/useLocation.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/useLocation.js" was ignored.
+node_modules/@radix-ui/react-dialog/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@radix-ui/react-dialog/dist/index.mjs" was ignored.
+node_modules/@tanstack/react-router/dist/esm/Match.js (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@tanstack/react-router/dist/esm/Match.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/routerContext.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-router/dist/esm/routerContext.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/useQuery.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-query/build/modern/useQuery.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/useIsFetching.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useIsFetching.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/useMutationState.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useMutationState.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js" was ignored.
+node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs" was ignored.
+node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs (1:0): Module level directives cause 
+errors when bundled, "use client" in "node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs" 
+was ignored.
+node_modules/framer-motion/dist/es/components/MotionConfig/index.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/components/MotionConfig/index.mjs" was ignored.
+node_modules/framer-motion/dist/es/components/LazyMotion/index.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/components/LazyMotion/index.mjs" was ignored.
+node_modules/framer-motion/dist/es/components/LayoutGroup/index.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/components/LayoutGroup/index.mjs" was ignored.
+node_modules/@tanstack/react-query/build/modern/useMutation.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useMutation.js" was ignored.
+node_modules/framer-motion/dist/es/motion/utils/use-visual-state.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/motion/utils/use-visual-state.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-isomorphic-effect.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-isomorphic-effect.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-unmount-effect.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-unmount-effect.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-force-update.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-force-update.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-motion-value-event.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-motion-value-event.mjs" was ignored.
+node_modules/framer-motion/dist/es/render/dom/features-max.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/render/dom/features-max.mjs" was ignored.
+node_modules/framer-motion/dist/es/render/dom/features-animation.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/render/dom/features-animation.mjs" was ignored.
+node_modules/framer-motion/dist/es/render/dom/features-min.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/render/dom/features-min.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-motion-value.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/value/use-motion-value.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-spring.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/framer-motion/dist/es/value/use-spring.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-motion-template.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/value/use-motion-template.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-transform.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/value/use-transform.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-time.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/framer-motion/dist/es/value/use-time.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-will-change/index.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/value/use-will-change/index.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-velocity.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/value/use-velocity.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-follow-value.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/value/use-follow-value.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion-config.mjs (1:0): Module level directives 
+cause errors when bundled, "use client" in 
+"node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion-config.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-scroll.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/framer-motion/dist/es/value/use-scroll.mjs" was ignored.
+node_modules/framer-motion/dist/es/animation/hooks/use-animation.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/animation/hooks/use-animation.mjs" was ignored.
+node_modules/framer-motion/dist/es/events/use-dom-event.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/events/use-dom-event.mjs" was ignored.
+node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence.mjs (1:0): Module level directives cause 
+errors when bundled, "use client" in "node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence.mjs" 
+was ignored.
+node_modules/framer-motion/dist/es/animation/hooks/use-animate-style.mjs (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/framer-motion/dist/es/animation/hooks/use-animate-style.mjs" was ignored.
+node_modules/@tanstack/react-query/build/modern/useQueries.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useQueries.js" was ignored.
+node_modules/framer-motion/dist/es/animation/hooks/use-animate.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/animation/hooks/use-animate.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-cycle.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/framer-motion/dist/es/utils/use-cycle.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-animation-frame.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-animation-frame.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-instant-transition.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-instant-transition.mjs" was ignored.
+node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence-data.mjs (1:0): Module level directives 
+cause errors when bundled, "use client" in 
+"node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence-data.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-page-in-view.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/utils/use-page-in-view.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-in-view.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/utils/use-in-view.mjs" was ignored.
+node_modules/framer-motion/dist/es/context/MotionContext/index.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/context/MotionContext/index.mjs" was ignored.
+node_modules/framer-motion/dist/es/context/MotionConfigContext.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/context/MotionConfigContext.mjs" was ignored.
+node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs" was ignored.
+node_modules/framer-motion/dist/es/context/PresenceContext.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/context/PresenceContext.mjs" was ignored.
+node_modules/framer-motion/dist/es/animation/hooks/use-animated-state.mjs (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/framer-motion/dist/es/animation/hooks/use-animated-state.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-inverted-scale.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/value/use-inverted-scale.mjs" was ignored.
+node_modules/framer-motion/dist/es/context/DeprecatedLayoutGroupContext.mjs (1:0): Module level directives cause 
+errors when bundled, "use client" in "node_modules/framer-motion/dist/es/context/DeprecatedLayoutGroupContext.mjs" was 
+ignored.
+node_modules/framer-motion/dist/es/components/AnimateSharedLayout.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/components/AnimateSharedLayout.mjs" was ignored.
+node_modules/framer-motion/dist/es/context/SwitchLayoutGroupContext.mjs (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/framer-motion/dist/es/context/SwitchLayoutGroupContext.mjs" was ignored.
+node_modules/@tanstack/react-router/dist/esm/CatchBoundary.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-router/dist/esm/CatchBoundary.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/useMatch.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/useMatch.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/Asset.js (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@tanstack/react-router/dist/esm/Asset.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/Matches.js (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@tanstack/react-router/dist/esm/Matches.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/useRouter.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/useRouter.js" was ignored.
+node_modules/@tanstack/react-router/dist/esm/link.js (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@tanstack/react-router/dist/esm/link.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js" was ignored.
+node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js (1:0): Module level directives cause 
+errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js" was 
+ignored.
+node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js" was ignored.
+node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion.mjs (1:0): Module level directives cause 
+errors when bundled, "use client" in "node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion.mjs" 
+was ignored.
+node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs (1:0): Module level directives cause errors 
+when bundled, "use client" in "node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs" was ignored.
+node_modules/@radix-ui/react-portal/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@radix-ui/react-portal/dist/index.mjs" was ignored.
+node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs" was ignored.
+node_modules/@radix-ui/react-focus-guards/dist/index.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@radix-ui/react-focus-guards/dist/index.mjs" was ignored.
+node_modules/@radix-ui/react-focus-scope/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@radix-ui/react-focus-scope/dist/index.mjs" was ignored.
+node_modules/@radix-ui/react-presence/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use 
+client" in "node_modules/@radix-ui/react-presence/dist/index.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-constant.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/utils/use-constant.mjs" was ignored.
+node_modules/@tanstack/react-router/dist/esm/matchContext.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/matchContext.js" was ignored.
+node_modules/framer-motion/dist/es/context/LazyContext.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/context/LazyContext.mjs" was ignored.
+node_modules/framer-motion/dist/es/utils/use-is-mounted.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/utils/use-is-mounted.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-combine-values.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/value/use-combine-values.mjs" was ignored.
+node_modules/framer-motion/dist/es/value/use-computed.mjs (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/framer-motion/dist/es/value/use-computed.mjs" was ignored.
+node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js" was ignored.
+node_modules/framer-motion/dist/es/components/Reorder/Item.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/components/Reorder/Item.mjs" was ignored.
+node_modules/framer-motion/dist/es/components/Reorder/Group.mjs (1:0): Module level directives cause errors when 
+bundled, "use client" in "node_modules/framer-motion/dist/es/components/Reorder/Group.mjs" was ignored.
+node_modules/@tanstack/react-router/dist/esm/Transitioner.js (1:0): Module level directives cause errors when bundled, 
+"use client" in "node_modules/@tanstack/react-router/dist/esm/Transitioner.js" was ignored.

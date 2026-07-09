@@ -22,6 +22,7 @@ import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
+import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
 import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
@@ -91,6 +92,11 @@ const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
   path: '/trackers/leaders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackersFootballRoute = TrackersFootballRouteImport.update({
+  id: '/trackers/football',
+  path: '/trackers/football',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
   id: '/success',
   path: '/success',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/topics': typeof TopicsRoute
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
+  '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/topics': typeof TopicsRoute
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
+  '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/topics': typeof TopicsRoute
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
+  '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/topics'
     | '/admin/curation'
     | '/sponsor/success'
+    | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/topics'
     | '/admin/curation'
     | '/sponsor/success'
+    | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/topics'
     | '/admin/curation'
     | '/sponsor/success'
+    | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
@@ -230,6 +242,7 @@ export interface RootRouteChildren {
   SponsorRoute: typeof SponsorRouteWithChildren
   TopicsRoute: typeof TopicsRoute
   AdminCurationRoute: typeof AdminCurationRoute
+  TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
@@ -330,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackersLeadersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trackers/football': {
+      id: '/trackers/football'
+      path: '/trackers/football'
+      fullPath: '/trackers/football'
+      preLoaderRoute: typeof TrackersFootballRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sponsor/success': {
       id: '/sponsor/success'
       path: '/success'
@@ -376,6 +396,7 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorRoute: SponsorRouteWithChildren,
   TopicsRoute: TopicsRoute,
   AdminCurationRoute: AdminCurationRoute,
+  TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,

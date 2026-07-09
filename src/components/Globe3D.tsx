@@ -120,13 +120,18 @@ export function Globe3D({ signals, onPick }: Props) {
               if (!s) return "";
               const score = Math.round((s.intensityScore ?? 0) * 100);
               const div = Math.round((s.divergence ?? 0) * 100);
+              const posts = typeof s.posts === "number" ? s.posts.toLocaleString() : "—";
+              const sentiment = (s.sentiment ?? "neutral").replace(/</g, "&lt;");
+              const excerpt = (s.headline ?? s.excerpt ?? "").replace(/</g, "&lt;").slice(0, 90);
               return `
-                <div style="background:rgba(8,12,20,0.92);border:1px solid rgba(34,211,238,0.4);padding:8px 10px;border-radius:8px;font-family:ui-monospace,monospace;font-size:11px;color:#e2e8f0;max-width:240px;box-shadow:0 4px 18px rgba(0,0,0,0.5)">
-                  <div style="color:#22d3ee;text-transform:uppercase;letter-spacing:0.12em;font-size:9.5px;margin-bottom:4px">${s.region ?? "—"}</div>
-                  <div style="font-weight:600;margin-bottom:4px;line-height:1.25">${(s.topic ?? "Signal").replace(/</g,"&lt;")}</div>
-                  <div style="display:flex;gap:10px;color:#94a3b8">
-                    <span>Score <span style="color:${d.color};font-weight:600">${score}</span></span>
-                    <span>Divergence <span style="color:#22d3ee;font-weight:600">${div}</span></span>
+                <div style="background:rgba(8,12,20,0.94);border:1px solid rgba(34,211,238,0.45);padding:9px 11px;border-radius:9px;font-family:ui-monospace,monospace;font-size:11px;color:#e2e8f0;max-width:260px;box-shadow:0 6px 22px rgba(0,0,0,0.55)">
+                  <div style="color:#22d3ee;text-transform:uppercase;letter-spacing:0.12em;font-size:9.5px;margin-bottom:4px">${s.region ?? "—"} · ${sentiment}</div>
+                  <div style="font-weight:600;margin-bottom:5px;line-height:1.3">${(s.topic ?? "Signal").replace(/</g,"&lt;")}</div>
+                  ${excerpt ? `<div style="color:#cbd5e1;font-size:10px;line-height:1.35;margin-bottom:6px">${excerpt}</div>` : ""}
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;color:#94a3b8;font-size:10px">
+                    <span>Intensity <span style="color:${d.color};font-weight:600">${score}</span></span>
+                    <span>Divergence <span style="color:#22d3ee;font-weight:600">${div}%</span></span>
+                    <span>Posts <span style="color:#e2e8f0;font-weight:600">${posts}</span></span>
                   </div>
                 </div>`;
             }}

@@ -1,0 +1,81 @@
+
+> build
+> vite build
+
+vite v7.3.5 building client environment for production...
+transforming...
+✓ 3356 modules transformed.
+rendering chunks...
+computing gzip size...
+.output/public/assets/styles-DsziywZK.css               141.42 kB │ gzip:  22.53 kB
+.output/public/assets/loader-circle-BhJmVqBo.js           0.14 kB │ gzip:   0.15 kB
+.output/public/assets/arrow-right-CP_JH6Gz.js             0.17 kB │ gzip:   0.16 kB
+.output/public/assets/arrow-up-right-mUgMd763.js          0.17 kB │ gzip:   0.16 kB
+.output/public/assets/lock-DZnnEDx-.js                    0.20 kB │ gzip:   0.19 kB
+.output/public/assets/users-DDfF8_AH.js                   0.31 kB │ gzip:   0.22 kB
+.output/public/assets/refresh-cw-Bl2q2KVM.js              0.32 kB │ gzip:   0.23 kB
+.output/public/assets/newspaper-BFcMgwPn.js               0.35 kB │ gzip:   0.25 kB
+.output/public/assets/cookie-Dt7ytpt7.js                  0.36 kB │ gzip:   0.22 kB
+.output/public/assets/heart-pnJnyFkN.js                   0.38 kB │ gzip:   0.27 kB
+.output/public/assets/earth-Bzv7beeR.js                   0.39 kB │ gzip:   0.27 kB
+.output/public/assets/trophy-IcqdtNez.js                  0.48 kB │ gzip:   0.28 kB
+.output/public/assets/sponsor-BGCk52-6.js                 0.55 kB │ gzip:   0.37 kB
+.output/public/assets/SimulatedDataBadge-AKWhfnS2.js      0.78 kB │ gzip:   0.52 kB
+.output/public/assets/share-2-WPInGPLM.js                 1.07 kB │ gzip:   0.53 kB
+.output/public/assets/sponsor.success-BU1qh6fA.js         1.31 kB │ gzip:   0.67 kB
+.output/public/assets/trackers.peace-DCKsh-bB.js          2.31 kB │ gzip:   0.96 kB
+.output/public/assets/trackers.leaders-DGMGrA4c.js        2.35 kB │ gzip:   0.99 kB
+.output/public/assets/trackers.media-CMso7fe-.js          2.36 kB │ gzip:   0.98 kB
+.output/public/assets/admin.curation-CfhMBHJ4.js          5.29 kB │ gzip:   2.28 kB
+.output/public/assets/privacy-BR3Lx6Bh.js                 5.60 kB │ gzip:   2.23 kB
+.output/public/assets/index-C4lbXCzN.js                   6.69 kB │ gzip:   2.78 kB
+.output/public/assets/trackers.football-CLUCNwbM.js       7.74 kB │ gzip:   2.62 kB
+.output/public/assets/about-WaQN8Y_J.js                  18.37 kB │ gzip:   5.74 kB
+.output/public/assets/index-CJLpl_83.js                  21.14 kB │ gzip:   8.78 kB
+.output/public/assets/compare-BfAORxex.js                21.99 kB │ gzip:   6.91 kB
+.output/public/assets/utils-Btgpx3zG.js                  27.62 kB │ gzip:   8.74 kB
+.output/public/assets/SiteFooter-KPF5GXfO.js             37.61 kB │ gzip:  11.24 kB
+.output/public/assets/trackers.index-DzspMnhy.js         53.32 kB │ gzip:  11.74 kB
+.output/public/assets/index-C1N1EaSD.js                  66.41 kB │ gzip:  19.74 kB
+.output/public/assets/topics-B94bP3jI.js                552.15 kB │ gzip: 146.62 kB
+.output/public/assets/index-I3d_by63.js                 802.22 kB │ gzip: 236.83 kB
+.output/public/assets/react-globe.gl-B_WqVRc1.js      1,817.32 kB │ gzip: 513.31 kB
+✓ built in 31m 15s
+vite v7.3.5 building ssr environment for production...
+transforming...
+✓ 123 modules transformed.
+rendering chunks...
+node_modules/.nitro/vite/services/ssr/assets/styles-DsziywZK.css                     141.42 kB
+node_modules/.nitro/vite/services/ssr/assets/empty-plugin-adapters-BFgPZ6_d.js         0.13 kB
+node_modules/.nitro/vite/services/ssr/assets/utils-DFoyPK36.js                         0.29 kB
+node_modules/.nitro/vite/services/ssr/assets/createServerRpc-LePmVLPl.js               0.31 kB
+node_modules/.nitro/vite/services/ssr/assets/createSsrRpc-CzWLZnEX.js                  0.43 kB
+node_modules/.nitro/vite/services/ssr/assets/SimulatedDataBadge-Db8xl9v9.js            0.76 kB
+node_modules/.nitro/vite/services/ssr/assets/sponsor-bNJh4jaq.js                       1.09 kB
+node_modules/.nitro/vite/services/ssr/assets/client-1tbKsSn0.js                        1.60 kB
+node_modules/.nitro/vite/services/ssr/assets/sponsor.success-GLchehTH.js               1.64 kB
+node_modules/.nitro/vite/services/ssr/assets/sponsor-unlocks.functions-DWmf0zcW.js     1.66 kB
+node_modules/.nitro/vite/services/ssr/assets/start-B2Tamj5N.js                         2.22 kB
+node_modules/.nitro/vite/services/ssr/assets/compare-dispatch.functions-Bafa-jUL.js    3.58 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.peace-DbsVuJ24.js                3.64 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.leaders-RP1gLbwa.js              3.65 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.media-CH_Oaos8.js                3.67 kB
+node_modules/.nitro/vite/services/ssr/index.js                                         3.86 kB
+node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-QNkvpNnt.js    4.63 kB
+node_modules/.nitro/vite/services/ssr/assets/privacy-8qeXZojE.js                       7.60 kB
+node_modules/.nitro/vite/services/ssr/assets/admin.curation-B_zFDJxG.js                7.88 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.football-BnV4iIRB.js            11.18 kB
+node_modules/.nitro/vite/services/ssr/assets/about-BAhXxGWd.js                        22.15 kB
+node_modules/.nitro/vite/services/ssr/assets/compare-C3ZwR_G2.js                      27.90 kB
+node_modules/.nitro/vite/services/ssr/assets/SiteFooter-B03Fe2Xc.js                   53.32 kB
+node_modules/.nitro/vite/services/ssr/assets/server-CybCAokI.js                       65.72 kB
+node_modules/.nitro/vite/services/ssr/assets/trackers.index-CC8w-Gwd.js               79.30 kB
+node_modules/.nitro/vite/services/ssr/assets/router-BscOkqMk.js                       93.65 kB
+node_modules/.nitro/vite/services/ssr/assets/index-BRVXkhB0.js                        99.96 kB
+node_modules/.nitro/vite/services/ssr/assets/topics-T_AwxWRG.js                      175.98 kB
+✓ built in 1m 9s
+
+[nitro] o Building [Nitro] (preset: cloudflare-module, compatibility: 2026-07-09)
+[nitro] √ Generated public .output/public
+vite v7.3.5 building nitro environment for production...
+transforming...
