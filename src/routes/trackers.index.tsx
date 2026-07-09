@@ -2065,9 +2065,10 @@ function TrackersPage() {
   const upcoming = TRACKER_CATALOG.filter((t) => t.status === "coming_soon");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative flex flex-col">
+      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
-      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 mobile-safe-bottom overflow-x-clip">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
