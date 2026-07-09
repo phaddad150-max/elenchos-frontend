@@ -246,31 +246,31 @@ export function TopicAnalysisPage({
         </div>
       )}
 
-      {/* Hero metrics — sticky on tablet+ only */}
-      <div className="md:sticky md:top-[3.25rem] z-20 -mx-3 sm:-mx-0 px-3 sm:px-0 py-2 md:bg-background/85 md:backdrop-blur-xl md:border-b md:border-border/60">
-        <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
-              <div className="font-display font-semibold text-lg sm:text-xl">Intelligence Briefing</div>
-            </div>
-            <DataFreshnessBar
-              sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
-              onRefresh={handleRefresh}
-              className="shrink-0"
-            />
+      {/* Intelligence Briefing — mobile: stacked panel; desktop: original inline row */}
+      <div className="md:hidden -mx-3 px-3 py-2">
+        <div className="glass rounded-xl border border-cyan/30 p-4 space-y-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
+            <div className="font-display font-semibold text-xl tracking-tight">Intelligence Briefing</div>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
-            <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
+          <DataFreshnessBar
+            sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
+            onRefresh={handleRefresh}
+          />
+          <div className="grid grid-cols-3 divide-x divide-border/60 border-y border-border/60 py-3">
+            <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} mobile />
             <HeroMetric
               label="Divergence"
               value={divergence !== null ? String(divergence) : "—"}
               sub="Citizen vs official"
               color={divergence !== null ? divergenceColor(divergence) : "var(--muted-foreground)"}
+              mobile
             />
-            <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" />
-            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-muted-foreground col-span-3">
-              {timeAgo(data.last_updated)}
+            <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" mobile />
+          </div>
+          <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-muted-foreground">
+            <span suppressHydrationWarning>{timeAgo(data.last_updated)}</span>
+            <div className="flex items-center gap-2 shrink-0">
               {curated?.hero_confidence && (
                 <span
                   className="px-1.5 py-0.5 rounded border uppercase"
@@ -282,9 +282,46 @@ export function TopicAnalysisPage({
                   {curated.hero_confidence}
                 </span>
               )}
-              <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
+              <TrendIcon className="w-5 h-5" style={{ color: sentimentColor(score) }} />
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="hidden md:block sticky top-0 z-30 -mx-3 sm:-mx-0 px-3 sm:px-0 py-2 bg-background/85 backdrop-blur-xl border-b border-border/60">
+        <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 flex flex-wrap items-center gap-3 sm:gap-5">
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
+            <div className="font-display font-semibold text-lg sm:text-xl truncate">Intelligence Briefing</div>
+          </div>
+          <DataFreshnessBar
+            sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
+            onRefresh={handleRefresh}
+            className="shrink-0"
+          />
+          <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
+          <HeroMetric
+            label="Divergence"
+            value={divergence !== null ? String(divergence) : "—"}
+            sub="Citizen vs official"
+            color={divergence !== null ? divergenceColor(divergence) : "var(--muted-foreground)"}
+          />
+          <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" />
+          <div className="text-[10px] font-mono text-muted-foreground">
+            <span suppressHydrationWarning>{timeAgo(data.last_updated)}</span>
+            {curated?.hero_confidence && (
+              <span
+                className="ml-2 px-1.5 py-0.5 rounded border uppercase"
+                style={{
+                  color: confidenceColor(curated.hero_confidence),
+                  borderColor: `${confidenceColor(curated.hero_confidence)}44`,
+                }}
+              >
+                {curated.hero_confidence}
+              </span>
+            )}
+          </div>
+          <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
         </div>
       </div>
 
@@ -542,14 +579,27 @@ function HeroMetric({
   value,
   sub,
   color,
+  mobile = false,
 }: {
   label: string;
   value: string;
   sub: string;
   color: string;
+  mobile?: boolean;
 }) {
+  if (mobile) {
+    return (
+      <div className="text-center px-1 min-w-0">
+        <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-muted-foreground">{label}</div>
+        <div className="text-2xl font-display font-semibold tabular-nums leading-none mt-1" style={{ color }}>
+          {value}
+        </div>
+        <div className="text-[9px] font-mono text-muted-foreground truncate mt-0.5 px-0.5">{sub}</div>
+      </div>
+    );
+  }
   return (
-    <div className="text-center min-w-0 sm:min-w-[4.5rem]">
+    <div className="text-center min-w-[4.5rem]">
       <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="text-xl sm:text-2xl font-display font-semibold tabular-nums" style={{ color }}>
         {value}

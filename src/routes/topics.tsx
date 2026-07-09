@@ -407,7 +407,7 @@ function TopicsFilterableGrid({
   const visibleCount = activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
-    "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3";
+    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-3 auto-rows-fr items-stretch";
 
   const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
@@ -529,7 +529,7 @@ function shortTitle(t: string): string {
 }
 
 const TOPIC_CARD_SHELL =
-  "group relative overflow-hidden rounded-xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 sm:p-3 flex flex-col min-h-[188px] sm:min-h-[176px] sm:h-[176px] hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation";
+  "group relative overflow-hidden rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-4 sm:p-3 flex flex-col h-full min-h-[248px] sm:min-h-[176px] sm:h-[176px] hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation";
 
 function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number }) {
   const backendName = SPONSOR_LOCKED_TOPIC_IDS[topic.id];
@@ -542,18 +542,18 @@ function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number })
       whileHover={{ scale: 1.01, y: -1 }}
       className={TOPIC_CARD_SHELL}
     >
-      <div className="shrink-0 flex items-center justify-center gap-1 text-[9px] font-mono uppercase tracking-[0.18em] text-cyan/80">
-        <Lock className="w-2.5 h-2.5" /> {category}
+      <div className="shrink-0 flex items-center justify-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-cyan">
+        <Lock className="w-3 h-3" /> {category}
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center min-h-0 px-1 text-center">
-        <Lock className="w-4 h-4 text-cyan/50 mb-1.5 shrink-0" />
-        <h3 className="text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[4rem] px-1 text-center">
+        <Lock className="w-5 h-5 text-cyan/50 mb-2 shrink-0" />
+        <h3 className="text-[15px] sm:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3">
           {shortTitle(topic.title)}
         </h3>
       </div>
       <a
         href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-        className="shrink-0 inline-flex items-center justify-center gap-1 px-2.5 py-2 sm:py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 active:bg-cyan/80 transition-all min-h-[40px] sm:min-h-0"
+        className="mt-auto shrink-0 inline-flex items-center justify-center gap-1 w-full px-3 py-2.5 sm:py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 active:bg-cyan/80 transition-all min-h-[44px] sm:min-h-0"
       >
         <Heart className="w-3 h-3" /> Sponsor me
       </a>
@@ -595,63 +595,62 @@ function TopicCard({
       onClick={onOpen}
       className={`${TOPIC_CARD_SHELL} w-full text-center`}
     >
-      <div className="shrink-0 flex items-start justify-between gap-1">
-        <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] text-cyan/75 truncate max-w-[45%]">
+      <div className="shrink-0 flex items-center justify-between gap-2 mb-3">
+        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan truncate">
           {category}
         </span>
         <span
-          className={`shrink-0 inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-mono uppercase tracking-[0.1em] sm:tracking-[0.12em] max-w-[55%] ${
+          className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.14em] ${
             cadence === "realtime" ? "text-cyan bg-cyan/10 border border-cyan/30" : "text-muted-foreground bg-background/50 border border-border/50"
           }`}
         >
-          {cadence === "realtime" && <span className="w-1 h-1 rounded-full bg-cyan pulse-dot shrink-0" />}
-          <span className="truncate sm:hidden">{cadenceLabel(cadence, true)}</span>
-          <span className="truncate hidden sm:inline">{cadenceLabel(cadence)}</span>
+          {cadence === "realtime" && <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" />}
+          <span className="truncate">{cadenceLabel(cadence, true)}</span>
         </span>
       </div>
 
-      <div className="shrink-0 flex items-center justify-center min-h-[2.25rem] sm:min-h-[2.75rem] px-1 py-0.5">
-        <h3 className="text-[12px] sm:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center">
+      <div className="shrink-0 flex items-center justify-center min-h-[3rem] sm:min-h-[2.75rem] px-1 mb-2">
+        <h3 className="text-[15px] sm:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center">
           {shortTitle(topic.title)}
         </h3>
       </div>
 
-      <div className="flex-1 flex items-center justify-center gap-2 sm:gap-2.5 py-0.5">
+      <div className="flex-1 flex items-center justify-center py-2 min-h-[5rem] sm:min-h-0">
         {hasScores ? (
-          <>
-            <div className="text-center min-w-[2.5rem] sm:min-w-[2.75rem]">
-              <div className="text-[7px] sm:text-[8px] font-mono uppercase tracking-[0.12em] sm:tracking-[0.14em] text-muted-foreground">
+          <div className="flex items-center justify-center gap-8 sm:gap-2.5">
+            <div className="text-center min-w-[4.5rem]">
+              <div className="text-[9px] sm:text-[8px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                 Sentiment
               </div>
               <div
-                className="text-xl sm:text-2xl font-display font-bold tabular-nums leading-none"
+                className="text-3xl sm:text-2xl font-display font-semibold tabular-nums leading-none mt-1"
                 style={{ color: sentimentTone }}
               >
                 {typeof sentiment === "number" ? sentiment : "—"}
               </div>
             </div>
-            <div className="w-px h-7 sm:h-8 bg-border/70" />
-            <div className="text-center min-w-[2.5rem] sm:min-w-[2.75rem]">
-              <div className="text-[7px] sm:text-[8px] font-mono uppercase tracking-[0.12em] sm:tracking-[0.14em] text-muted-foreground">
+            <div className="w-px h-12 sm:h-8 bg-border/70 shrink-0" />
+            <div className="text-center min-w-[4.5rem]">
+              <div className="text-[9px] sm:text-[8px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                 Divergence
               </div>
               <div
-                className="text-xl sm:text-2xl font-display font-bold tabular-nums leading-none"
+                className="text-3xl sm:text-2xl font-display font-semibold tabular-nums leading-none mt-1"
                 style={{ color: divergenceTone }}
               >
                 {typeof divergence === "number" ? divergence : "—"}
               </div>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="text-[8px] sm:text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1">
+          <div className="text-[10px] sm:text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
             Awaiting cycle
           </div>
         )}
       </div>
 
-      <span className="shrink-0 inline-flex items-center justify-center px-2.5 py-2 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all min-h-[40px] sm:min-h-0">
+      <span className="mt-auto shrink-0 inline-flex items-center justify-center w-full px-3 py-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all min-h-[44px] sm:min-h-0">
         View Analysis →
       </span>
     </motion.button>
