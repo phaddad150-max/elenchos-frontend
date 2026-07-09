@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Minus,
   Trophy,
-  Users,
 } from "lucide-react";
 import {
   Bar,
@@ -39,7 +38,6 @@ import {
   type TopicSnapshot,
 } from "@/lib/dashboard-data";
 import {
-  buildAudienceLenses,
   historySentimentSeries,
   qaToInsightCards,
   questionsToInsightCards,
@@ -161,10 +159,6 @@ export function TopicAnalysisPage({
   const divergence = typeof data?.divergence_score === "number" ? Math.round(data.divergence_score) : null;
   const sample = data?.sample_size?.toLocaleString() ?? "—";
 
-  const lenses = useMemo(
-    () => buildAudienceLenses(curated, data, qa),
-    [curated, data, qa],
-  );
   const insightCards = useMemo(
     () => (qa.length ? qaToInsightCards(qa) : questionsToInsightCards(data?.question_analysis ?? [])),
     [qa, data],
@@ -240,7 +234,7 @@ export function TopicAnalysisPage({
         <div className="rounded-xl border border-amber-signal/35 bg-amber-signal/[0.06] px-4 py-3 flex items-start gap-2 text-sm text-foreground/90">
           <AlertTriangle className="w-4 h-4 text-amber-signal shrink-0 mt-0.5" />
           <span>
-            Curated synthesis is older than the latest snapshot — run Pass 2 curation to refresh headlines and audience lenses.
+            Curated synthesis is older than the latest snapshot — run Pass 2 curation to refresh headlines and insight cards.
           </span>
         </div>
       )}
@@ -315,37 +309,6 @@ export function TopicAnalysisPage({
         </div>
         <span className="text-xs text-muted-foreground group-hover:text-foreground">Fan rankings by player discourse →</span>
       </Link>
-
-      {/* Audience lenses */}
-      <section className="space-y-3">
-        <SectionLabel icon={<Users className="w-3.5 h-3.5" />} title="Audience Intelligence Lenses" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {lenses.map((l, i) => (
-            <motion.div
-              key={l.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="rounded-xl border border-border bg-background/50 backdrop-blur p-4 space-y-2"
-              style={{ borderTop: `2px solid ${l.accent}` }}
-            >
-              <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: l.accent }}>
-                {l.title}
-              </div>
-              <div className="text-[10px] text-muted-foreground">{l.subtitle}</div>
-              <p className="text-sm font-medium leading-snug line-clamp-3">{l.summary || "—"}</p>
-              <ul className="space-y-1">
-                {l.insights.slice(0, 4).map((ins, j) => (
-                  <li key={j} className="text-[12px] text-foreground/85 leading-snug flex gap-1.5">
-                    <span style={{ color: l.accent }}>·</span>
-                    <span className="line-clamp-2">{ins}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* Narrative threads */}
       {threads.length > 0 && (
