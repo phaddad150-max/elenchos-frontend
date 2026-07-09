@@ -42,7 +42,6 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
 import { LIVE_TOPIC_KEYS, isLiveTopicId, liveTopicConfig } from "@/lib/topic-catalog";
-import { TopicLensRadar } from "@/components/TopicLensRadar";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -865,10 +864,8 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       </header>
 
       {/* Live data panel (real Supabase data for mapped topics) */}
-      {useLive && liveCfg && topic.id === "fifa-world-cup-2026" ? (
+      {useLive && liveCfg ? (
         <TopicAnalysisPage rootKey={liveCfg.rootKey} headerLabel={liveCfg.headerLabel} />
-      ) : useLive && liveCfg ? (
-        <LiveAbrahamPanel rootKey={liveCfg.rootKey} headerLabel={liveCfg.headerLabel} />
       ) : null}
 
       {!useLive && (
@@ -958,7 +955,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
         </>
       )}
 
-      {/* AI Synthesis — only for non-live (simulated) topics; live topics show narrative inline in LiveAbrahamPanel */}
+      {/* AI Synthesis — only for non-live (simulated) topics; live topics use TopicAnalysisPage */}
       {!useLive && (
         <section className="glass rounded-2xl p-5 space-y-3 border-l-2 border-l-cyan">
           <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -1736,11 +1733,6 @@ function LiveAbrahamPanel({
         <HeroSentimentCard score={score} label={label} trend={trend} color={color} sample={sample} />
         <HeroDivergenceCard data={data} />
       </div>
-
-      <TopicLensRadar
-        lensScores={curated?.lens_scores}
-        snapshot={data as TopicSnapshot}
-      />
 
       {/* Segmented sentiment */}
       {segments.length > 0 && (

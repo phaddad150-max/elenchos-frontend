@@ -299,16 +299,18 @@ export function TopicAnalysisPage({
         </motion.div>
       )}
 
-      <Link
-        to="/trackers/football"
-        className="flex items-center justify-between gap-3 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.06] px-4 py-3 hover:border-emerald-signal/55 transition-colors group"
-      >
-        <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-signal">
-          <Trophy className="w-4 h-4" />
-          Gladiator Podium · Football Player Index
-        </div>
-        <span className="text-xs text-muted-foreground group-hover:text-foreground">Fan rankings by player discourse →</span>
-      </Link>
+      {rootKey === "fifa-world-cup-2026" && (
+        <Link
+          to="/trackers/football"
+          className="flex items-center justify-between gap-3 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.06] px-4 py-3 hover:border-emerald-signal/55 transition-colors group"
+        >
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-signal">
+            <Trophy className="w-4 h-4" />
+            Gladiator Podium · Football Player Index
+          </div>
+          <span className="text-xs text-muted-foreground group-hover:text-foreground">Fan rankings by player discourse →</span>
+        </Link>
+      )}
 
       {/* Narrative threads */}
       {threads.length > 0 && (
