@@ -89,11 +89,6 @@ function useTopicBundle(rootKey: string) {
     ])
       .then((results) => {
         if (cancelled) return;
-        const rejected = results.filter((r) => r.status === "rejected");
-        if (rejected.length > 0) {
-          console.warn("Topic bundle partial failure", rejected);
-          setLoadError("Some briefing data could not be loaded.");
-        }
         const ins = results[1].status === "fulfilled" ? results[1].value : null;
         const pairs = results[2].status === "fulfilled" ? results[2].value : [];
         const hist = results[3].status === "fulfilled" ? results[3].value : [];
@@ -105,6 +100,15 @@ function useTopicBundle(rootKey: string) {
         setCurated(ins);
         setQa(pairs ?? []);
         setHistory(hist ?? []);
+
+        const rejected = results.filter((r) => r.status === "rejected");
+        const hasCoreData = Boolean(snap || ins || (pairs?.length ?? 0) > 0);
+        if (rejected.length > 0) {
+          console.warn("Topic bundle partial failure", rejected);
+          if (!hasCoreData) {
+            setLoadError("Some briefing data could not be loaded.");
+          }
+        }
       })
       .catch((e) => {
         if (cancelled) return;

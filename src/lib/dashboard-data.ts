@@ -351,20 +351,21 @@ const supabaseHeaders = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` 
 
 export async function loadCuratedTopicInsights(
   topic: string,
-  window: string = "wow",
+  comparisonWindow: string = "wow",
 ): Promise<CuratedTopicInsights | null> {
-  if (typeof window === "undefined" || !topic) return null;
-  const cacheKey = `${topic}::${window}`;
-  window.curatedInsights ??= {};
-  if (window.curatedInsights[cacheKey] !== undefined) {
-    return window.curatedInsights[cacheKey];
+  if (typeof globalThis.window === "undefined" || !topic) return null;
+  const w = globalThis.window;
+  const cacheKey = `${topic}::${comparisonWindow}`;
+  w.curatedInsights ??= {};
+  if (w.curatedInsights[cacheKey] !== undefined) {
+    return w.curatedInsights[cacheKey];
   }
-  window.__curatedInsightsPromises ??= {};
-  if (!window.__curatedInsightsPromises[cacheKey]) {
-    window.__curatedInsightsPromises[cacheKey] = (async () => {
+  w.__curatedInsightsPromises ??= {};
+  if (!w.__curatedInsightsPromises[cacheKey]) {
+    w.__curatedInsightsPromises[cacheKey] = (async () => {
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?topic=eq.${encodeURIComponent(topic)}&comparison_window=eq.${encodeURIComponent(window)}&select=*&limit=1`,
+          `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?topic=eq.${encodeURIComponent(topic)}&comparison_window=eq.${encodeURIComponent(comparisonWindow)}&select=*&limit=1`,
           { headers: supabaseHeaders },
         );
         if (!res.ok) {
@@ -374,16 +375,16 @@ export async function loadCuratedTopicInsights(
         }
         const rows = (await res.json()) as CuratedTopicInsights[];
         const row = rows?.[0] ?? null;
-        window.curatedInsights![cacheKey] = row;
+        w.curatedInsights![cacheKey] = row;
         return row;
       } catch (e) {
         console.warn("curated_topic_insights fetch failed (table may not exist yet)", e);
-        window.curatedInsights![cacheKey] = null;
+        w.curatedInsights![cacheKey] = null;
         return null;
       }
     })();
   }
-  return window.__curatedInsightsPromises[cacheKey];
+  return w.__curatedInsightsPromises[cacheKey];
 }
 
 export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]> {
