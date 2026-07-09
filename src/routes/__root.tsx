@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { PathAuthGate } from "@/components/PathAuthGate";
 import { ThemeInit } from "@/components/ThemeInit";
 
 const FONT_LINKS = [
@@ -160,9 +159,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeInit />
-      <PathAuthGate>
-        <Outlet />
-      </PathAuthGate>
+      <Outlet />
     </QueryClientProvider>
   );
 }

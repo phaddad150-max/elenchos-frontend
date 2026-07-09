@@ -109,10 +109,7 @@ function AdminCurationPage() {
         <main className="flex-1 max-w-lg mx-auto px-6 py-16 text-center space-y-4">
           <h1 className="text-xl font-display font-semibold">Admin access required</h1>
           <p className="text-sm text-muted-foreground">
-            Sign in with an authorized account to manage curated insights.
-            {sessionEmail && (
-              <span className="block mt-2 font-mono text-xs">Signed in as {sessionEmail}</span>
-            )}
+            This page is restricted to authorized admin accounts.
           </p>
           <Link to="/" className="text-cyan text-sm font-mono hover:underline">
             Back to dashboard
