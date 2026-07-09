@@ -167,6 +167,14 @@ function TopicsPage() {
     else url.searchParams.delete("topic");
     window.history.pushState({}, "", url.toString());
   };
+  // SSR renders with selectedId=null; sync ?topic= from URL after client hydration.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("topic");
+    if (t && getTopic(t)) setSelectedIdState(t);
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onPop = () => {

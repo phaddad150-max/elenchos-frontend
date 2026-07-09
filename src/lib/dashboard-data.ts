@@ -265,10 +265,24 @@ declare global {
   }
 }
 
-export async function loadDashboardData(): Promise<Record<string, TopicSnapshot> | null> {
+export function invalidateDashboardCache(): void {
+  if (typeof window === "undefined") return;
+  window.dashboardData = undefined;
+  window.__dashboardDataPromise = undefined;
+  window.dashboardMeta = undefined;
+}
+
+export async function loadDashboardData(force = false): Promise<Record<string, TopicSnapshot> | null> {
   if (typeof window === "undefined") return null;
-  if (window.dashboardData) return window.dashboardData;
-  if (window.__dashboardDataPromise) return window.__dashboardDataPromise;
+  const hadFailedFetch = window.dashboardMeta?.fallback === true;
+  if (force || hadFailedFetch) {
+    invalidateDashboardCache();
+  } else if (window.dashboardData) {
+    return window.dashboardData;
+  }
+  if (window.__dashboardDataPromise && !force && !hadFailedFetch) {
+    return window.__dashboardDataPromise;
+  }
 
   window.__dashboardDataPromise = (async () => {
     try {

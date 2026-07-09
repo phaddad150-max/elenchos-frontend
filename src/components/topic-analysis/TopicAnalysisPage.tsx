@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
+  AlertTriangle,
   Brain,
   ChevronDown,
   Lightbulb,
@@ -57,38 +58,75 @@ import {
 
 type LiveData = TopicSnapshot;
 
+const BUNDLE_TIMEOUT_MS = 20_000;
+
 function useTopicBundle(rootKey: string) {
   const [data, setData] = useState<LiveData | null>(null);
   const [curated, setCurated] = useState<CuratedTopicInsights | null>(null);
   const [qa, setQa] = useState<CuratedQaPair[]>([]);
   const [history, setHistory] = useState<TopicHistoryPoint[]>([]);
   const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      loadDashboardData(),
+    setReady(false);
+    setLoadError(null);
+
+    const timeoutId = window.setTimeout(() => {
+      if (!cancelled) {
+        setLoadError("Loading timed out — retry or refresh the page.");
+        setReady(true);
+      }
+    }, BUNDLE_TIMEOUT_MS);
+
+    Promise.allSettled([
+      loadDashboardData(attempt > 0),
       loadCuratedTopicInsights(rootKey),
       loadCuratedQaPairs(rootKey),
       loadTopicHistory(rootKey, 8),
-    ]).then(([, ins, pairs, hist]) => {
-      if (cancelled) return;
-      const snap =
-        typeof window !== "undefined"
-          ? (window.dashboardData?.[rootKey] as LiveData | undefined) ?? null
-          : null;
-      setData(snap);
-      setCurated(ins);
-      setQa(pairs);
-      setHistory(hist);
-      setReady(true);
-    });
+    ])
+      .then((results) => {
+        if (cancelled) return;
+        const rejected = results.filter((r) => r.status === "rejected");
+        if (rejected.length > 0) {
+          console.warn("Topic bundle partial failure", rejected);
+          setLoadError("Some briefing data could not be loaded.");
+        }
+        const ins = results[1].status === "fulfilled" ? results[1].value : null;
+        const pairs = results[2].status === "fulfilled" ? results[2].value : [];
+        const hist = results[3].status === "fulfilled" ? results[3].value : [];
+        const snap =
+          typeof window !== "undefined"
+            ? (window.dashboardData?.[rootKey] as LiveData | undefined) ?? null
+            : null;
+        setData(snap);
+        setCurated(ins);
+        setQa(pairs ?? []);
+        setHistory(hist ?? []);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        console.error("Topic bundle load failed", e);
+        setLoadError("Could not load intelligence briefing.");
+      })
+      .finally(() => {
+        if (!cancelled) {
+          clearTimeout(timeoutId);
+          setReady(true);
+        }
+      });
+
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
     };
-  }, [rootKey]);
+  }, [rootKey, attempt]);
 
-  return { data, curated, qa, history, ready };
+  const retry = () => setAttempt((n) => n + 1);
+
+  return { data, curated, qa, history, ready, loadError, retry };
 }
 
 export function TopicAnalysisPage({
@@ -98,9 +136,14 @@ export function TopicAnalysisPage({
   rootKey: string;
   headerLabel: string;
 }) {
-  const { data, curated, qa, history, ready } = useTopicBundle(rootKey);
+  const { data, curated, qa, history, ready, loadError, retry } = useTopicBundle(rootKey);
   const [rawOpen, setRawOpen] = useState(false);
   const [pickedCard, setPickedCard] = useState<InsightCardModel | null>(null);
+
+  const curatedStale = useMemo(() => {
+    if (!curated?.generated_at || !data?.last_updated) return false;
+    return new Date(curated.generated_at).getTime() < new Date(data.last_updated).getTime();
+  }, [curated?.generated_at, data?.last_updated]);
 
   const score = data?.overall_sentiment && typeof data.overall_sentiment === "object"
     ? (data.overall_sentiment.score ?? 0)
@@ -150,9 +193,20 @@ export function TopicAnalysisPage({
 
   if (!data) {
     return (
-      <section className="glass rounded-2xl p-6 border border-amber-signal/30 space-y-2">
+      <section className="glass rounded-2xl p-6 border border-amber-signal/30 space-y-3">
         <h3 className="font-display font-semibold">{headerLabel}</h3>
-        <p className="text-sm text-muted-foreground">No live snapshot yet for this topic.</p>
+        <p className="text-sm text-muted-foreground">
+          {loadError ?? "No live snapshot yet for this topic."}
+        </p>
+        {loadError && (
+          <button
+            type="button"
+            onClick={retry}
+            className="text-[11px] font-mono uppercase tracking-wider text-cyan hover:underline"
+          >
+            Retry loading
+          </button>
+        )}
       </section>
     );
   }
@@ -165,6 +219,28 @@ export function TopicAnalysisPage({
 
   return (
     <div className="space-y-5 sm:space-y-6">
+      {loadError && (
+        <div className="rounded-xl border border-amber-signal/40 bg-amber-signal/[0.08] px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span className="text-foreground/90">{loadError}</span>
+          <button
+            type="button"
+            onClick={retry}
+            className="text-[11px] font-mono uppercase tracking-wider text-cyan hover:underline shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {curatedStale && (
+        <div className="rounded-xl border border-amber-signal/35 bg-amber-signal/[0.06] px-4 py-3 flex items-start gap-2 text-sm text-foreground/90">
+          <AlertTriangle className="w-4 h-4 text-amber-signal shrink-0 mt-0.5" />
+          <span>
+            Curated synthesis is older than the latest snapshot — run Pass 2 curation to refresh headlines and audience lenses.
+          </span>
+        </div>
+      )}
+
       {/* Sticky hero bar */}
       <div className="sticky top-0 z-30 -mx-3 sm:-mx-0 px-3 sm:px-0 py-2 bg-background/85 backdrop-blur-xl border-b border-border/60">
         <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 flex flex-wrap items-center gap-3 sm:gap-5">
