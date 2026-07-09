@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Radio, Sun, Moon, Menu, X } from "lucide-react";
+import { Radio, Sun, Moon } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/hooks/use-theme";
 import { SponsorModal } from "@/components/SponsorModal";
@@ -39,13 +39,12 @@ void NewBadge;
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
   const [theme, , toggle] = useTheme();
-  const [open, setOpen] = useState(false);
   const [sponsorOpen, setSponsorOpen] = useState(false);
   return (
     <>
       <SponsorModal open={sponsorOpen} onClose={() => setSponsorOpen(false)} />
       <nav className="sticky top-0 z-30 nav-shell">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 md:py-3.5 flex items-center justify-between gap-3">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           <Link to="/" className="flex items-center gap-2 md:gap-3 group min-w-0">
             <div className="brand-mark w-9 h-9 md:w-10 md:h-10 rounded-full grid place-items-center shrink-0">
               <Radio className="w-4 h-4 text-cyan" strokeWidth={2.5} />
@@ -76,7 +75,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <GlobalSearch />
             <UserMenu />
             {rightSlot}
@@ -84,7 +83,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
               href="https://x.com/elenchospulse"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 text-[11px] font-mono uppercase tracking-[0.18em]"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 text-[11px] font-mono uppercase tracking-[0.18em]"
               aria-label="Follow Elenchos on X"
             >
               <XLogo className="w-3.5 h-3.5" />
@@ -92,43 +91,13 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
             </a>
             <button
               onClick={toggle}
-              className="p-2 rounded-lg hover:bg-secondary border border-border"
+              className="tap-target p-2 rounded-lg hover:bg-secondary border border-border touch-manipulation"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="md:hidden p-2 rounded-lg hover:bg-secondary border border-border"
-              aria-label="Toggle menu"
-            >
-              {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {open && (
-          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-            <div className="px-4 py-3 flex flex-col gap-1">
-              {TABS.map((t) => (
-                <Link
-                  key={t.to}
-                  to={t.to}
-                  onClick={() => setOpen(false)}
-                  className="px-3 py-2.5 rounded-lg text-sm font-display font-semibold text-muted-foreground hover:bg-secondary"
-                  activeProps={{
-                    className:
-                      "px-3 py-2.5 rounded-lg text-sm font-display font-semibold text-cyan bg-cyan/10 border border-cyan/40",
-                  }}
-                  activeOptions={{ exact: true }}
-                >
-                  {t.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </nav>
       <MobileTabBar />
     </>

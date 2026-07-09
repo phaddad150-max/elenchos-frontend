@@ -113,7 +113,7 @@ export function GlobalSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="md:hidden p-2 rounded-lg hover:bg-secondary border border-border"
+        className="md:hidden tap-target p-2 rounded-lg hover:bg-secondary border border-border touch-manipulation"
         aria-label="Search"
       >
         <Search className="w-4 h-4" />

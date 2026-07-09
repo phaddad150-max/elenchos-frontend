@@ -539,14 +539,15 @@ function Dashboard() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
 
       <SiteNav />
-      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5 relative flex-1">
+      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <div className="flex flex-wrap items-center gap-3">
-          <div className={`flex-1 min-w-[260px] rounded-xl border px-4 py-2.5 text-[12px] font-mono flex items-start gap-2 ${isLive ? "border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal" : "border-amber-signal/40 bg-amber-signal/10 text-amber-signal"}`}>
+          <div className={`w-full rounded-xl border px-3 sm:px-4 py-2.5 text-[11px] sm:text-[12px] font-mono flex items-start gap-2 ${isLive ? "border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal" : "border-amber-signal/40 bg-amber-signal/10 text-amber-signal"}`}>
             <span className={`w-1.5 h-1.5 mt-1.5 rounded-full pulse-dot shrink-0 ${isLive ? "bg-emerald-signal" : "bg-amber-signal"}`} />
-            <span>
-              <span className="uppercase tracking-[0.22em] text-[11px] font-semibold mr-1.5">LIVE</span>
+            <span className="leading-relaxed">
+              <span className="uppercase tracking-[0.22em] text-[10px] sm:text-[11px] font-semibold mr-1.5">LIVE</span>
               <span className="text-foreground/80">
-                Small samples are intentional. They preserve authenticity in suppressed environments where loud voices drown out citizens.
+                <span className="sm:hidden">Small samples preserve authenticity in suppressed environments.</span>
+                <span className="hidden sm:inline">Small samples are intentional. They preserve authenticity in suppressed environments where loud voices drown out citizens.</span>
               </span>
             </span>
           </div>
@@ -583,15 +584,17 @@ function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-1 xl:grid-cols-12 gap-4"
         >
-          <section className="glass rounded-2xl p-5 xl:col-span-8">
+          <section className="glass rounded-2xl p-4 sm:p-5 xl:col-span-8 overflow-hidden">
 
-            <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+            <div className="flex flex-col gap-3 mb-3">
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Real-Time Citizen Signals"
-                subtitle="Curated and live signals — sentiment, narrative divergence, and WoW trend. Click a row for full detail."
+                subtitle="Sentiment, divergence & trend — tap a row for detail."
               />
-              <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
+              <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll">
+                <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
+              </div>
             </div>
 
             <TooltipProvider delayDuration={200}>
@@ -617,16 +620,17 @@ function Dashboard() {
           {/* Right rail — globe + 2 rotating region tiles */}
           <div className="xl:col-span-4 space-y-4">
 
-            <section className="glass rounded-2xl p-4 globe-panel relative overflow-hidden">
+            <section className="glass rounded-2xl p-3 sm:p-4 globe-panel relative overflow-hidden">
               <div className="flex items-start justify-between gap-2 mb-1">
                 <div>
                   <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
-                  <div className="text-[11px] font-mono text-muted-foreground mt-0.5">
-                    Hover a point for topic + score · {regionTiles.length} regions · {fmtNum(kpis.postsAnalyzed)} posts
+                  <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
+                    <span className="sm:hidden">Tap a point for detail · {regionTiles.length} regions</span>
+                    <span className="hidden sm:inline">Hover a point for topic + score · {regionTiles.length} regions · {fmtNum(kpis.postsAnalyzed)} posts</span>
                   </div>
                 </div>
               </div>
-              <div className="h-[280px] sm:h-[320px] xl:h-[280px] -mx-1">
+              <div className="h-[220px] sm:h-[320px] xl:h-[280px] -mx-1">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -937,7 +941,7 @@ function CitizenGroupFilter({
     { key: "Social", color: "var(--magenta)" },
   ];
   return (
-    <div className="flex items-center gap-1 text-[11px] font-mono flex-wrap">
+    <div className="flex items-center gap-1 text-[11px] font-mono flex-nowrap min-w-max">
       <button
         onClick={() => onChange(null)}
         className={`px-2.5 py-1 rounded-full uppercase tracking-wider border transition-colors ${
@@ -1156,8 +1160,9 @@ function CitizenSignalRow({
       whileHover={{ x: 2, scale: 1.005 }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="group w-full text-left px-3 py-3 rounded-lg bg-secondary/30 border border-border hover:border-cyan/50 hover:bg-secondary/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all flex items-center gap-3 cursor-pointer"
+      className="group w-full text-left px-3 py-3 rounded-lg bg-secondary/30 border border-border hover:border-cyan/50 hover:bg-secondary/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] active:bg-secondary/70 transition-all flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation"
     >
+      <div className="flex items-center gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
         {String(index).padStart(2, "0")}
       </span>
@@ -1176,11 +1181,35 @@ function CitizenSignalRow({
             )}
           </span>
         </span>
-        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground line-clamp-1">
+        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground line-clamp-2 sm:line-clamp-1">
           {headline || signal.topic}
         </span>
       </span>
-      {/* Sentiment bar + score + divergence + trend */}
+      <span
+        className="sm:hidden text-[11px] font-mono tabular-nums px-2 py-1 rounded shrink-0 font-semibold"
+        style={{ background: tone.tint, color: tone.color }}
+      >
+        {score ?? "—"}
+      </span>
+      </div>
+      {/* Mobile metrics row */}
+      <div className="md:hidden flex items-center gap-2 pl-8 w-full">
+        <span className="relative flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+          <span className="block h-full rounded-full" style={{ width: `${barPct}%`, background: tone.color }} />
+        </span>
+        {divergence !== null && (
+          <span
+            className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border shrink-0"
+            style={{ color: divColor, borderColor: `${divColor}55`, background: `${divColor}14` }}
+          >
+            Δ{divergence !== null ? Math.round(divergence) : "—"}
+          </span>
+        )}
+        <span className={`shrink-0 ${trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"}`}>
+          {trendUp ? <ArrowUpRight className="w-3.5 h-3.5" /> : trendDown ? <ArrowDownRight className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+        </span>
+      </div>
+      {/* Desktop sentiment bar + score + divergence + trend */}
       <span className="hidden md:flex items-center gap-2 w-[280px] shrink-0">
         <span className="relative flex-1 h-2 rounded-full bg-border overflow-hidden">
           <motion.span
@@ -1224,13 +1253,6 @@ function CitizenSignalRow({
             <span className="text-[8px] font-mono uppercase tracking-wider opacity-90">{windowLabel}</span>
           )}
         </span>
-      </span>
-      {/* Mobile-only compact score pill */}
-      <span
-        className="md:hidden text-[11px] font-mono tabular-nums px-2 py-1 rounded shrink-0 font-semibold"
-        style={{ background: tone.tint, color: tone.color }}
-      >
-        {score ?? "—"}
       </span>
     </motion.button>
       </TooltipTrigger>
@@ -2018,7 +2040,7 @@ function DashboardKpiGrid({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="glass rounded-2xl p-3 sm:p-4 relative overflow-hidden"
+            className="glass rounded-2xl p-3 sm:p-4 relative overflow-hidden min-w-0"
             style={{ borderColor: `${brand}33` }}
           >
             <span
@@ -2026,12 +2048,12 @@ function DashboardKpiGrid({
               className="pointer-events-none absolute -inset-px rounded-2xl opacity-60"
               style={{ background: `radial-gradient(220px circle at 50% 0%, ${brand}1a, transparent 65%)` }}
             />
-            <div className="relative flex items-start justify-between gap-2 mb-1.5 min-h-[2.25rem]">
-              <span className="inline-flex items-start gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.16em] sm:tracking-[0.18em] text-muted-foreground font-mono leading-tight">
+            <div className="relative flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between mb-1.5">
+              <span className="inline-flex items-start gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] text-muted-foreground font-mono leading-tight min-w-0">
                 <Icon className="w-3 h-3 mt-0.5 shrink-0" />
                 <span className="break-words">{t.label}</span>
               </span>
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
                 {(history[t.label]?.length ?? 0) >= 2 && (
                   <MiniSparkline values={history[t.label]!} color={brand} />
                 )}

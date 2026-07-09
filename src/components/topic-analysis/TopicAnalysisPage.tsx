@@ -246,41 +246,45 @@ export function TopicAnalysisPage({
         </div>
       )}
 
-      {/* Sticky hero bar */}
-      <div className="sticky top-0 z-30 -mx-3 sm:-mx-0 px-3 sm:px-0 py-2 bg-background/85 backdrop-blur-xl border-b border-border/60">
-        <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 flex flex-wrap items-center gap-3 sm:gap-5">
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
-            <div className="font-display font-semibold text-lg sm:text-xl truncate">Intelligence Briefing</div>
+      {/* Hero metrics — sticky on tablet+ only */}
+      <div className="md:sticky md:top-[3.25rem] z-20 -mx-3 sm:-mx-0 px-3 sm:px-0 py-2 md:bg-background/85 md:backdrop-blur-xl md:border-b md:border-border/60">
+        <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 space-y-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
+              <div className="font-display font-semibold text-lg sm:text-xl">Intelligence Briefing</div>
+            </div>
+            <DataFreshnessBar
+              sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
+              onRefresh={handleRefresh}
+              className="shrink-0"
+            />
           </div>
-          <DataFreshnessBar
-            sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
-            onRefresh={handleRefresh}
-            className="shrink-0"
-          />
-          <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
-          <HeroMetric
-            label="Divergence"
-            value={divergence !== null ? String(divergence) : "—"}
-            sub="Citizen vs official"
-            color={divergence !== null ? divergenceColor(divergence) : "var(--muted-foreground)"}
-          />
-          <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" />
-          <div className="text-[10px] font-mono text-muted-foreground">
-            {timeAgo(data.last_updated)}
-            {curated?.hero_confidence && (
-              <span
-                className="ml-2 px-1.5 py-0.5 rounded border uppercase"
-                style={{
-                  color: confidenceColor(curated.hero_confidence),
-                  borderColor: `${confidenceColor(curated.hero_confidence)}44`,
-                }}
-              >
-                {curated.hero_confidence}
-              </span>
-            )}
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
+            <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
+            <HeroMetric
+              label="Divergence"
+              value={divergence !== null ? String(divergence) : "—"}
+              sub="Citizen vs official"
+              color={divergence !== null ? divergenceColor(divergence) : "var(--muted-foreground)"}
+            />
+            <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" />
+            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-muted-foreground col-span-3">
+              {timeAgo(data.last_updated)}
+              {curated?.hero_confidence && (
+                <span
+                  className="px-1.5 py-0.5 rounded border uppercase"
+                  style={{
+                    color: confidenceColor(curated.hero_confidence),
+                    borderColor: `${confidenceColor(curated.hero_confidence)}44`,
+                  }}
+                >
+                  {curated.hero_confidence}
+                </span>
+              )}
+              <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
+            </div>
           </div>
-          <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
         </div>
       </div>
 
@@ -314,11 +318,11 @@ export function TopicAnalysisPage({
       {rootKey === "fifa-world-cup-2026" && (
         <Link
           to="/trackers/football"
-          className="flex items-center justify-between gap-3 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.06] px-4 py-3 hover:border-emerald-signal/55 transition-colors group"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.06] px-4 py-3 hover:border-emerald-signal/55 active:bg-emerald-signal/10 transition-colors group touch-manipulation"
         >
-          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-signal">
-            <Trophy className="w-4 h-4" />
-            Gladiator Podium · Football Player Index
+          <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] sm:tracking-[0.18em] text-emerald-signal">
+            <Trophy className="w-4 h-4 shrink-0" />
+            <span>Gladiator Podium · Football Index</span>
           </div>
           <span className="text-xs text-muted-foreground group-hover:text-foreground">Fan rankings by player discourse →</span>
         </Link>
@@ -545,7 +549,7 @@ function HeroMetric({
   color: string;
 }) {
   return (
-    <div className="text-center min-w-[4.5rem]">
+    <div className="text-center min-w-0 sm:min-w-[4.5rem]">
       <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="text-xl sm:text-2xl font-display font-semibold tabular-nums" style={{ color }}>
         {value}

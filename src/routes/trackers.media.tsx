@@ -36,7 +36,7 @@ function MediaPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteNav />
-      <main className="max-w-[1200px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 flex-1">
+      <main className="max-w-[1200px] mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 flex-1 mobile-safe-bottom overflow-x-clip">
         <div className="mb-6 flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
           <Link
             to="/trackers"

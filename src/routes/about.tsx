@@ -59,7 +59,7 @@ function AboutPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1180px] mx-auto w-full px-4 md:px-8 py-6 md:py-12 pb-24 md:pb-12 space-y-12 md:space-y-20 relative flex-1">
+      <main className="max-w-[1180px] mx-auto w-full px-4 md:px-8 py-6 md:py-12 mobile-safe-bottom md:pb-12 space-y-12 md:space-y-20 relative flex-1 overflow-x-clip">
         <Hero />
         <Pillars />
         <Method />

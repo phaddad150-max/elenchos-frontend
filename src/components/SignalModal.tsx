@@ -42,7 +42,7 @@ export function SignalModal({ signal, onClose }: { signal: Signal | null; onClos
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md grid place-items-center p-4"
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md grid place-items-end sm:place-items-center p-0 sm:p-4"
         >
           <motion.div
             initial={{ scale: 0.95, y: 20, opacity: 0 }}
@@ -50,7 +50,7 @@ export function SignalModal({ signal, onClose }: { signal: Signal | null; onClos
             exit={{ scale: 0.95, y: 20, opacity: 0 }}
             transition={{ type: "spring", damping: 22 }}
             onClick={(e) => e.stopPropagation()}
-            className="glass-strong rounded-3xl max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto"
+            className="glass-strong rounded-t-3xl sm:rounded-3xl max-w-3xl w-full p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 relative max-h-[92vh] sm:max-h-[90vh] overflow-y-auto"
           >
             <button
               onClick={onClose}

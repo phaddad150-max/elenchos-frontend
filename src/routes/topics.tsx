@@ -208,8 +208,8 @@ function TopicsPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-3">
           <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-3 sm:px-4 py-2.5 text-[11px] sm:text-[12px] font-mono text-cyan flex items-start gap-2 w-full sm:flex-1 sm:min-w-0">
             <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-cyan pulse-dot shrink-0" />
             <span>
@@ -407,7 +407,7 @@ function TopicsFilterableGrid({
   const visibleCount = activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
-    "grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3";
+    "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3";
 
   const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;

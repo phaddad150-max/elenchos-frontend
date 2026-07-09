@@ -66,7 +66,7 @@ function FootballPlayersPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteNav />
-      <main className="max-w-[1200px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-1">
+      <main className="max-w-[1200px] mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-10 flex-1 mobile-safe-bottom overflow-x-clip">
         <Link
           to="/trackers"
           className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground hover:text-cyan mb-6"

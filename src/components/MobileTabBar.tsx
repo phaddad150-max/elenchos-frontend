@@ -23,10 +23,10 @@ export function MobileTabBar() {
               <Link
                 to={t.to}
                 activeOptions={{ exact: true }}
-                className="flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground"
+                className="flex flex-col items-center justify-center gap-1 py-2 min-h-[52px] text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground touch-manipulation active:bg-secondary/60"
                 activeProps={{
                   className:
-                    "flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-mono uppercase tracking-[0.14em] text-cyan",
+                    "flex flex-col items-center justify-center gap-1 py-2 min-h-[52px] text-[10px] font-mono uppercase tracking-[0.14em] text-cyan touch-manipulation",
                 }}
               >
                 <Icon className="w-[18px] h-[18px]" strokeWidth={2} />

@@ -2067,7 +2067,7 @@ function TrackersPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 mobile-safe-bottom overflow-x-clip">
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

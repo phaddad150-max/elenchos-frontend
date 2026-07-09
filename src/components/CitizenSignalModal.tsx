@@ -43,7 +43,7 @@ export function CitizenSignalModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-md grid place-items-center p-4"
+          className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-md grid place-items-end sm:place-items-center p-0 sm:p-4"
         >
           <motion.div
             initial={{ scale: 0.96, y: 20, opacity: 0 }}
@@ -51,7 +51,7 @@ export function CitizenSignalModal({
             exit={{ scale: 0.96, y: 20, opacity: 0 }}
             transition={{ type: "spring", damping: 24 }}
             onClick={(e) => e.stopPropagation()}
-            className="glass-strong rounded-3xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto"
+            className="glass-strong rounded-t-3xl sm:rounded-3xl max-w-2xl w-full p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 relative max-h-[92vh] sm:max-h-[90vh] overflow-y-auto"
           >
             <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-secondary transition-colors z-10" aria-label="Close">
               <X className="w-4 h-4" />
