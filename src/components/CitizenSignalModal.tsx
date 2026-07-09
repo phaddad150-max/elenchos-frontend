@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MessageSquare, Sparkles, Share2, TrendingUp, ArrowUpRight, ArrowDownRight, ArrowRight } from "lucide-react";
-import type { CitizenSignal, TopicSnapshot } from "@/lib/dashboard-data";
+import type { FeedCitizenSignal, TopicSnapshot } from "@/lib/dashboard-data";
 import { cleanHeadline } from "@/lib/utils";
 
 
@@ -31,7 +31,7 @@ export function CitizenSignalModal({
   snapshot,
   onClose,
 }: {
-  signal: CitizenSignal | null;
+  signal: FeedCitizenSignal | null;
   snapshot?: TopicSnapshot | null;
   onClose: () => void;
 }) {
@@ -93,15 +93,29 @@ function dedupeSentences(...parts: Array<string | null | undefined>): string {
   return out.join(" ");
 }
 
-function Body({ signal, snapshot }: { signal: CitizenSignal; snapshot?: TopicSnapshot | null }) {
+function Body({ signal, snapshot }: { signal: FeedCitizenSignal; snapshot?: TopicSnapshot | null }) {
+  const curated = signal.curated_insight;
   const tone = sentimentTone(signal.sentiment_score, signal.sentiment_label);
   const score = typeof signal.sentiment_score === "number" ? Math.round(signal.sentiment_score) : null;
   const updated = signal.last_updated ? new Date(signal.last_updated).toLocaleString() : "—";
   const insights = snapshot?.key_insights?.filter(Boolean).slice(0, 4) ?? [];
+  const threads = curated?.insight_threads?.filter((t) => t.headline || t.summary).slice(0, 4) ?? [];
 
-  const rawHeadline = cleanHeadline(signal.headline ?? signal.summary ?? signal.topic);
-  const headline = shortenHeadline(rawHeadline);
-  const citizenNarrative = dedupeSentences(signal.summary, snapshot?.narrative_summary);
+  const rawHeadline = cleanHeadline(
+    curated?.hero_headline ?? signal.headline ?? signal.summary ?? signal.topic,
+  );
+  const headline = shortenHeadline(rawHeadline, 160);
+  const citizenNarrative = dedupeSentences(
+    curated?.hero_summary ?? signal.summary,
+    snapshot?.narrative_summary,
+  );
+  const divergence =
+    typeof signal.divergence_score === "number"
+      ? Math.round(signal.divergence_score)
+      : typeof snapshot?.divergence_score === "number"
+        ? Math.round(snapshot.divergence_score)
+        : null;
+  const windowLabel = (signal.comparison_window ?? "wow").toLowerCase() === "mom" ? "MoM" : "WoW";
   const headlineKey = headline.toLowerCase().replace(/[^a-z0-9]/g, "");
   const excerptKey = (signal.excerpt ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const narrativeKey = citizenNarrative.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -138,11 +152,29 @@ function Body({ signal, snapshot }: { signal: CitizenSignal; snapshot?: TopicSna
         </h2>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5 mb-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
         <Stat label="Sentiment" value={score !== null ? `${score}/100` : "—"} color={tone.color} bar={score ?? 0} />
+        <Stat label="Divergence" value={divergence !== null ? `${divergence}` : "—"} color="var(--rose-signal)" />
         <Stat label="Sample size" value={(signal.sample_size ?? 0).toLocaleString()} color="var(--cyan)" />
-        <Stat label="Trend" value={signal.trend ?? "Stable"} color="var(--cyan)" />
+        <Stat
+          label={`Trend · ${windowLabel}`}
+          value={
+            typeof signal.sentiment_delta === "number"
+              ? `${signal.sentiment_delta > 0 ? "+" : ""}${signal.sentiment_delta}`
+              : (signal.trend ?? "Stable")
+          }
+          color={signal.sentiment_delta != null && signal.sentiment_delta < 0 ? "var(--rose-signal)" : "var(--emerald-signal)"}
+        />
       </div>
+
+      {curated?.evolution_note && (
+        <div className="rounded-xl border border-cyan/30 bg-cyan/5 p-3.5 mb-3">
+          <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan mb-1">
+            Evolution · {windowLabel}
+          </div>
+          <p className="text-[13px] text-foreground/90 leading-relaxed">{curated.evolution_note}</p>
+        </div>
+      )}
 
       {citizenNarrative && (
         <div className="rounded-xl border border-border bg-secondary/30 p-3.5 mb-3 border-l-2 border-l-cyan/60">
@@ -160,7 +192,25 @@ function Body({ signal, snapshot }: { signal: CitizenSignal; snapshot?: TopicSna
         </div>
       )}
 
-      {insights.length > 0 && (
+      {threads.length > 0 ? (
+        <div className="rounded-xl border border-border bg-secondary/30 p-3.5 mb-3">
+          <div className="flex items-center gap-2 text-cyan mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <h3 className="font-display font-semibold text-[12px] tracking-[0.14em] uppercase">Insight threads</h3>
+          </div>
+          <ul className="space-y-2">
+            {threads.map((it, i) => (
+              <li key={i} className="text-[13px] text-foreground/90 leading-relaxed">
+                <span className="text-cyan font-mono mr-2">{String(i + 1).padStart(2, "0")}</span>
+                {it.headline && <span className="font-medium">{it.headline}</span>}
+                {it.summary && (
+                  <span className={it.headline ? " block text-muted-foreground mt-0.5" : ""}>{it.summary}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : insights.length > 0 ? (
         <div className="rounded-xl border border-border bg-secondary/30 p-3.5 mb-3">
           <div className="flex items-center gap-2 text-cyan mb-2">
             <Sparkles className="w-3.5 h-3.5" />
@@ -175,7 +225,7 @@ function Body({ signal, snapshot }: { signal: CitizenSignal; snapshot?: TopicSna
             ))}
           </ul>
         </div>
-      )}
+      ) : null}
 
       <div className="flex items-center justify-between gap-3 pt-3 border-t border-border">
         <span className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">

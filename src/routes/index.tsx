@@ -57,8 +57,8 @@ import {
   type IntelFeedItem,
   type TopicSnapshot,
   type CitizenSignal,
+  type FeedCitizenSignal,
 } from "@/lib/dashboard-data";
-import { topicIdForBackendName } from "@/lib/topic-catalog";
 import { Compass } from "lucide-react";
 import {
   extractPeaceCountries,
@@ -222,7 +222,7 @@ function Dashboard() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [flips, setFlips] = useState<ReturnType<typeof generateFlips>>([]);
   const [picked, setPicked] = useState<Signal | null>(null);
-  const [pickedCitizen, setPickedCitizen] = useState<CitizenSignal | null>(null);
+  const [pickedCitizen, setPickedCitizen] = useState<FeedCitizenSignal | null>(null);
   const [topicOpen, setTopicOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | Sentiment>("all");
   const [regionFilter, setRegionFilter] = useState<string | null>(null);
@@ -281,8 +281,14 @@ function Dashboard() {
       window.dashboardOverview = undefined as never;
       window.__dashboardOverviewPromise = undefined;
     }
-    await Promise.all([loadDashboardData(), loadDashboardOverview()]);
+    if (typeof window !== "undefined") {
+      window.__citizenSignalsPromise = undefined;
+      window.citizenSignals = undefined as never;
+    }
+    await Promise.all([loadDashboardData(), loadDashboardOverview(), loadCitizenSignals()]);
     setOverview(window.dashboardOverview ?? null);
+    setCitizenSignals((await loadCitizenSignals()) ?? []);
+    loadCuratedHighlights(6).then(setCuratedHighlights);
     setSignals(seedSignals(28));
     setFlips(generateFlips(4));
     setRefreshedAt(new Date());
@@ -427,7 +433,7 @@ function Dashboard() {
   // Citizen signals: prefer the inline `citizen_signals` array on the
   // freshest dashboard_overviews row. Fall back to the citizen_signals
   // table when the overview row doesn't include it (older rows).
-  const feedSignals = useMemo<CitizenSignal[]>(() => {
+  const feedSignals = useMemo<FeedCitizenSignal[]>(() => {
     const inline = overview?.citizen_signals;
     if (Array.isArray(inline) && inline.length > 0) {
       return inline.map((s, i) => {
@@ -453,11 +459,22 @@ function Dashboard() {
           ...(typeof s.divergence_score === "number" ? { divergence_score: s.divergence_score } : {}),
           ...(typeof s.narrative_divergence === "number" ? { narrative_divergence: s.narrative_divergence } : {}),
           ...(s.divergence_label ? { divergence_label: s.divergence_label } : {}),
-        } as CitizenSignal;
+        } as FeedCitizenSignal;
       });
     }
-    return citizenSignals;
+    return citizenSignals as FeedCitizenSignal[];
   }, [overview, citizenSignals]);
+
+  const mergedFeedSignals = useMemo<FeedCitizenSignal[]>(() => {
+    const curatedTopics = new Set(
+      curatedHighlights.map((h) => h.topic).filter((t): t is string => !!t),
+    );
+    const fromCurated = curatedHighlights.map((h, i) =>
+      curatedHighlightToFeedSignal(h, h.topic ? snapshots?.[h.topic] ?? null : null, i),
+    );
+    const fromCitizen = feedSignals.filter((s) => !curatedTopics.has(s.topic));
+    return [...fromCurated, ...fromCitizen];
+  }, [curatedHighlights, feedSignals, snapshots]);
 
   // Region tiles: derived strictly from dashboard_overviews.global_heatmap
   // when present. Aggregates per country: signal count + avg sentiment.
@@ -561,8 +578,6 @@ function Dashboard() {
         {/* HERO: 5 KPI tiles — strictly from dashboard_overviews.kpis */}
         <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
 
-        <CuratedHighlightsRow highlights={curatedHighlights} />
-
         {/* CoreTopicsRow removed — topics are surfaced via the Latest Citizen Signals topic filter
             chips below (real data from dashboard_overviews.intel_feed). */}
 
@@ -577,14 +592,14 @@ function Dashboard() {
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Real-Time Citizen Signals"
-                subtitle="Higher divergence = wider gap between citizen voices and official narrative. Click a row for the full reasoning."
+                subtitle="Curated and live signals — sentiment, narrative divergence, and WoW trend. Click a row for full detail."
               />
               <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
             </div>
 
             <CitizenSignalsFeed
               onPick={setPickedCitizen}
-              signals={feedSignals}
+              signals={mergedFeedSignals}
               groupFilter={topicFilter}
               fallback={
                 <div className="space-y-1.5">
@@ -646,7 +661,12 @@ function Dashboard() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <AiAnalysisSummary snapshots={snapshots} signals={feedSignals} overview={overview} />
+          <AiAnalysisSummary
+            snapshots={snapshots}
+            signals={mergedFeedSignals}
+            highlights={curatedHighlights}
+            overview={overview}
+          />
         </motion.div>
 
       </main>
@@ -749,6 +769,137 @@ function shortenSignal(text: string): string {
   return t;
 }
 
+function sentimentScoreFromSnapshot(snapshot?: TopicSnapshot | null): number | null {
+  const os = snapshot?.overall_sentiment;
+  if (typeof os === "object" && os && typeof os.score === "number") return os.score;
+  if (typeof os === "number") return os;
+  return null;
+}
+
+function curatedHighlightToFeedSignal(
+  h: CuratedTopicInsights,
+  snapshot: TopicSnapshot | null,
+  index: number,
+): FeedCitizenSignal {
+  const score = sentimentScoreFromSnapshot(snapshot);
+  const divergence =
+    typeof snapshot?.divergence_score === "number"
+      ? snapshot.divergence_score
+      : typeof h.divergence_delta === "number"
+        ? Math.max(0, Math.min(100, 50 + h.divergence_delta))
+        : undefined;
+  const delta = h.sentiment_delta;
+  const trend =
+    typeof delta === "number"
+      ? delta > 0
+        ? "Improving"
+        : delta < 0
+          ? "Declining"
+          : "Stable"
+      : "Stable";
+  const shortLine =
+    shortenSignal(h.hero_headline ?? h.hero_summary ?? h.topic ?? "") ||
+    h.topic ||
+    "Curated signal";
+
+  return {
+    id: -(h.id ?? index + 1),
+    topic: h.topic ?? "Unknown topic",
+    signal_type: "curated",
+    sentiment_score: score,
+    sentiment_label: snapshot?.overall_sentiment && typeof snapshot.overall_sentiment === "object"
+      ? snapshot.overall_sentiment.label ?? null
+      : null,
+    trend,
+    headline: shortLine,
+    summary: h.hero_summary ?? h.hero_headline ?? null,
+    excerpt: h.evolution_note ?? null,
+    source: "Curated · Pass 2",
+    sample_size: snapshot?.sample_size ?? null,
+    last_updated: h.generated_at ?? snapshot?.last_updated ?? null,
+    created_at: h.generated_at ?? null,
+    divergence_score: divergence,
+    sentiment_delta: h.sentiment_delta,
+    divergence_delta: h.divergence_delta,
+    comparison_window: h.comparison_window ?? "wow",
+    curated_insight: h,
+  };
+}
+
+function buildCrossTopicFallback(
+  overview: DashboardOverview | null,
+  snapshots: Record<string, TopicSnapshot> | null,
+  highlights: CuratedTopicInsights[],
+  signals: FeedCitizenSignal[],
+): { summary: string; findings: string[] } {
+  const findings: string[] = [];
+
+  for (const h of highlights.slice(0, 5)) {
+    if (h.hero_headline) {
+      findings.push(h.hero_headline);
+    } else if (h.hero_summary) {
+      const first = h.hero_summary.split(/(?<=[.!?])\s+/)[0]?.trim();
+      if (first) findings.push(first);
+    }
+  }
+
+  if (!findings.length && snapshots) {
+    const snaps = Object.values(snapshots).sort(
+      (a, b) => (b.divergence_score ?? 0) - (a.divergence_score ?? 0),
+    );
+    for (const s of snaps.slice(0, 5)) {
+      const ki = s.key_insights?.find((x) => x?.trim());
+      if (ki) findings.push(ki.trim());
+      else if (s.narrative_summary) {
+        const first = s.narrative_summary.split(/(?<=[.!?])\s+/)[0]?.trim();
+        if (first) findings.push(first);
+      }
+    }
+  }
+
+  if (!findings.length) {
+    for (const s of signals.slice(0, 5)) {
+      const line = shortenSignal(s.headline ?? s.summary ?? "");
+      if (line) findings.push(line);
+    }
+  }
+
+  const evolutionBits = highlights
+    .map((h) => h.evolution_note?.trim())
+    .filter((x): x is string => !!x)
+    .slice(0, 2);
+
+  const summaryParts = evolutionBits.length
+    ? evolutionBits
+    : highlights
+        .map((h) => h.hero_summary?.split(/(?<=[.!?])\s+/)[0]?.trim())
+        .filter((x): x is string => !!x)
+        .slice(0, 3);
+
+  if (!summaryParts.length && snapshots) {
+    const top = Object.values(snapshots)
+      .sort((a, b) => (b.divergence_score ?? 0) - (a.divergence_score ?? 0))
+      .slice(0, 2)
+      .map((s) => s.narrative_summary?.split(/(?<=[.!?])\s+/)[0]?.trim())
+      .filter((x): x is string => !!x);
+    summaryParts.push(...top);
+  }
+
+  const k = overview?.kpis;
+  const avgDiv =
+    typeof k?.average_narrative_divergence === "number"
+      ? Math.round(k.average_narrative_divergence)
+      : null;
+  const lead =
+    summaryParts.length > 0
+      ? summaryParts.join(" ")
+      : avgDiv !== null
+        ? `Cross-topic monitoring shows an average narrative divergence of ${avgDiv}, with citizen voices diverging sharply from official narratives across multiple live topics.`
+        : "";
+
+  return { summary: lead, findings: findings.slice(0, 5) };
+}
+
 type TopicGroup = "Political" | "Economic" | "Social";
 
 const TOPIC_GROUP_MAP: Record<string, TopicGroup> = {
@@ -827,18 +978,18 @@ function CitizenSignalsFeed({
   useFallback,
   onPick,
 }: {
-  signals: CitizenSignal[];
+  signals: FeedCitizenSignal[];
   groupFilter: string | null;
   fallback: React.ReactNode;
   useFallback: boolean;
-  onPick: (s: CitizenSignal) => void;
+  onPick: (s: FeedCitizenSignal) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
   // Dedupe to ONE signal per topic. Prefer signal_type="overall"; otherwise
   // pick the newest row. Then filter by group (Political/Economic/Social).
   const items = useMemo(() => {
-    const byTopic = new Map<string, CitizenSignal>();
+    const byTopic = new Map<string, FeedCitizenSignal>();
     const filtered = signals.filter(
       (s) => !groupFilter || topicGroup(s.topic) === groupFilter,
     );
@@ -849,13 +1000,15 @@ function CitizenSignalsFeed({
         byTopic.set(s.topic, s);
         continue;
       }
-      const existingIsOverall = existing.signal_type === "overall";
-      const candidateIsOverall = s.signal_type === "overall";
-      if (candidateIsOverall && !existingIsOverall) {
+      const rank = (row: FeedCitizenSignal) =>
+        row.signal_type === "curated" ? 2 : row.signal_type === "overall" ? 1 : 0;
+      const existingRank = rank(existing);
+      const candidateRank = rank(s);
+      if (candidateRank > existingRank) {
         byTopic.set(s.topic, s);
         continue;
       }
-      if (candidateIsOverall === existingIsOverall) {
+      if (candidateRank === existingRank) {
         const ta = new Date(existing.last_updated ?? existing.created_at ?? 0).getTime();
         const tb = new Date(s.last_updated ?? s.created_at ?? 0).getTime();
         if (tb > ta) byTopic.set(s.topic, s);
@@ -864,10 +1017,9 @@ function CitizenSignalsFeed({
     const out = Array.from(byTopic.values());
     // Prioritize topics with the highest divergence score (when present);
     // otherwise fall back to the freshest signals.
-    const divOf = (s: CitizenSignal) => {
-      const anyS = s as unknown as { divergence_score?: number; narrative_divergence?: number };
-      if (typeof anyS.divergence_score === "number") return anyS.divergence_score;
-      if (typeof anyS.narrative_divergence === "number") return anyS.narrative_divergence;
+    const divOf = (s: FeedCitizenSignal) => {
+      if (typeof s.divergence_score === "number") return s.divergence_score;
+      if (typeof s.narrative_divergence === "number") return s.narrative_divergence;
       return -1;
     };
     out.sort((a, b) => {
@@ -943,14 +1095,21 @@ function CitizenSignalsFeed({
 
 
 
-function CitizenSignalRow({ signal, index, onPick }: { signal: CitizenSignal; index: number; onPick: (s: CitizenSignal) => void }) {
+function CitizenSignalRow({
+  signal,
+  index,
+  onPick,
+}: {
+  signal: FeedCitizenSignal;
+  index: number;
+  onPick: (s: FeedCitizenSignal) => void;
+}) {
   const tone = sentimentTone(signal.sentiment_score, signal.sentiment_label);
-  const anyS = signal as unknown as { divergence_score?: number; narrative_divergence?: number; divergence_label?: string };
   const divergence =
-    typeof anyS.divergence_score === "number"
-      ? anyS.divergence_score
-      : typeof anyS.narrative_divergence === "number"
-        ? anyS.narrative_divergence
+    typeof signal.divergence_score === "number"
+      ? signal.divergence_score
+      : typeof signal.narrative_divergence === "number"
+        ? signal.narrative_divergence
         : null;
   const divColor =
     divergence === null
@@ -965,8 +1124,18 @@ function CitizenSignalRow({ signal, index, onPick }: { signal: CitizenSignal; in
   const score = typeof signal.sentiment_score === "number" ? Math.round(signal.sentiment_score) : null;
   const barPct = score !== null ? Math.max(4, Math.min(100, score)) : 50;
   const trend = (signal.trend ?? "").toLowerCase();
-  const trendUp = /(rising|improving|up|positive)/.test(trend);
-  const trendDown = /(declining|falling|down|negative|worsening)/.test(trend);
+  const delta = signal.sentiment_delta;
+  const isCurated = signal.signal_type === "curated";
+  const trendUp =
+    typeof delta === "number" ? delta > 0 : /(rising|improving|up|positive|progress)/.test(trend);
+  const trendDown =
+    typeof delta === "number" ? delta < 0 : /(declining|falling|down|negative|worsening|regress)/.test(trend);
+  const hasWindow = isCurated || typeof delta === "number" || !!signal.comparison_window;
+  const windowLabel = (signal.comparison_window ?? "").toLowerCase() === "mom" ? "MoM" : "WoW";
+  const trendTitle =
+    typeof delta === "number"
+      ? `${delta > 0 ? "Progressing" : delta < 0 ? "Regressing" : "Stable"} · ${windowLabel} ${delta > 0 ? "+" : ""}${delta}`
+      : signal.trend ?? "Stable";
   return (
     <motion.button
       type="button"
@@ -991,9 +1160,14 @@ function CitizenSignalRow({ signal, index, onPick }: { signal: CitizenSignal; in
           />
           <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80 truncate">
             {signal.topic}
+            {isCurated && (
+              <span className="ml-1.5 text-[9px] text-muted-foreground normal-case tracking-normal">
+                · curated
+              </span>
+            )}
           </span>
         </span>
-        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground truncate">
+        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground line-clamp-1">
           {headline || signal.topic}
         </span>
       </span>
@@ -1031,12 +1205,15 @@ function CitizenSignalRow({ signal, index, onPick }: { signal: CitizenSignal; in
           <span className="text-[11px]">{divergence !== null ? Math.round(divergence) : "—"}</span>
         </span>
         <span
-          title={signal.trend ?? "Stable"}
-          className={`inline-flex items-center justify-center w-5 h-5 rounded ${
+          title={trendTitle}
+          className={`inline-flex flex-col items-center justify-center min-w-[2.25rem] leading-none gap-0.5 ${
             trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"
           }`}
         >
           {trendUp ? <ArrowUpRight className="w-3.5 h-3.5" /> : trendDown ? <ArrowDownRight className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+          {hasWindow && (
+            <span className="text-[8px] font-mono uppercase tracking-wider opacity-90">{windowLabel}</span>
+          )}
         </span>
       </span>
       {/* Mobile-only compact score pill */}
@@ -1099,16 +1276,30 @@ function RotatingRegionTiles({
 
 function AiAnalysisSummary({
   overview,
+  snapshots,
+  signals,
+  highlights,
 }: {
   snapshots?: Record<string, TopicSnapshot> | null;
-  signals?: CitizenSignal[];
+  signals?: FeedCitizenSignal[];
+  highlights?: CuratedTopicInsights[];
   overview: DashboardOverview | null;
 }) {
-  // Strictly cross-topic synthesis from dashboard_overviews.grok_ai_summary.
-  // No per-topic insights here — those live in the Citizen Signals panel.
-  const summary = overview?.grok_ai_summary ?? null;
+  const fallback = useMemo(
+    () =>
+      buildCrossTopicFallback(
+        overview,
+        snapshots ?? null,
+        highlights ?? [],
+        signals ?? [],
+      ),
+    [overview, snapshots, highlights, signals],
+  );
+  const summary = overview?.grok_ai_summary?.trim() || fallback.summary || null;
+  const findings = fallback.findings;
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const k = overview?.kpis;
+  const usingFallback = !overview?.grok_ai_summary?.trim() && !!fallback.summary;
 
   return (
     <section className="glass rounded-2xl p-4 sm:p-5 border-l-2 border-l-cyan">
@@ -1127,7 +1318,7 @@ function AiAnalysisSummary({
           )}
           <span className="px-2 py-1 rounded bg-cyan/15 text-cyan border border-cyan/40 text-[11px] font-mono inline-flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
-            AI · cross-topic
+            {usingFallback ? "Synthesized · live data" : "AI · cross-topic"}
           </span>
         </div>
       </div>
@@ -1140,6 +1331,25 @@ function AiAnalysisSummary({
         <p className="text-sm leading-relaxed text-muted-foreground">
           Awaiting the next AI analysis cycle… the cross-topic synthesis will appear here as soon as the backend workflow publishes a fresh summary.
         </p>
+      )}
+
+      {findings.length > 0 && (
+        <div className="mt-4 space-y-2">
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan">
+            Key findings
+          </div>
+          <ul className="space-y-1.5">
+            {findings.map((f, i) => (
+              <li
+                key={i}
+                className="text-[13px] text-foreground/85 leading-snug flex gap-2"
+              >
+                <span className="text-cyan font-mono shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {k && (
@@ -1657,52 +1867,6 @@ function avgDivergenceFromSnapshots(
     .filter((v): v is number => typeof v === "number");
   if (!sentimentSpread.length) return undefined;
   return sentimentSpread.reduce((sum, v) => sum + v, 0) / sentimentSpread.length;
-}
-
-function CuratedHighlightsRow({ highlights }: { highlights: CuratedTopicInsights[] }) {
-  if (!highlights.length) return null;
-
-  return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
-        <Sparkles className="w-3.5 h-3.5" />
-        Curated Intelligence Highlights
-        <span className="text-muted-foreground normal-case tracking-normal text-[10px]">
-          Pass 2 synthesis across topics
-        </span>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {highlights.map((h) => {
-          const topicId = h.topic ? topicIdForBackendName(h.topic) : null;
-          const href = topicId ? `/topics?topic=${encodeURIComponent(topicId)}` : "/topics";
-          return (
-            <Link
-              key={`${h.topic}-${h.id}`}
-              to={href}
-              className="glass rounded-xl p-4 border border-cyan/25 hover:border-cyan/50 transition-colors block space-y-2"
-            >
-              <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                {h.topic}
-              </div>
-              {h.hero_headline && (
-                <h3 className="font-display font-semibold text-sm leading-snug line-clamp-2">
-                  {h.hero_headline}
-                </h3>
-              )}
-              {h.hero_summary && (
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                  {h.hero_summary}
-                </p>
-              )}
-              {h.evolution_note && (
-                <p className="text-[10px] font-mono text-cyan/80 line-clamp-1">{h.evolution_note}</p>
-              )}
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
 }
 
 function DashboardKpiGrid({

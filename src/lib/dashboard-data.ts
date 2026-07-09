@@ -231,6 +231,17 @@ export type CitizenSignal = {
   created_at?: string | null;
 };
 
+/** Dashboard feed row — citizen signal and/or curated highlight metadata. */
+export type FeedCitizenSignal = CitizenSignal & {
+  divergence_score?: number;
+  narrative_divergence?: number;
+  divergence_label?: string;
+  sentiment_delta?: number | null;
+  divergence_delta?: number | null;
+  comparison_window?: string;
+  curated_insight?: CuratedTopicInsights;
+};
+
 declare global {
   interface Window {
     dashboardData?: Record<string, TopicSnapshot> | null;
