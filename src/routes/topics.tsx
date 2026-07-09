@@ -208,7 +208,7 @@ function TopicsPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
+      <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-3">
           <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-3 sm:px-4 py-2.5 text-[11px] sm:text-[12px] font-mono text-cyan flex items-start gap-2 w-full sm:flex-1 sm:min-w-0">
             <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-cyan pulse-dot shrink-0" />
@@ -407,7 +407,7 @@ function TopicsFilterableGrid({
   const visibleCount = activeTopics.length + sponsorLocked.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
-    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-3 auto-rows-fr items-stretch";
+    "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
 
   const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
@@ -529,7 +529,7 @@ function shortTitle(t: string): string {
 }
 
 const TOPIC_CARD_SHELL =
-  "group relative overflow-hidden rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-4 sm:p-3 flex flex-col h-full min-h-[248px] sm:min-h-[176px] sm:h-[176px] hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation";
+  "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 md:p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation md:min-h-[176px] md:h-[176px]";
 
 function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number }) {
   const backendName = SPONSOR_LOCKED_TOPIC_IDS[topic.id];
@@ -542,20 +542,24 @@ function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number })
       whileHover={{ scale: 1.01, y: -1 }}
       className={TOPIC_CARD_SHELL}
     >
-      <div className="shrink-0 flex items-center justify-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-cyan">
-        <Lock className="w-3 h-3" /> {category}
+      <div className="shrink-0 text-center">
+        <span className="inline-flex items-center gap-1 text-[8px] md:text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
+          <Lock className="w-2.5 h-2.5 md:w-3 md:h-3" /> {category}
+        </span>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[4rem] px-1 text-center">
-        <Lock className="w-5 h-5 text-cyan/50 mb-2 shrink-0" />
-        <h3 className="text-[15px] sm:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3">
+      <div className="flex-1 flex flex-col items-center justify-center px-0.5 py-2 text-center min-h-[3.5rem] md:min-h-[4rem]">
+        <Lock className="w-4 h-4 md:w-5 md:h-5 text-cyan/50 mb-1.5 shrink-0" />
+        <h3 className="text-[11px] md:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3">
           {shortTitle(topic.title)}
         </h3>
       </div>
       <a
         href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-        className="mt-auto shrink-0 inline-flex items-center justify-center gap-1 w-full px-3 py-2.5 sm:py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 active:bg-cyan/80 transition-all min-h-[44px] sm:min-h-0"
+        className="mt-auto shrink-0 inline-flex items-center justify-center gap-1 w-full px-2 py-2 md:px-3 md:py-1.5 rounded-lg text-[8px] md:text-[10px] font-mono uppercase tracking-[0.14em] md:tracking-[0.16em] font-semibold bg-cyan text-background hover:bg-cyan/90 active:bg-cyan/80 transition-all min-h-[36px] md:min-h-0"
       >
-        <Heart className="w-3 h-3" /> Sponsor me
+        <Heart className="w-2.5 h-2.5 md:w-3 md:h-3" />
+        <span className="md:hidden">Sponsor</span>
+        <span className="hidden md:inline">Sponsor me</span>
       </a>
     </motion.div>
   );
@@ -593,49 +597,50 @@ function TopicCard({
       whileTap={{ scale: 0.98 }}
       transition={{ delay }}
       onClick={onOpen}
-      className={`${TOPIC_CARD_SHELL} w-full text-center`}
+      className={`${TOPIC_CARD_SHELL} w-full min-w-0 text-center`}
     >
-      <div className="shrink-0 flex items-center justify-between gap-2 mb-3">
-        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan truncate">
+      <div className="shrink-0 flex flex-col items-center gap-1 mb-2 md:flex-row md:justify-between md:items-center md:gap-2 md:mb-3">
+        <span className="text-[8px] md:text-[9px] font-mono uppercase tracking-[0.14em] md:tracking-[0.16em] text-cyan truncate max-w-full">
           {category}
         </span>
         <span
-          className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.14em] ${
+          className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-[0.1em] md:tracking-[0.12em] ${
             cadence === "realtime" ? "text-cyan bg-cyan/10 border border-cyan/30" : "text-muted-foreground bg-background/50 border border-border/50"
           }`}
         >
-          {cadence === "realtime" && <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" />}
-          <span className="truncate">{cadenceLabel(cadence, true)}</span>
+          {cadence === "realtime" && <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-cyan pulse-dot shrink-0" />}
+          <span>{cadenceLabel(cadence, true)}</span>
         </span>
       </div>
 
-      <div className="shrink-0 flex items-center justify-center min-h-[3rem] sm:min-h-[2.75rem] px-1 mb-2">
-        <h3 className="text-[15px] sm:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center">
+      <div className="shrink-0 flex items-center justify-center min-h-[2.75rem] md:min-h-[2.75rem] px-0.5 mb-1.5 md:mb-2">
+        <h3 className="text-[11px] md:text-[13px] font-display font-semibold tracking-tight leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-3 md:line-clamp-2 text-center">
           {shortTitle(topic.title)}
         </h3>
       </div>
 
-      <div className="flex-1 flex items-center justify-center py-2 min-h-[5rem] sm:min-h-0">
+      <div className="flex-1 flex items-center justify-center py-1 md:py-2 min-h-[3.25rem] md:min-h-0">
         {hasScores ? (
-          <div className="flex items-center justify-center gap-8 sm:gap-2.5">
-            <div className="text-center min-w-[4.5rem]">
-              <div className="text-[9px] sm:text-[8px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                Sentiment
+          <div className="grid grid-cols-2 gap-x-1 w-full md:flex md:items-center md:justify-center md:gap-2.5">
+            <div className="text-center min-w-0">
+              <div className="text-[7px] md:text-[8px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                <span className="md:hidden">Sent.</span>
+                <span className="hidden md:inline">Sentiment</span>
               </div>
               <div
-                className="text-3xl sm:text-2xl font-display font-semibold tabular-nums leading-none mt-1"
+                className="text-xl md:text-2xl font-display font-semibold tabular-nums leading-none mt-0.5"
                 style={{ color: sentimentTone }}
               >
                 {typeof sentiment === "number" ? sentiment : "—"}
               </div>
             </div>
-            <div className="w-px h-12 sm:h-8 bg-border/70 shrink-0" />
-            <div className="text-center min-w-[4.5rem]">
-              <div className="text-[9px] sm:text-[8px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                Divergence
+            <div className="text-center min-w-0 border-l border-border/50 md:border-l-0 md:border-none">
+              <div className="text-[7px] md:text-[8px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                <span className="md:hidden">Div.</span>
+                <span className="hidden md:inline">Divergence</span>
               </div>
               <div
-                className="text-3xl sm:text-2xl font-display font-semibold tabular-nums leading-none mt-1"
+                className="text-xl md:text-2xl font-display font-semibold tabular-nums leading-none mt-0.5"
                 style={{ color: divergenceTone }}
               >
                 {typeof divergence === "number" ? divergence : "—"}
@@ -643,15 +648,16 @@ function TopicCard({
             </div>
           </div>
         ) : (
-          <div className="text-[10px] sm:text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
-            Awaiting cycle
+          <div className="text-[8px] md:text-[9px] font-mono text-muted-foreground inline-flex items-center gap-1">
+            <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-cyan pulse-dot" />
+            Awaiting
           </div>
         )}
       </div>
 
-      <span className="mt-auto shrink-0 inline-flex items-center justify-center w-full px-3 py-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-[10px] font-mono uppercase tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all min-h-[44px] sm:min-h-0">
-        View Analysis →
+      <span className="mt-auto shrink-0 inline-flex items-center justify-center w-full px-2 py-2 md:px-2.5 md:py-1.5 rounded-lg text-[8px] md:text-[10px] font-mono uppercase tracking-[0.14em] md:tracking-[0.16em] font-semibold bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all min-h-[36px] md:min-h-0">
+        <span className="md:hidden">Open →</span>
+        <span className="hidden md:inline">View Analysis →</span>
       </span>
     </motion.button>
   );
