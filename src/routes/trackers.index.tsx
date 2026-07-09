@@ -25,6 +25,7 @@ import {
   bucketForCountry,
   extractLeadersByRegion,
   extractMediaTrust,
+  extractFootballPlayers,
   extractPeaceCountries,
   extractRankedLeaders,
   fetchLatestTrackers,
@@ -1420,6 +1421,73 @@ function PeaceDetail({ row }: { row?: TrackerRow }) {
 
 const MEDIA_ACCENT = "#8B5CF6"; // violet
 
+function FootballOverviewCard({
+  def,
+  row,
+}: {
+  def: TrackerDefinition;
+  row?: TrackerRow;
+}) {
+  const players = useMemo(() => extractFootballPlayers(row), [row]);
+  const top = players.filter((p) => p.status !== "waiting").slice(0, 3);
+  const snapshotDate = formatDate(row?.created_at);
+
+  return (
+    <Link
+      to="/trackers/football"
+      className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-emerald-signal/45 hover:shadow-[0_28px_64px_-28px_rgba(16,185,129,0.35)] overflow-hidden block cursor-pointer"
+    >
+      <div className="tracker-shimmer absolute top-0 left-0 right-0 h-px opacity-50 pointer-events-none" />
+      <div className="relative p-5 md:p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-emerald-signal" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal text-[10px] font-mono uppercase tracking-[0.16em]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-signal animate-pulse" />
+              Player Index
+            </span>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-signal transition-colors" />
+        </div>
+        <h3 className="text-xl md:text-2xl font-display font-semibold leading-tight group-hover:text-emerald-signal/95 transition-colors">
+          {def.title}
+        </h3>
+        <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">{def.tagline}</p>
+        {top.length > 0 ? (
+          <div className="mt-5 space-y-2">
+            <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2">
+              Top fan discourse
+            </div>
+            {top.map((p, i) => (
+              <TrackerOverviewRow key={p.player_name} index={i} score={p.sentiment_score}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <RankBadge rank={p.rank ?? i + 1} highlight={i === 0} />
+                  <div className="min-w-0">
+                    <div className="text-sm font-display font-semibold truncate">{p.player_name}</div>
+                    <div className="text-[10px] font-mono text-muted-foreground truncate">
+                      {p.fan_takeaway ?? p.team ?? ""}
+                    </div>
+                  </div>
+                </div>
+              </TrackerOverviewRow>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border text-[12px] font-mono text-muted-foreground">
+            Awaiting football_player_index sync
+          </div>
+        )}
+        <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4 text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+          <span>{snapshotDate ?? "—"}</span>
+          <span className="text-emerald-signal group-hover:gap-2 inline-flex items-center gap-1 transition-all">
+            Open index <ArrowUpRight className="w-3 h-3" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function MediaTrustOverviewCard({
   def,
   row,
@@ -2031,6 +2099,8 @@ function TrackersPage() {
                 <PeaceOverviewCard def={def} row={row} href="/trackers/peace" />
               ) : def.tracker_type === "media_trust" ? (
                 <MediaTrustOverviewCard def={def} row={row} />
+              ) : def.tracker_type === "football_player_index" ? (
+                <FootballOverviewCard def={def} row={row} />
               ) : null;
             if (!inner) return null;
             return (

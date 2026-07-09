@@ -107,6 +107,42 @@ export function bucketForCountry(c: PeaceCountry): PeaceBucketKey | "other" {
   return "other";
 }
 
+export type FootballPlayerEntry = {
+  rank?: number;
+  player_name: string;
+  nationality?: string;
+  team?: string;
+  sentiment_score?: number | null;
+  sentiment_label?: string;
+  mention_salience?: number | null;
+  trend?: "rising" | "falling" | "stable" | string;
+  fan_takeaway?: string;
+  evidence?: string[];
+  experience_tags?: string[];
+  status?: "active" | "waiting" | string;
+};
+
+export type FootballPlayerIndexData = {
+  players?: FootballPlayerEntry[];
+  golden_boot_race_summary?: string;
+  key_insights?: string[];
+  posts_analyzed?: number;
+  snapshot_date?: string;
+};
+
+export function extractFootballPlayers(row?: TrackerRow): FootballPlayerEntry[] {
+  const data = (row?.data ?? {}) as FootballPlayerIndexData;
+  const players = Array.isArray(data.players) ? data.players : [];
+  return [...players]
+    .filter((p) => p?.player_name)
+    .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
+    .map((p, i) => ({ ...p, rank: p.rank ?? i + 1 }));
+}
+
+export function extractFootballIndexMeta(row?: TrackerRow): FootballPlayerIndexData {
+  return (row?.data ?? {}) as FootballPlayerIndexData;
+}
+
 export type TrackerRow = {
   id?: string;
   tracker_type: string;
@@ -453,6 +489,15 @@ export const TRACKER_CATALOG: TrackerDefinition[] = [
       "Citizen trust in the world's news outlets — with English vs. local-language discrepancy scoring.",
     status: "live",
     accent: "violet",
+  },
+  {
+    key: "football-players",
+    tracker_type: "football_player_index",
+    title: "Gladiator Podium · Football Player Index",
+    tagline:
+      "Fan discourse rankings for World Cup players — form, legacy, golden-boot race and post-match sentiment from earned media on X.",
+    status: "live",
+    accent: "emerald",
   },
   {
     key: "immigration-borders",

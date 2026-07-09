@@ -43,6 +43,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
 import { LIVE_TOPIC_KEYS, isLiveTopicId, liveTopicConfig } from "@/lib/topic-catalog";
 import { TopicLensRadar } from "@/components/TopicLensRadar";
+import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   SPONSOR_LOCKED_TOPIC_IDS,
@@ -856,9 +857,11 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       </header>
 
       {/* Live data panel (real Supabase data for mapped topics) */}
-      {useLive && liveCfg && (
+      {useLive && liveCfg && topic.id === "fifa-world-cup-2026" ? (
+        <TopicAnalysisPage rootKey={liveCfg.rootKey} headerLabel={liveCfg.headerLabel} />
+      ) : useLive && liveCfg ? (
         <LiveAbrahamPanel rootKey={liveCfg.rootKey} headerLabel={liveCfg.headerLabel} />
-      )}
+      ) : null}
 
       {!useLive && (
         <>

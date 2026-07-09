@@ -1,0 +1,543 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { motion } from "framer-motion";
+import {
+  Brain,
+  ChevronDown,
+  Lightbulb,
+  MessageSquare,
+  Radio,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  Trophy,
+  Users,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  loadCuratedQaPairs,
+  loadCuratedTopicInsights,
+  loadDashboardData,
+  loadTopicHistory,
+  type CuratedQaPair,
+  type CuratedTopicInsights,
+  type QuestionAnalysis,
+  type TopicHistoryPoint,
+  type TopicSnapshot,
+} from "@/lib/dashboard-data";
+import {
+  buildAudienceLenses,
+  historySentimentSeries,
+  qaToInsightCards,
+  questionsToInsightCards,
+  sortThreads,
+  type InsightCardModel,
+} from "./mappers";
+import {
+  confidenceColor,
+  divergenceColor,
+  formatDelta,
+  prettySegmentName,
+  segScore,
+  sentimentColor,
+  timeAgo,
+} from "./utils";
+
+type LiveData = TopicSnapshot;
+
+function useTopicBundle(rootKey: string) {
+  const [data, setData] = useState<LiveData | null>(null);
+  const [curated, setCurated] = useState<CuratedTopicInsights | null>(null);
+  const [qa, setQa] = useState<CuratedQaPair[]>([]);
+  const [history, setHistory] = useState<TopicHistoryPoint[]>([]);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      loadDashboardData(),
+      loadCuratedTopicInsights(rootKey),
+      loadCuratedQaPairs(rootKey),
+      loadTopicHistory(rootKey, 8),
+    ]).then(([, ins, pairs, hist]) => {
+      if (cancelled) return;
+      const snap =
+        typeof window !== "undefined"
+          ? (window.dashboardData?.[rootKey] as LiveData | undefined) ?? null
+          : null;
+      setData(snap);
+      setCurated(ins);
+      setQa(pairs);
+      setHistory(hist);
+      setReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [rootKey]);
+
+  return { data, curated, qa, history, ready };
+}
+
+export function TopicAnalysisPage({
+  rootKey,
+  headerLabel,
+}: {
+  rootKey: string;
+  headerLabel: string;
+}) {
+  const { data, curated, qa, history, ready } = useTopicBundle(rootKey);
+  const [rawOpen, setRawOpen] = useState(false);
+  const [pickedCard, setPickedCard] = useState<InsightCardModel | null>(null);
+
+  const score = data?.overall_sentiment && typeof data.overall_sentiment === "object"
+    ? (data.overall_sentiment.score ?? 0)
+    : 0;
+  const label = data?.overall_sentiment && typeof data.overall_sentiment === "object"
+    ? (data.overall_sentiment.label ?? "—")
+    : "—";
+  const trend = data?.overall_sentiment && typeof data.overall_sentiment === "object"
+    ? (data.overall_sentiment.trend ?? "")
+    : "";
+  const divergence = typeof data?.divergence_score === "number" ? Math.round(data.divergence_score) : null;
+  const sample = data?.sample_size?.toLocaleString() ?? "—";
+
+  const lenses = useMemo(
+    () => buildAudienceLenses(curated, data, qa),
+    [curated, data, qa],
+  );
+  const insightCards = useMemo(
+    () => (qa.length ? qaToInsightCards(qa) : questionsToInsightCards(data?.question_analysis ?? [])),
+    [qa, data],
+  );
+  const threads = useMemo(() => sortThreads(curated?.insight_threads ?? []), [curated]);
+  const sentimentSeries = useMemo(() => historySentimentSeries(history), [history]);
+  const segments = useMemo(
+    () => Object.entries(data?.segmented_sentiment ?? {}).map(([k, v]) => ({
+      name: prettySegmentName(k),
+      score: segScore(v as number | { score?: number }),
+    })),
+    [data],
+  );
+  const questionHeat = useMemo(
+    () => (data?.question_analysis ?? []).map((q, i) => ({
+      name: `Q${i + 1}`,
+      score: q.sentiment_score ?? 50,
+      full: (q.question ?? "").slice(0, 60),
+    })),
+    [data],
+  );
+
+  if (!ready) {
+    return (
+      <section className="glass rounded-2xl p-8 border border-cyan/20 text-sm font-mono text-muted-foreground text-center">
+        Loading intelligence briefing…
+      </section>
+    );
+  }
+
+  if (!data) {
+    return (
+      <section className="glass rounded-2xl p-6 border border-amber-signal/30 space-y-2">
+        <h3 className="font-display font-semibold">{headerLabel}</h3>
+        <p className="text-sm text-muted-foreground">No live snapshot yet for this topic.</p>
+      </section>
+    );
+  }
+
+  const TrendIcon = /increas|improv|up|posit/i.test(trend)
+    ? TrendingUp
+    : /decreas|declin|down|neg/i.test(trend)
+      ? TrendingDown
+      : Minus;
+
+  return (
+    <div className="space-y-5 sm:space-y-6">
+      {/* Sticky hero bar */}
+      <div className="sticky top-0 z-30 -mx-3 sm:-mx-0 px-3 sm:px-0 py-2 bg-background/85 backdrop-blur-xl border-b border-border/60">
+        <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 flex flex-wrap items-center gap-3 sm:gap-5">
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
+            <div className="font-display font-semibold text-lg sm:text-xl truncate">Intelligence Briefing</div>
+          </div>
+          <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
+          <HeroMetric
+            label="Divergence"
+            value={divergence !== null ? String(divergence) : "—"}
+            sub="Citizen vs official"
+            color={divergence !== null ? divergenceColor(divergence) : "var(--muted-foreground)"}
+          />
+          <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" />
+          <div className="text-[10px] font-mono text-muted-foreground">
+            {timeAgo(data.last_updated)}
+            {curated?.hero_confidence && (
+              <span
+                className="ml-2 px-1.5 py-0.5 rounded border uppercase"
+                style={{
+                  color: confidenceColor(curated.hero_confidence),
+                  borderColor: `${confidenceColor(curated.hero_confidence)}44`,
+                }}
+              >
+                {curated.hero_confidence}
+              </span>
+            )}
+          </div>
+          <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
+        </div>
+      </div>
+
+      {curated?.hero_headline && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl border border-cyan/35 bg-cyan/[0.06] p-4 sm:p-5 space-y-2"
+        >
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-cyan">
+            <Sparkles className="w-3.5 h-3.5" /> Curated synthesis
+          </div>
+          <h2 className="text-xl sm:text-2xl font-display font-semibold leading-tight">{curated.hero_headline}</h2>
+          {curated.hero_summary && (
+            <p className="text-sm text-foreground/90 leading-relaxed line-clamp-3">{curated.hero_summary}</p>
+          )}
+          <div className="flex flex-wrap gap-2 text-[10px] font-mono">
+            {formatDelta(curated.sentiment_delta) && (
+              <span className="px-2 py-0.5 rounded-full border border-border">Sentiment {formatDelta(curated.sentiment_delta)}</span>
+            )}
+            {formatDelta(curated.divergence_delta) && (
+              <span className="px-2 py-0.5 rounded-full border border-border">Divergence {formatDelta(curated.divergence_delta)}</span>
+            )}
+            {curated.comparison_window && (
+              <span className="text-muted-foreground uppercase">vs {curated.comparison_window}</span>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      <Link
+        to="/trackers/football"
+        className="flex items-center justify-between gap-3 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.06] px-4 py-3 hover:border-emerald-signal/55 transition-colors group"
+      >
+        <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-signal">
+          <Trophy className="w-4 h-4" />
+          Gladiator Podium · Football Player Index
+        </div>
+        <span className="text-xs text-muted-foreground group-hover:text-foreground">Fan rankings by player discourse →</span>
+      </Link>
+
+      {/* Audience lenses */}
+      <section className="space-y-3">
+        <SectionLabel icon={<Users className="w-3.5 h-3.5" />} title="Audience Intelligence Lenses" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {lenses.map((l, i) => (
+            <motion.div
+              key={l.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06 }}
+              className="rounded-xl border border-border bg-background/50 backdrop-blur p-4 space-y-2"
+              style={{ borderTop: `2px solid ${l.accent}` }}
+            >
+              <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: l.accent }}>
+                {l.title}
+              </div>
+              <div className="text-[10px] text-muted-foreground">{l.subtitle}</div>
+              <p className="text-sm font-medium leading-snug line-clamp-3">{l.summary || "—"}</p>
+              <ul className="space-y-1">
+                {l.insights.slice(0, 4).map((ins, j) => (
+                  <li key={j} className="text-[12px] text-foreground/85 leading-snug flex gap-1.5">
+                    <span style={{ color: l.accent }}>·</span>
+                    <span className="line-clamp-2">{ins}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Narrative threads */}
+      {threads.length > 0 && (
+        <section className="space-y-3">
+          <SectionLabel icon={<Lightbulb className="w-3.5 h-3.5" />} title="Narrative Threads" sub="Ranked storylines" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {threads.map((t, i) => (
+              <div
+                key={`${t.theme}-${i}`}
+                className="rounded-xl border border-border bg-secondary/20 p-4 space-y-1.5"
+                style={{ borderLeft: `3px solid ${confidenceColor(t.confidence)}` }}
+              >
+                <div className="flex justify-between gap-2 text-[10px] font-mono uppercase text-muted-foreground">
+                  <span>{t.theme ?? "Thread"}</span>
+                  {t.confidence && <span style={{ color: confidenceColor(t.confidence) }}>{t.confidence}</span>}
+                </div>
+                {t.headline && <h4 className="font-display font-semibold text-sm">{t.headline}</h4>}
+                {t.summary && <p className="text-[13px] text-foreground/85 leading-relaxed line-clamp-2">{t.summary}</p>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Insight cards grid */}
+      <section className="space-y-3">
+        <SectionLabel icon={<Brain className="w-3.5 h-3.5" />} title="Key Insights" sub={`${insightCards.length} cards`} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {insightCards.map((card, i) => (
+            <button
+              key={card.id}
+              type="button"
+              onClick={() => setPickedCard(card)}
+              className="text-left rounded-xl border border-border bg-background/40 hover:border-cyan/40 p-4 space-y-2 transition-colors"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className="text-lg font-display font-semibold tabular-nums"
+                  style={{ color: sentimentColor(card.score) }}
+                >
+                  {card.score}
+                </span>
+                {card.wowDelta != null && card.wowDelta !== 0 && (
+                  <span className="text-[10px] font-mono text-muted-foreground">WoW {formatDelta(card.wowDelta)}</span>
+                )}
+              </div>
+              <h4 className="font-display font-semibold text-sm leading-snug line-clamp-2">{card.title}</h4>
+              <p className="text-[12px] text-muted-foreground line-clamp-2">{card.summary}</p>
+              <div className="flex flex-wrap gap-1">
+                {card.audiences.map((a) => (
+                  <span key={a} className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-secondary border border-border">
+                    {a}
+                  </span>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Visual analytics */}
+      <section className="space-y-3">
+        <SectionLabel icon={<Radio className="w-3.5 h-3.5" />} title="Visual Analytics" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ChartPanel title="Sentiment trend">
+            {sentimentSeries.length > 1 ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={sentimentSeries}>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                  <Tooltip contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} />
+                  <Line type="monotone" dataKey="score" stroke="var(--cyan)" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart label="History populates after multiple snapshot runs" />
+            )}
+          </ChartPanel>
+          <ChartPanel title="Question heatmap">
+            {questionHeat.length > 0 ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={questionHeat}>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }}
+                    formatter={(v: number) => [v, "Score"]}
+                    labelFormatter={(_, payload) => payload?.[0]?.payload?.full ?? ""}
+                  />
+                  <Bar dataKey="score" radius={[4, 4, 0, 0]}>
+                    {questionHeat.map((e, i) => (
+                      <Cell key={i} fill={sentimentColor(e.score)} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart />
+            )}
+          </ChartPanel>
+          <ChartPanel title="Fan segments">
+            {segments.length > 0 ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={segments} layout="vertical" margin={{ left: 8 }}>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                  <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
+                  <Bar dataKey="score" radius={[0, 4, 4, 0]}>
+                    {segments.map((e, i) => (
+                      <Cell key={i} fill={sentimentColor(e.score)} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart />
+            )}
+          </ChartPanel>
+          <ChartPanel title="Historical comparison">
+            <div className="flex flex-wrap gap-3 p-2">
+              <ComparePill label="WoW sentiment" value={formatDelta(curated?.sentiment_delta)} />
+              <ComparePill label="WoW divergence" value={formatDelta(curated?.divergence_delta)} />
+              <ComparePill label="Window" value={curated?.comparison_window?.toUpperCase() ?? "WOW"} />
+              {curated?.evolution_note && (
+                <p className="w-full text-[12px] text-muted-foreground leading-relaxed mt-2 line-clamp-3">
+                  {curated.evolution_note}
+                </p>
+              )}
+            </div>
+          </ChartPanel>
+        </div>
+      </section>
+
+      {/* Raw data collapsible */}
+      <div className="rounded-xl border border-border overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setRawOpen((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground hover:bg-secondary/30"
+        >
+          <span className="flex items-center gap-2">
+            <MessageSquare className="w-3.5 h-3.5" /> Raw data & methodology
+          </span>
+          <ChevronDown className={`w-4 h-4 transition-transform ${rawOpen ? "rotate-180" : ""}`} />
+        </button>
+        {rawOpen && (
+          <div className="px-4 pb-4 space-y-3 text-sm border-t border-border pt-3">
+            <p className="text-muted-foreground text-[12px] leading-relaxed">
+              Based on <strong className="text-foreground">{sample}</strong> public posts (paraphrased aggregates only — no usernames or direct quotes stored).
+            </p>
+            {data.narrative_summary && (
+              <div>
+                <div className="text-[10px] font-mono uppercase text-cyan mb-1">Narrative summary</div>
+                <p className="text-foreground/90">{data.narrative_summary}</p>
+              </div>
+            )}
+            {(data.question_analysis ?? []).length > 0 && (
+              <div className="grid gap-2 max-h-64 overflow-y-auto custom-scroll">
+                {(data.question_analysis as QuestionAnalysis[]).map((q, i) => (
+                  <div key={i} className="text-[12px] p-2 rounded border border-border bg-secondary/20">
+                    <div className="font-mono text-cyan text-[10px]">Q{i + 1} · {q.sentiment_score}/100</div>
+                    <div className="text-muted-foreground mt-0.5">{q.question}</div>
+                    {q.summary && <div className="mt-1">{q.summary}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Insight modal */}
+      {pickedCard && (
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md grid place-items-center p-4"
+          onClick={() => setPickedCard(null)}
+        >
+          <div
+            className="glass-strong rounded-2xl max-w-lg w-full p-5 space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-[10px] font-mono uppercase text-cyan">Insight detail</div>
+            <h3 className="text-xl font-display font-semibold">{pickedCard.title}</h3>
+            <p className="text-sm text-foreground/90">{pickedCard.summary}</p>
+            {pickedCard.evidence.length > 0 && (
+              <ul className="space-y-1 text-[13px]">
+                {pickedCard.evidence.map((e, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-cyan font-mono">{String(i + 1).padStart(2, "0")}</span>
+                    {e}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              onClick={() => setPickedCard(null)}
+              className="text-xs font-mono text-cyan hover:underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HeroMetric({
+  label,
+  value,
+  sub,
+  color,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  color: string;
+}) {
+  return (
+    <div className="text-center min-w-[4.5rem]">
+      <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-xl sm:text-2xl font-display font-semibold tabular-nums" style={{ color }}>
+        {value}
+      </div>
+      <div className="text-[9px] font-mono text-muted-foreground truncate max-w-[5rem]">{sub}</div>
+    </div>
+  );
+}
+
+function SectionLabel({
+  icon,
+  title,
+  sub,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  sub?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
+      {icon}
+      {title}
+      {sub && <span className="text-muted-foreground normal-case tracking-normal text-[10px]">· {sub}</span>}
+    </div>
+  );
+}
+
+function ChartPanel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border bg-background/40 p-3 sm:p-4">
+      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function EmptyChart({ label = "No data yet" }: { label?: string }) {
+  return (
+    <div className="h-[180px] grid place-items-center text-[11px] font-mono text-muted-foreground border border-dashed border-border rounded-lg">
+      {label}
+    </div>
+  );
+}
+
+function ComparePill({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="px-3 py-2 rounded-lg border border-border bg-secondary/30">
+      <div className="text-[9px] font-mono uppercase text-muted-foreground">{label}</div>
+      <div className="text-sm font-display font-semibold tabular-nums">{value ?? "—"}</div>
+    </div>
+  );
+}

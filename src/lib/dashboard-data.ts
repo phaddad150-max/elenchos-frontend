@@ -111,6 +111,11 @@ export type CuratedTopicInsights = {
     number
   >>;
   status?: "draft" | "published" | "archived";
+  audience_lenses?: {
+    journalist?: { summary?: string; insights?: string[] };
+    researcher?: { summary?: string; insights?: string[] };
+    policymaker?: { summary?: string; insights?: string[] };
+  };
 };
 
 export type CuratedQaEvidence = { point?: string; confidence?: string };
