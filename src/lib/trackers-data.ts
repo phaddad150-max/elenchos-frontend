@@ -112,6 +112,7 @@ export type FootballPlayerEntry = {
   player_name: string;
   nationality?: string;
   team?: string;
+  still_in_competition?: boolean;
   sentiment_score?: number | null;
   sentiment_label?: string;
   mention_salience?: number | null;
@@ -119,24 +120,47 @@ export type FootballPlayerEntry = {
   fan_takeaway?: string;
   evidence?: string[];
   experience_tags?: string[];
-  status?: "active" | "waiting" | string;
+  status?: "active" | "waiting" | "eliminated" | string;
 };
 
 export type FootballPlayerIndexData = {
   players?: FootballPlayerEntry[];
+  teams_eliminated?: string[];
   golden_boot_race_summary?: string;
   key_insights?: string[];
   posts_analyzed?: number;
   snapshot_date?: string;
 };
 
+function normalizeTeamName(name?: string): string {
+  return (name ?? "").toLowerCase().trim().replace(/national team/gi, "").trim();
+}
+
+function playerTeamLabel(p: FootballPlayerEntry): string {
+  return normalizeTeamName(p.team || p.nationality);
+}
+
+function teamMatchesEliminated(teamLabel: string, eliminated: string): boolean {
+  const a = normalizeTeamName(teamLabel);
+  const b = normalizeTeamName(eliminated);
+  if (!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
+function isActiveCompetitionPlayer(p: FootballPlayerEntry, eliminated: string[]): boolean {
+  if (p.still_in_competition === false || p.status === "eliminated") return false;
+  const label = playerTeamLabel(p);
+  return !eliminated.some((e) => teamMatchesEliminated(label, e));
+}
+
 export function extractFootballPlayers(row?: TrackerRow): FootballPlayerEntry[] {
   const data = (row?.data ?? {}) as FootballPlayerIndexData;
+  const eliminated = Array.isArray(data.teams_eliminated) ? data.teams_eliminated : [];
   const players = Array.isArray(data.players) ? data.players : [];
   return [...players]
-    .filter((p) => p?.player_name)
+    .filter((p) => p?.player_name && isActiveCompetitionPlayer(p, eliminated))
     .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
-    .map((p, i) => ({ ...p, rank: p.rank ?? i + 1 }));
+    .map((p, i) => ({ ...p, rank: i + 1 }));
 }
 
 export function extractFootballIndexMeta(row?: TrackerRow): FootballPlayerIndexData {

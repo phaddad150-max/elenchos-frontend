@@ -85,7 +85,7 @@ function FootballPlayersPage() {
           <p className="text-sm text-muted-foreground leading-relaxed">{def?.tagline}</p>
           <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
             Paraphrased fan discourse from earned media on X — no usernames or verbatim quotes.
-            Complements FIFA topic insights on player performances and the golden-boot conversation.
+            Rankings include only players whose national teams are still in the tournament.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2 py-0.5 rounded-full border border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal text-[10px] font-mono uppercase">
