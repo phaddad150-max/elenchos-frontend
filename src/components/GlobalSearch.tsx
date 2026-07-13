@@ -19,7 +19,6 @@ import type { CitizenSignal } from "@/lib/dashboard-data";
 const TRACKER_HREFS: Record<string, string> = {
   global_leader_trust: "/trackers/leaders",
   peace_normalization: "/trackers/peace",
-  media_trust: "/trackers/media",
   football_player_index: "/trackers/football",
 };
 

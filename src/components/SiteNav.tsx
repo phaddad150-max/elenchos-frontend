@@ -1,10 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Radio, Sun, Moon } from "lucide-react";
-import { useState } from "react";
 import { useTheme } from "@/hooks/use-theme";
-import { SponsorModal } from "@/components/SponsorModal";
 import { UserMenu } from "@/components/UserMenu";
-import { SPONSOR_ENABLED } from "@/lib/sponsor-topics";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import type { ReactNode } from "react";
@@ -39,10 +36,8 @@ void NewBadge;
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
   const [theme, , toggle] = useTheme();
-  const [sponsorOpen, setSponsorOpen] = useState(false);
   return (
     <>
-      <SponsorModal open={sponsorOpen} onClose={() => setSponsorOpen(false)} />
       <nav className="sticky top-0 z-30 nav-shell">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           <Link to="/" className="flex items-center gap-2 md:gap-3 group min-w-0">

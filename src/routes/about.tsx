@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   Sparkles,
   ScrollText,
-  HandCoins,
   Globe2,
   LineChart,
   Layers,
@@ -65,7 +64,7 @@ function AboutPage() {
         <Method />
         <Audience />
         <WhyX />
-        <SponsorAndLegal />
+        <LegalSection />
       </main>
 
       <SiteFooter />
@@ -556,13 +555,6 @@ const STACK_ITEMS = [
     icon: Sparkles,
     blurb: "Frontend and pipeline development environment.",
   },
-  {
-    id: "stripe",
-    label: "Stripe",
-    color: "violet",
-    icon: HandCoins,
-    blurb: "Topic sponsorship checkout — funds API and infrastructure costs.",
-  },
 ] as const;
 
 function WhyX() {
@@ -658,7 +650,7 @@ function WhyX() {
   );
 }
 
-// ───────────────────────── Sponsor + Legal ─────────────────────────
+// ───────────────────────── Legal ─────────────────────────
 
 const DISCLAIMER_POINTS = [
   "Independent experimental research — not a commercial business, news outlet, or advisory service.",
@@ -667,35 +659,9 @@ const DISCLAIMER_POINTS = [
   "Use of this dashboard is entirely at your own risk.",
 ];
 
-function SponsorAndLegal() {
+function LegalSection() {
   return (
-    <section className="grid md:grid-cols-[1.1fr_1fr] gap-4">
-      <div className="glass rounded-2xl p-6 md:p-7 border-t-2 border-t-emerald-signal/60 relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute -bottom-16 -right-10 w-56 h-56 rounded-full opacity-20 blur-3xl"
-          style={{ background: "var(--emerald-signal)" }}
-        />
-        <div className="flex items-center gap-2 text-emerald-signal">
-          <div className="p-1.5 rounded-md bg-emerald-signal/15 border border-emerald-signal/30">
-            <HandCoins className="w-4 h-4" />
-          </div>
-          <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">
-            Sponsor a Topic
-          </h2>
-        </div>
-        <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
-          Running Elenchos has real costs: xAI, Grok, X API, infrastructure, and ongoing research.
-          Sponsoring a topic directly funds those expenses and keeps the work independent.
-        </p>
-        <Link
-          to="/topics"
-          className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-emerald-signal/50 bg-emerald-signal/10 text-emerald-signal text-[11px] font-mono uppercase tracking-[0.2em] hover:bg-emerald-signal/15 transition-colors"
-        >
-          Explore sponsorable topics <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-
+    <section>
       <Collapsible defaultOpen={false} className="glass rounded-2xl p-6 md:p-7">
         <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 text-left group">
           <div className="flex items-center gap-2 text-muted-foreground">

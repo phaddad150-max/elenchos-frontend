@@ -33,8 +33,6 @@ import {
   Lightbulb,
   AlertTriangle,
   Users,
-  Lock,
-  Heart,
   Radio,
   Flame,
 } from "lucide-react";
@@ -47,17 +45,7 @@ import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topic
 import { LIVE_TOPIC_KEYS, isLiveTopicId, liveTopicConfig } from "@/lib/topic-catalog";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import {
-  SPONSOR_LOCKED_TOPIC_IDS,
-  SPONSOR_PENDING_STORAGE_KEY,
-  SPONSOR_ENABLED,
-  isTopicSponsorLocked,
-  topicIdForBackendName,
-} from "@/lib/sponsor-topics";
-import { getUnlockedSponsorTopics } from "@/lib/sponsor-unlocks.functions";
-
 const NEAR_REALTIME_TOPIC_ID = "fifa-world-cup-2026";
-const SPONSOR_VISIBLE_COUNT = 4;
 
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly"> = {
   "fifa-world-cup-2026": "realtime",
@@ -297,63 +285,17 @@ function TopicsFilterableGrid({
   onOpen: (id: string) => void;
 }) {
   const [category, setCategory] = useState<"all" | TopicCategory>("all");
-  const [unlocked, setUnlocked] = useState<string[]>([]);
-
-  // Server-verified unlocks: ask the server which topics have a real paid
-  // sponsorship row. The Stripe webhook (service role) is the only writer
-  // of `topic_sponsorships`, so localStorage can never forge an unlock.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!SPONSOR_ENABLED) return;
-    const params = new URLSearchParams(window.location.search);
-    const justReturned = params.get("success") === "true";
-    if (justReturned) {
-      try {
-        window.localStorage.removeItem(SPONSOR_PENDING_STORAGE_KEY);
-      } catch {}
-      const url = new URL(window.location.href);
-      url.searchParams.delete("success");
-      window.history.replaceState({}, "", url.toString());
-    }
-
-    let cancelled = false;
-    const refresh = async () => {
-      try {
-        const { topics } = await getUnlockedSponsorTopics();
-        if (cancelled) return;
-        const ids = topics
-          .map((name) => topicIdForBackendName(name))
-          .filter((v): v is string => !!v);
-        setUnlocked(ids);
-      } catch {
-        if (!cancelled) setUnlocked([]);
-      }
-    };
-    refresh();
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    if (justReturned) timer = setTimeout(refresh, 3000);
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
-
-  const isUnlocked = (id: string) => unlocked.includes(id);
 
   const filtered = useMemo(() => {
     return FEATURE_TOPICS.filter((t) => {
       if (category !== "all" && topicCategory(t.id) !== category) return false;
-      // Sponsor-locked topics remain visible as "Sponsor me" cards even while
-      // the global Sponsor nav/CTA is hidden — clicking still routes to /sponsor.
       return true;
     });
   }, [category]);
 
-  type Bucket = "live-data" | "live-empty" | "sponsor-locked" | "unavailable";
+  type Bucket = "live-data" | "live-empty" | "unavailable";
   function bucketOf(t: FeatureTopic): Bucket {
     const cfg = LIVE_TOPIC_KEYS[t.id];
-    const locked = isTopicSponsorLocked(t.id) && !isUnlocked(t.id);
-    if (locked) return "sponsor-locked";
     if (!cfg) return "unavailable";
     const snap = !simMode ? readSnapshot(cfg.rootKey) : null;
     if (snap || simMode) return "live-data";
@@ -363,7 +305,6 @@ function TopicsFilterableGrid({
   const bucketRank: Record<Bucket, number> = {
     "live-data": 0,
     "live-empty": 1,
-    "sponsor-locked": 2,
     "unavailable": 3,
   };
 
@@ -387,24 +328,9 @@ function TopicsFilterableGrid({
         return prio(a.id) - prio(b.id);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, simMode, unlocked]);
+  }, [filtered, simMode]);
 
-  const { activeTopics, sponsorLocked } = useMemo(() => {
-    const activeTopics: FeatureTopic[] = [];
-    const sponsorLocked: FeatureTopic[] = [];
-    for (const t of ordered) {
-      if (bucketOf(t) === "sponsor-locked") sponsorLocked.push(t);
-      else activeTopics.push(t);
-    }
-    return { activeTopics, sponsorLocked };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ordered, simMode, unlocked]);
-
-  const [sponsorExpanded, setSponsorExpanded] = useState(false);
-  const sponsorVisible = sponsorLocked.slice(0, SPONSOR_VISIBLE_COUNT);
-  const sponsorMore = sponsorLocked.slice(SPONSOR_VISIBLE_COUNT);
-
-  const visibleCount = activeTopics.length + sponsorLocked.length;
+  const visibleCount = ordered.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
@@ -455,7 +381,7 @@ function TopicsFilterableGrid({
         </div>
       )}
 
-      {(activeTopics.length > 0 || sponsorLocked.length > 0) && (
+      {ordered.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
@@ -463,44 +389,12 @@ function TopicsFilterableGrid({
               Topics
             </h2>
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
-              · Live, weekly &amp; monthly · sponsor to unlock
+              · Live, weekly &amp; monthly
             </span>
           </div>
           <div className={topicGridClass}>
-            {activeTopics.map((t, i) => renderTopicCard(t, i))}
-            {sponsorVisible.map((t, i) => (
-              <SponsorMeCard key={t.id} topic={t} delay={(activeTopics.length + i) * 0.03} />
-            ))}
-            {sponsorExpanded &&
-              sponsorMore.map((t, i) => (
-                <SponsorMeCard
-                  key={t.id}
-                  topic={t}
-                  delay={(activeTopics.length + sponsorVisible.length + i) * 0.03}
-                />
-              ))}
+            {ordered.map((t, i) => renderTopicCard(t, i))}
           </div>
-          {sponsorMore.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setSponsorExpanded((v) => !v)}
-              className="w-full flex items-center justify-center gap-2 py-3 sm:py-2.5 rounded-xl border border-dashed border-cyan/35 bg-cyan/[0.04] hover:bg-cyan/[0.08] hover:border-cyan/50 active:bg-cyan/[0.12] text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] sm:tracking-[0.2em] text-cyan transition-colors min-h-[44px] touch-manipulation"
-            >
-              {sponsorExpanded ? (
-                <>
-                  <ChevronDown className="w-4 h-4 rotate-180" />
-                  <span className="sm:hidden">Show fewer</span>
-                  <span className="hidden sm:inline">Show fewer sponsor topics</span>
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="w-4 h-4" />
-                  <span className="sm:hidden">+{sponsorMore.length} more topics</span>
-                  <span className="hidden sm:inline">Show {sponsorMore.length} more sponsor topics</span>
-                </>
-              )}
-            </button>
-          )}
         </section>
       )}
     </div>
@@ -528,7 +422,7 @@ function shortTitle(t: string): string {
   return map[t] ?? t;
 }
 
-/** Shared typography + row heights — every topic/sponsor card uses the same slots */
+/** Shared typography + row heights — every topic card uses the same slots */
 const CARD_LABEL = "text-[9px] md:text-[10px] font-mono uppercase tracking-[0.18em] leading-none";
 const CARD_TITLE = "text-[13px] md:text-[13px] font-display font-semibold tracking-tight leading-[1.25] text-center w-full";
 const CARD_SCORE_LABEL = "text-[9px] md:text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground leading-none";
@@ -578,42 +472,7 @@ function TopicCardScore({
   );
 }
 
-function SponsorMeCard({ topic, delay }: { topic: FeatureTopic; delay: number }) {
-  const backendName = SPONSOR_LOCKED_TOPIC_IDS[topic.id];
-  const category = topicCategory(topic.id);
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      whileHover={{ scale: 1.01, y: -1 }}
-      className={TOPIC_CARD_SHELL}
-    >
-      <div className="h-10 shrink-0 flex flex-col items-center justify-center gap-1">
-        <span className={`${CARD_LABEL} text-cyan inline-flex items-center gap-1`}>
-          <Lock className="w-3 h-3 shrink-0" /> {category}
-        </span>
-      </div>
-      <div className="h-[3.75rem] shrink-0 flex flex-col items-center justify-center px-1 text-center">
-        <Lock className="w-4 h-4 text-cyan/50 mb-1 shrink-0" />
-        <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-2`}>
-          {shortTitle(topic.title)}
-        </h3>
-      </div>
-      <div className="h-[4.5rem] shrink-0 flex items-center justify-center w-full">
-        <p className={`${CARD_LABEL} text-muted-foreground text-center`}>Sponsor to unlock</p>
-      </div>
-      <a
-        href={`/sponsor?topic=${encodeURIComponent(backendName)}`}
-        className={`${CARD_CTA} mt-auto shrink-0 gap-1.5 bg-cyan text-background hover:bg-cyan/90 active:bg-cyan/80`}
-      >
-        <Heart className="w-3 h-3 shrink-0" />
-        <span className="md:hidden">Sponsor</span>
-        <span className="hidden md:inline">Sponsor me</span>
-      </a>
-    </motion.div>
-  );
-}
+
 
 
 
