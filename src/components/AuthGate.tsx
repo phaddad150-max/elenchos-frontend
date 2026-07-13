@@ -56,8 +56,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-background">
-        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+      <div className="min-h-screen relative grid place-items-center bg-background">
+        <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+        <div className="relative z-10 flex flex-col items-center gap-3 text-muted-foreground">
           <div className="brand-mark w-10 h-10 rounded-full grid place-items-center">
             <Radio className="w-4 h-4 text-cyan" strokeWidth={2.5} />
           </div>

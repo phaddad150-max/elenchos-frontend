@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Radio, Loader2, AlertCircle } from "lucide-react";
+import { Radio, Loader2, AlertCircle, Sun, Moon } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
 import { CookieConsent } from "@/components/CookieConsent";
+import { useTheme } from "@/hooks/use-theme";
 
 const CONSENT_KEY = "elenchos_consent_v1";
 
@@ -21,6 +22,7 @@ function XIcon({ className }: { className?: string }) {
 }
 
 export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
+  const [theme, , toggleTheme] = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,8 +56,17 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen relative flex items-center justify-center bg-background px-4 py-10">
+      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 z-20 tap-target p-2 rounded-lg hover:bg-secondary border border-border bg-background/80 backdrop-blur touch-manipulation"
+        aria-label="Toggle theme"
+      >
+        {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      </button>
+      <div className="relative z-10 w-full max-w-md">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="brand-mark w-12 h-12 rounded-full grid place-items-center mb-3">
             <Radio className="w-5 h-5 text-cyan" strokeWidth={2.5} />
