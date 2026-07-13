@@ -22,7 +22,7 @@ function XIcon({ className }: { className?: string }) {
 }
 
 export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
-  const [theme, , toggleTheme] = useTheme();
+  const [theme, setTheme] = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,14 +58,40 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-background px-4 py-10">
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="fixed top-4 right-4 z-20 tap-target p-2 rounded-lg hover:bg-secondary border border-border bg-background/80 backdrop-blur touch-manipulation"
-        aria-label="Toggle theme"
+      <div
+        role="tablist"
+        aria-label="Theme"
+        className="fixed top-4 right-4 z-20 inline-flex items-center gap-1 rounded-full border border-border bg-background/80 backdrop-blur p-1"
       >
-        {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-      </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={theme === "dark"}
+          onClick={() => setTheme("dark")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.14em] transition-colors ${
+            theme === "dark"
+              ? "bg-secondary text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Moon className="w-3.5 h-3.5" />
+          Dark
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={theme === "light"}
+          onClick={() => setTheme("light")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.14em] transition-colors ${
+            theme === "light"
+              ? "bg-secondary text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Sun className="w-3.5 h-3.5" />
+          Light
+        </button>
+      </div>
       <div className="relative z-10 w-full max-w-md">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="brand-mark w-12 h-12 rounded-full grid place-items-center mb-3">
