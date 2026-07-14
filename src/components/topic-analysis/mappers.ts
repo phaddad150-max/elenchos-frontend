@@ -116,6 +116,47 @@ export function buildAudienceLenses(
   ];
 }
 
+const PLACEHOLDER_QA_RE =
+  /limited or unclear data|insufficient clear signals|public discussion exists but is fragmented/i;
+
+export function isPlaceholderQuestion(q: QuestionAnalysis): boolean {
+  const text = [q.summary, ...(q.key_points ?? [])].filter(Boolean).join(" ");
+  return PLACEHOLDER_QA_RE.test(text);
+}
+
+export function keyInsightsToInsightCards(insights: string[]): InsightCardModel[] {
+  return insights
+    .map((raw, i) => raw?.trim())
+    .filter((x): x is string => Boolean(x))
+    .map((text, i) => ({
+      id: `ki-${i}`,
+      title: text.split(/(?<=[.!?])\s+/)[0] ?? text,
+      summary: text,
+      score: 50,
+      evidence: [],
+      audiences: ["All audiences"],
+      wowDelta: null,
+    }));
+}
+
+/** Pass 2 QA → Pass 1 key_insights → substantive question_analysis (skips empty-run placeholders). */
+export function buildInsightCards(
+  qa: CuratedQaPair[],
+  snapshot: TopicSnapshot | null,
+  questions: QuestionAnalysis[],
+): InsightCardModel[] {
+  const curated = qa.filter((c) => c.card_title?.trim() || c.card_summary?.trim());
+  if (curated.length) return qaToInsightCards(curated);
+
+  const insights = (snapshot?.key_insights ?? []).filter((x) => x?.trim());
+  if (insights.length) return keyInsightsToInsightCards(insights);
+
+  const substantive = questions.filter((q) => !isPlaceholderQuestion(q));
+  if (substantive.length) return questionsToInsightCards(substantive);
+
+  return [];
+}
+
 export function qaToInsightCards(qa: CuratedQaPair[]): InsightCardModel[] {
   return qa.map((c, i) => ({
     id: `${c.question_slug ?? i}`,

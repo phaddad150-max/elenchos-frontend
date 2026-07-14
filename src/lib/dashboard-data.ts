@@ -1,7 +1,9 @@
-// Loads latest snapshots from external Supabase (`topic_snapshots` table) and
+// Loads snapshots from Supabase (`latest_topic_snapshots` + `topic_snapshots` history) and
 // the latest aggregated row from `dashboard_overviews`. Exposes both on the
 // window for any component to read. Per-topic snapshots are keyed by the
 // exact topic name string used by the backend.
+//
+// READ-ONLY toward intelligence tables — never DELETE, UPDATE, or UPSERT Supabase rows.
 
 import { useEffect, useState } from "react";
 
@@ -56,6 +58,48 @@ function snapshotQuality(row: TopicSnapshot): number {
     typeof row.fetched_post_count === "number" ? row.fetched_post_count : sample;
   if (sample <= 0 && fetched <= 0) return -1;
   return sample > 0 ? sample : fetched;
+}
+
+/** Merge published latest view with best historical row — keeps divergence/signals from latest, substantive Pass 1 from richer snapshot. */
+export function mergeTopicSnapshots(
+  historical?: TopicSnapshot | null,
+  latest?: TopicSnapshot | null,
+): TopicSnapshot | null {
+  if (!historical && !latest) return null;
+  if (!historical) return latest!;
+  if (!latest) return historical;
+
+  const hQ = snapshotQuality(historical);
+  const lQ = snapshotQuality(latest);
+  const content = hQ >= lQ ? historical : latest;
+
+  return {
+    ...content,
+    topic: content.topic,
+    divergence_score: latest.divergence_score ?? historical.divergence_score,
+    signals: latest.signals ?? historical.signals,
+    top_3_key_stories: latest.top_3_key_stories ?? historical.top_3_key_stories,
+    divergence_gap: latest.divergence_gap ?? historical.divergence_gap,
+    narrative_divergence: latest.narrative_divergence ?? historical.narrative_divergence,
+    last_updated: latest.last_updated ?? historical.last_updated,
+    key_insights: content.key_insights,
+    question_analysis: content.question_analysis,
+    narrative_summary:
+      content.narrative_summary ?? latest.narrative_summary ?? historical.narrative_summary,
+    overall_sentiment:
+      content.overall_sentiment ?? latest.overall_sentiment ?? historical.overall_sentiment,
+    segmented_sentiment:
+      content.segmented_sentiment ?? latest.segmented_sentiment ?? historical.segmented_sentiment,
+    sample_size:
+      Math.max(historical.sample_size ?? 0, latest.sample_size ?? 0) || content.sample_size,
+    fetched_post_count:
+      Math.max(historical.fetched_post_count ?? 0, latest.fetched_post_count ?? 0) ||
+      content.fetched_post_count,
+    month: latest.month ?? historical.month,
+    analysis_version: latest.analysis_version ?? historical.analysis_version,
+    is_live: latest.is_live ?? historical.is_live,
+    raw_analysis: content.raw_analysis ?? latest.raw_analysis ?? historical.raw_analysis,
+  };
 }
 
 /** Prefer rows with real X data over empty fallback inserts (sample_size 0). */
@@ -343,19 +387,36 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
 
   window.__dashboardDataPromise = (async () => {
     try {
-      // Load recent snapshots, normalize legacy topic names, and pick the best
-      // row per canonical topic (skips empty fallback rows when history exists).
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/topic_snapshots?select=*&order=last_updated.desc&limit=500`,
-        { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } },
-      );
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const rows = (await res.json()) as TopicSnapshot[];
-      const byTopic = pickBestSnapshots(rows);
+      const headers = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
+      const [histRes, latestRes] = await Promise.all([
+        fetch(
+          `${SUPABASE_URL}/rest/v1/topic_snapshots?select=*&order=last_updated.desc&limit=500`,
+          { headers },
+        ),
+        fetch(`${SUPABASE_URL}/rest/v1/latest_topic_snapshots?select=*`, { headers }),
+      ]);
+      if (!histRes.ok) throw new Error("HTTP " + histRes.status);
+      const histRows = (await histRes.json()) as TopicSnapshot[];
+      const historical = pickBestSnapshots(histRows);
+
+      let latestByTopic: Record<string, TopicSnapshot> = {};
+      if (latestRes.ok) {
+        const latestRows = (await latestRes.json()) as TopicSnapshot[];
+        latestByTopic = pickBestSnapshots(latestRows);
+      } else {
+        console.warn("latest_topic_snapshots fetch failed", latestRes.status);
+      }
+
+      const keys = new Set([...Object.keys(historical), ...Object.keys(latestByTopic)]);
+      const byTopic: Record<string, TopicSnapshot> = {};
+      for (const key of keys) {
+        const merged = mergeTopicSnapshots(historical[key], latestByTopic[key]);
+        if (merged) byTopic[key] = merged;
+      }
 
       window.dashboardData = byTopic;
       window.dashboardMeta = {};
-      console.log("✅ Loaded latest_topic_snapshots", Object.keys(byTopic));
+      console.log("✅ Loaded topic snapshots (merged latest + history)", Object.keys(byTopic));
       return byTopic;
     } catch (e) {
       console.error("Supabase latest_topic_snapshots fetch failed", e);

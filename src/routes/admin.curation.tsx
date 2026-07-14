@@ -64,29 +64,51 @@ function AdminCurationPage() {
     })();
   }, [isAdmin]);
 
-  const updateRow = async (row: CuratedTopicInsights, patch: Partial<CuratedTopicInsights>) => {
-    if (!row.id) return;
-    setSavingId(row.id);
+  /** Append-only: insert a new revision row — never PATCH/UPDATE existing rows. */
+  const insertRevision = async (
+    row: CuratedTopicInsights,
+    patch: Partial<CuratedTopicInsights & { status?: string }>,
+  ) => {
+    if (!row.topic) return;
+    setSavingId(row.id ?? -1);
     setError(null);
     try {
       const { data: session } = await supabaseExternal.auth.getSession();
       const token = session.session?.access_token;
       if (!token) throw new Error("Not authenticated");
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/curated_topic_insights?id=eq.${row.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            apikey: ANON_KEY,
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify(patch),
+
+      const now = new Date().toISOString();
+      const newRow = {
+        topic: row.topic,
+        snapshot_month: row.snapshot_month ?? now.slice(0, 7),
+        comparison_window: row.comparison_window ?? "wow",
+        hero_headline: patch.hero_headline ?? row.hero_headline ?? "",
+        hero_summary: patch.hero_summary ?? row.hero_summary ?? "",
+        hero_confidence: row.hero_confidence,
+        insight_threads: row.insight_threads ?? [],
+        sentiment_delta: row.sentiment_delta,
+        divergence_delta: row.divergence_delta,
+        evolution_note: row.evolution_note,
+        status: patch.status ?? (row as { status?: string }).status ?? "published",
+        generated_at: now,
+      };
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/curated_topic_insights`, {
+        method: "POST",
+        headers: {
+          apikey: ANON_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
         },
-      );
-      if (!res.ok) throw new Error(`Update failed (${res.status})`);
-      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, ...patch } : r)));
+        body: JSON.stringify(newRow),
+      });
+      if (!res.ok) throw new Error(`Insert failed (${res.status})`);
+      const inserted = (await res.json()) as CuratedTopicInsights[];
+      const saved = inserted[0];
+      if (saved) {
+        setRows((prev) => [saved, ...prev]);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -140,7 +162,7 @@ function AdminCurationPage() {
           <h1 className="text-2xl font-display font-semibold">Curation Admin</h1>
         </div>
         <p className="text-sm text-muted-foreground font-mono">
-          Edit Pass 2 curated insights. Published rows surface on topic pages and dashboard highlights.
+          Save inserts a new Pass 2 revision (append-only). Published rows surface on topic pages and dashboard highlights.
         </p>
         {error && (
           <p className="text-sm text-rose-signal font-mono border border-rose-signal/40 rounded-lg px-3 py-2">
@@ -153,7 +175,7 @@ function AdminCurationPage() {
               key={row.id}
               row={row}
               saving={savingId === row.id}
-              onSave={(patch) => updateRow(row, patch)}
+              onSave={(patch) => insertRevision(row, patch)}
             />
           ))}
           {!items.length && (
@@ -219,7 +241,7 @@ function AdminCurationCard({
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 disabled:opacity-50"
       >
         {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-        Save
+        Save new revision
       </button>
     </div>
   );

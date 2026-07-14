@@ -38,9 +38,8 @@ import {
   type TopicSnapshot,
 } from "@/lib/dashboard-data";
 import {
+  buildInsightCards,
   historySentimentSeries,
-  qaToInsightCards,
-  questionsToInsightCards,
   sortThreads,
   type InsightCardModel,
 } from "./mappers";
@@ -162,7 +161,7 @@ export function TopicAnalysisPage({
   const sample = data?.sample_size?.toLocaleString() ?? "—";
 
   const insightCards = useMemo(
-    () => (qa.length ? qaToInsightCards(qa) : questionsToInsightCards(data?.question_analysis ?? [])),
+    () => buildInsightCards(qa, data, data?.question_analysis ?? []),
     [qa, data],
   );
   const threads = useMemo(() => sortThreads(curated?.insight_threads ?? []), [curated]);
@@ -388,7 +387,8 @@ export function TopicAnalysisPage({
         </section>
       )}
 
-      {/* Insight cards grid */}
+      {/* Insight cards — Pass 2 QA, else Pass 1 key_insights / question_analysis */}
+      {insightCards.length > 0 && (
       <section className="space-y-3">
         <SectionLabel icon={<Brain className="w-3.5 h-3.5" />} title="Key Insights" sub={`${insightCards.length} cards`} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -423,6 +423,7 @@ export function TopicAnalysisPage({
           ))}
         </div>
       </section>
+      )}
 
       {/* Visual analytics */}
       <section className="space-y-3">
