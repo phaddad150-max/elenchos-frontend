@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Radio, Loader2, AlertCircle, Sun, Moon } from "lucide-react";
+import { Radio, Loader2, AlertCircle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
 import { CookieConsent } from "@/components/CookieConsent";
-import { useTheme } from "@/hooks/use-theme";
+import { ThemePreferenceTabs } from "@/components/ThemePreferenceTabs";
 
 const CONSENT_KEY = "elenchos_consent_v1";
 
@@ -22,7 +22,6 @@ function XIcon({ className }: { className?: string }) {
 }
 
 export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
-  const [theme, setTheme] = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,88 +55,61 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-background px-4 py-10">
+    <div className="min-h-screen relative flex flex-col bg-background">
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
-      <div
-        role="tablist"
-        aria-label="Theme"
-        className="fixed top-4 right-4 z-20 inline-flex items-center gap-1 rounded-full border border-border bg-background/80 backdrop-blur p-1"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={theme === "dark"}
-          onClick={() => setTheme("dark")}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.14em] transition-colors ${
-            theme === "dark"
-              ? "bg-secondary text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Moon className="w-3.5 h-3.5" />
-          Dark
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={theme === "light"}
-          onClick={() => setTheme("light")}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.14em] transition-colors ${
-            theme === "light"
-              ? "bg-secondary text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Sun className="w-3.5 h-3.5" />
-          Light
-        </button>
-      </div>
-      <div className="relative z-10 w-full max-w-md">
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="brand-mark w-12 h-12 rounded-full grid place-items-center mb-3">
-            <Radio className="w-5 h-5 text-cyan" strokeWidth={2.5} />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight text-glow-cyan">
-            Elenchos
-          </h1>
-          <p className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground mt-1">
-            Sign in with X to access the dashboard
-          </p>
+      <header className="relative z-20 w-full border-b border-border/50 bg-background/80 backdrop-blur">
+        <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-center">
+          <ThemePreferenceTabs />
         </div>
-
-        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6 shadow-xl">
-          <p className="text-xs text-muted-foreground text-center mb-5 leading-relaxed">
-            Continue with your X account. We never see or store your password — only
-            your basic profile (name, handle, avatar) is shared with us.
-          </p>
-
-          <button
-            type="button"
-            onClick={handleTwitter}
-            disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-border bg-foreground text-background hover:bg-foreground/90 text-sm font-medium disabled:opacity-60 transition-colors"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XIcon className="w-4 h-4" />}
-            Continue with X
-          </button>
-
-          {error && (
-            <div className="mt-4 flex items-start gap-2 text-xs text-red-500 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-              <span>{error}</span>
+      </header>
+      <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="brand-mark w-12 h-12 rounded-full grid place-items-center mb-3">
+              <Radio className="w-5 h-5 text-cyan" strokeWidth={2.5} />
             </div>
-          )}
-        </div>
+            <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight text-glow-cyan">
+              Elenchos
+            </h1>
+            <p className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground mt-1">
+              Sign in with X to access the dashboard
+            </p>
+          </div>
 
-        <p className="text-[11px] text-muted-foreground text-center mt-5 leading-relaxed">
-          By signing in you agree to our{" "}
-          <Link to="/privacy" className="text-cyan hover:underline">
-            Privacy Notice
-          </Link>
-          . Your X profile and authentication metadata are stored securely on
-          EU-hosted infrastructure. We never sell your data and never receive your
-          password.
-        </p>
+          <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6 shadow-xl">
+            <p className="text-xs text-muted-foreground text-center mb-5 leading-relaxed">
+              Continue with your X account. We never see or store your password — only
+              your basic profile (name, handle, avatar) is shared with us.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleTwitter}
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-border bg-foreground text-background hover:bg-foreground/90 text-sm font-medium disabled:opacity-60 transition-colors"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XIcon className="w-4 h-4" />}
+              Continue with X
+            </button>
+
+            {error && (
+              <div className="mt-4 flex items-start gap-2 text-xs text-red-500 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
+
+          <p className="text-[11px] text-muted-foreground text-center mt-5 leading-relaxed">
+            By signing in you agree to our{" "}
+            <Link to="/privacy" className="text-cyan hover:underline">
+              Privacy Notice
+            </Link>
+            . Your X profile and authentication metadata are stored securely on
+            EU-hosted infrastructure. We never sell your data and never receive your
+            password.
+          </p>
+        </div>
       </div>
       <CookieConsent />
     </div>

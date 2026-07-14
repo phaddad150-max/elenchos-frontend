@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Radio, Sun, Moon } from "lucide-react";
-import { useTheme } from "@/hooks/use-theme";
+import { Radio } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
+import { ThemePreferenceTabs } from "@/components/ThemePreferenceTabs";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import type { ReactNode } from "react";
@@ -35,10 +35,14 @@ void NewBadge;
 
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
-  const [theme, , toggle] = useTheme();
   return (
     <>
       <nav className="sticky top-0 z-30 nav-shell">
+        <div className="border-b border-border/40 bg-background/40">
+          <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2 flex items-center justify-center">
+            <ThemePreferenceTabs />
+          </div>
+        </div>
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           <Link to="/" className="flex items-center gap-2 md:gap-3 group min-w-0">
             <div className="brand-mark w-9 h-9 md:w-10 md:h-10 rounded-full grid place-items-center shrink-0">
@@ -84,13 +88,6 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
               <XLogo className="w-3.5 h-3.5" />
               Follow
             </a>
-            <button
-              onClick={toggle}
-              className="tap-target p-2 rounded-lg hover:bg-secondary border border-border touch-manipulation"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
           </div>
         </div>
       </nav>
