@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { PathAuthGate } from "@/components/PathAuthGate";
 import { ThemeInit } from "@/components/ThemeInit";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const FONT_LINKS = [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -163,6 +164,7 @@ function RootComponent() {
       <PathAuthGate>
         <Outlet />
       </PathAuthGate>
+      <CookieConsent />
     </QueryClientProvider>
   );
 }

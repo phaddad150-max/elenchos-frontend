@@ -3,7 +3,8 @@
 // window for any component to read. Per-topic snapshots are keyed by the
 // exact topic name string used by the backend.
 //
-// READ-ONLY toward intelligence tables — never DELETE, UPDATE, or UPSERT Supabase rows.
+// GOLDEN RULE: READ-ONLY toward intelligence tables — never DELETE, UPDATE, or UPSERT.
+// New data is appended by backend pipelines only (.insert()). UI reads via fetch/select.
 
 import { useEffect, useState } from "react";
 
@@ -81,7 +82,8 @@ export function mergeTopicSnapshots(
     top_3_key_stories: latest.top_3_key_stories ?? historical.top_3_key_stories,
     divergence_gap: latest.divergence_gap ?? historical.divergence_gap,
     narrative_divergence: latest.narrative_divergence ?? historical.narrative_divergence,
-    last_updated: latest.last_updated ?? historical.last_updated,
+    last_updated: content.last_updated ?? latest.last_updated ?? historical.last_updated,
+    pipeline_last_updated: latest.last_updated ?? historical.last_updated,
     key_insights: content.key_insights,
     question_analysis: content.question_analysis,
     narrative_summary:
@@ -173,6 +175,8 @@ export type TopicSnapshot = {
   analysis_version?: string;
   is_live?: boolean;
   fetched_post_count?: number;
+  /** Most recent pipeline run timestamp (may be an empty fallback row). */
+  pipeline_last_updated?: string;
   // Narrative-divergence block, when published by the backend.
   narrative_divergence?:
     | { score?: number; label?: string; summary?: string }
@@ -357,12 +361,14 @@ declare global {
     curatedInsights?: Record<string, CuratedTopicInsights | null> | null;
     curatedQaPairs?: Record<string, CuratedQaPair[]> | null;
     topicHistory?: Record<string, TopicHistoryPoint[]> | null;
+    topicSnapshots?: Record<string, TopicSnapshot | null> | null;
     __dashboardDataPromise?: Promise<Record<string, TopicSnapshot> | null>;
     __dashboardOverviewPromise?: Promise<DashboardOverview | null>;
     __citizenSignalsPromise?: Promise<CitizenSignal[] | null>;
     __curatedInsightsPromises?: Record<string, Promise<CuratedTopicInsights | null>>;
     __curatedQaPromises?: Record<string, Promise<CuratedQaPair[]>>;
     __topicHistoryPromises?: Record<string, Promise<TopicHistoryPoint[]>>;
+    __topicSnapshotPromises?: Record<string, Promise<TopicSnapshot | null>>;
   }
 }
 
@@ -458,13 +464,66 @@ export async function loadDashboardOverview(): Promise<DashboardOverview | null>
 
 const supabaseHeaders = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
 
+/** Best merged Pass 1 snapshot for one topic (direct fetch — not dependent on global 500-row cache). */
+export async function loadTopicSnapshot(
+  topic: string,
+  force = false,
+): Promise<TopicSnapshot | null> {
+  if (typeof window === "undefined" || !topic) return null;
+  const canonical = normalizeTopicKey(topic) ?? topic;
+  window.topicSnapshots ??= {};
+  if (!force && window.topicSnapshots[canonical]) {
+    return window.topicSnapshots[canonical]!;
+  }
+  window.__topicSnapshotPromises ??= {};
+  const promiseKey = `${canonical}::${force ? "1" : "0"}`;
+  if (!force && window.__topicSnapshotPromises[promiseKey]) {
+    return window.__topicSnapshotPromises[promiseKey]!;
+  }
+  window.__topicSnapshotPromises[promiseKey] = (async () => {
+    try {
+      const names = legacyTopicNames(canonical);
+      const inList = names.map((n) => encodeURIComponent(n)).join(",");
+      const headers = supabaseHeaders;
+      const [histRes, latestRes] = await Promise.all([
+        fetch(
+          `${SUPABASE_URL}/rest/v1/topic_snapshots?topic=in.(${inList})&select=*&order=last_updated.desc&limit=24`,
+          { headers },
+        ),
+        fetch(
+          `${SUPABASE_URL}/rest/v1/latest_topic_snapshots?topic=in.(${inList})&select=*&limit=5`,
+          { headers },
+        ),
+      ]);
+      if (!histRes.ok) throw new Error("HTTP " + histRes.status);
+      const historical = pickBestSnapshots((await histRes.json()) as TopicSnapshot[]);
+      let latestByTopic: Record<string, TopicSnapshot> = {};
+      if (latestRes.ok) {
+        latestByTopic = pickBestSnapshots((await latestRes.json()) as TopicSnapshot[]);
+      }
+      const merged = mergeTopicSnapshots(historical[canonical], latestByTopic[canonical]);
+      window.topicSnapshots![canonical] = merged;
+      if (merged && window.dashboardData) {
+        window.dashboardData[canonical] = merged;
+      }
+      return merged;
+    } catch (e) {
+      console.warn("loadTopicSnapshot failed", canonical, e);
+      window.topicSnapshots![canonical] = null;
+      return null;
+    }
+  })();
+  return window.__topicSnapshotPromises[promiseKey]!;
+}
+
 export async function loadCuratedTopicInsights(
   topic: string,
   comparisonWindow: string = "wow",
 ): Promise<CuratedTopicInsights | null> {
   if (typeof globalThis.window === "undefined" || !topic) return null;
+  const canonical = normalizeTopicKey(topic) ?? topic;
   const w = globalThis.window;
-  const cacheKey = `${topic}::${comparisonWindow}`;
+  const cacheKey = `${canonical}::${comparisonWindow}`;
   w.curatedInsights ??= {};
   if (w.curatedInsights[cacheKey] !== undefined) {
     return w.curatedInsights[cacheKey];
@@ -473,8 +532,10 @@ export async function loadCuratedTopicInsights(
   if (!w.__curatedInsightsPromises[cacheKey]) {
     w.__curatedInsightsPromises[cacheKey] = (async () => {
       try {
+        const names = legacyTopicNames(canonical);
+        const inList = names.map((n) => encodeURIComponent(n)).join(",");
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?topic=eq.${encodeURIComponent(topic)}&comparison_window=eq.${encodeURIComponent(comparisonWindow)}&select=*&limit=1`,
+          `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?topic=in.(${inList})&comparison_window=eq.${encodeURIComponent(comparisonWindow)}&select=*&order=generated_at.desc&limit=1`,
           { headers: supabaseHeaders },
         );
         if (!res.ok) {
@@ -498,14 +559,17 @@ export async function loadCuratedTopicInsights(
 
 export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]> {
   if (typeof window === "undefined" || !topic) return [];
+  const canonical = normalizeTopicKey(topic) ?? topic;
   window.curatedQaPairs ??= {};
-  if (window.curatedQaPairs[topic]) return window.curatedQaPairs[topic]!;
+  if (window.curatedQaPairs[canonical]) return window.curatedQaPairs[canonical]!;
   window.__curatedQaPromises ??= {};
-  if (!window.__curatedQaPromises[topic]) {
-    window.__curatedQaPromises[topic] = (async () => {
+  if (!window.__curatedQaPromises[canonical]) {
+    window.__curatedQaPromises[canonical] = (async () => {
       try {
+        const names = legacyTopicNames(canonical);
+        const inList = names.map((n) => encodeURIComponent(n)).join(",");
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/latest_curated_qa_pairs?topic=eq.${encodeURIComponent(topic)}&select=*&order=rank.asc&limit=50`,
+          `${SUPABASE_URL}/rest/v1/latest_curated_qa_pairs?topic=in.(${inList})&select=*&order=rank.asc&limit=50`,
           { headers: supabaseHeaders },
         );
         if (!res.ok) {
@@ -514,16 +578,16 @@ export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]
         }
         const rows = (await res.json()) as CuratedQaPair[];
         const sorted = [...(rows ?? [])].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
-        window.curatedQaPairs![topic] = sorted;
+        window.curatedQaPairs![canonical] = sorted;
         return sorted;
       } catch (e) {
         console.warn("curated_qa_pairs fetch failed (table may not exist yet)", e);
-        window.curatedQaPairs![topic] = [];
+        window.curatedQaPairs![canonical] = [];
         return [];
       }
     })();
   }
-  return window.__curatedQaPromises[topic];
+  return window.__curatedQaPromises[canonical];
 }
 
 export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsights[]> {
@@ -550,7 +614,7 @@ export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsi
   }
 }
 
-function legacyTopicNames(canonical: string): string[] {
+export function legacyTopicNames(canonical: string): string[] {
   const names = new Set<string>([canonical]);
   for (const [alias, target] of Object.entries(TOPIC_ALIASES)) {
     if (target === canonical) {

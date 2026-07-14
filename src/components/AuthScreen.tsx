@@ -2,16 +2,9 @@ import { useState } from "react";
 import { Radio, Loader2, AlertCircle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
-import { CookieConsent } from "@/components/CookieConsent";
+import { PrivacyComplianceNotice } from "@/components/PrivacyComplianceNotice";
 import { ThemePreferenceTabs } from "@/components/ThemePreferenceTabs";
-
-const CONSENT_KEY = "elenchos_consent_v1";
-
-function hasStoredPrivacyChoice() {
-  if (typeof window === "undefined") return false;
-  const stored = window.localStorage.getItem(CONSENT_KEY);
-  return stored === "accepted" || stored === "declined";
-}
+import { hasPrivacyChoice } from "@/lib/privacy-consent";
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -26,7 +19,7 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
   const [error, setError] = useState<string | null>(null);
 
   const blockIfNoConsent = () => {
-    if (!hasConsent && !hasStoredPrivacyChoice()) {
+    if (!hasConsent && !hasPrivacyChoice()) {
       setError("Please choose a privacy & cookie option below to continue.");
       return true;
     }
@@ -55,7 +48,7 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col bg-background">
+    <div className="min-h-screen relative flex flex-col bg-background pb-28">
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <header className="relative z-20 w-full border-b border-border/50 bg-background/80 backdrop-blur">
         <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-center">
@@ -77,7 +70,8 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
           </div>
 
           <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6 shadow-xl">
-            <p className="text-xs text-muted-foreground text-center mb-5 leading-relaxed">
+            <PrivacyComplianceNotice />
+            <p className="text-xs text-muted-foreground text-center mb-5 mt-4 leading-relaxed">
               Continue with your X account. We never see or store your password — only
               your basic profile (name, handle, avatar) is shared with us.
             </p>
@@ -111,7 +105,6 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
           </p>
         </div>
       </div>
-      <CookieConsent />
     </div>
   );
 }

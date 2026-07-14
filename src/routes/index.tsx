@@ -49,7 +49,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { clearDashboardCaches } from "@/lib/data-cache";
 import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
 
-import { CookieConsent } from "@/components/CookieConsent";
 import {
   loadCuratedHighlights,
   loadDashboardData,
@@ -121,12 +120,7 @@ function GatedDashboard() {
       </div>
     );
   }
-  return (
-    <>
-      <Dashboard />
-      <CookieConsent />
-    </>
-  );
+  return <Dashboard />;
 }
 
 const SECTORS = ["GOV", "DIP", "SEC", "ECO", "HEA", "MED"] as const;

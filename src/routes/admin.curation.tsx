@@ -4,6 +4,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
 import type { CuratedTopicInsights } from "@/lib/dashboard-data";
+import { assertAppendOnlyFetch } from "@/lib/supabase-append-only";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 
 const SUPABASE_URL = "https://jacbalsongvqvaqlfsbx.supabase.co";
@@ -93,8 +94,9 @@ function AdminCurationPage() {
         generated_at: now,
       };
 
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/curated_topic_insights`, {
-        method: "POST",
+      const url = `${SUPABASE_URL}/rest/v1/curated_topic_insights`;
+      const init = {
+        method: "POST" as const,
         headers: {
           apikey: ANON_KEY,
           Authorization: `Bearer ${token}`,
@@ -102,7 +104,9 @@ function AdminCurationPage() {
           Prefer: "return=representation",
         },
         body: JSON.stringify(newRow),
-      });
+      };
+      assertAppendOnlyFetch(url, init);
+      const res = await fetch(url, init);
       if (!res.ok) throw new Error(`Insert failed (${res.status})`);
       const inserted = (await res.json()) as CuratedTopicInsights[];
       const saved = inserted[0];

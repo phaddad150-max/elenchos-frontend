@@ -148,7 +148,9 @@ export function buildInsightCards(
   const curated = qa.filter((c) => c.card_title?.trim() || c.card_summary?.trim());
   if (curated.length) return qaToInsightCards(curated);
 
-  const insights = (snapshot?.key_insights ?? []).filter((x) => x?.trim());
+  const insights = (snapshot?.key_insights ?? [])
+    .map((x) => x?.trim())
+    .filter((x): x is string => Boolean(x) && !PLACEHOLDER_QA_RE.test(x));
   if (insights.length) return keyInsightsToInsightCards(insights);
 
   const substantive = questions.filter((q) => !isPlaceholderQuestion(q));

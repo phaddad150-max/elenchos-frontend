@@ -29,7 +29,7 @@ import {
 import {
   loadCuratedQaPairs,
   loadCuratedTopicInsights,
-  loadDashboardData,
+  loadTopicSnapshot,
   loadTopicHistory,
   type CuratedQaPair,
   type CuratedTopicInsights,
@@ -81,20 +81,17 @@ function useTopicBundle(rootKey: string) {
     }, BUNDLE_TIMEOUT_MS);
 
     Promise.allSettled([
-      loadDashboardData(attempt > 0),
+      loadTopicSnapshot(rootKey, attempt > 0),
       loadCuratedTopicInsights(rootKey),
       loadCuratedQaPairs(rootKey),
       loadTopicHistory(rootKey, 8),
     ])
       .then((results) => {
         if (cancelled) return;
+        const snap = results[0].status === "fulfilled" ? results[0].value : null;
         const ins = results[1].status === "fulfilled" ? results[1].value : null;
         const pairs = results[2].status === "fulfilled" ? results[2].value : [];
         const hist = results[3].status === "fulfilled" ? results[3].value : [];
-        const snap =
-          typeof window !== "undefined"
-            ? (window.dashboardData?.[rootKey] as LiveData | undefined) ?? null
-            : null;
         setData(snap);
         setCurated(ins);
         setQa(pairs ?? []);
@@ -145,8 +142,9 @@ export function TopicAnalysisPage({
 
   const curatedStale = useMemo(() => {
     if (!curated?.generated_at || !data?.last_updated) return false;
-    return new Date(curated.generated_at).getTime() < new Date(data.last_updated).getTime();
-  }, [curated?.generated_at, data?.last_updated]);
+    const pipelineAt = data.pipeline_last_updated ?? data.last_updated;
+    return new Date(curated.generated_at).getTime() < new Date(pipelineAt).getTime();
+  }, [curated?.generated_at, data?.last_updated, data?.pipeline_last_updated]);
 
   const score = data?.overall_sentiment && typeof data.overall_sentiment === "object"
     ? (data.overall_sentiment.score ?? 0)

@@ -13,4 +13,6 @@ export function clearDashboardCaches() {
   window.__curatedQaPromises = undefined;
   window.topicHistory = undefined;
   window.__topicHistoryPromises = undefined;
+  window.topicSnapshots = undefined;
+  window.__topicSnapshotPromises = undefined;
 }

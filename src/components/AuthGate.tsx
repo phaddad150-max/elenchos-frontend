@@ -4,14 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
 import { AuthScreen } from "./AuthScreen";
 import { Loader2, Radio } from "lucide-react";
-
-const CONSENT_KEY = "elenchos_consent_v1";
-
-function hasPrivacyChoice() {
-  if (typeof window === "undefined") return false;
-  const stored = window.localStorage.getItem(CONSENT_KEY);
-  return stored === "accepted" || stored === "declined";
-}
+import { hasPrivacyChoice } from "@/lib/privacy-consent";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const [primarySession, setPrimarySession] = useState<Session | null>(null);

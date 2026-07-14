@@ -2,13 +2,18 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Cookie, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-const CONSENT_KEY = "elenchos_consent_v1";
+import { appendOnlyInsert } from "@/lib/supabase-append-only";
+import {
+  CONSENT_KEY,
+  hasPrivacyChoice,
+  writeConsentChoice,
+  type ConsentChoice,
+} from "@/lib/privacy-consent";
 
 async function recordConsent(granted: boolean) {
   try {
     const { data } = await supabase.auth.getSession();
-    await supabase.from("user_consents").insert({
+    await appendOnlyInsert(supabase, "user_consents", {
       user_id: data.session?.user.id ?? null,
       consent_type: "cookies_and_privacy",
       granted,
@@ -25,17 +30,11 @@ export function CookieConsent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(CONSENT_KEY);
-    if (!stored) setOpen(true);
+    setOpen(!hasPrivacyChoice());
   }, []);
 
-  const set = (value: "accepted" | "declined") => {
-    try {
-      window.localStorage.setItem(CONSENT_KEY, value);
-      window.dispatchEvent(new Event("consent-changed"));
-    } catch {
-      /* ignore */
-    }
+  const set = (value: ConsentChoice) => {
+    writeConsentChoice(value);
     recordConsent(value === "accepted");
     setOpen(false);
   };
@@ -43,7 +42,11 @@ export function CookieConsent() {
   if (!open) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 p-3 md:p-5 pointer-events-none">
+    <div
+      className="fixed bottom-0 inset-x-0 z-[100] p-3 md:p-5 pointer-events-none"
+      role="dialog"
+      aria-label="Privacy and cookie consent"
+    >
       <div className="pointer-events-auto max-w-3xl mx-auto rounded-2xl border border-cyan/30 bg-background/95 backdrop-blur-xl shadow-2xl p-4 md:p-5">
         <div className="flex items-start gap-3">
           <div className="brand-mark w-9 h-9 rounded-full grid place-items-center shrink-0">
@@ -64,12 +67,14 @@ export function CookieConsent() {
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => set("accepted")}
                 className="px-4 py-1.5 rounded-full bg-cyan text-background text-[11px] font-mono uppercase tracking-[0.18em] font-bold hover:bg-cyan/90"
               >
                 Accept & continue
               </button>
               <button
+                type="button"
                 onClick={() => set("declined")}
                 className="px-4 py-1.5 rounded-full border border-border text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground hover:bg-secondary"
               >
@@ -78,6 +83,7 @@ export function CookieConsent() {
             </div>
           </div>
           <button
+            type="button"
             onClick={() => set("declined")}
             aria-label="Close"
             className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"
@@ -89,3 +95,5 @@ export function CookieConsent() {
     </div>
   );
 }
+
+export { CONSENT_KEY };

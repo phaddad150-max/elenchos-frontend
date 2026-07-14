@@ -684,7 +684,14 @@ function LegalSection() {
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">
+          <p className="mt-4 text-[13px] text-foreground/85 leading-relaxed">
+            For data processing, cookies, and your GDPR rights, see our{" "}
+            <Link to="/privacy" className="text-cyan hover:underline">
+              Privacy Notice
+            </Link>
+            .
+          </p>
+          <p className="mt-3 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">
             Status: Live · independent research
           </p>
         </CollapsibleContent>
