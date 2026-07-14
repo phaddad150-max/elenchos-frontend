@@ -91,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Real-time citizen sentiment and narrative divergence across global topics, leaders, and countries." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@elenchospulse" },
       { name: "twitter:title", content: "Elenchos — Public Discourse Analysis" },
       { name: "twitter:description", content: "Real-time citizen sentiment and narrative divergence across global topics, leaders, and countries." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/W5Rz2r3llIMFfLshMCCJDKe94DJ2/social-images/social-1780054472712-elenchos_logo.webp" },

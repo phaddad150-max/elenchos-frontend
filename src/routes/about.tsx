@@ -319,9 +319,9 @@ const STEPS = [
   },
   {
     icon: Scale,
-    title: "Score & Compare",
+    title: "Score & Contrast",
     body:
-      "Every topic gets a 0–100 score, held against the official narrative to quantify the gap.",
+      "Every topic gets a 0–100 divergence score against the official narrative.",
   },
   {
     icon: Monitor,

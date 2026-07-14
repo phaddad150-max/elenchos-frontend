@@ -1,6 +1,5 @@
-// External Supabase project (jacbalsongvqvaqlfsbx) used for Google + X OAuth on
-// non-Lovable hosts (e.g. Vercel). Lovable Cloud auth only works on elenchos.live.
-// Dashboard data also reads from this project via dashboard-data.ts.
+// Supabase project (jacbalsongvqvaqlfsbx) for Google + X OAuth and dashboard reads.
+// Used by the Vercel-hosted frontend at elenchos.live.
 import { createClient } from "@supabase/supabase-js";
 
 const EXTERNAL_SUPABASE_URL = "https://jacbalsongvqvaqlfsbx.supabase.co";

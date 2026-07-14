@@ -113,8 +113,8 @@ function PrivacyPage() {
 
           <Section icon={Globe2} title="Where your data is stored">
             <p>
-              Your account and consent records are stored in Lovable Cloud
-              (managed Supabase / PostgreSQL) on EU-region infrastructure.
+              Your account and consent records are stored in Supabase
+              (PostgreSQL) on EU-region infrastructure.
               Authentication tokens are exchanged over TLS and stored encrypted
               at rest.
             </p>
