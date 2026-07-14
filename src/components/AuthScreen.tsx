@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Radio, Loader2, AlertCircle } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
-import { PrivacyComplianceNotice } from "@/components/PrivacyComplianceNotice";
 import { ThemePreferenceTabs } from "@/components/ThemePreferenceTabs";
 import { hasPrivacyChoice } from "@/lib/privacy-consent";
 
@@ -70,8 +68,7 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
           </div>
 
           <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6 shadow-xl">
-            <PrivacyComplianceNotice />
-            <p className="text-xs text-muted-foreground text-center mb-5 mt-4 leading-relaxed">
+            <p className="text-xs text-muted-foreground text-center mb-5 leading-relaxed">
               Continue with your X account. We never see or store your password — only
               your basic profile (name, handle, avatar) is shared with us.
             </p>
@@ -93,16 +90,6 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
               </div>
             )}
           </div>
-
-          <p className="text-[11px] text-muted-foreground text-center mt-5 leading-relaxed">
-            By signing in you agree to our{" "}
-            <Link to="/privacy" className="text-cyan hover:underline">
-              Privacy Notice
-            </Link>
-            . Your X profile and authentication metadata are stored securely on
-            EU-hosted infrastructure. We never sell your data and never receive your
-            password.
-          </p>
         </div>
       </div>
     </div>
