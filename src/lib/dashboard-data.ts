@@ -27,6 +27,60 @@ export const CANONICAL_TOPICS = [
   "US AI Economy Boom & American Technological Renaissance",
 ] as const;
 
+const CANONICAL_TOPIC_SET = new Set<string>(CANONICAL_TOPICS);
+
+/** Legacy / truncated DB topic strings → canonical TOPIC_CONFIG keys (keep in sync with backend). */
+export const TOPIC_ALIASES: Record<string, string> = {
+  "fifa world cup 2026": "fifa-world-cup-2026",
+  "fifa world cup 2026 & global fan reactions": "fifa-world-cup-2026",
+  "us ai economy boom & american technologies": "US AI Economy Boom & American Technological Renaissance",
+  "crime & safety": "Crime, Safety & Lawlessness",
+  "crime and safety": "Crime, Safety & Lawlessness",
+  "crime-safety-lawlessness": "Crime, Safety & Lawlessness",
+  "crime, safety & lawlessness": "Crime, Safety & Lawlessness",
+};
+
+/** Map any Supabase topic string to the canonical backend key, or null if unknown. */
+export function normalizeTopicKey(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (CANONICAL_TOPIC_SET.has(trimmed)) return trimmed;
+  const aliased = TOPIC_ALIASES[trimmed.toLowerCase()];
+  if (aliased && CANONICAL_TOPIC_SET.has(aliased)) return aliased;
+  return null;
+}
+
+function snapshotQuality(row: TopicSnapshot): number {
+  const sample = typeof row.sample_size === "number" ? row.sample_size : 0;
+  const fetched =
+    typeof row.fetched_post_count === "number" ? row.fetched_post_count : sample;
+  if (sample <= 0 && fetched <= 0) return -1;
+  return sample > 0 ? sample : fetched;
+}
+
+/** Prefer rows with real X data over empty fallback inserts (sample_size 0). */
+export function pickBestSnapshots(rows: TopicSnapshot[]): Record<string, TopicSnapshot> {
+  const buckets: Record<string, TopicSnapshot[]> = {};
+  for (const row of rows) {
+    const canonical = normalizeTopicKey(row?.topic);
+    if (!canonical) continue;
+    (buckets[canonical] ??= []).push({ ...row, topic: canonical });
+  }
+  const byTopic: Record<string, TopicSnapshot> = {};
+  for (const [key, group] of Object.entries(buckets)) {
+    group.sort((a, b) => {
+      const qa = snapshotQuality(a);
+      const qb = snapshotQuality(b);
+      if (qa !== qb) return qb - qa;
+      const ta = Date.parse(a.last_updated ?? "") || 0;
+      const tb = Date.parse(b.last_updated ?? "") || 0;
+      return tb - ta;
+    });
+    byTopic[key] = group[0]!;
+  }
+  return byTopic;
+}
+
 // Static UI-only placeholders. NEVER queried against Supabase. NEVER bound
 // to topic_snapshots. Surfaced only as "Coming soon" cards / sponsor options.
 export const COMING_SOON_TOPICS = [
@@ -74,6 +128,7 @@ export type TopicSnapshot = {
   top_3_key_stories?: string[] | null;
   analysis_version?: string;
   is_live?: boolean;
+  fetched_post_count?: number;
   // Narrative-divergence block, when published by the backend.
   narrative_divergence?:
     | { score?: number; label?: string; summary?: string }
@@ -147,6 +202,8 @@ export type TopicHistoryPoint = {
   overall_sentiment?: { score?: number; label?: string };
   divergence_score?: number | null;
   segmented_sentiment?: Record<string, SegmentValue | number>;
+  sample_size?: number;
+  fetched_post_count?: number;
 };
 
 export type IntelFeedItem = {
@@ -286,24 +343,15 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
 
   window.__dashboardDataPromise = (async () => {
     try {
-      // Single source of truth: latest_topic_snapshots view (one row per
-      // topic, latest by last_updated). Includes divergence_score + signals.
+      // Load recent snapshots, normalize legacy topic names, and pick the best
+      // row per canonical topic (skips empty fallback rows when history exists).
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/latest_topic_snapshots?select=*&limit=400`,
+        `${SUPABASE_URL}/rest/v1/topic_snapshots?select=*&order=last_updated.desc&limit=500`,
         { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } },
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as TopicSnapshot[];
-
-      const canonical = new Set<string>(CANONICAL_TOPICS);
-      const byTopic: Record<string, TopicSnapshot> = {};
-      for (const row of rows) {
-        if (!row?.topic) continue;
-        if (!canonical.has(row.topic)) continue;
-        // Latest-per-topic is already guaranteed by the view; first wins.
-        if (byTopic[row.topic]) continue;
-        byTopic[row.topic] = row;
-      }
+      const byTopic = pickBestSnapshots(rows);
 
       window.dashboardData = byTopic;
       window.dashboardMeta = {};
@@ -441,30 +489,60 @@ export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsi
   }
 }
 
+function legacyTopicNames(canonical: string): string[] {
+  const names = new Set<string>([canonical]);
+  for (const [alias, target] of Object.entries(TOPIC_ALIASES)) {
+    if (target === canonical) {
+      const titleCase = alias.replace(/\b\w/g, (c) => c.toUpperCase());
+      names.add(titleCase);
+      names.add(alias);
+    }
+  }
+  if (canonical === "fifa-world-cup-2026") names.add("FIFA World Cup 2026");
+  if (canonical === "US AI Economy Boom & American Technological Renaissance") {
+    names.add("US AI Economy Boom & American Technologies");
+  }
+  return [...names];
+}
+
 export async function loadTopicHistory(topic: string, limit = 6): Promise<TopicHistoryPoint[]> {
   if (typeof window === "undefined" || !topic) return [];
+  const canonical = normalizeTopicKey(topic) ?? topic;
   window.topicHistory ??= {};
-  if (window.topicHistory[topic]) return window.topicHistory[topic]!;
+  if (window.topicHistory[canonical]) return window.topicHistory[canonical]!;
   window.__topicHistoryPromises ??= {};
-  if (!window.__topicHistoryPromises[topic]) {
-    window.__topicHistoryPromises[topic] = (async () => {
+  if (!window.__topicHistoryPromises[canonical]) {
+    window.__topicHistoryPromises[canonical] = (async () => {
       try {
+        const names = legacyTopicNames(canonical);
+        const inList = names.map((n) => encodeURIComponent(n)).join(",");
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/topic_snapshots?topic=eq.${encodeURIComponent(topic)}&select=month,last_updated,overall_sentiment,divergence_score,segmented_sentiment&order=last_updated.desc&limit=${limit}`,
+          `${SUPABASE_URL}/rest/v1/topic_snapshots?topic=in.(${inList})&select=month,last_updated,overall_sentiment,divergence_score,segmented_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=${Math.max(limit * 3, 18)}`,
           { headers: supabaseHeaders },
         );
         if (!res.ok) throw new Error("HTTP " + res.status);
-        const rows = (await res.json()) as TopicHistoryPoint[];
-        window.topicHistory![topic] = rows ?? [];
-        return rows ?? [];
+        const rows = ((await res.json()) as TopicHistoryPoint[]).filter(
+          (r) => snapshotQuality(r as TopicSnapshot) >= 0,
+        );
+        const deduped: TopicHistoryPoint[] = [];
+        const seen = new Set<string>();
+        for (const row of rows) {
+          const key = row.last_updated ?? row.month ?? "";
+          if (seen.has(key)) continue;
+          seen.add(key);
+          deduped.push(row);
+          if (deduped.length >= limit) break;
+        }
+        window.topicHistory![canonical] = deduped;
+        return deduped;
       } catch (e) {
         console.warn("topic_snapshots history fetch failed", e);
-        window.topicHistory![topic] = [];
+        window.topicHistory![canonical] = [];
         return [];
       }
     })();
   }
-  return window.__topicHistoryPromises[topic];
+  return window.__topicHistoryPromises[canonical];
 }
 
 export async function loadCitizenSignals(): Promise<CitizenSignal[] | null> {
@@ -480,8 +558,7 @@ export async function loadCitizenSignals(): Promise<CitizenSignal[] | null> {
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as CitizenSignal[];
-      const canonical = new Set<string>(CANONICAL_TOPICS);
-      const filtered = rows.filter((r) => r?.topic && canonical.has(r.topic));
+      const filtered = rows.filter((r) => normalizeTopicKey(r?.topic) != null);
       window.citizenSignals = filtered;
       console.log("✅ Loaded citizen_signals", filtered.length);
       return filtered;

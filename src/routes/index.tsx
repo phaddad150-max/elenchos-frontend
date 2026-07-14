@@ -57,6 +57,7 @@ import {
   loadCitizenSignals,
   useSimMode,
   CANONICAL_TOPICS,
+  normalizeTopicKey,
   type CuratedTopicInsights,
   type DashboardOverview,
   type IntelFeedItem,
@@ -324,13 +325,12 @@ function Dashboard() {
   // Supabase), placed geographically via topic→anchor mapping.
   const liveSignals = useMemo<Signal[]>(() => {
     if (simMode) return [];
-    const allowed = new Set<string>(CANONICAL_TOPICS as readonly string[]);
     const seen = new Set<string>();
     const out: Signal[] = [];
 
     if (overview?.intel_feed?.length) {
       overview.intel_feed.forEach((it, i) => {
-        if (it?.topic && !allowed.has(it.topic)) return;
+        if (it?.topic && !normalizeTopicKey(it.topic)) return;
         const sig = intelToSignal(it, i);
         if (seen.has(sig.id)) return;
         seen.add(sig.id);
@@ -362,7 +362,7 @@ function Dashboard() {
         }));
 
     source.forEach((it, i) => {
-      if (!it?.topic || !allowed.has(it.topic)) return;
+      if (!it?.topic || !normalizeTopicKey(it.topic)) return;
       if (seen.has(it.topic)) return;
       seen.add(it.topic);
       const geo = topicGeo(it.topic);
