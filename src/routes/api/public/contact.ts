@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/public/contact")({
             );
           }
 
-          // Lovable connector gateway removed — configure a mail provider on Vercel when needed.
+          // Email relay not configured — wire a mail provider on Vercel when needed.
           console.info("[contact] message received (email relay not configured)", {
             source: parsed.data.source,
             email: parsed.data.email,

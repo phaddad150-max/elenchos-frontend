@@ -5,13 +5,13 @@ Presentation layer for [elenchos.live](https://elenchos.live). Reads all scores,
 ## Stack
 
 - TanStack Start + Vite
-- Deployed on **Vercel** (not Lovable)
+- Deployed on **Vercel**
 - Auth + data: Supabase project `jacbalsongvqvaqlfsbx`
 
 ## Retired
 
 - `/compare` on-demand page and `elenchos-compare-backend` dispatch — removed
-- Lovable Cloud hosting and connector integrations — removed
+
 
 ## Local dev
 
