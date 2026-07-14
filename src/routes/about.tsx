@@ -614,9 +614,7 @@ function WhyX() {
                 ? "border-cyan/40 bg-cyan/10 text-cyan"
                 : item.color === "emerald"
                   ? "border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal"
-                  : item.color === "violet"
-                    ? "border-violet-400/40 bg-violet-400/10 text-violet-400"
-                    : "border-border bg-secondary/60 text-muted-foreground";
+                  : "border-border bg-secondary/60 text-muted-foreground";
             return (
               <button
                 key={item.id}
