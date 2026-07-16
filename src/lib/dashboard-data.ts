@@ -416,9 +416,10 @@ const supabaseHeaders = {
 };
 
 function supabaseFetch(pathAndQuery: string, init?: RequestInit): Promise<Response> {
-  const sep = pathAndQuery.includes("?") ? "&" : "?";
-  // Cache-bust query so browser/CDN cannot serve a stale PostgREST body.
-  const url = `${SUPABASE_URL}/rest/v1/${pathAndQuery}${sep}_ts=${Date.now()}`;
+  // Do NOT append arbitrary query params (e.g. _ts=...). PostgREST treats unknown
+  // keys as column filters and returns 400, which blanked the entire dashboard.
+  // Browser freshness comes from cache: "no-store" + Cache-Control headers only.
+  const url = `${SUPABASE_URL}/rest/v1/${pathAndQuery}`;
   return fetch(url, {
     ...init,
     cache: "no-store",

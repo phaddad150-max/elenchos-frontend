@@ -269,8 +269,8 @@ function Dashboard() {
     clearDashboardCaches();
     const [snap, ov, cs] = await Promise.all([
       loadDashboardData(true),
-      loadDashboardOverview(),
-      loadCitizenSignals(),
+      loadDashboardOverview(true),
+      loadCitizenSignals(true),
     ]);
     setSnapshots(snap ?? null);
     setOverview(ov);
