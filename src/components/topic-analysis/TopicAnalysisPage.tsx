@@ -80,11 +80,13 @@ function useTopicBundle(rootKey: string) {
       }
     }, BUNDLE_TIMEOUT_MS);
 
+    // attempt > 0 means user hit refresh — force re-fetch so new Supabase rows appear.
+    const force = attempt > 0;
     Promise.allSettled([
-      loadTopicSnapshot(rootKey, attempt > 0),
-      loadCuratedTopicInsights(rootKey),
-      loadCuratedQaPairs(rootKey),
-      loadTopicHistory(rootKey, 8),
+      loadTopicSnapshot(rootKey, force),
+      loadCuratedTopicInsights(rootKey, "wow", force),
+      loadCuratedQaPairs(rootKey, force),
+      loadTopicHistory(rootKey, 8, force),
     ])
       .then((results) => {
         if (cancelled) return;

@@ -5,6 +5,7 @@ export function clearDashboardCaches() {
   window.__dashboardDataPromise = undefined;
   window.dashboardOverview = undefined as never;
   window.__dashboardOverviewPromise = undefined;
+  window.dashboardMeta = undefined as never;
   window.__citizenSignalsPromise = undefined;
   window.citizenSignals = undefined as never;
   window.curatedInsights = undefined;

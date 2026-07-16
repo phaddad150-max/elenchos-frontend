@@ -61,7 +61,30 @@ function snapshotQuality(row: TopicSnapshot): number {
   return sample > 0 ? sample : fetched;
 }
 
-/** Merge published latest view with best historical row — keeps divergence/signals from latest, substantive Pass 1 from richer snapshot. */
+function isSubstantiveSnapshot(row: TopicSnapshot | null | undefined): boolean {
+  return snapshotQuality(row as TopicSnapshot) >= 0;
+}
+
+function snapshotRecencyMs(row: TopicSnapshot): number {
+  return Date.parse(row.last_updated ?? "") || 0;
+}
+
+/**
+ * Live display rank: skip empty rows, then prefer freshest last_updated.
+ * Sample size is only a tiebreaker — never hide a newer FIFA/manual run
+ * behind an older larger sample.
+ */
+export function compareSnapshotsForLive(a: TopicSnapshot, b: TopicSnapshot): number {
+  const aSub = isSubstantiveSnapshot(a) ? 1 : 0;
+  const bSub = isSubstantiveSnapshot(b) ? 1 : 0;
+  if (aSub !== bSub) return bSub - aSub;
+  const ta = snapshotRecencyMs(a);
+  const tb = snapshotRecencyMs(b);
+  if (ta !== tb) return tb - ta;
+  return snapshotQuality(b) - snapshotQuality(a);
+}
+
+/** Merge latest view + history: always surface the newest substantive Pass 1 row. */
 export function mergeTopicSnapshots(
   historical?: TopicSnapshot | null,
   latest?: TopicSnapshot | null,
@@ -72,39 +95,51 @@ export function mergeTopicSnapshots(
 
   const hQ = snapshotQuality(historical);
   const lQ = snapshotQuality(latest);
-  const content = hQ >= lQ ? historical : latest;
+
+  // Newest substantive wins for all narrative/content fields.
+  let content: TopicSnapshot;
+  if (lQ >= 0 && hQ >= 0) {
+    content = compareSnapshotsForLive(latest, historical) <= 0 ? latest : historical;
+  } else if (lQ >= 0) {
+    content = latest;
+  } else if (hQ >= 0) {
+    content = historical;
+  } else {
+    content = compareSnapshotsForLive(latest, historical) <= 0 ? latest : historical;
+  }
+
+  const other = content === latest ? historical : latest;
 
   return {
     ...content,
     topic: content.topic,
-    divergence_score: latest.divergence_score ?? historical.divergence_score,
-    signals: latest.signals ?? historical.signals,
-    top_3_key_stories: latest.top_3_key_stories ?? historical.top_3_key_stories,
-    divergence_gap: latest.divergence_gap ?? historical.divergence_gap,
-    narrative_divergence: latest.narrative_divergence ?? historical.narrative_divergence,
-    last_updated: content.last_updated ?? latest.last_updated ?? historical.last_updated,
-    pipeline_last_updated: latest.last_updated ?? historical.last_updated,
-    key_insights: content.key_insights,
-    question_analysis: content.question_analysis,
-    narrative_summary:
-      content.narrative_summary ?? latest.narrative_summary ?? historical.narrative_summary,
-    overall_sentiment:
-      content.overall_sentiment ?? latest.overall_sentiment ?? historical.overall_sentiment,
-    segmented_sentiment:
-      content.segmented_sentiment ?? latest.segmented_sentiment ?? historical.segmented_sentiment,
-    sample_size:
-      Math.max(historical.sample_size ?? 0, latest.sample_size ?? 0) || content.sample_size,
-    fetched_post_count:
-      Math.max(historical.fetched_post_count ?? 0, latest.fetched_post_count ?? 0) ||
-      content.fetched_post_count,
-    month: latest.month ?? historical.month,
-    analysis_version: latest.analysis_version ?? historical.analysis_version,
-    is_live: latest.is_live ?? historical.is_live,
-    raw_analysis: content.raw_analysis ?? latest.raw_analysis ?? historical.raw_analysis,
+    // Prefer fields from the displayed content; fill gaps from the other row.
+    divergence_score: content.divergence_score ?? other.divergence_score,
+    signals: content.signals ?? other.signals,
+    top_3_key_stories: content.top_3_key_stories ?? other.top_3_key_stories,
+    divergence_gap: content.divergence_gap ?? other.divergence_gap,
+    narrative_divergence: content.narrative_divergence ?? other.narrative_divergence,
+    last_updated: content.last_updated ?? other.last_updated,
+    pipeline_last_updated:
+      snapshotRecencyMs(latest) >= snapshotRecencyMs(historical)
+        ? latest.last_updated ?? historical.last_updated
+        : historical.last_updated ?? latest.last_updated,
+    key_insights: content.key_insights ?? other.key_insights,
+    question_analysis: content.question_analysis ?? other.question_analysis,
+    narrative_summary: content.narrative_summary ?? other.narrative_summary,
+    overall_sentiment: content.overall_sentiment ?? other.overall_sentiment,
+    segmented_sentiment: content.segmented_sentiment ?? other.segmented_sentiment,
+    // Honest sample for the displayed run (do not inflate with older max).
+    sample_size: content.sample_size ?? other.sample_size,
+    fetched_post_count: content.fetched_post_count ?? other.fetched_post_count,
+    month: content.month ?? other.month,
+    analysis_version: content.analysis_version ?? other.analysis_version,
+    is_live: content.is_live ?? other.is_live,
+    raw_analysis: content.raw_analysis ?? other.raw_analysis,
   };
 }
 
-/** Prefer rows with real X data over empty fallback inserts (sample_size 0). */
+/** Prefer newest substantive row per topic (empty inserts never win). */
 export function pickBestSnapshots(rows: TopicSnapshot[]): Record<string, TopicSnapshot> {
   const buckets: Record<string, TopicSnapshot[]> = {};
   for (const row of rows) {
@@ -114,14 +149,7 @@ export function pickBestSnapshots(rows: TopicSnapshot[]): Record<string, TopicSn
   }
   const byTopic: Record<string, TopicSnapshot> = {};
   for (const [key, group] of Object.entries(buckets)) {
-    group.sort((a, b) => {
-      const qa = snapshotQuality(a);
-      const qb = snapshotQuality(b);
-      if (qa !== qb) return qb - qa;
-      const ta = Date.parse(a.last_updated ?? "") || 0;
-      const tb = Date.parse(b.last_updated ?? "") || 0;
-      return tb - ta;
-    });
+    group.sort(compareSnapshotsForLive);
     byTopic[key] = group[0]!;
   }
   return byTopic;
@@ -379,6 +407,25 @@ export function invalidateDashboardCache(): void {
   window.dashboardMeta = undefined;
 }
 
+const supabaseHeaders = {
+  apikey: ANON_KEY,
+  Authorization: `Bearer ${ANON_KEY}`,
+  // Intelligence is append-only; always read the newest REST payload.
+  "Cache-Control": "no-cache",
+  Pragma: "no-cache",
+};
+
+function supabaseFetch(pathAndQuery: string, init?: RequestInit): Promise<Response> {
+  const sep = pathAndQuery.includes("?") ? "&" : "?";
+  // Cache-bust query so browser/CDN cannot serve a stale PostgREST body.
+  const url = `${SUPABASE_URL}/rest/v1/${pathAndQuery}${sep}_ts=${Date.now()}`;
+  return fetch(url, {
+    ...init,
+    cache: "no-store",
+    headers: { ...supabaseHeaders, ...(init?.headers as Record<string, string> | undefined) },
+  });
+}
+
 export async function loadDashboardData(force = false): Promise<Record<string, TopicSnapshot> | null> {
   if (typeof window === "undefined") return null;
   const hadFailedFetch = window.dashboardMeta?.fallback === true;
@@ -393,13 +440,9 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
 
   window.__dashboardDataPromise = (async () => {
     try {
-      const headers = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
       const [histRes, latestRes] = await Promise.all([
-        fetch(
-          `${SUPABASE_URL}/rest/v1/topic_snapshots?select=*&order=last_updated.desc&limit=500`,
-          { headers },
-        ),
-        fetch(`${SUPABASE_URL}/rest/v1/latest_topic_snapshots?select=*`, { headers }),
+        supabaseFetch("topic_snapshots?select=*&order=last_updated.desc&limit=500"),
+        supabaseFetch("latest_topic_snapshots?select=*"),
       ]);
       if (!histRes.ok) throw new Error("HTTP " + histRes.status);
       const histRows = (await histRes.json()) as TopicSnapshot[];
@@ -435,16 +478,19 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
   return window.__dashboardDataPromise;
 }
 
-export async function loadDashboardOverview(): Promise<DashboardOverview | null> {
+export async function loadDashboardOverview(force = false): Promise<DashboardOverview | null> {
   if (typeof window === "undefined") return null;
+  if (force) {
+    window.dashboardOverview = undefined;
+    window.__dashboardOverviewPromise = undefined;
+  }
   if (window.dashboardOverview) return window.dashboardOverview;
   if (window.__dashboardOverviewPromise) return window.__dashboardOverviewPromise;
 
   window.__dashboardOverviewPromise = (async () => {
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/dashboard_overviews?select=*&order=generated_at.desc&limit=1`,
-        { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } },
+      const res = await supabaseFetch(
+        "dashboard_overviews?select=*&order=generated_at.desc&limit=1",
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as DashboardOverview[];
@@ -462,8 +508,6 @@ export async function loadDashboardOverview(): Promise<DashboardOverview | null>
   return window.__dashboardOverviewPromise;
 }
 
-const supabaseHeaders = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
-
 /** Best merged Pass 1 snapshot for one topic (direct fetch — not dependent on global 500-row cache). */
 export async function loadTopicSnapshot(
   topic: string,
@@ -472,7 +516,13 @@ export async function loadTopicSnapshot(
   if (typeof window === "undefined" || !topic) return null;
   const canonical = normalizeTopicKey(topic) ?? topic;
   window.topicSnapshots ??= {};
-  if (!force && window.topicSnapshots[canonical]) {
+  if (force) {
+    delete window.topicSnapshots[canonical];
+    if (window.__topicSnapshotPromises) {
+      delete window.__topicSnapshotPromises[`${canonical}::0`];
+      delete window.__topicSnapshotPromises[`${canonical}::1`];
+    }
+  } else if (window.topicSnapshots[canonical]) {
     return window.topicSnapshots[canonical]!;
   }
   window.__topicSnapshotPromises ??= {};
@@ -484,15 +534,12 @@ export async function loadTopicSnapshot(
     try {
       const names = legacyTopicNames(canonical);
       const inList = names.map((n) => encodeURIComponent(n)).join(",");
-      const headers = supabaseHeaders;
       const [histRes, latestRes] = await Promise.all([
-        fetch(
-          `${SUPABASE_URL}/rest/v1/topic_snapshots?topic=in.(${inList})&select=*&order=last_updated.desc&limit=24`,
-          { headers },
+        supabaseFetch(
+          `topic_snapshots?topic=in.(${inList})&select=*&order=last_updated.desc&limit=24`,
         ),
-        fetch(
-          `${SUPABASE_URL}/rest/v1/latest_topic_snapshots?topic=in.(${inList})&select=*&limit=5`,
-          { headers },
+        supabaseFetch(
+          `latest_topic_snapshots?topic=in.(${inList})&select=*&limit=5`,
         ),
       ]);
       if (!histRes.ok) throw new Error("HTTP " + histRes.status);
@@ -516,27 +563,52 @@ export async function loadTopicSnapshot(
   return window.__topicSnapshotPromises[promiseKey]!;
 }
 
+/** Empty-run Pass 2 rows (zero posts) must not mask real Pass 1 content. */
+export function isEmptyCuratedInsight(row: CuratedTopicInsights | null | undefined): boolean {
+  if (!row) return true;
+  const text = [row.hero_headline, row.hero_summary, row.evolution_note]
+    .filter(Boolean)
+    .join(" ");
+  if (!text.trim()) return true;
+  return /zero posts|data collapse|data void|data shortfall|no fresh signals|collapse to zero|drops to zero|yield no insights|insufficient signals|no usable recent signals/i.test(
+    text,
+  );
+}
+
+export function isEmptyCuratedQa(row: CuratedQaPair): boolean {
+  const text = [row.card_title, row.card_summary].filter(Boolean).join(" ");
+  return (
+    !text.trim() ||
+    /limited or unclear data|insufficient clear signals|insufficient signals|public discussion exists but is fragmented/i.test(
+      text,
+    )
+  );
+}
+
 export async function loadCuratedTopicInsights(
   topic: string,
   comparisonWindow: string = "wow",
+  force = false,
 ): Promise<CuratedTopicInsights | null> {
   if (typeof globalThis.window === "undefined" || !topic) return null;
   const canonical = normalizeTopicKey(topic) ?? topic;
   const w = globalThis.window;
   const cacheKey = `${canonical}::${comparisonWindow}`;
   w.curatedInsights ??= {};
-  if (w.curatedInsights[cacheKey] !== undefined) {
+  w.__curatedInsightsPromises ??= {};
+  if (force) {
+    delete w.curatedInsights[cacheKey];
+    delete w.__curatedInsightsPromises[cacheKey];
+  } else if (w.curatedInsights[cacheKey] !== undefined) {
     return w.curatedInsights[cacheKey];
   }
-  w.__curatedInsightsPromises ??= {};
   if (!w.__curatedInsightsPromises[cacheKey]) {
     w.__curatedInsightsPromises[cacheKey] = (async () => {
       try {
         const names = legacyTopicNames(canonical);
         const inList = names.map((n) => encodeURIComponent(n)).join(",");
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?topic=in.(${inList})&comparison_window=eq.${encodeURIComponent(comparisonWindow)}&select=*&order=generated_at.desc&limit=1`,
-          { headers: supabaseHeaders },
+        const res = await supabaseFetch(
+          `latest_curated_topic_insights?topic=in.(${inList})&comparison_window=eq.${encodeURIComponent(comparisonWindow)}&select=*&order=generated_at.desc&limit=1`,
         );
         if (!res.ok) {
           // View may not exist until migration is applied
@@ -545,8 +617,10 @@ export async function loadCuratedTopicInsights(
         }
         const rows = (await res.json()) as CuratedTopicInsights[];
         const row = rows?.[0] ?? null;
-        w.curatedInsights![cacheKey] = row;
-        return row;
+        // Drop empty-run curation so topic pages fall back to Pass 1.
+        const usable = row && !isEmptyCuratedInsight(row) ? row : null;
+        w.curatedInsights![cacheKey] = usable;
+        return usable;
       } catch (e) {
         console.warn("curated_topic_insights fetch failed (table may not exist yet)", e);
         w.curatedInsights![cacheKey] = null;
@@ -557,27 +631,33 @@ export async function loadCuratedTopicInsights(
   return w.__curatedInsightsPromises[cacheKey];
 }
 
-export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]> {
+export async function loadCuratedQaPairs(topic: string, force = false): Promise<CuratedQaPair[]> {
   if (typeof window === "undefined" || !topic) return [];
   const canonical = normalizeTopicKey(topic) ?? topic;
   window.curatedQaPairs ??= {};
-  if (window.curatedQaPairs[canonical]) return window.curatedQaPairs[canonical]!;
   window.__curatedQaPromises ??= {};
+  if (force) {
+    delete window.curatedQaPairs[canonical];
+    delete window.__curatedQaPromises[canonical];
+  } else if (window.curatedQaPairs[canonical]) {
+    return window.curatedQaPairs[canonical]!;
+  }
   if (!window.__curatedQaPromises[canonical]) {
     window.__curatedQaPromises[canonical] = (async () => {
       try {
         const names = legacyTopicNames(canonical);
         const inList = names.map((n) => encodeURIComponent(n)).join(",");
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/latest_curated_qa_pairs?topic=in.(${inList})&select=*&order=rank.asc&limit=50`,
-          { headers: supabaseHeaders },
+        const res = await supabaseFetch(
+          `latest_curated_qa_pairs?topic=in.(${inList})&select=*&order=rank.asc&limit=50`,
         );
         if (!res.ok) {
           if (res.status === 404 || res.status === 400) return [];
           throw new Error("HTTP " + res.status);
         }
         const rows = (await res.json()) as CuratedQaPair[];
-        const sorted = [...(rows ?? [])].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+        const sorted = [...(rows ?? [])]
+          .filter((r) => !isEmptyCuratedQa(r))
+          .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
         window.curatedQaPairs![canonical] = sorted;
         return sorted;
       } catch (e) {
@@ -593,9 +673,8 @@ export async function loadCuratedQaPairs(topic: string): Promise<CuratedQaPair[]
 export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsights[]> {
   if (typeof window === "undefined") return [];
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/latest_curated_topic_insights?comparison_window=eq.wow&select=*&order=generated_at.desc&limit=${limit * 3}`,
-      { headers: supabaseHeaders },
+    const res = await supabaseFetch(
+      `latest_curated_topic_insights?comparison_window=eq.wow&select=*&order=generated_at.desc&limit=${limit * 3}`,
     );
     if (!res.ok) return [];
     const rows = (await res.json()) as CuratedTopicInsights[];
@@ -603,6 +682,7 @@ export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsi
     const out: CuratedTopicInsights[] = [];
     for (const row of rows ?? []) {
       if (!row.topic || seen.has(row.topic)) continue;
+      if (isEmptyCuratedInsight(row)) continue;
       if (!row.hero_headline && !row.hero_summary) continue;
       seen.add(row.topic);
       out.push(row);
@@ -630,20 +710,28 @@ export function legacyTopicNames(canonical: string): string[] {
   return [...names];
 }
 
-export async function loadTopicHistory(topic: string, limit = 6): Promise<TopicHistoryPoint[]> {
+export async function loadTopicHistory(
+  topic: string,
+  limit = 6,
+  force = false,
+): Promise<TopicHistoryPoint[]> {
   if (typeof window === "undefined" || !topic) return [];
   const canonical = normalizeTopicKey(topic) ?? topic;
   window.topicHistory ??= {};
-  if (window.topicHistory[canonical]) return window.topicHistory[canonical]!;
   window.__topicHistoryPromises ??= {};
+  if (force) {
+    delete window.topicHistory[canonical];
+    delete window.__topicHistoryPromises[canonical];
+  } else if (window.topicHistory[canonical]) {
+    return window.topicHistory[canonical]!;
+  }
   if (!window.__topicHistoryPromises[canonical]) {
     window.__topicHistoryPromises[canonical] = (async () => {
       try {
         const names = legacyTopicNames(canonical);
         const inList = names.map((n) => encodeURIComponent(n)).join(",");
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/topic_snapshots?topic=in.(${inList})&select=month,last_updated,overall_sentiment,divergence_score,segmented_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=${Math.max(limit * 3, 18)}`,
-          { headers: supabaseHeaders },
+        const res = await supabaseFetch(
+          `topic_snapshots?topic=in.(${inList})&select=month,last_updated,overall_sentiment,divergence_score,segmented_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=${Math.max(limit * 3, 18)}`,
         );
         if (!res.ok) throw new Error("HTTP " + res.status);
         const rows = ((await res.json()) as TopicHistoryPoint[]).filter(
@@ -670,16 +758,19 @@ export async function loadTopicHistory(topic: string, limit = 6): Promise<TopicH
   return window.__topicHistoryPromises[canonical];
 }
 
-export async function loadCitizenSignals(): Promise<CitizenSignal[] | null> {
+export async function loadCitizenSignals(force = false): Promise<CitizenSignal[] | null> {
   if (typeof window === "undefined") return null;
+  if (force) {
+    window.citizenSignals = undefined;
+    window.__citizenSignalsPromise = undefined;
+  }
   if (window.citizenSignals) return window.citizenSignals;
   if (window.__citizenSignalsPromise) return window.__citizenSignalsPromise;
 
   window.__citizenSignalsPromise = (async () => {
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/citizen_signals?select=id,topic,signal_type,sentiment_score,sentiment_label,trend,headline,summary,excerpt,source,sample_size,last_updated,created_at&order=last_updated.desc&limit=400`,
-        { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } },
+      const res = await supabaseFetch(
+        "citizen_signals?select=id,topic,signal_type,sentiment_score,sentiment_label,trend,headline,summary,excerpt,source,sample_size,last_updated,created_at&order=last_updated.desc&limit=400",
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as CitizenSignal[];

@@ -117,11 +117,16 @@ export function buildAudienceLenses(
 }
 
 const PLACEHOLDER_QA_RE =
-  /limited or unclear data|insufficient clear signals|public discussion exists but is fragmented/i;
+  /limited or unclear data|insufficient clear signals|insufficient signals|public discussion exists but is fragmented|zero posts|data collapse/i;
 
 export function isPlaceholderQuestion(q: QuestionAnalysis): boolean {
   const text = [q.summary, ...(q.key_points ?? [])].filter(Boolean).join(" ");
   return PLACEHOLDER_QA_RE.test(text);
+}
+
+function isPlaceholderCuratedQa(c: CuratedQaPair): boolean {
+  const text = [c.card_title, c.card_summary].filter(Boolean).join(" ");
+  return !text.trim() || PLACEHOLDER_QA_RE.test(text);
 }
 
 export function keyInsightsToInsightCards(insights: string[]): InsightCardModel[] {
@@ -145,7 +150,9 @@ export function buildInsightCards(
   snapshot: TopicSnapshot | null,
   questions: QuestionAnalysis[],
 ): InsightCardModel[] {
-  const curated = qa.filter((c) => c.card_title?.trim() || c.card_summary?.trim());
+  const curated = qa.filter(
+    (c) => (c.card_title?.trim() || c.card_summary?.trim()) && !isPlaceholderCuratedQa(c),
+  );
   if (curated.length) return qaToInsightCards(curated);
 
   const insights = (snapshot?.key_insights ?? [])
