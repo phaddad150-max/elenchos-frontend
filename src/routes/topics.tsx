@@ -442,14 +442,14 @@ function shortTitle(t: string): string {
 
 /** Shared typography + row heights — every topic card uses the same slots */
 const CARD_LABEL = "text-[9px] md:text-[10px] font-mono uppercase tracking-[0.18em] leading-none";
-const CARD_TITLE = "text-[13px] md:text-[13px] font-display font-semibold tracking-tight leading-[1.25] text-center w-full";
+const CARD_TITLE = "text-[15px] md:text-[16px] font-display font-semibold tracking-tight leading-[1.2] text-center w-full";
 const CARD_SCORE_LABEL = "text-[9px] md:text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground leading-none";
 const CARD_SCORE_VALUE = "text-[1.75rem] md:text-2xl font-display font-semibold tabular-nums leading-none";
 const CARD_CTA =
   "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.16em] font-semibold text-[10px] md:text-[10px] min-h-[40px] md:min-h-[34px]";
 
 const TOPIC_CARD_SHELL =
-  "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[236px] md:min-h-[196px] md:h-[196px]";
+  "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] md:min-h-[210px] md:h-[210px]";
 
 function TopicCardCadence({ cadence }: { cadence: "realtime" | "weekly" | "monthly" }) {
   return (
@@ -495,10 +495,10 @@ function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
   if (!trend) {
     return (
       <div
-        className="h-6 shrink-0 flex items-center justify-center"
+        className="h-8 shrink-0 flex items-center justify-center"
         aria-hidden
       >
-        <Minus className="w-3.5 h-3.5 text-muted-foreground/35" />
+        <Minus className="w-5 h-5 text-muted-foreground/35" strokeWidth={2.5} />
       </div>
     );
   }
@@ -527,13 +527,13 @@ function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
 
   return (
     <div
-      className="h-6 shrink-0 flex items-center justify-center gap-1"
+      className="h-8 shrink-0 flex items-center justify-center gap-1.5"
       title={deltaText ? `${label} (${deltaText} pts)` : label}
       aria-label={deltaText ? `${label}, ${deltaText} points` : label}
     >
-      <Icon className="w-3.5 h-3.5 shrink-0" style={{ color }} strokeWidth={2.5} />
+      <Icon className="w-5 h-5 shrink-0" style={{ color }} strokeWidth={2.75} />
       {deltaText && (
-        <span className="text-[9px] font-mono tabular-nums leading-none" style={{ color }}>
+        <span className="text-[11px] md:text-xs font-mono font-semibold tabular-nums leading-none" style={{ color }}>
           {deltaText}
         </span>
       )}
@@ -592,7 +592,7 @@ function TopicCard({
       </div>
 
       {/* Slot 2 — title (fixed height, centered) */}
-      <div className="h-[3.25rem] shrink-0 flex items-center justify-center px-1">
+      <div className="h-[3.75rem] shrink-0 flex items-center justify-center px-1">
         <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-3 md:line-clamp-2`}>
           {shortTitle(topic.title)}
         </h3>
