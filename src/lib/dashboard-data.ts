@@ -427,6 +427,21 @@ function supabaseFetch(pathAndQuery: string, init?: RequestInit): Promise<Respon
   });
 }
 
+/**
+ * Build a PostgREST `in.(...)` value list that survives commas, ampersands, etc.
+ * Without double quotes, `in.(Crime, Safety & Lawlessness)` splits on commas and
+ * returns zero rows — which blanked Crime and other multi-clause topics.
+ */
+export function postgrestInList(values: string[]): string {
+  return values
+    .filter((v) => Boolean(v?.trim()))
+    .map((v) => {
+      const quoted = `"${String(v).replace(/"/g, '\\"')}"`;
+      return encodeURIComponent(quoted);
+    })
+    .join(",");
+}
+
 export async function loadDashboardData(force = false): Promise<Record<string, TopicSnapshot> | null> {
   if (typeof window === "undefined") return null;
   const hadFailedFetch = window.dashboardMeta?.fallback === true;
@@ -534,7 +549,7 @@ export async function loadTopicSnapshot(
   window.__topicSnapshotPromises[promiseKey] = (async () => {
     try {
       const names = legacyTopicNames(canonical);
-      const inList = names.map((n) => encodeURIComponent(n)).join(",");
+      const inList = postgrestInList(names);
       const [histRes, latestRes] = await Promise.all([
         supabaseFetch(
           `topic_snapshots?topic=in.(${inList})&select=*&order=last_updated.desc&limit=24`,
@@ -607,7 +622,7 @@ export async function loadCuratedTopicInsights(
     w.__curatedInsightsPromises[cacheKey] = (async () => {
       try {
         const names = legacyTopicNames(canonical);
-        const inList = names.map((n) => encodeURIComponent(n)).join(",");
+        const inList = postgrestInList(names);
         const res = await supabaseFetch(
           `latest_curated_topic_insights?topic=in.(${inList})&comparison_window=eq.${encodeURIComponent(comparisonWindow)}&select=*&order=generated_at.desc&limit=1`,
         );
@@ -647,7 +662,7 @@ export async function loadCuratedQaPairs(topic: string, force = false): Promise<
     window.__curatedQaPromises[canonical] = (async () => {
       try {
         const names = legacyTopicNames(canonical);
-        const inList = names.map((n) => encodeURIComponent(n)).join(",");
+        const inList = postgrestInList(names);
         const res = await supabaseFetch(
           `latest_curated_qa_pairs?topic=in.(${inList})&select=*&order=rank.asc&limit=50`,
         );
@@ -848,7 +863,7 @@ export async function loadTopicHistory(
     window.__topicHistoryPromises[canonical] = (async () => {
       try {
         const names = legacyTopicNames(canonical);
-        const inList = names.map((n) => encodeURIComponent(n)).join(",");
+        const inList = postgrestInList(names);
         const res = await supabaseFetch(
           `topic_snapshots?topic=in.(${inList})&select=month,last_updated,overall_sentiment,divergence_score,segmented_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=${Math.max(limit * 3, 18)}`,
         );
