@@ -6,6 +6,7 @@ import {
   loadDashboardData,
   loadDashboardOverview,
   loadTopicHistory,
+  loadWowSentimentTrends,
   useSimMode,
   type ContentSource,
   type CuratedQaPair,
@@ -14,6 +15,7 @@ import {
   type TopicHistoryPoint,
   type TopicSignals,
   type TopicSnapshot,
+  type WowTrend,
 } from "@/lib/dashboard-data";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -147,12 +149,14 @@ function TopicsPage() {
     loadDashboardOverview().then((o) =>
       setSourceUpdatedAt(o?.generated_at ?? o?.last_updated ?? null),
     );
+    loadWowSentimentTrends().then(() => setTick((n) => n + 1));
   }, []);
 
   const handleRefresh = async () => {
     clearDashboardCaches();
     await loadDashboardData(true);
-    const overview = await loadDashboardOverview();
+    const overview = await loadDashboardOverview(true);
+    await loadWowSentimentTrends(true);
     setSourceUpdatedAt(overview?.generated_at ?? overview?.last_updated ?? null);
     setTick((n) => n + 1);
     setRefreshedAt(new Date());
@@ -277,6 +281,13 @@ function topicCategory(id: string): TopicCategory {
 }
 
 
+function readWowTrend(rootKey: string): WowTrend | null {
+  if (typeof window === "undefined") return null;
+  const map = (window as Window & { wowSentimentTrends?: Record<string, WowTrend> })
+    .wowSentimentTrends;
+  return map?.[rootKey] ?? null;
+}
+
 function TopicsFilterableGrid({
   simMode,
   onOpen,
@@ -285,6 +296,11 @@ function TopicsFilterableGrid({
   onOpen: (id: string) => void;
 }) {
   const [category, setCategory] = useState<"all" | TopicCategory>("all");
+  const [wowTick, setWowTick] = useState(0);
+
+  useEffect(() => {
+    loadWowSentimentTrends().then(() => setWowTick((n) => n + 1));
+  }, []);
 
   const filtered = useMemo(() => {
     return FEATURE_TOPICS.filter((t) => {
@@ -328,7 +344,7 @@ function TopicsFilterableGrid({
         return prio(a.id) - prio(b.id);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, simMode]);
+  }, [filtered, simMode, wowTick]);
 
   const visibleCount = ordered.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
@@ -338,6 +354,7 @@ function TopicsFilterableGrid({
   const renderTopicCard = (t: FeatureTopic, i: number) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
     const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
+    const wow = liveKey && !simMode ? readWowTrend(liveKey) : null;
     return (
       <TopicCard
         key={t.id}
@@ -345,6 +362,7 @@ function TopicsFilterableGrid({
         delay={i * 0.03}
         cadence={topicCadence(t.id)}
         snapshot={snap}
+        wowTrend={wow}
         onOpen={() => onOpen(t.id)}
       />
     );
@@ -431,7 +449,7 @@ const CARD_CTA =
   "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.16em] font-semibold text-[10px] md:text-[10px] min-h-[40px] md:min-h-[34px]";
 
 const TOPIC_CARD_SHELL =
-  "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[220px] md:min-h-[176px] md:h-[176px]";
+  "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[236px] md:min-h-[196px] md:h-[196px]";
 
 function TopicCardCadence({ cadence }: { cadence: "realtime" | "weekly" | "monthly" }) {
   return (
@@ -472,22 +490,70 @@ function TopicCardScore({
   );
 }
 
+/** WoW sentiment arrow between topic title and score row. */
+function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
+  if (!trend) {
+    return (
+      <div
+        className="h-6 shrink-0 flex items-center justify-center"
+        aria-hidden
+      >
+        <Minus className="w-3.5 h-3.5 text-muted-foreground/35" />
+      </div>
+    );
+  }
+  const Icon =
+    trend.direction === "up"
+      ? TrendingUp
+      : trend.direction === "down"
+        ? TrendingDown
+        : Minus;
+  const color =
+    trend.direction === "up"
+      ? "var(--emerald-signal)"
+      : trend.direction === "down"
+        ? "var(--rose-signal)"
+        : "var(--muted-foreground)";
+  const label =
+    trend.direction === "up"
+      ? "Week-over-week sentiment up"
+      : trend.direction === "down"
+        ? "Week-over-week sentiment down"
+        : "Week-over-week sentiment stable";
+  const deltaText =
+    typeof trend.delta === "number" && !Number.isNaN(trend.delta) && trend.delta !== 0
+      ? `${trend.delta > 0 ? "+" : ""}${Math.round(trend.delta)}`
+      : null;
 
-
-
-
+  return (
+    <div
+      className="h-6 shrink-0 flex items-center justify-center gap-1"
+      title={deltaText ? `${label} (${deltaText} pts)` : label}
+      aria-label={deltaText ? `${label}, ${deltaText} points` : label}
+    >
+      <Icon className="w-3.5 h-3.5 shrink-0" style={{ color }} strokeWidth={2.5} />
+      {deltaText && (
+        <span className="text-[9px] font-mono tabular-nums leading-none" style={{ color }}>
+          {deltaText}
+        </span>
+      )}
+    </div>
+  );
+}
 
 function TopicCard({
   topic,
   delay,
   onOpen,
   snapshot = null,
+  wowTrend = null,
   cadence = "weekly",
 }: {
   topic: FeatureTopic;
   delay: number;
   onOpen: () => void;
   snapshot?: TopicSnapshot | null;
+  wowTrend?: WowTrend | null;
   cadence?: "realtime" | "weekly" | "monthly";
 }) {
   const os = snapshot?.overall_sentiment;
@@ -496,6 +562,18 @@ function TopicCard({
   const sentimentTone = typeof sentiment === "number" ? scoreTone(sentiment, "sentiment") : "var(--muted-foreground)";
   const divergenceTone = typeof divergence === "number" ? scoreTone(divergence, "divergence") : "var(--muted-foreground)";
   const category = topicCategory(topic.id);
+
+  // Fallback: Pass 1 overall_sentiment.trend label when no curated/history WoW yet
+  const resolvedWow: WowTrend | null = (() => {
+    if (wowTrend) return wowTrend;
+    const label =
+      typeof os === "object" && os && typeof os.trend === "string" ? os.trend : null;
+    if (!label) return null;
+    if (/increas|improv|up|ris|gain/i.test(label)) return { delta: null, direction: "up" };
+    if (/decreas|declin|down|fall|wors/i.test(label)) return { delta: null, direction: "down" };
+    if (/stable|flat|steady|unchang/i.test(label)) return { delta: null, direction: "flat" };
+    return null;
+  })();
 
   return (
     <motion.button
@@ -514,14 +592,17 @@ function TopicCard({
       </div>
 
       {/* Slot 2 — title (fixed height, centered) */}
-      <div className="h-[3.75rem] shrink-0 flex items-center justify-center px-1">
+      <div className="h-[3.25rem] shrink-0 flex items-center justify-center px-1">
         <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-3 md:line-clamp-2`}>
           {shortTitle(topic.title)}
         </h3>
       </div>
 
+      {/* Slot 2b — WoW trend arrow between name and scores */}
+      <TopicCardWowTrend trend={resolvedWow} />
+
       {/* Slot 3 — scores (fixed height, always 2 equal columns) */}
-      <div className="h-[4.5rem] shrink-0 w-full">
+      <div className="h-[4.25rem] shrink-0 w-full">
         <div className="grid grid-cols-2 h-full w-full divide-x divide-border/60 items-center">
           <TopicCardScore
             label="Sentiment"

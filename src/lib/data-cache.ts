@@ -16,4 +16,8 @@ export function clearDashboardCaches() {
   window.__topicHistoryPromises = undefined;
   window.topicSnapshots = undefined;
   window.__topicSnapshotPromises = undefined;
+  // WoW trends for topics grid
+  (window as Window & { wowSentimentTrends?: unknown; __wowSentimentTrendsPromise?: unknown }).wowSentimentTrends =
+    undefined;
+  (window as Window & { __wowSentimentTrendsPromise?: unknown }).__wowSentimentTrendsPromise = undefined;
 }

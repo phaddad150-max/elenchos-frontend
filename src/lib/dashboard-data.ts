@@ -695,6 +695,124 @@ export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsi
   }
 }
 
+/** Week-over-week sentiment direction for topic cards (up / down / flat). */
+export type WowTrend = {
+  /** Current − prior overall sentiment (pts). Null when only a label is known. */
+  delta: number | null;
+  direction: "up" | "down" | "flat";
+};
+
+function overallSentimentScore(row: TopicSnapshot | TopicHistoryPoint): number | null {
+  const os = row.overall_sentiment;
+  if (typeof os === "object" && os && typeof (os as { score?: number }).score === "number") {
+    return Number((os as { score: number }).score);
+  }
+  return null;
+}
+
+function directionFromDelta(delta: number, epsilon = 0.5): WowTrend["direction"] {
+  if (delta > epsilon) return "up";
+  if (delta < -epsilon) return "down";
+  return "flat";
+}
+
+function directionFromTrendLabel(label?: string | null): WowTrend["direction"] | null {
+  if (!label) return null;
+  if (/increas|improv|up|ris|gain/i.test(label)) return "up";
+  if (/decreas|declin|down|fall|wors/i.test(label)) return "down";
+  if (/stable|flat|steady|unchang/i.test(label)) return "flat";
+  return null;
+}
+
+/**
+ * Load WoW sentiment trends for all live topics.
+ * Prefer Pass 2 curated `sentiment_delta` (wow window); fall back to comparing
+ * the two most recent substantive Pass 1 snapshots per topic.
+ */
+export async function loadWowSentimentTrends(
+  force = false,
+): Promise<Record<string, WowTrend>> {
+  if (typeof window === "undefined") return {};
+  const w = window as Window & {
+    wowSentimentTrends?: Record<string, WowTrend>;
+    __wowSentimentTrendsPromise?: Promise<Record<string, WowTrend>>;
+  };
+  if (force) {
+    w.wowSentimentTrends = undefined;
+    w.__wowSentimentTrendsPromise = undefined;
+  } else if (w.wowSentimentTrends) {
+    return w.wowSentimentTrends;
+  }
+  if (!force && w.__wowSentimentTrendsPromise) return w.__wowSentimentTrendsPromise;
+
+  w.__wowSentimentTrendsPromise = (async () => {
+    const out: Record<string, WowTrend> = {};
+    try {
+      // 1) Curated WoW deltas (skip empty-run curation that invents +12 from 0 posts)
+      const curatedRes = await supabaseFetch(
+        "latest_curated_topic_insights?comparison_window=eq.wow&select=topic,sentiment_delta,hero_headline,hero_summary,evolution_note&order=generated_at.desc&limit=80",
+      );
+      if (curatedRes.ok) {
+        const rows = (await curatedRes.json()) as CuratedTopicInsights[];
+        for (const row of rows ?? []) {
+          const key = normalizeTopicKey(row.topic);
+          if (!key || out[key]) continue;
+          if (isEmptyCuratedInsight(row)) continue;
+          if (typeof row.sentiment_delta !== "number" || Number.isNaN(row.sentiment_delta)) continue;
+          out[key] = {
+            delta: Math.round(row.sentiment_delta * 10) / 10,
+            direction: directionFromDelta(row.sentiment_delta),
+          };
+        }
+      }
+
+      // 2) Fill gaps from Pass 1 history (two newest substantive snapshots)
+      const histRes = await supabaseFetch(
+        "topic_snapshots?select=topic,last_updated,overall_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=500",
+      );
+      if (histRes.ok) {
+        const histRows = (await histRes.json()) as TopicSnapshot[];
+        const byTopic: Record<string, TopicSnapshot[]> = {};
+        for (const row of histRows ?? []) {
+          const key = normalizeTopicKey(row.topic);
+          if (!key) continue;
+          if (snapshotQuality(row) < 0) continue;
+          (byTopic[key] ??= []).push(row);
+        }
+        for (const [key, group] of Object.entries(byTopic)) {
+          if (out[key]) continue;
+          const sorted = [...group].sort(compareSnapshotsForLive);
+          const current = sorted[0];
+          const prior = sorted[1];
+          if (!current || !prior) {
+            const label =
+              typeof current?.overall_sentiment === "object"
+                ? current.overall_sentiment?.trend
+                : undefined;
+            const dir = directionFromTrendLabel(label);
+            if (dir) out[key] = { delta: null, direction: dir };
+            continue;
+          }
+          const curScore = overallSentimentScore(current);
+          const priorScore = overallSentimentScore(prior);
+          if (curScore == null || priorScore == null) continue;
+          const delta = curScore - priorScore;
+          out[key] = {
+            delta: Math.round(delta * 10) / 10,
+            direction: directionFromDelta(delta),
+          };
+        }
+      }
+    } catch (e) {
+      console.warn("loadWowSentimentTrends failed", e);
+    }
+    w.wowSentimentTrends = out;
+    return out;
+  })();
+
+  return w.__wowSentimentTrendsPromise;
+}
+
 export function legacyTopicNames(canonical: string): string[] {
   const names = new Set<string>([canonical]);
   for (const [alias, target] of Object.entries(TOPIC_ALIASES)) {
