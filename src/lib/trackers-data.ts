@@ -183,30 +183,97 @@ export type TrackerRow = {
 };
 
 async function fetchTrackerRows(endpoint: "latest_trackers" | "trackers"): Promise<TrackerRow[] | null> {
-  const order = endpoint === "trackers" ? "&order=created_at.desc" : "";
+  // Prefer last_updated so append-only history ranks correctly; fall back created_at.
+  const order =
+    endpoint === "trackers"
+      ? "&order=last_updated.desc.nullslast,created_at.desc"
+      : "";
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/${endpoint}?select=*&limit=200${order}`,
-    { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } },
+    {
+      cache: "no-store",
+      headers: {
+        apikey: ANON_KEY,
+        Authorization: `Bearer ${ANON_KEY}`,
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    },
   );
   if (!res.ok) return null;
   const rows = (await res.json()) as TrackerRow[];
   return Array.isArray(rows) ? rows : null;
 }
 
+/** -1 = empty / unusable for display; higher = richer payload. */
+function trackerRowQuality(row: TrackerRow): number {
+  const data = (row.data ?? {}) as Record<string, unknown>;
+  const itemCount = typeof row.item_count === "number" ? row.item_count : null;
+
+  if (row.tracker_type === "football_player_index") {
+    const players = Array.isArray(data.players) ? data.players.length : 0;
+    const posts = typeof data.posts_analyzed === "number" ? data.posts_analyzed : 0;
+    if (players <= 0) return -1;
+    return players * 1000 + posts;
+  }
+
+  if (itemCount != null) {
+    if (itemCount <= 0) return -1;
+    return itemCount;
+  }
+
+  // Leaders / peace / media: any non-empty structured data counts as substantive.
+  if (data.regions && typeof data.regions === "object") return 10;
+  if (Array.isArray(data.ranked_leaders) && data.ranked_leaders.length > 0) {
+    return data.ranked_leaders.length;
+  }
+  if (Array.isArray(data.leaders) && data.leaders.length > 0) return data.leaders.length;
+  if (data.detailed_countries && typeof data.detailed_countries === "object") return 10;
+  if (data.countries && typeof data.countries === "object") return 10;
+  if (data.regions && typeof data.regions === "object") return 10;
+
+  if (!data || Object.keys(data).length === 0) return -1;
+  return 1;
+}
+
+function trackerRecencyMs(row: TrackerRow): number {
+  return Date.parse(row.last_updated ?? row.created_at ?? "") || 0;
+}
+
+/**
+ * One row per tracker_type: never let an empty newer insert (e.g. football
+ * item_count=0) hide a prior substantive snapshot. Among substantive rows,
+ * prefer the freshest last_updated.
+ */
 function dedupeLatestTrackerRows(rows: TrackerRow[]): TrackerRow[] {
-  const seen = new Set<string>();
-  const latest: TrackerRow[] = [];
+  const buckets = new Map<string, TrackerRow[]>();
   for (const r of rows) {
-    if (seen.has(r.tracker_type)) continue;
-    seen.add(r.tracker_type);
-    latest.push(r);
+    if (!r?.tracker_type) continue;
+    const list = buckets.get(r.tracker_type) ?? [];
+    list.push(r);
+    buckets.set(r.tracker_type, list);
+  }
+  const latest: TrackerRow[] = [];
+  for (const group of buckets.values()) {
+    group.sort((a, b) => {
+      const qa = trackerRowQuality(a);
+      const qb = trackerRowQuality(b);
+      const aSub = qa >= 0 ? 1 : 0;
+      const bSub = qb >= 0 ? 1 : 0;
+      if (aSub !== bSub) return bSub - aSub;
+      const ta = trackerRecencyMs(a);
+      const tb = trackerRecencyMs(b);
+      if (ta !== tb) return tb - ta;
+      return qb - qa;
+    });
+    latest.push(group[0]!);
   }
   return latest;
 }
 
 export async function fetchLatestTrackers(): Promise<TrackerRow[]> {
   try {
-    // Primary source of truth: the `trackers` table (freshest rows).
+    // Primary source of truth: the `trackers` table (append-only history).
     const trackerRows = await fetchTrackerRows("trackers");
     if (trackerRows && trackerRows.length > 0) return dedupeLatestTrackerRows(trackerRows);
 

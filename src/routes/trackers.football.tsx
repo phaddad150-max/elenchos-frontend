@@ -61,7 +61,9 @@ function FootballPlayersPage() {
   const def = TRACKER_CATALOG.find((t) => t.tracker_type === "football_player_index");
   const players = useMemo(() => extractFootballPlayers(row), [row]);
   const meta = useMemo(() => extractFootballIndexMeta(row), [row]);
-  const snapshotDate = row ? formatDate(row.created_at) : null;
+  const snapshotDate = row
+    ? formatDate(row.last_updated ?? row.created_at)
+    : null;
 
   return (
     <div className="min-h-screen relative flex flex-col">
