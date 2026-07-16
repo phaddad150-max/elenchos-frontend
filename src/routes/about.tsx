@@ -158,10 +158,18 @@ function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.1 }}
-            className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed max-w-2xl"
+            className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed max-w-2xl space-y-3"
           >
-            <span className="text-cyan font-mono text-[11.5px] uppercase tracking-[0.18em] mr-1.5">Ancient Greek</span>
-            for cross-examination — the Socratic method applied to X. Testing what people claim against what they believe, and measuring gaps with official narratives.
+            <span className="block">
+              <span className="text-cyan font-mono text-[11.5px] uppercase tracking-[0.18em] mr-1.5">Ancient Greek</span>
+              for cross-examination. Socrates used it to expose the gaps between what people claimed to know and what they truly believed — revealing contradictions, shaky logic, and comforting illusions.
+            </span>
+            <span className="block">
+              This is the Socratic method: pursuing truth by testing ideas against reality.
+            </span>
+            <span className="block">
+              elenchos.live brings the same approach to X — examining real claims against beliefs and official narratives.
+            </span>
           </motion.p>
         </div>
       </div>
