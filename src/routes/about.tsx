@@ -161,14 +161,13 @@ function Hero() {
             className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed max-w-2xl space-y-3"
           >
             <span className="block">
-              <span className="text-cyan font-mono text-[11.5px] uppercase tracking-[0.18em] mr-1.5">Ancient Greek</span>
-              for cross-examination. Socrates used it to expose the gaps between what people claimed to know and what they truly believed — revealing contradictions, shaky logic, and comforting illusions.
+              Ancient Greek for cross-examination.Socrates used it to expose the gaps between what people claimed to know and what they truly believed.. revealing contradictions, shaky logic, and comforting illusions.
             </span>
             <span className="block">
               This is the Socratic method: pursuing truth by testing ideas against reality.
             </span>
             <span className="block">
-              elenchos.live brings the same approach to X — examining real claims against beliefs and official narratives.
+              elenchos.live bring the same approach to X — examining real claims against beliefs and official narratives.
             </span>
           </motion.p>
         </div>
