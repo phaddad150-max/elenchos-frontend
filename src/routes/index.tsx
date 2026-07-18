@@ -91,37 +91,9 @@ export const Route = createFileRoute("/")({
     links: [{ rel: "canonical", href: "https://elenchos.live/" }],
   }),
 
-  component: GatedDashboard,
+  // Dashboard overview is the default landing page for elenchos.live
+  component: Dashboard,
 });
-
-function GatedDashboard() {
-  const navigate = Route.useNavigate();
-  const [checked, setChecked] = useState(false);
-  useEffect(() => {
-    try {
-      const seen = window.localStorage.getItem("elenchos_visited");
-      if (!seen) {
-        window.localStorage.setItem("elenchos_visited", "1");
-        navigate({ to: "/about" });
-        return;
-      }
-    } catch {
-      // ignore storage errors (private mode, SSR)
-    }
-    setChecked(true);
-  }, [navigate]);
-
-  if (!checked) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-          Loading…
-        </div>
-      </div>
-    );
-  }
-  return <Dashboard />;
-}
 
 const SECTORS = ["GOV", "DIP", "SEC", "ECO", "HEA", "MED"] as const;
 function sectorFor(topic: string) {
