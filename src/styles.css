@@ -172,23 +172,40 @@
     0 0 18px oklch(0.82 0.16 200 / 0.18);
 }
 
+/* Light theme: keep the outer panel clean, but give the globe a deep “well”
+   so the day/blue-marble sphere has clear edge contrast (night texture washed out before). */
 .light .globe-panel {
   background:
-    radial-gradient(circle at 50% 52%, oklch(0.82 0.16 200 / 0.08), transparent 26rem),
-    linear-gradient(135deg, oklch(0.99 0.002 240 / 0.95), oklch(0.96 0.004 240 / 0.95));
+    radial-gradient(circle at 72% 18%, oklch(0.82 0.12 200 / 0.1), transparent 18rem),
+    linear-gradient(135deg, oklch(0.99 0.002 240 / 0.98), oklch(0.965 0.006 230 / 0.98));
+  border-color: oklch(0.82 0.06 220 / 0.35);
 }
-.light .globe-stage {
+.light .globe-stage,
+.light .globe-stage--light {
+  /* Deep slate cradle — only behind the canvas, not the whole dashboard */
   background:
-    radial-gradient(circle at 50% 46%, oklch(0.82 0.16 200 / 0.05), transparent 19rem),
-    radial-gradient(circle at 50% 92%, oklch(0.82 0.16 200 / 0.06), transparent 22rem);
+    radial-gradient(circle at 50% 42%, oklch(0.34 0.055 230), oklch(0.22 0.04 245) 52%, oklch(0.16 0.03 250) 100%);
+  box-shadow:
+    inset 0 0 0 1px oklch(0.78 0.08 200 / 0.35),
+    inset 0 -28px 48px oklch(0.12 0.03 250 / 0.45),
+    0 12px 32px oklch(0.55 0.04 240 / 0.18);
 }
-.light .globe-stage::before {
+.light .globe-stage::before,
+.light .globe-stage--light::before {
   background:
-    linear-gradient(90deg, transparent 49.8%, oklch(0.82 0.16 200 / 0.08) 50%, transparent 50.2%),
-    linear-gradient(0deg, transparent 49.8%, oklch(0.82 0.16 200 / 0.06) 50%, transparent 50.2%);
+    linear-gradient(90deg, transparent 49.8%, oklch(0.88 0.08 200 / 0.14) 50%, transparent 50.2%),
+    linear-gradient(0deg, transparent 49.8%, oklch(0.88 0.08 200 / 0.1) 50%, transparent 50.2%);
+  opacity: 0.55;
 }
-.light .globe-stage::after {
-  background: radial-gradient(ellipse at center, oklch(0.82 0.16 200 / 0.15), transparent 68%);
+.light .globe-stage::after,
+.light .globe-stage--light::after {
+  /* Soft cyan under-glow without washing out the globe surface */
+  background: radial-gradient(ellipse at center, oklch(0.72 0.12 200 / 0.28), transparent 70%);
+  opacity: 0.85;
+}
+.light .globe-stage canvas {
+  /* Slight lift so the sphere separates from the well */
+  filter: contrast(1.08) saturate(1.12) brightness(1.04);
 }
 
 @layer utilities {

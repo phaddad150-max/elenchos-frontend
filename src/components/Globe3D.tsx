@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
 import type { Signal } from "@/lib/sim-data";
 import { INTENSITY_GLOBE_COLOR } from "@/lib/sim-data";
+import { useTheme } from "@/hooks/use-theme";
 
 // react-globe.gl pulls in three.js — must be client-only (no SSR).
 const Globe = lazy(() => import("react-globe.gl"));
+
+const EARTH_NIGHT =
+  "https://unpkg.com/three-globe/example/img/earth-night.jpg";
+// Day / blue-marble texture — much higher contrast on light UI than night lights
+const EARTH_DAY =
+  "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
 
 interface Props {
   signals: Signal[];
@@ -15,6 +22,8 @@ export function Globe3D({ signals, onPick }: Props) {
   const [size, setSize] = useState({ w: 600, h: 480 });
   const [mounted, setMounted] = useState(false);
   const globeRef = useRef<any>(null);
+  const [theme] = useTheme();
+  const isLight = theme === "light";
 
   useEffect(() => {
     setMounted(true);
@@ -32,7 +41,7 @@ export function Globe3D({ signals, onPick }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // Apply auto-rotate once the globe instance exists.
+  // Apply auto-rotate once the globe instance exists (re-run on theme swap remount).
   useEffect(() => {
     if (!mounted) return;
     const id = setInterval(() => {
@@ -50,7 +59,7 @@ export function Globe3D({ signals, onPick }: Props) {
       clearInterval(id);
     }, 120);
     return () => clearInterval(id);
-  }, [mounted]);
+  }, [mounted, isLight]);
 
   const activeSignals = useMemo(() => signals.slice(0, 32), [signals]);
 
@@ -64,12 +73,14 @@ export function Globe3D({ signals, onPick }: Props) {
 
   const arcs = activeSignals.slice(0, 14).map((s, i) => {
     const target = activeSignals[(i + 5) % Math.max(activeSignals.length, 1)] ?? s;
+    // Light mode: stronger arc fade so paths read over blue-marble land
+    const arcEnd = isLight ? "rgba(8, 145, 178, 0.35)" : "rgba(0, 213, 255, 0.16)";
     return {
       startLat: s.lat,
       startLng: s.lng,
       endLat: target.lat,
       endLng: target.lng,
-      color: [INTENSITY_GLOBE_COLOR[s.intensity], "rgba(0, 213, 255, 0.16)"],
+      color: [INTENSITY_GLOBE_COLOR[s.intensity], arcEnd],
       order: i,
     };
   });
@@ -93,27 +104,45 @@ export function Globe3D({ signals, onPick }: Props) {
       color: INTENSITY_GLOBE_COLOR[s.intensity],
     }));
 
+  // Light-mode-only presentation (dark theme keeps original night globe)
+  const globeImageUrl = isLight ? EARTH_DAY : EARTH_NIGHT;
+  const atmosphereColor = isLight ? "#0e7490" : "#22d3ee";
+  const atmosphereAltitude = isLight ? 0.2 : 0.34;
+  const defaultPoint = isLight ? "#0e7490" : "#22d3ee";
+  const defaultArc = isLight
+    ? (["#0891b2", "rgba(8, 145, 178, 0.35)"] as [string, string])
+    : (["#00d5ff", "rgba(0, 213, 255, 0.16)"] as [string, string]);
+  const arcStroke = isLight ? 0.65 : 0.45;
+  const labelSize = isLight ? 0.82 : 0.72;
+  const pointRadiusBoost = isLight ? 1.15 : 1;
+
   return (
-    <div ref={wrapRef} className="relative w-full h-full min-h-[240px] overflow-hidden rounded-xl globe-stage">
+    <div
+      ref={wrapRef}
+      className={`relative w-full h-full min-h-[240px] overflow-hidden rounded-xl globe-stage${
+        isLight ? " globe-stage--light" : ""
+      }`}
+    >
       {mounted ? (
         <Suspense fallback={<GlobeFallback />}>
           <Globe
+            key={isLight ? "globe-light" : "globe-dark"}
             ref={globeRef}
             width={size.w}
             height={size.h}
             backgroundColor="rgba(0,0,0,0)"
-            globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
+            globeImageUrl={globeImageUrl}
             bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
             showAtmosphere
-            atmosphereColor="#22d3ee"
-            atmosphereAltitude={0.34}
+            atmosphereColor={atmosphereColor}
+            atmosphereAltitude={atmosphereAltitude}
             showGraticules
             pointsData={points}
             pointLat={(d: any) => d?.lat ?? 0}
             pointLng={(d: any) => d?.lng ?? 0}
-            pointColor={(d: any) => d?.color ?? "#22d3ee"}
+            pointColor={(d: any) => d?.color ?? defaultPoint}
             pointAltitude={(d: any) => 0.025 + (d?.size ?? 0.4) * 0.1}
-            pointRadius={(d: any) => 0.38 + (d?.size ?? 0.4) * 0.48}
+            pointRadius={(d: any) => (0.38 + (d?.size ?? 0.4) * 0.48) * pointRadiusBoost}
             pointResolution={10}
             pointLabel={(d: any) => {
               const s = d?.signal;
@@ -123,6 +152,7 @@ export function Globe3D({ signals, onPick }: Props) {
               const posts = typeof s.posts === "number" ? s.posts.toLocaleString() : "—";
               const sentiment = (s.sentiment ?? "neutral").replace(/</g, "&lt;");
               const excerpt = (s.headline ?? s.excerpt ?? "").replace(/</g, "&lt;").slice(0, 90);
+              // Tooltip always dark for readability on both themes
               return `
                 <div style="background:rgba(8,12,20,0.94);border:1px solid rgba(34,211,238,0.45);padding:9px 11px;border-radius:9px;font-family:ui-monospace,monospace;font-size:11px;color:#e2e8f0;max-width:260px;box-shadow:0 6px 22px rgba(0,0,0,0.55)">
                   <div style="color:#22d3ee;text-transform:uppercase;letter-spacing:0.12em;font-size:9.5px;margin-bottom:4px">${s.region ?? "—"} · ${sentiment}</div>
@@ -141,15 +171,15 @@ export function Globe3D({ signals, onPick }: Props) {
             arcStartLng={(d: any) => d?.startLng ?? 0}
             arcEndLat={(d: any) => d?.endLat ?? 0}
             arcEndLng={(d: any) => d?.endLng ?? 0}
-            arcColor={(d: any) => d?.color ?? ["#00d5ff", "rgba(0, 213, 255, 0.16)"]}
+            arcColor={(d: any) => d?.color ?? defaultArc}
             arcAltitude={0.18}
-            arcStroke={0.45}
+            arcStroke={arcStroke}
             arcDashLength={0.38}
             arcDashGap={1.8}
             arcDashInitialGap={(d: any) => (d?.order ?? 0) * 0.35}
             arcDashAnimateTime={3200}
             ringsData={rings}
-            ringColor={(d: any) => d?.color ?? "#22d3ee"}
+            ringColor={(d: any) => d?.color ?? defaultPoint}
             ringMaxRadius={(d: any) => d?.maxR ?? 4}
             ringPropagationSpeed={(d: any) => d?.propagationSpeed ?? 2}
             ringRepeatPeriod={(d: any) => d?.repeatPeriod ?? 1200}
@@ -157,16 +187,16 @@ export function Globe3D({ signals, onPick }: Props) {
             labelLat={(d: any) => d?.lat ?? 0}
             labelLng={(d: any) => d?.lng ?? 0}
             labelText={(d: any) => d?.text ?? ""}
-            labelColor={(d: any) => d?.color ?? "#00d5ff"}
-            labelSize={0.72}
+            labelColor={(d: any) => d?.color ?? defaultPoint}
+            labelSize={labelSize}
             labelAltitude={0.035}
-            labelDotRadius={0.16}
+            labelDotRadius={isLight ? 0.2 : 0.16}
           />
         </Suspense>
       ) : (
         <GlobeFallback />
       )}
-      <div className="absolute bottom-3 left-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono pointer-events-none">
+      <div className="absolute bottom-3 left-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono pointer-events-none z-10">
         live signal mesh · auto-rotate
       </div>
     </div>
