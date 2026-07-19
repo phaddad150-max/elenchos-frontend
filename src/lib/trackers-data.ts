@@ -205,6 +205,36 @@ async function fetchTrackerRows(endpoint: "latest_trackers" | "trackers"): Promi
   return Array.isArray(rows) ? rows : null;
 }
 
+/** Count leaders with real scores (exclude waiting / null scores). */
+function countActiveScoredLeaders(data: Record<string, unknown>): number {
+  let count = 0;
+  const collect = (raw: unknown) => {
+    if (!Array.isArray(raw)) return;
+    for (const item of raw) {
+      if (!item || typeof item !== "object") continue;
+      const l = item as RankedLeader;
+      if (l.status === "waiting") continue;
+      if (typeof l.overall_score === "number") count += 1;
+    }
+  };
+
+  const regions = data.regions;
+  if (regions && typeof regions === "object" && Object.keys(regions as object).length > 0) {
+    for (const bucket of Object.values(regions as Record<string, unknown>)) {
+      collect(bucket);
+    }
+    return count;
+  }
+  // Backend historical shape: top-level americas / europe arrays
+  for (const key of ["americas", "europe", "middle_east", "global"] as const) {
+    collect(data[key]);
+  }
+  if (count > 0) return count;
+  collect(data.ranked_leaders);
+  collect(data.leaders);
+  return count;
+}
+
 /** -1 = empty / unusable for display; higher = richer payload. */
 function trackerRowQuality(row: TrackerRow): number {
   const data = (row.data ?? {}) as Record<string, unknown>;
@@ -217,20 +247,36 @@ function trackerRowQuality(row: TrackerRow): number {
     return players * 1000 + posts;
   }
 
+  if (row.tracker_type === "global_leader_trust") {
+    // Prefer explicit item_count when backend sets it; still validate payload.
+    const active = countActiveScoredLeaders(data);
+    if (active <= 0) return -1;
+    if (itemCount != null && itemCount <= 0) return -1;
+    return active * 1000 + (itemCount ?? active);
+  }
+
   if (itemCount != null) {
     if (itemCount <= 0) return -1;
     return itemCount;
   }
 
-  // Leaders / peace / media: any non-empty structured data counts as substantive.
-  if (data.regions && typeof data.regions === "object") return 10;
+  // Peace / media: any non-empty structured data counts as substantive.
+  if (data.detailed_countries && typeof data.detailed_countries === "object") {
+    const n = Object.keys(data.detailed_countries as object).length;
+    return n > 0 ? n : -1;
+  }
+  if (data.countries && typeof data.countries === "object") {
+    const n = Object.keys(data.countries as object).length;
+    return n > 0 ? n : -1;
+  }
+  if (data.regions && typeof data.regions === "object" && row.tracker_type === "media_trust") {
+    const n = Object.keys(data.regions as object).length;
+    return n > 0 ? n : -1;
+  }
   if (Array.isArray(data.ranked_leaders) && data.ranked_leaders.length > 0) {
     return data.ranked_leaders.length;
   }
   if (Array.isArray(data.leaders) && data.leaders.length > 0) return data.leaders.length;
-  if (data.detailed_countries && typeof data.detailed_countries === "object") return 10;
-  if (data.countries && typeof data.countries === "object") return 10;
-  if (data.regions && typeof data.regions === "object") return 10;
 
   if (!data || Object.keys(data).length === 0) return -1;
   return 1;
@@ -336,30 +382,47 @@ function sortLeaders(leaders: RankedLeader[]): RankedLeader[] {
   return arr;
 }
 
-/** New shape: data.regions = { americas: [...], europe: [...], middle_east: [...], global: [...] } */
+/**
+ * Leaderboard shapes supported:
+ * 1) data.regions = { americas: [...], europe: [...], ... }
+ * 2) top-level data.americas / data.europe (trackers.py historical)
+ * 3) legacy data.ranked_leaders / data.leaders (flattened into global)
+ */
 export function extractLeadersByRegion(
   row?: TrackerRow,
 ): Record<LeaderRegionBucketKey, RankedLeader[]> {
   const data = (row?.data ?? {}) as Record<string, unknown>;
-  const regions = (data.regions ?? {}) as Record<string, unknown>;
+  const regions =
+    data.regions && typeof data.regions === "object"
+      ? (data.regions as Record<string, unknown>)
+      : {};
   const out = {} as Record<LeaderRegionBucketKey, RankedLeader[]>;
   for (const bucket of LEADER_REGION_BUCKETS) {
-    const leaders = sortLeaders(coerceLeaders(regions[bucket.key], bucket.label));
-    out[bucket.key] = leaders.slice(0, 10).map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
+    // Prefer nested regions[key], fall back to top-level data[key] from backend.
+    const raw = regions[bucket.key] ?? data[bucket.key];
+    const leaders = sortLeaders(coerceLeaders(raw, bucket.label));
+    out[bucket.key] = leaders.slice(0, 20).map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
+  }
+
+  // Legacy flat list → show under global if no regional buckets had data
+  const hasRegional = LEADER_REGION_BUCKETS.some((b) => out[b.key].length > 0);
+  if (!hasRegional) {
+    const legacy = sortLeaders(
+      coerceLeaders((data.ranked_leaders ?? data.leaders) as unknown, "Global"),
+    );
+    out.global = legacy.slice(0, 20).map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
   }
   return out;
 }
 
 export function extractRankedLeaders(row?: TrackerRow): RankedLeader[] {
+  const byRegion = extractLeadersByRegion(row);
+  const all: RankedLeader[] = [];
+  for (const bucket of LEADER_REGION_BUCKETS) all.push(...byRegion[bucket.key]);
+  if (all.length > 0) return sortLeaders(all);
+
+  // Final legacy fallback
   const data = (row?.data ?? {}) as Record<string, unknown>;
-  // New shape first: flatten data.regions
-  if (data.regions && typeof data.regions === "object") {
-    const byRegion = extractLeadersByRegion(row);
-    const all: RankedLeader[] = [];
-    for (const bucket of LEADER_REGION_BUCKETS) all.push(...byRegion[bucket.key]);
-    return sortLeaders(all);
-  }
-  // Legacy shape
   const raw = (data.ranked_leaders ?? data.leaders) as unknown;
   const withScore = sortLeaders(coerceLeaders(raw));
   return withScore.map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
