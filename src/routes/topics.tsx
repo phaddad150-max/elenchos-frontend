@@ -505,7 +505,7 @@ function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
   if (!trend) {
     return (
       <div
-        className="h-8 shrink-0 flex items-center justify-center"
+        className="h-8 w-full shrink-0 flex items-center justify-center"
         aria-hidden
       >
         <Minus className="w-5 h-5 text-muted-foreground/35" strokeWidth={2.5} />
@@ -537,7 +537,7 @@ function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
 
   return (
     <div
-      className="h-8 shrink-0 flex items-center justify-center gap-1.5"
+      className="h-8 w-full shrink-0 flex items-center justify-center gap-1.5 text-center"
       title={deltaText ? `${label} (${deltaText} pts)` : label}
       aria-label={deltaText ? `${label}, ${deltaText} points` : label}
     >
@@ -601,15 +601,15 @@ function TopicCard({
         <TopicCardCadence cadence={cadence} />
       </div>
 
-      {/* Slot 2 — title (fixed height, centered) */}
-      <div className="h-[3.5rem] shrink-0 flex items-center justify-center px-1.5">
-        <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-2`}>
-          {shortTitle(topic.title)}
-        </h3>
+      {/* Slot 2 — title + trend arrow (centered under name, especially mobile) */}
+      <div className="shrink-0 w-full flex flex-col items-center justify-center px-1.5">
+        <div className="h-[3.5rem] w-full flex items-center justify-center">
+          <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center mx-auto`}>
+            {shortTitle(topic.title)}
+          </h3>
+        </div>
+        <TopicCardWowTrend trend={resolvedWow} />
       </div>
-
-      {/* Slot 2b — WoW trend arrow between name and scores */}
-      <TopicCardWowTrend trend={resolvedWow} />
 
       {/* Slot 3 — scores (fixed height, always 2 equal columns, centered) */}
       <div className="h-[4.1rem] shrink-0 w-full">
