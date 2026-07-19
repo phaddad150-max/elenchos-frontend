@@ -382,11 +382,36 @@ function sortLeaders(leaders: RankedLeader[]): RankedLeader[] {
   return arr;
 }
 
+function mapLeaderRegionBucket(region?: string): LeaderRegionBucketKey {
+  const r = (region ?? "").toLowerCase();
+  if (
+    /(america|latin|caribbean|usa|u\.s\.|canada|mexico|brazil|argentin|chile|colomb|peru|salvador)/.test(
+      r,
+    )
+  ) {
+    return "americas";
+  }
+  if (/(europe|eu\b|uk|britain|france|germany|italy|spain|hungary|ukraine)/.test(r)) {
+    return "europe";
+  }
+  if (/(middle east|gulf|arab|israel|iran|turkey|saudi)/.test(r)) {
+    return "middle_east";
+  }
+  return "global";
+}
+
+/** True when a regional list has at least one scored (non-waiting) leader. */
+function hasScoredLeaders(list: RankedLeader[]): boolean {
+  return list.some((l) => l.status !== "waiting" && typeof l.overall_score === "number");
+}
+
 /**
  * Leaderboard shapes supported:
  * 1) data.regions = { americas: [...], europe: [...], ... }
- * 2) top-level data.americas / data.europe (trackers.py historical)
- * 3) legacy data.ranked_leaders / data.leaders (flattened into global)
+ * 2) top-level data.americas / data.europe (trackers.py)
+ * 3) legacy data.ranked_leaders / data.leaders (Jun 30 shape — still the last good snapshot)
+ *
+ * Waiting-only regional shells must not hide ranked_leaders fallbacks.
  */
 export function extractLeadersByRegion(
   row?: TrackerRow,
@@ -398,19 +423,38 @@ export function extractLeadersByRegion(
       : {};
   const out = {} as Record<LeaderRegionBucketKey, RankedLeader[]>;
   for (const bucket of LEADER_REGION_BUCKETS) {
+    out[bucket.key] = [];
+  }
+
+  for (const bucket of LEADER_REGION_BUCKETS) {
     // Prefer nested regions[key], fall back to top-level data[key] from backend.
     const raw = regions[bucket.key] ?? data[bucket.key];
     const leaders = sortLeaders(coerceLeaders(raw, bucket.label));
-    out[bucket.key] = leaders.slice(0, 20).map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
+    // Keep waiting rows only if we also have scored peers in that bucket
+    const scored = leaders.filter(
+      (l) => l.status !== "waiting" && typeof l.overall_score === "number",
+    );
+    const waiting = leaders.filter((l) => l.status === "waiting");
+    const merged = scored.length > 0 ? [...scored, ...waiting] : scored;
+    out[bucket.key] = merged.slice(0, 20).map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
   }
 
-  // Legacy flat list → show under global if no regional buckets had data
-  const hasRegional = LEADER_REGION_BUCKETS.some((b) => out[b.key].length > 0);
-  if (!hasRegional) {
+  const hasRegionalScored = LEADER_REGION_BUCKETS.some((b) => hasScoredLeaders(out[b.key]));
+  if (!hasRegionalScored) {
+    // Legacy / historical: ranked_leaders with overall_score (e.g. id 15 Jun 30)
     const legacy = sortLeaders(
-      coerceLeaders((data.ranked_leaders ?? data.leaders) as unknown, "Global"),
-    );
-    out.global = legacy.slice(0, 20).map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
+      coerceLeaders((data.ranked_leaders ?? data.leaders) as unknown),
+    ).filter((l) => l.status !== "waiting" && typeof l.overall_score === "number");
+
+    for (const l of legacy) {
+      const bucket = mapLeaderRegionBucket(l.region);
+      out[bucket].push(l);
+    }
+    for (const bucket of LEADER_REGION_BUCKETS) {
+      out[bucket.key] = sortLeaders(out[bucket.key])
+        .slice(0, 20)
+        .map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
+    }
   }
   return out;
 }
