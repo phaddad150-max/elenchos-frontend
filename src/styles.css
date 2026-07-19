@@ -39,7 +39,10 @@
   --color-surface-2: var(--surface-2);
   --color-grid-line: var(--grid-line);
   --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-family-sans: var(--font-sans);
+  --font-family-mono: var(--font-mono);
 }
 
 :root {
@@ -226,6 +229,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-display);
     font-feature-settings: "ss01", "cv11";
     font-size: 15.5px;
     -webkit-font-smoothing: antialiased;
@@ -237,6 +241,22 @@
     background-image: var(--gradient-aurora);
     background-attachment: fixed;
     min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
   }
 
   ::selection {
@@ -506,11 +526,11 @@ body {
 }
 .nav-tab {
   position: relative;
-  padding: 0.55rem 1.1rem;
+  padding: 0.6rem 1.15rem;
   border-radius: 9999px;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   letter-spacing: 0.01em;
   color: var(--color-muted-foreground);
   display: inline-flex;
@@ -536,6 +556,44 @@ body {
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--color-cyan), transparent);
   filter: blur(0.5px);
+}
+
+/* Mobile bottom nav — always clear where you are */
+.mobile-tab-bar {
+  box-shadow: 0 -8px 28px -18px oklch(0 0 0 / 0.45);
+}
+.light .mobile-tab-bar {
+  background: oklch(0.99 0.002 240 / 0.97);
+  border-top-color: oklch(0.82 0.006 240 / 0.95);
+  box-shadow: 0 -10px 32px -20px oklch(0.4 0.04 240 / 0.28);
+}
+.light .mobile-tab-active {
+  background: oklch(0.82 0.16 200 / 0.14);
+  color: oklch(0.32 0.08 210);
+  box-shadow: inset 0 0 0 1px oklch(0.82 0.16 200 / 0.35);
+}
+.light .mobile-tab:not(.mobile-tab-active) {
+  color: oklch(0.42 0.04 228);
+}
+
+/* Light: topic cards — stronger type contrast, same shell size */
+.light .group.relative.overflow-hidden.rounded-xl {
+  border-color: oklch(0.78 0.08 200 / 0.4);
+  background: linear-gradient(
+    145deg,
+    oklch(0.99 0.002 240),
+    oklch(0.96 0.01 210 / 0.95)
+  );
+  box-shadow: 0 10px 28px -18px oklch(0.4 0.04 240 / 0.22);
+}
+.light body {
+  /* Slightly higher base size on small screens for readability */
+  font-size: 16px;
+}
+@media (min-width: 768px) {
+  .light body {
+    font-size: 15.5px;
+  }
 }
 
 /* === Premium tracker cards === */

@@ -15,7 +15,7 @@ export function ThemePreferenceTabs({ className = "" }: { className?: string }) 
         role="tab"
         aria-selected={theme === "dark"}
         onClick={() => setTheme("dark")}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.14em] transition-colors ${
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-display font-semibold tracking-wide transition-colors ${
           theme === "dark"
             ? "bg-secondary text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
@@ -29,7 +29,7 @@ export function ThemePreferenceTabs({ className = "" }: { className?: string }) 
         role="tab"
         aria-selected={theme === "light"}
         onClick={() => setTheme("light")}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.14em] transition-colors ${
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-display font-semibold tracking-wide transition-colors ${
           theme === "light"
             ? "bg-secondary text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"

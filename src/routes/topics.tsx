@@ -440,13 +440,17 @@ function shortTitle(t: string): string {
   return map[t] ?? t;
 }
 
-/** Shared typography + row heights — every topic card uses the same slots */
-const CARD_LABEL = "text-[9px] md:text-[10px] font-mono uppercase tracking-[0.18em] leading-none";
-const CARD_TITLE = "text-[15px] md:text-[16px] font-display font-semibold tracking-tight leading-[1.2] text-center w-full";
-const CARD_SCORE_LABEL = "text-[9px] md:text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground leading-none";
-const CARD_SCORE_VALUE = "text-[1.75rem] md:text-2xl font-display font-semibold tabular-nums leading-none";
+/** Shared typography + row heights — card shell size stays fixed; type is larger & centered */
+const CARD_LABEL =
+  "text-[10.5px] md:text-[11px] font-mono uppercase tracking-[0.12em] leading-none text-center";
+const CARD_TITLE =
+  "text-[16px] md:text-[17px] font-display font-semibold tracking-tight leading-[1.18] text-center w-full";
+const CARD_SCORE_LABEL =
+  "text-[10.5px] md:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground leading-none text-center";
+const CARD_SCORE_VALUE =
+  "text-[1.95rem] md:text-[2.05rem] font-display font-semibold tabular-nums leading-none text-center";
 const CARD_CTA =
-  "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.16em] font-semibold text-[10px] md:text-[10px] min-h-[40px] md:min-h-[34px]";
+  "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.12em] font-semibold text-[11.5px] md:text-[12px] min-h-[40px] md:min-h-[36px]";
 
 const TOPIC_CARD_SHELL =
   "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] md:min-h-[210px] md:h-[210px]";
@@ -478,7 +482,7 @@ function TopicCardScore({
   color: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center px-1 min-w-0 h-full gap-1">
+    <div className="flex flex-col items-center justify-center text-center px-0.5 min-w-0 h-full gap-1.5">
       <span className={CARD_SCORE_LABEL}>
         <span className="md:hidden">{shortLabel}</span>
         <span className="hidden md:inline">{label}</span>
@@ -533,7 +537,7 @@ function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
     >
       <Icon className="w-5 h-5 shrink-0" style={{ color }} strokeWidth={2.75} />
       {deltaText && (
-        <span className="text-[11px] md:text-xs font-mono font-semibold tabular-nums leading-none" style={{ color }}>
+        <span className="text-xs md:text-[13px] font-mono font-semibold tabular-nums leading-none" style={{ color }}>
           {deltaText}
         </span>
       )}
@@ -586,14 +590,14 @@ function TopicCard({
       className={`${TOPIC_CARD_SHELL} w-full min-w-0`}
     >
       {/* Slot 1 — meta (fixed height, centered) */}
-      <div className="h-10 shrink-0 flex flex-col items-center justify-center gap-1">
-        <span className={`${CARD_LABEL} text-cyan truncate max-w-full text-center`}>{category}</span>
+      <div className="h-9 shrink-0 flex flex-col items-center justify-center gap-1">
+        <span className={`${CARD_LABEL} text-cyan truncate max-w-full`}>{category}</span>
         <TopicCardCadence cadence={cadence} />
       </div>
 
       {/* Slot 2 — title (fixed height, centered) */}
-      <div className="h-[3.75rem] shrink-0 flex items-center justify-center px-1">
-        <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-3 md:line-clamp-2`}>
+      <div className="h-[3.5rem] shrink-0 flex items-center justify-center px-1.5">
+        <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-2`}>
           {shortTitle(topic.title)}
         </h3>
       </div>
@@ -601,9 +605,9 @@ function TopicCard({
       {/* Slot 2b — WoW trend arrow between name and scores */}
       <TopicCardWowTrend trend={resolvedWow} />
 
-      {/* Slot 3 — scores (fixed height, always 2 equal columns) */}
-      <div className="h-[4.25rem] shrink-0 w-full">
-        <div className="grid grid-cols-2 h-full w-full divide-x divide-border/60 items-center">
+      {/* Slot 3 — scores (fixed height, always 2 equal columns, centered) */}
+      <div className="h-[4.1rem] shrink-0 w-full">
+        <div className="grid grid-cols-2 h-full w-full divide-x divide-border/60 items-center justify-items-center">
           <TopicCardScore
             label="Sentiment"
             shortLabel="Sent."
@@ -821,12 +825,20 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
     >
       {/* Top bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 active:bg-cyan/15 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Topics
-        </button>
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 min-w-0">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-full text-[13px] font-display font-semibold border border-cyan/45 bg-cyan/10 text-cyan hover:bg-cyan/15 active:bg-cyan/20 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
+          >
+            <ArrowLeft className="w-4 h-4" /> Topics
+          </button>
+          <span className="text-muted-foreground font-mono text-[12px] hidden sm:inline" aria-hidden>
+            /
+          </span>
+          <span className="text-[12px] sm:text-[13px] font-display font-medium text-muted-foreground truncate max-w-[14rem] sm:max-w-xs hidden sm:inline">
+            {shortTitle(topic.title)}
+          </span>
+        </nav>
         <a
           href={shareHref}
           target="_blank"

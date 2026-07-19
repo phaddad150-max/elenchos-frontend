@@ -26,25 +26,24 @@ function NewBadge({ className, strokeWidth: _ }: { className?: string; strokeWid
 }
 
 const TABS = [
-  { to: "/", label: "Dashboard Overview", icon: null },
-  { to: "/topics", label: "Topics", icon: null },
-  { to: "/trackers", label: "Trackers", icon: null },
-  { to: "/about", label: "About", icon: null },
+  { to: "/", label: "Dashboard", exact: true },
+  { to: "/topics", label: "Topics", exact: false },
+  { to: "/trackers", label: "Trackers", exact: false },
+  { to: "/about", label: "About", exact: true },
 ] as const;
 void NewBadge;
-
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
   return (
     <>
-      <nav className="sticky top-0 z-30 nav-shell">
+      <nav className="sticky top-0 z-30 nav-shell" aria-label="Main">
         <div className="border-b border-border/40 bg-background/40">
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2 flex items-center justify-center">
+          <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 flex items-center justify-center">
             <ThemePreferenceTabs />
           </div>
         </div>
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between gap-2 sm:gap-3">
-          <Link to="/" className="flex items-center gap-2 md:gap-3 group min-w-0">
+          <Link to="/" className="flex items-center gap-2 md:gap-3 group min-w-0" aria-label="Elenchos home">
             <div className="brand-mark w-9 h-9 md:w-10 md:h-10 rounded-full grid place-items-center shrink-0">
               <Radio className="w-4 h-4 text-cyan" strokeWidth={2.5} />
             </div>
@@ -53,21 +52,27 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
                 <span className="text-xl md:text-2xl font-display font-semibold tracking-tight text-glow-cyan truncate">
                   Elenchos
                 </span>
-                <span className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mt-1">
-                  CROSSED EXAMINED PUBLIC DISCOURSE
+                <span className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mt-1">
+                  Cross-examined public discourse
                 </span>
               </div>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1 nav-pill-group rounded-full p-1">
+          <div
+            className="hidden md:flex items-center gap-1 nav-pill-group rounded-full p-1"
+            role="navigation"
+            aria-label="Primary pages"
+          >
             {TABS.map((t) => (
               <Link
                 key={t.to}
                 to={t.to}
                 className="nav-tab inline-flex items-center gap-1.5"
-                activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center gap-1.5" }}
-                activeOptions={{ exact: true }}
+                activeProps={{
+                  className: "nav-tab nav-tab-active inline-flex items-center gap-1.5",
+                }}
+                activeOptions={{ exact: t.exact }}
               >
                 {t.label}
               </Link>
@@ -82,7 +87,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
               href="https://x.com/elenchospulse"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 text-[11px] font-mono uppercase tracking-[0.18em]"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 text-[11px] font-mono uppercase tracking-[0.16em]"
               aria-label="Follow Elenchos on X"
             >
               <XLogo className="w-3.5 h-3.5" />
@@ -94,5 +99,4 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
       <MobileTabBar />
     </>
   );
-
 }
