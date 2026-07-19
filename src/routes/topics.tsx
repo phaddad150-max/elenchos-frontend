@@ -372,12 +372,18 @@ function TopicsFilterableGrid({
     <div className="space-y-5 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 pb-0.5 custom-scroll">
-          <div className="inline-flex rounded-full border border-border bg-background/40 p-1 text-[10px] sm:text-[11px] font-mono min-w-max">
+          <div
+            className="inline-flex rounded-full border border-border bg-background/40 p-1 text-[11px] sm:text-[12px] font-display font-semibold min-w-max"
+            role="tablist"
+            aria-label="Filter topics by category"
+          >
             {cats.map((c) => (
               <button
                 key={c}
+                role="tab"
+                aria-selected={category === c}
                 onClick={() => setCategory(c)}
-                className={`px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-full uppercase tracking-[0.16em] sm:tracking-[0.18em] transition-colors whitespace-nowrap min-h-[36px] sm:min-h-0 ${
+                className={`px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-full tracking-wide transition-colors whitespace-nowrap min-h-[40px] sm:min-h-0 ${
                   category === c
                     ? "bg-cyan/15 text-cyan border border-cyan/40"
                     : "text-muted-foreground hover:text-foreground"
@@ -388,7 +394,7 @@ function TopicsFilterableGrid({
             ))}
           </div>
         </div>
-        <span className="text-[10px] sm:text-[11px] font-mono text-muted-foreground sm:ml-auto shrink-0">
+        <span className="text-[12px] sm:text-[13px] font-display font-medium text-muted-foreground sm:ml-auto shrink-0">
           {visibleCount} topics
         </span>
       </div>
@@ -453,7 +459,7 @@ const CARD_CTA =
   "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.12em] font-semibold text-[11.5px] md:text-[12px] min-h-[40px] md:min-h-[36px]";
 
 const TOPIC_CARD_SHELL =
-  "group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] md:min-h-[210px] md:h-[210px]";
+  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] md:min-h-[210px] md:h-[210px]";
 
 function TopicCardCadence({ cadence }: { cadence: "realtime" | "weekly" | "monthly" }) {
   return (
