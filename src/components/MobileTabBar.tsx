@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Layers, Scale, Info } from "lucide-react";
+import { LayoutDashboard, Layers, BrainCircuit, Info } from "lucide-react";
 
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
@@ -13,7 +13,7 @@ const TABS = [
     to: "/trackers",
     label: "Trackers",
     match: (p: string) => p === "/trackers" || p.startsWith("/trackers/"),
-    icon: Scale,
+    icon: BrainCircuit,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },
 ] as const;
