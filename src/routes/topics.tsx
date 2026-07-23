@@ -351,6 +351,14 @@ function TopicsFilterableGrid({
       const i = PRIORITY.indexOf(id);
       return i === -1 ? 99 : i;
     };
+    /** Live (near real-time) always before weekly, then monthly. */
+    const cadenceRank = (id: string) => {
+      const c = topicCadence(id);
+      if (c === "realtime") return 0;
+      if (c === "weekly") return 1;
+      if (c === "monthly") return 2;
+      return 3;
+    };
     const available = [...filtered].filter((t) => bucketOf(t) !== "unavailable");
     const archived = available
       .filter((t) => isArchivedTopicId(t.id))
@@ -358,10 +366,19 @@ function TopicsFilterableGrid({
     const active = available
       .filter((t) => !isArchivedTopicId(t.id))
       .sort((a, b) => {
+        // 1) Cadence: Live first, then weekly, then monthly
+        const ca = cadenceRank(a.id);
+        const cb = cadenceRank(b.id);
+        if (ca !== cb) return ca - cb;
+        // 2) Within same cadence, named priority (near-realtime id first)
+        const pa = prio(a.id);
+        const pb = prio(b.id);
+        if (pa !== pb) return pa - pb;
+        // 3) Prefer topics that already have snapshots
         const ba = bucketRank[bucketOf(a)];
         const bb = bucketRank[bucketOf(b)];
         if (ba !== bb) return ba - bb;
-        return prio(a.id) - prio(b.id);
+        return a.title.localeCompare(b.title);
       });
     return { activeTopics: active, archivedTopics: archived };
     // eslint-disable-next-line react-hooks/exhaustive-deps
