@@ -881,11 +881,31 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
     compare: [],
   },
   {
+    id: "us-iran-confrontation",
+    title: "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
+    shortTitle: "US–Iran Confrontation",
+    description:
+      "Near-real-time citizen discourse on US and allied pressure against the Iranian regime — Treasury financial networks, military posture, proxies, and regime-survival narratives after decades of confrontation.",
+    sampleSize: "",
+    confidence: "Moderate",
+    region: "United States / Middle East",
+    trackers: [],
+    simulation: {
+      title: "Live data",
+      pathA: { label: "Live", series: [] },
+      pathB: { label: "Live", series: [] },
+      caption: "",
+    },
+    insights: { citizenSays: "", officialSays: "", gap: "" },
+    takeaway: "",
+    compare: [],
+  },
+  {
     id: "fifa-world-cup-2026",
     title: "FIFA World Cup 2026",
     shortTitle: "World Cup 2026",
     description:
-      "Citizen sentiment on the 2026 FIFA World Cup — fan excitement, host-nation politics, commercialization and geopolitics.",
+      "Archived tournament monitor — fan excitement, host-nation politics, commercialization and geopolitics from the 2026 World Cup cycle.",
     sampleSize: "",
     confidence: "Moderate",
     region: "Global",

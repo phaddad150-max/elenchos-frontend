@@ -27,6 +27,7 @@ export const CANONICAL_TOPICS = [
   "Global AI Race",
   "Cuba Sanctions & the Domino Effect",
   "fifa-world-cup-2026",
+  "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
   "US AI Economy Boom & American Technological Renaissance",
 ] as const;
 
@@ -41,6 +42,11 @@ export const TOPIC_ALIASES: Record<string, string> = {
   "crime and safety": "Crime, Safety & Lawlessness",
   "crime-safety-lawlessness": "Crime, Safety & Lawlessness",
   "crime, safety & lawlessness": "Crime, Safety & Lawlessness",
+  "us-iran confrontation": "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
+  "us iran confrontation": "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
+  "us-iran-confrontation": "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
+  "us-iran confrontation: sanctions, networks & regime pressure":
+    "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
 };
 
 /** Map any Supabase topic string to the canonical backend key, or null if unknown. */

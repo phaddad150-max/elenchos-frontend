@@ -174,6 +174,12 @@ const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat:
   "Global AI Race": { region: "San Francisco", subregion: "Eastern Mediterranean", lat: 37.77, lng: -122.42 },
   "Cuba Sanctions & the Domino Effect": { region: "Havana", subregion: "Eastern Mediterranean", lat: 23.13, lng: -82.38 },
   "fifa-world-cup-2026": { region: "Mexico City", subregion: "Eastern Mediterranean", lat: 19.43, lng: -99.13 },
+  "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": {
+    region: "Washington DC",
+    subregion: "Eastern Mediterranean",
+    lat: 38.91,
+    lng: -77.04,
+  },
   "US AI Economy Boom & American Technological Renaissance": { region: "Austin", subregion: "Eastern Mediterranean", lat: 30.27, lng: -97.74 },
 };
 
@@ -883,6 +889,8 @@ const TOPIC_GROUP_MAP: Record<string, TopicGroup> = {
   "Political Polarization & Populism Rise": "Social",
   "Global AI Race": "Economic",
   "Cuba Sanctions & the Domino Effect": "Political",
+  "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "Political",
+  "fifa-world-cup-2026": "Social",
 };
 
 function topicGroup(topic?: string | null): TopicGroup {
@@ -1845,6 +1853,8 @@ function shortTopicLabel(t: string): string {
   if (t.startsWith("Migration, Green")) return "EU Migration";
   if (t.startsWith("Government Performance")) return "Gov. Corruption";
   if (t.startsWith("Crime, Safety")) return "Crime & Safety";
+  if (t.startsWith("US-Iran Confrontation")) return "US–Iran Confrontation";
+  if (t.startsWith("Government Performance")) return "Gov & Corruption";
   if (t.startsWith("Political Polarization")) return "Polarization";
   if (t.startsWith("Global AI")) return "Global AI Race";
   if (t.startsWith("Cuba Sanctions")) return "Cuba Sanctions";

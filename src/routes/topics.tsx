@@ -44,13 +44,21 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
 import { clearDashboardCaches } from "@/lib/data-cache";
 import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
-import { LIVE_TOPIC_KEYS, isLiveTopicId, liveTopicConfig } from "@/lib/topic-catalog";
+import {
+  LIVE_TOPIC_KEYS,
+  isLiveTopicId,
+  liveTopicConfig,
+  isArchivedTopicId,
+} from "@/lib/topic-catalog";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-const NEAR_REALTIME_TOPIC_ID = "fifa-world-cup-2026";
 
-const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly"> = {
-  "fifa-world-cup-2026": "realtime",
+/** Primary near-real-time monitor (replaces FIFA after tournament close). */
+const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
+
+const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "archived"> = {
+  "us-iran-confrontation": "realtime",
+  "fifa-world-cup-2026": "archived",
   "arab-israeli-normalization": "weekly",
   "iranian-voices-vs-regime": "weekly",
   "us-ai-economy-boom": "weekly",
@@ -66,7 +74,8 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly"> = 
   "cuba-sanctions-domino": "monthly",
 };
 
-function topicCadence(id: string): "realtime" | "weekly" | "monthly" {
+function topicCadence(id: string): "realtime" | "weekly" | "monthly" | "archived" {
+  if (isArchivedTopicId(id)) return "archived";
   return TOPIC_UPDATE_CADENCE[id] ?? "weekly";
 }
 
@@ -88,14 +97,19 @@ function scoreTone(score: number, kind: "sentiment" | "divergence"): string {
   return score >= 60 ? "var(--rose-signal)" : score >= 35 ? "var(--amber-signal)" : "var(--emerald-signal)";
 }
 
-function cadenceLabel(cadence: "realtime" | "weekly" | "monthly", short = false): string {
+function cadenceLabel(
+  cadence: "realtime" | "weekly" | "monthly" | "archived",
+  short = false,
+): string {
   if (short) {
     if (cadence === "realtime") return "Live";
     if (cadence === "weekly") return "Weekly";
+    if (cadence === "archived") return "Archived";
     return "Monthly";
   }
   if (cadence === "realtime") return "Live · Near real-time";
   if (cadence === "weekly") return "Weekly refresh";
+  if (cadence === "archived") return "Archived tournament";
   return "Monthly refresh";
 }
 
@@ -276,7 +290,8 @@ function topicCategory(id: string): TopicCategory {
     id === "us-ai-economy-boom"
   )
     return "Economic";
-  if (id === "crime-safety-lawlessness" || id === "political-polarization-populism" || id === "fifa-world-cup-2026") return "Social";
+  if (id === "crime-safety-lawlessness" || id === "political-polarization-populism") return "Social";
+  if (id === "fifa-world-cup-2026") return "Social";
   return "Political";
 }
 
@@ -324,29 +339,35 @@ function TopicsFilterableGrid({
     "unavailable": 3,
   };
 
-  const ordered = useMemo(() => {
+  const { activeTopics, archivedTopics } = useMemo(() => {
     const PRIORITY = [
       NEAR_REALTIME_TOPIC_ID,
-      "arab-israeli-normalization",
       "iranian-voices-vs-regime",
+      "arab-israeli-normalization",
+      "new-us-foreign-policy",
       "us-ai-economy-boom",
     ];
     const prio = (id: string) => {
       const i = PRIORITY.indexOf(id);
       return i === -1 ? 99 : i;
     };
-    return [...filtered]
-      .filter((t) => bucketOf(t) !== "unavailable")
+    const available = [...filtered].filter((t) => bucketOf(t) !== "unavailable");
+    const archived = available
+      .filter((t) => isArchivedTopicId(t.id))
+      .sort((a, b) => prio(a.id) - prio(b.id));
+    const active = available
+      .filter((t) => !isArchivedTopicId(t.id))
       .sort((a, b) => {
         const ba = bucketRank[bucketOf(a)];
         const bb = bucketRank[bucketOf(b)];
         if (ba !== bb) return ba - bb;
         return prio(a.id) - prio(b.id);
       });
+    return { activeTopics: active, archivedTopics: archived };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, simMode, wowTick]);
 
-  const visibleCount = ordered.length;
+  const visibleCount = activeTopics.length + archivedTopics.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
@@ -405,7 +426,7 @@ function TopicsFilterableGrid({
         </div>
       )}
 
-      {ordered.length > 0 && (
+      {activeTopics.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
@@ -417,7 +438,24 @@ function TopicsFilterableGrid({
             </span>
           </div>
           <div className={topicGridClass}>
-            {ordered.map((t, i) => renderTopicCard(t, i))}
+            {activeTopics.map((t, i) => renderTopicCard(t, i))}
+          </div>
+        </section>
+      )}
+
+      {archivedTopics.length > 0 && (
+        <section className="space-y-3 pt-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
+              Archived topics
+            </h2>
+            <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
+              · Historical snapshots · no longer near real-time
+            </span>
+          </div>
+          <div className={`${topicGridClass} opacity-95`}>
+            {archivedTopics.map((t, i) => renderTopicCard(t, i))}
           </div>
         </section>
       )}
@@ -442,6 +480,7 @@ function shortTitle(t: string): string {
     "Cuba Sanctions & the Domino Effect": "Cuba Sanctions",
     "US AI Economy Boom & American Technological Renaissance": "US AI Economy Boom",
     "FIFA World Cup 2026": "FIFA World Cup 2026",
+    "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "US–Iran Confrontation",
   };
   return map[t] ?? t;
 }
@@ -461,13 +500,19 @@ const CARD_CTA =
 const TOPIC_CARD_SHELL =
   "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] md:min-h-[210px] md:h-[210px]";
 
-function TopicCardCadence({ cadence }: { cadence: "realtime" | "weekly" | "monthly" }) {
+function TopicCardCadence({
+  cadence,
+}: {
+  cadence: "realtime" | "weekly" | "monthly" | "archived";
+}) {
   return (
     <span
       className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full ${CARD_LABEL} ${
         cadence === "realtime"
           ? "text-cyan bg-cyan/10 border border-cyan/30"
-          : "text-muted-foreground bg-background/50 border border-border/50"
+          : cadence === "archived"
+            ? "text-muted-foreground bg-secondary/40 border border-border/60"
+            : "text-muted-foreground bg-background/50 border border-border/50"
       }`}
     >
       {cadence === "realtime" && <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" />}
@@ -564,7 +609,7 @@ function TopicCard({
   onOpen: () => void;
   snapshot?: TopicSnapshot | null;
   wowTrend?: WowTrend | null;
-  cadence?: "realtime" | "weekly" | "monthly";
+  cadence?: "realtime" | "weekly" | "monthly" | "archived";
 }) {
   const os = snapshot?.overall_sentiment;
   const sentiment = typeof os === "object" && os && typeof os.score === "number" ? Math.round(os.score) : undefined;

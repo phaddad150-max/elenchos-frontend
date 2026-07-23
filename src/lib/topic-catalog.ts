@@ -62,11 +62,22 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "fifa-world-cup-2026",
     headerLabel: "FIFA World Cup 2026",
   },
+  "us-iran-confrontation": {
+    rootKey: "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
+    headerLabel: "US–Iran Confrontation",
+  },
   "us-ai-economy-boom": {
     rootKey: "US AI Economy Boom & American Technological Renaissance",
     headerLabel: "US AI Economy Boom",
   },
 };
+
+/** Topics kept for history / read-only archive (not primary live monitors). */
+export const ARCHIVED_TOPIC_IDS = ["fifa-world-cup-2026"] as const;
+
+export function isArchivedTopicId(id: string): boolean {
+  return (ARCHIVED_TOPIC_IDS as readonly string[]).includes(id);
+}
 
 export function isLiveTopicId(id: string): boolean {
   return Object.prototype.hasOwnProperty.call(LIVE_TOPIC_KEYS, id);
