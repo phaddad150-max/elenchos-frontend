@@ -400,19 +400,6 @@ export function TopicAnalysisPage({
         </motion.div>
       )}
 
-      {rootKey === "fifa-world-cup-2026" && (
-        <Link
-          to="/trackers/football"
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.06] px-4 py-3 hover:border-emerald-signal/55 active:bg-emerald-signal/10 transition-colors group touch-manipulation"
-        >
-          <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] sm:tracking-[0.18em] text-emerald-signal">
-            <Trophy className="w-4 h-4 shrink-0" />
-            <span>Gladiator Podium · Football Index</span>
-          </div>
-          <span className="text-xs text-muted-foreground group-hover:text-foreground">Fan rankings by player discourse →</span>
-        </Link>
-      )}
-
       {/* Narrative threads — tappable; full text in sheet/modal */}
       {threads.length > 0 && (
         <section className="space-y-3">

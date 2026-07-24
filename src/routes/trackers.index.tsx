@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -41,6 +41,10 @@ import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Q
 
 
 export const Route = createFileRoute("/trackers/")({
+  /** Trackers hub temporarily hidden from product — restore by removing this redirect. */
+  beforeLoad: () => {
+    throw redirect({ to: "/topics" });
+  },
   head: () => ({
     meta: [
       { title: "Performance Trackers: Leaders, Peace & Global Issues Ranked by Citizens — Elenchos" },

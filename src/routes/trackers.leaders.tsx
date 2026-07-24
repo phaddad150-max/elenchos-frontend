@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -8,6 +8,9 @@ import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/leaders")({
+  beforeLoad: () => {
+    throw redirect({ to: "/topics" });
+  },
   head: () => ({
     meta: [
       { title: "Live Leader Leaderboard — Elenchos" },

@@ -176,7 +176,7 @@ function Hero() {
   );
 }
 
-// ───────────────────────── Pillars (Dashboard / Topics / Trackers) ─────────────────────────
+// ───────────────────────── Pillars (Dashboard / Topics) ─────────────────────────
 
 const PILLARS = [
   {
@@ -195,14 +195,6 @@ const PILLARS = [
       "Deep dives on every monitored topic. Nine balanced questions, scored 0–100, with the gap to official narratives surfaced.",
     accent: "emerald",
   },
-  {
-    icon: Scale,
-    title: "Trackers",
-    to: "/trackers",
-    blurb:
-      "Performance scorecards for leaders and countries — trust, popularity, and the live Peace & Normalization index.",
-    accent: "amber",
-  },
 ] as const;
 
 const PILLAR_DETAILS: Record<string, string[]> = {
@@ -215,11 +207,6 @@ const PILLAR_DETAILS: Record<string, string[]> = {
     "Nine balanced questions scored 0–100 per topic",
     "Pass 2 curated insight threads and Q&A pairs",
     "Historical sentiment sparklines across snapshots",
-  ],
-  Trackers: [
-    "Global leader trust ranked by citizen discourse",
-    "Peace & normalization index by country",
-    "Football player index during World Cup cycles",
   ],
 };
 

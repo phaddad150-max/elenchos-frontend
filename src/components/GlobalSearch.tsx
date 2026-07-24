@@ -10,17 +10,10 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { Search, Layers, Activity, LineChart } from "lucide-react";
+import { Search, Layers, Activity } from "lucide-react";
 import { LIVE_TOPIC_KEYS, topicIdForBackendName } from "@/lib/topic-catalog";
-import { TRACKER_CATALOG } from "@/lib/trackers-data";
 import { loadCitizenSignals } from "@/lib/dashboard-data";
 import type { CitizenSignal } from "@/lib/dashboard-data";
-
-const TRACKER_HREFS: Record<string, string> = {
-  global_leader_trust: "/trackers/leaders",
-  peace_normalization: "/trackers/peace",
-  football_player_index: "/trackers/football",
-};
 
 export function GlobalSearch() {
   const [open, setOpen] = useState(false);
@@ -45,22 +38,13 @@ export function GlobalSearch() {
 
   const topicItems = useMemo(
     () =>
-      Object.entries(LIVE_TOPIC_KEYS).map(([id, cfg]) => ({
-        id,
-        label: cfg.headerLabel,
-        keywords: `${cfg.headerLabel} ${cfg.rootKey}`.toLowerCase(),
-      })),
-    [],
-  );
-
-  const trackerItems = useMemo(
-    () =>
-      TRACKER_CATALOG.filter((t) => t.status === "live").map((t) => ({
-        id: t.key,
-        label: t.title,
-        href: TRACKER_HREFS[t.tracker_type] ?? "/trackers",
-        keywords: `${t.title} ${t.tagline}`.toLowerCase(),
-      })),
+      Object.entries(LIVE_TOPIC_KEYS)
+        .filter(([id]) => id !== "fifa-world-cup-2026")
+        .map(([id, cfg]) => ({
+          id,
+          label: cfg.headerLabel,
+          keywords: `${cfg.headerLabel} ${cfg.rootKey}`.toLowerCase(),
+        })),
     [],
   );
 
@@ -101,7 +85,7 @@ export function GlobalSearch() {
         type="button"
         onClick={() => setOpen(true)}
         className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-secondary/40 text-muted-foreground hover:border-cyan/40 hover:text-foreground text-[11px] font-mono transition-colors min-w-[140px]"
-        aria-label="Search topics, trackers, and signals"
+        aria-label="Search topics and signals"
       >
         <Search className="w-3.5 h-3.5 shrink-0" />
         <span className="truncate">Search…</span>
@@ -119,7 +103,7 @@ export function GlobalSearch() {
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Topics, trackers, citizen signals…" />
+        <CommandInput placeholder="Topics and citizen signals…" />
         <CommandList>
           <CommandEmpty>No matches.</CommandEmpty>
 
@@ -133,22 +117,6 @@ export function GlobalSearch() {
                 <Layers className="w-4 h-4 text-cyan" />
                 <span className="truncate">{t.label}</span>
                 <CommandShortcut>Topic</CommandShortcut>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup heading="Trackers">
-            {trackerItems.map((t) => (
-              <CommandItem
-                key={t.id}
-                value={`tracker ${t.keywords}`}
-                onSelect={() => go(t.href)}
-              >
-                <LineChart className="w-4 h-4 text-amber-signal" />
-                <span className="truncate">{t.label}</span>
-                <CommandShortcut>Tracker</CommandShortcut>
               </CommandItem>
             ))}
           </CommandGroup>
