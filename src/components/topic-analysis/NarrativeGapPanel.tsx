@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { AlertTriangle, ChevronDown, Share2, Users, Newspaper, GitCompareArrows } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { AlertTriangle, ChevronDown, Share2, GitCompareArrows } from "lucide-react";
 import { divergenceBand, divergenceColor } from "@/lib/score-colors";
 import { buildInsightShareText, buildTwitterShareHref } from "@/lib/share-insight";
 import type { NarrativeGapPoint } from "@/lib/dashboard-data";
@@ -19,9 +19,8 @@ export type NarrativeGapPanelProps = {
 
 /**
  * Comparative narrative gap:
- * - Side frames = citizen vs official/media narratives (full text expandable)
- * - Center = score + why that score
- * - Identified gaps = concrete paired claims (the insight layer)
+ * - Score strip = score + why that score
+ * - Identified gaps = concrete paired claims (no duplicate summary boxes above)
  */
 export function NarrativeGapPanel({
   topicLabel,
@@ -159,32 +158,8 @@ export function NarrativeGapPanel({
         ) : null}
       </div>
 
-      {/* Side-by-side frames */}
-      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 px-3 sm:px-4 pb-3 items-stretch">
-        <FrameCard
-          icon={<Users className="w-3.5 h-3.5" />}
-          label="Citizens on X"
-          accent="var(--cyan)"
-          body={
-            citizen ||
-            "No distinct citizen frame in this snapshot yet. Run Pass 1 to refresh structured gap frames."
-          }
-          muted={!citizen}
-        />
-        <FrameCard
-          icon={<Newspaper className="w-3.5 h-3.5" />}
-          label="Official + media"
-          accent="var(--amber-signal)"
-          body={
-            official ||
-            "No distinct official/media frame in this snapshot yet. Run Pass 1 to refresh structured gap frames."
-          }
-          muted={!official}
-        />
-      </div>
-
-      {/* Identified gaps — the comparative insight layer */}
-      {points.length > 0 && (
+      {/* Identified gaps only — no duplicate dual summary boxes above */}
+      {points.length > 0 ? (
         <div className="relative border-t border-border/60 px-3 sm:px-4 py-3 space-y-2.5">
           <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-foreground/80">
             <GitCompareArrows className="w-3.5 h-3.5 text-cyan" />
@@ -196,7 +171,23 @@ export function NarrativeGapPanel({
             ))}
           </div>
         </div>
-      )}
+      ) : (citizen || official) ? (
+        <div className="relative border-t border-border/60 px-3 sm:px-4 py-3 space-y-2.5">
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-foreground/80">
+            <GitCompareArrows className="w-3.5 h-3.5 text-cyan" />
+            Identified gaps · what each side claims
+          </div>
+          <GapPointRow
+            index={1}
+            point={{
+              claim_citizen: citizen || undefined,
+              claim_official_media: official || undefined,
+              why_it_matters: rationale || headline || undefined,
+            }}
+            color={color}
+          />
+        </div>
+      ) : null}
 
       {/* Optional longer synthesis */}
       {showOverviewToggle && (
@@ -279,43 +270,6 @@ function GapPointRow({
   );
 }
 
-function FrameCard({
-  icon,
-  label,
-  accent,
-  body,
-  muted,
-}: {
-  icon: ReactNode;
-  label: string;
-  accent: string;
-  body: string;
-  muted?: boolean;
-}) {
-  return (
-    <div
-      className="rounded-xl border bg-background/50 p-3 sm:p-3.5 flex flex-col gap-2 min-h-[7rem] h-full"
-      style={{ borderColor: `${accent}44`, borderTopWidth: 2, borderTopColor: accent }}
-    >
-      <div
-        className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] shrink-0"
-        style={{ color: accent }}
-      >
-        {icon}
-        {label}
-      </div>
-      <ExpandableText
-        text={body}
-        className={`text-[13px] sm:text-[14px] leading-snug flex-1 ${
-          muted ? "text-muted-foreground italic" : "text-foreground/90"
-        }`}
-        clampLines={4}
-        forceToggle={!muted && body.length > 80}
-      />
-    </div>
-  );
-}
-
 /**
  * Reliable expand/collapse: measures overflow, always reveals full text on Read more.
  */
@@ -338,10 +292,8 @@ function ExpandableText({
     if (open) return;
     const el = ref.current;
     if (!el) return;
-    // Detect true visual clamp overflow
     const check = () => setOverflows(forceToggle || el.scrollHeight > el.clientHeight + 2);
     check();
-    // Re-check after fonts/layout
     const t = window.setTimeout(check, 50);
     return () => window.clearTimeout(t);
   }, [text, open, clampLines, forceToggle]);
