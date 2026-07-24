@@ -48,6 +48,7 @@ import { MiniSparkline } from "@/components/MiniSparkline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { clearDashboardCaches } from "@/lib/data-cache";
 import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
+import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 
 import {
   loadCuratedHighlights,
@@ -346,7 +347,7 @@ function Dashboard() {
       const geo = topicGeo(it.topic);
       const score = typeof it.sentiment_score === "number" ? it.sentiment_score : 50;
       const sentiment: Sentiment =
-        score >= 65 ? "supportive" : score >= 50 ? "neutral" : score >= 35 ? "critical" : "outraged";
+        score >= 61 ? "supportive" : score >= 41 ? "neutral" : score >= 21 ? "critical" : "outraged";
       const intensityScore = Math.min(1, Math.abs(score - 50) / 50 + 0.35);
       const intensity: Intensity =
         intensityScore >= 0.85 ? "critical" : intensityScore >= 0.65 ? "high" : intensityScore >= 0.4 ? "medium" : "low";
@@ -690,27 +691,9 @@ function Header({
   );
 }
 
-// Color-code by sentiment score (0-100) with refined bands.
-// 81-100 bright green · 71-80 green · 61-70 light green · 51-60 amber ·
-// 41-50 light red/orange · 0-40 red.
+// Canonical bands: 61–70 Leaning Positive = light green (#86efac).
 function sentimentTone(score?: number | null, label?: string | null): { color: string; tint: string; band: string } {
-  const s = typeof score === "number" ? score : null;
-  const lab = (label ?? "").toLowerCase();
-  if (s !== null) {
-    if (s >= 81) return { color: "#22c55e", tint: "rgba(34,197,94,0.12)", band: "Strongly Positive" };
-    if (s >= 71) return { color: "#4ade80", tint: "rgba(74,222,128,0.12)", band: "Positive" };
-    if (s >= 61) return { color: "#86efac", tint: "rgba(134,239,172,0.12)", band: "Leaning Positive" };
-    if (s >= 51) return { color: "var(--amber-signal)", tint: "rgba(245,158,11,0.12)", band: "Mixed" };
-    if (s >= 41) return { color: "#fb923c", tint: "rgba(251,146,60,0.12)", band: "Slightly Negative" };
-    return { color: "var(--rose-signal)", tint: "rgba(244,63,94,0.12)", band: "Negative" };
-  }
-  if (lab.includes("strongly positive")) return { color: "#22c55e", tint: "rgba(34,197,94,0.12)", band: "Strongly Positive" };
-  if (lab.includes("leaning positive") || lab.includes("slightly positive")) return { color: "#86efac", tint: "rgba(134,239,172,0.12)", band: "Leaning Positive" };
-  if (lab.includes("positive")) return { color: "#4ade80", tint: "rgba(74,222,128,0.12)", band: "Positive" };
-  if (lab.includes("strongly negative")) return { color: "var(--rose-signal)", tint: "rgba(244,63,94,0.12)", band: "Strongly Negative" };
-  if (lab.includes("slightly negative")) return { color: "#fb923c", tint: "rgba(251,146,60,0.12)", band: "Slightly Negative" };
-  if (lab.includes("negative")) return { color: "var(--rose-signal)", tint: "rgba(244,63,94,0.12)", band: "Negative" };
-  return { color: "var(--amber-signal)", tint: "rgba(245,158,11,0.12)", band: "Mixed" };
+  return sharedSentimentTone(score, label);
 }
 
 function timeAgo(iso?: string | null): string {

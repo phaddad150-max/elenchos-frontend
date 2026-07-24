@@ -1,14 +1,11 @@
-export function sentimentColor(score: number): string {
-  if (score >= 65) return "var(--emerald-signal)";
-  if (score >= 45) return "var(--amber-signal)";
-  return "var(--rose-signal)";
-}
-
-export function divergenceColor(score: number): string {
-  if (score >= 60) return "var(--rose-signal)";
-  if (score >= 35) return "var(--amber-signal)";
-  return "var(--emerald-signal)";
-}
+export {
+  sentimentColor,
+  divergenceColor,
+  divergenceBand,
+  sentimentTone,
+  sentimentColorCoarse,
+  sentimentNetLabel,
+} from "@/lib/score-colors";
 
 export function confidenceColor(c?: string): string {
   const v = (c ?? "").toLowerCase();

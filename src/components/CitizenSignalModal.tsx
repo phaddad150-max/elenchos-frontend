@@ -2,20 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, MessageSquare, Sparkles, Share2, TrendingUp, ArrowUpRight, ArrowDownRight, ArrowRight } from "lucide-react";
 import type { FeedCitizenSignal, TopicSnapshot } from "@/lib/dashboard-data";
 import { cleanHeadline } from "@/lib/utils";
-
-
-function sentimentTone(score?: number | null, label?: string | null) {
-  const s = typeof score === "number" ? score : null;
-  if (s !== null) {
-    if (s >= 81) return { color: "#22c55e", band: "Strongly Positive" };
-    if (s >= 71) return { color: "#4ade80", band: "Positive" };
-    if (s >= 61) return { color: "#86efac", band: "Leaning Positive" };
-    if (s >= 51) return { color: "var(--amber-signal)", band: "Mixed" };
-    if (s >= 41) return { color: "#fb923c", band: "Slightly Negative" };
-    return { color: "var(--rose-signal)", band: "Negative" };
-  }
-  return { color: "var(--amber-signal)", band: label ?? "Mixed" };
-}
+import { sentimentTone } from "@/lib/score-colors";
 
 function TrendIcon({ trend }: { trend?: string | null }) {
   const t = (trend ?? "").toLowerCase();

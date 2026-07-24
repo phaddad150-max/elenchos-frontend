@@ -52,6 +52,12 @@ import {
 } from "@/lib/topic-catalog";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  sentimentColorCoarse,
+  divergenceColor as scoreColorsDivergence,
+  sentimentNetLabel,
+  sentimentColor as scoreColorsSentiment,
+} from "@/lib/score-colors";
 
 /** Primary near-real-time monitor (replaces FIFA after tournament close). */
 const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
@@ -92,10 +98,9 @@ function readDivergenceScore(snapshot?: TopicSnapshot | null): number | undefine
 }
 
 function scoreTone(score: number, kind: "sentiment" | "divergence"): string {
-  if (kind === "sentiment") {
-    return score >= 60 ? "var(--emerald-signal)" : score >= 40 ? "var(--amber-signal)" : "var(--rose-signal)";
-  }
-  return score >= 60 ? "var(--rose-signal)" : score >= 35 ? "var(--amber-signal)" : "var(--emerald-signal)";
+  // 61–70 leaning positive → light green; 71+ full green; divergence inverted.
+  if (kind === "sentiment") return sentimentColorCoarse(score);
+  return scoreColorsDivergence(score);
 }
 
 function cadenceLabel(
@@ -752,8 +757,7 @@ function SubGroupBreakdown({ trackers }: { trackers: FeatureTopic["trackers"] })
   const current = items.find((i) => i.key === active) ?? items[0];
   const tracker = current.tracker;
   const score = tracker?.score ?? 0;
-  const color =
-    score >= 65 ? "var(--emerald-signal)" : score >= 45 ? "var(--amber-signal)" : "var(--rose-signal)";
+  const color = scoreColorsSentiment(score);
 
   return (
     <section className="glass rounded-2xl border border-cyan/20 p-5 space-y-4">
@@ -884,7 +888,8 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
     : `${topic.title} — Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
   const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
-  const sentimentTone = overallSentiment >= 60 ? "emerald" : overallSentiment >= 40 ? "amber" : "rose";
+  const sentimentTone =
+    overallSentiment >= 71 ? "emerald" : overallSentiment >= 61 ? "emerald" : overallSentiment >= 41 ? "amber" : "rose";
 
   return (
     <motion.section
@@ -1177,17 +1182,13 @@ function prettySegmentName(k: string): string {
 
 
 function sentimentColor(score: number): string {
-  if (score >= 65) return "var(--emerald-signal)";
-  if (score >= 45) return "var(--amber-signal)";
-  return "var(--rose-signal)";
+  return scoreColorsSentiment(score);
 }
 
 // Higher divergence == more concern. Color-coded with the same palette
 // used across the dashboard: green low, amber medium, red high.
 function divergenceColor(score: number): string {
-  if (score >= 60) return "var(--rose-signal)";
-  if (score >= 35) return "var(--amber-signal)";
-  return "var(--emerald-signal)";
+  return scoreColorsDivergence(score);
 }
 
 function divergenceBand(score: number): string {
@@ -2015,7 +2016,7 @@ function OverallSentiment({ score, trend, tone }: { score: number; trend: number
         <div>
           <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">Overall Citizen Sentiment</div>
           <div className="text-lg font-display font-semibold mt-1">
-            {score >= 60 ? "Net positive" : score >= 40 ? "Mixed signal" : "Net negative"}
+            {sentimentNetLabel(score)}
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             Weighted average of stability, economy & social trackers
@@ -2156,9 +2157,9 @@ function SegmentedSentiment({
               ? "emerald"
               : seg.highlight === "low"
                 ? "rose"
-                : seg.score >= 60
+                : seg.score >= 61
                   ? "emerald"
-                  : seg.score >= 40
+                  : seg.score >= 41
                     ? "amber"
                     : "rose";
           const color = toneVar(tone);
