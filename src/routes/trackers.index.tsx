@@ -1130,6 +1130,15 @@ function PeaceCountryCard({
                 {c.name}
               </span>
               {c.momentum && <MomentumChip momentum={c.momentum} />}
+              {c.data_quality && c.data_quality !== "high" && (
+                <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-border text-muted-foreground">
+                  {c.data_quality === "none"
+                    ? c.status === "carried_forward"
+                      ? "Prior · thin X"
+                      : "Waiting · thin X"
+                    : "Low X sample"}
+                </span>
+              )}
             </div>
             {c.progress && (
               <div

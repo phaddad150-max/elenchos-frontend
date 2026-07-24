@@ -73,6 +73,11 @@ export type PeaceCountry = {
   dominant_narrative?: string;
   key_signals?: string[];
   honest_assessment?: string;
+  /** high | low | none — from bucketed peace_v2 scoring */
+  data_quality?: string;
+  status?: string;
+  posts_in_bucket?: number;
+  evidence_notes?: string;
 };
 
 // Three diagnostic buckets for the peace index.
