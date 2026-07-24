@@ -62,6 +62,9 @@ import {
 /** Primary near-real-time monitor (replaces FIFA after tournament close). */
 const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
 
+/** Topics marked with a small NEW pill on the card (no layout change). */
+const NEW_TOPIC_IDS = new Set(["elon-musk-public-voices"]);
+
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "archived"> = {
   "us-iran-confrontation": "realtime",
   "fifa-world-cup-2026": "archived",
@@ -349,6 +352,7 @@ function TopicsFilterableGrid({
   const { activeTopics, archivedTopics } = useMemo(() => {
     const PRIORITY = [
       NEAR_REALTIME_TOPIC_ID,
+      "elon-musk-public-voices", // directly after live monitor
       "iranian-voices-vs-regime",
       "arab-israeli-normalization",
       "new-us-foreign-policy",
@@ -408,6 +412,7 @@ function TopicsFilterableGrid({
         cadence={topicCadence(t.id)}
         snapshot={snap}
         wowTrend={wow}
+        isNew={NEW_TOPIC_IDS.has(t.id)}
         onOpen={() => onOpen(t.id)}
       />
     );
@@ -628,6 +633,7 @@ function TopicCard({
   snapshot = null,
   wowTrend = null,
   cadence = "weekly",
+  isNew = false,
 }: {
   topic: FeatureTopic;
   delay: number;
@@ -635,6 +641,7 @@ function TopicCard({
   snapshot?: TopicSnapshot | null;
   wowTrend?: WowTrend | null;
   cadence?: "realtime" | "weekly" | "monthly" | "archived";
+  isNew?: boolean;
 }) {
   const os = snapshot?.overall_sentiment;
   const sentiment = typeof os === "object" && os && typeof os.score === "number" ? Math.round(os.score) : undefined;
@@ -668,7 +675,17 @@ function TopicCard({
       {/* Slot 1 — meta (fixed height, centered) */}
       <div className="h-9 shrink-0 flex flex-col items-center justify-center gap-1">
         <span className={`${CARD_LABEL} text-cyan truncate max-w-full`}>{category}</span>
-        <TopicCardCadence cadence={cadence} />
+        <div className="flex items-center justify-center gap-1 min-h-[1.25rem]">
+          <TopicCardCadence cadence={cadence} />
+          {isNew && (
+            <span
+              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-[0.14em] leading-none text-background bg-cyan border border-cyan/50 shrink-0"
+              aria-label="New topic"
+            >
+              New
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Slot 2 — title + trend arrow (centered under name, especially mobile) */}
