@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   loadCuratedQaPairs,
   loadCuratedTopicInsights,
@@ -18,7 +17,7 @@ import {
   type WowTrend,
 } from "@/lib/dashboard-data";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Brain,
@@ -127,46 +126,12 @@ function avgDivergence(t: FeatureTopic) {
   return Math.round(t.compare.reduce((s, r) => s + r.divergence, 0) / t.compare.length);
 }
 
-export const Route = createFileRoute("/topics")({
-  head: () => ({
-    meta: [
-      { title: "Topics — Elenchos" },
-      {
-        name: "description",
-        content:
-          "Explore what ordinary citizens are saying about major global issues. Real public conversations, analyzed with care and transparency.",
-      },
-      { property: "og:title", content: "Topics — Elenchos" },
-      {
-        property: "og:description",
-        content: "Live citizen sentiment from public X discourse, analyzed across nine dimensions per topic.",
-      },
-      { property: "og:url", content: "https://elenchos.live/topics" },
-    ],
-    links: [{ rel: "canonical", href: "https://elenchos.live/topics" }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "CollectionPage",
-          name: "Live Topics: Public Square Sentiment",
-          description:
-            "Live citizen sentiment from public X discourse, analyzed across nine dimensions per topic.",
-          url: "https://elenchos.live/topics",
-        }),
-      },
-    ],
-  }),
-
-  component: TopicsPage,
-});
-
-function TopicsPage() {
+/** Shared shell: nav, live badge, freshness bar, footer. */
+function TopicsShell({ children }: { children: ReactNode }) {
   const [, setTick] = useState(0);
   const [refreshedAt, setRefreshedAt] = useState(() => new Date());
   const [sourceUpdatedAt, setSourceUpdatedAt] = useState<string | null>(null);
-  const [simMode] = useSimMode();
+
   useEffect(() => {
     loadDashboardData().then(() => setTick((n) => n + 1));
     loadDashboardOverview().then((o) =>
@@ -184,39 +149,6 @@ function TopicsPage() {
     setTick((n) => n + 1);
     setRefreshedAt(new Date());
   };
-  const [selectedId, setSelectedIdState] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("topic");
-    return t && getTopic(t) ? t : null;
-  });
-  const setSelectedId = (id: string | null) => {
-    setSelectedIdState(id);
-    if (typeof window === "undefined") return;
-    const url = new URL(window.location.href);
-    if (id) url.searchParams.set("topic", id);
-    else url.searchParams.delete("topic");
-    window.history.pushState({}, "", url.toString());
-  };
-  // SSR renders with selectedId=null; sync ?topic= from URL after client hydration.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("topic");
-    if (t && getTopic(t)) setSelectedIdState(t);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onPop = () => {
-      const params = new URLSearchParams(window.location.search);
-      const t = params.get("topic");
-      setSelectedIdState(t && getTopic(t) ? t : null);
-    };
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
-  }, []);
-  const selected = selectedId ? getTopic(selectedId) : null;
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -242,41 +174,81 @@ function TopicsPage() {
             onRefresh={handleRefresh}
           />
         </div>
-        <AnimatePresence mode="wait">
-          {!selected ? (
-            <motion.section
-              key="grid"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              <header className="space-y-3">
-                <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
-                  <span className="w-1 h-3.5 bg-cyan rounded-sm" />
-                  Live Topics
-                </div>
-                <h1 className="text-[1.55rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.1] break-words">
-                  Live Topics:{" "}
-                  <span className="text-cyan">Public Square Sentiment</span>
-                </h1>
-                <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-                  Citizen sentiment and narrative divergence from real public discourse on X
-                </p>
-              </header>
-
-              <h2 className="sr-only">All topics</h2>
-              <TopicsFilterableGrid simMode={simMode} onOpen={(id) => setSelectedId(id)} />
-
-            </motion.section>
-          ) : (
-            <TopicDetail key={selected.id} topic={selected} simMode={simMode} onBack={() => setSelectedId(null)} />
-          )}
-        </AnimatePresence>
+        {children}
       </main>
 
       <SiteFooter />
     </div>
+  );
+}
+
+/** Topics index: /topics */
+export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
+  const [simMode] = useSimMode();
+
+  return (
+    <TopicsShell>
+      <motion.section
+        key="grid"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <header className="space-y-3">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
+            <span className="w-1 h-3.5 bg-cyan rounded-sm" />
+            Live Topics
+          </div>
+          <h1 className="text-[1.55rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.1] break-words">
+            Live Topics:{" "}
+            <span className="text-cyan">Public Square Sentiment</span>
+          </h1>
+          <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
+            Citizen sentiment and narrative divergence from real public discourse on X
+          </p>
+        </header>
+
+        <h2 className="sr-only">All topics</h2>
+        <TopicsFilterableGrid simMode={simMode} onOpen={onOpen} />
+      </motion.section>
+    </TopicsShell>
+  );
+}
+
+/** Topic detail: /topics/$topicId */
+export function TopicDetailPage({
+  topicId,
+  onBack,
+}: {
+  topicId: string;
+  onBack: () => void;
+}) {
+  const [simMode] = useSimMode();
+  const topic = getTopic(topicId);
+
+  if (!topic) {
+    return (
+      <TopicsShell>
+        <div className="rounded-xl border border-border bg-secondary/20 p-8 text-center space-y-4">
+          <p className="text-sm font-mono text-muted-foreground">
+            Topic not found: <span className="text-foreground">{topicId}</span>
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-display font-semibold border border-cyan/45 bg-cyan/10 text-cyan hover:bg-cyan/15"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to topics
+          </button>
+        </div>
+      </TopicsShell>
+    );
+  }
+
+  return (
+    <TopicsShell>
+      <TopicDetail key={topic.id} topic={topic} simMode={simMode} onBack={onBack} />
+    </TopicsShell>
   );
 }
 
@@ -899,7 +871,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   });
   const liveScore = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.score : undefined;
   const liveLabel = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.label : undefined;
-  const shareUrl = `https://elenchos.live/topics?topic=${encodeURIComponent(topic.id)}`;
+  const shareUrl = `https://elenchos.live/topics/${encodeURIComponent(topic.id)}`;
   const liveDiv =
     useLive && liveData && typeof liveData.divergence_score === "number"
       ? Math.round(liveData.divergence_score)

@@ -190,7 +190,7 @@ function FootballPlayersPage() {
         )}
 
         <a
-          href="/topics?topic=fifa-world-cup-2026"
+          href="/topics/fifa-world-cup-2026"
           className="mt-8 inline-flex text-sm font-mono text-cyan hover:underline"
         >
           View full FIFA World Cup 2026 intelligence briefing →

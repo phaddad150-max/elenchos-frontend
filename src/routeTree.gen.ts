@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TopicsRouteImport } from './routes/topics'
 import { Route as SponsorRouteImport } from './routes/sponsor'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -18,19 +17,16 @@ import { Route as LeadersRouteImport } from './routes/leaders'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
+import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
+import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
 import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 
-const TopicsRoute = TopicsRouteImport.update({
-  id: '/topics',
-  path: '/topics',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SponsorRoute = SponsorRouteImport.update({
   id: '/sponsor',
   path: '/sponsor',
@@ -71,6 +67,11 @@ const TrackersIndexRoute = TrackersIndexRouteImport.update({
   path: '/trackers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TopicsIndexRoute = TopicsIndexRouteImport.update({
+  id: '/topics/',
+  path: '/topics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
   id: '/trackers/peace',
   path: '/trackers/peace',
@@ -89,6 +90,11 @@ const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
 const TrackersFootballRoute = TrackersFootballRouteImport.update({
   id: '/trackers/football',
   path: '/trackers/football',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
+  id: '/topics/$topicId',
+  path: '/topics/$topicId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
@@ -115,13 +121,14 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
-  '/topics': typeof TopicsRoute
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
+  '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
+  '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -133,13 +140,14 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
-  '/topics': typeof TopicsRoute
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
+  '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
+  '/topics': typeof TopicsIndexRoute
   '/trackers': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -152,13 +160,14 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
-  '/topics': typeof TopicsRoute
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
+  '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
+  '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -172,13 +181,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/sponsor'
-    | '/topics'
     | '/admin/curation'
     | '/sponsor/success'
+    | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
+    | '/topics/'
     | '/trackers/'
     | '/api/public/contact'
   fileRoutesByTo: FileRoutesByTo
@@ -190,13 +200,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/sponsor'
-    | '/topics'
     | '/admin/curation'
     | '/sponsor/success'
+    | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
+    | '/topics'
     | '/trackers'
     | '/api/public/contact'
   id:
@@ -208,13 +219,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/sponsor'
-    | '/topics'
     | '/admin/curation'
     | '/sponsor/success'
+    | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
+    | '/topics/'
     | '/trackers/'
     | '/api/public/contact'
   fileRoutesById: FileRoutesById
@@ -227,25 +239,19 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SponsorRoute: typeof SponsorRouteWithChildren
-  TopicsRoute: typeof TopicsRoute
   AdminCurationRoute: typeof AdminCurationRoute
+  TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
+  TopicsIndexRoute: typeof TopicsIndexRoute
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/topics': {
-      id: '/topics'
-      path: '/topics'
-      fullPath: '/topics'
-      preLoaderRoute: typeof TopicsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sponsor': {
       id: '/sponsor'
       path: '/sponsor'
@@ -302,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/topics/': {
+      id: '/topics/'
+      path: '/topics'
+      fullPath: '/topics/'
+      preLoaderRoute: typeof TopicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trackers/peace': {
       id: '/trackers/peace'
       path: '/trackers/peace'
@@ -328,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/trackers/football'
       fullPath: '/trackers/football'
       preLoaderRoute: typeof TrackersFootballRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/$topicId': {
+      id: '/topics/$topicId'
+      path: '/topics/$topicId'
+      fullPath: '/topics/$topicId'
+      preLoaderRoute: typeof TopicsTopicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sponsor/success': {
@@ -373,12 +393,13 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SponsorRoute: SponsorRouteWithChildren,
-  TopicsRoute: TopicsRoute,
   AdminCurationRoute: AdminCurationRoute,
+  TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
+  TopicsIndexRoute: TopicsIndexRoute,
   TrackersIndexRoute: TrackersIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
 }

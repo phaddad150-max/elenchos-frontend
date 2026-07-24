@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { FEATURE_TOPICS } from "@/lib/feature-topics";
 
 const BASE_URL = "https://elenchos.live";
 
@@ -16,6 +17,11 @@ export const Route = createFileRoute("/sitemap.xml")({
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "daily", priority: "1.0" },
           { path: "/topics", changefreq: "daily", priority: "0.9" },
+          ...FEATURE_TOPICS.map((t) => ({
+            path: `/topics/${t.id}`,
+            changefreq: "daily" as const,
+            priority: "0.8",
+          })),
           { path: "/trackers", changefreq: "daily", priority: "0.9" },
           { path: "/about", changefreq: "monthly", priority: "0.6" },
           { path: "/privacy", changefreq: "yearly", priority: "0.3" },

@@ -128,7 +128,7 @@ export function GlobalSearch() {
               <CommandItem
                 key={t.id}
                 value={`topic ${t.keywords}`}
-                onSelect={() => go(`/topics?topic=${encodeURIComponent(t.id)}`)}
+                onSelect={() => go(`/topics/${encodeURIComponent(t.id)}`)}
               >
                 <Layers className="w-4 h-4 text-cyan" />
                 <span className="truncate">{t.label}</span>
@@ -161,7 +161,7 @@ export function GlobalSearch() {
                   <CommandItem
                     key={s.topicId}
                     value={`signal ${s.keywords}`}
-                    onSelect={() => go(`/topics?topic=${encodeURIComponent(s.topicId)}`)}
+                    onSelect={() => go(`/topics/${encodeURIComponent(s.topicId)}`)}
                   >
                     <Activity className="w-4 h-4 text-emerald-signal" />
                     <div className="flex flex-col min-w-0">
