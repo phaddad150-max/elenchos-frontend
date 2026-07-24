@@ -31,6 +31,7 @@ import {
   loadCuratedTopicInsights,
   loadTopicSnapshot,
   loadTopicHistory,
+  getNarrativeGapFrames,
   type CuratedQaPair,
   type CuratedTopicInsights,
   type QuestionAnalysis,
@@ -43,6 +44,7 @@ import {
   sortThreads,
   type InsightCardModel,
 } from "./mappers";
+import { NarrativeGapPanel } from "./NarrativeGapPanel";
 import {
   confidenceColor,
   divergenceColor,
@@ -159,6 +161,7 @@ export function TopicAnalysisPage({
     : "";
   const divergence = typeof data?.divergence_score === "number" ? Math.round(data.divergence_score) : null;
   const sample = data?.sample_size?.toLocaleString() ?? "—";
+  const gapFrames = useMemo(() => getNarrativeGapFrames(data), [data]);
 
   const insightCards = useMemo(
     () => buildInsightCards(qa, data, data?.question_analysis ?? []),
@@ -324,6 +327,17 @@ export function TopicAnalysisPage({
         </div>
       </div>
 
+      {/* Citizen vs official/media — visual gap (primary scan; long prose collapsed) */}
+      <NarrativeGapPanel
+        topicLabel={headerLabel}
+        score={gapFrames.score ?? divergence}
+        citizenFrame={gapFrames.citizenFrame}
+        officialMediaFrame={gapFrames.officialMediaFrame}
+        gapHeadline={gapFrames.gapHeadline}
+        fullOverview={gapFrames.fullOverview}
+        sentimentScore={score}
+      />
+
       {curated?.hero_headline && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -335,7 +349,7 @@ export function TopicAnalysisPage({
           </div>
           <h2 className="text-xl sm:text-2xl font-display font-semibold leading-tight">{curated.hero_headline}</h2>
           {curated.hero_summary && (
-            <p className="text-sm text-foreground/90 leading-relaxed line-clamp-3">{curated.hero_summary}</p>
+            <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2">{curated.hero_summary}</p>
           )}
           <div className="flex flex-wrap gap-2 text-[10px] font-mono">
             {formatDelta(curated.sentiment_delta) && (
@@ -519,8 +533,14 @@ export function TopicAnalysisPage({
             </p>
             {data.narrative_summary && (
               <div>
-                <div className="text-[10px] font-mono uppercase text-cyan mb-1">Narrative summary</div>
-                <p className="text-foreground/90">{data.narrative_summary}</p>
+                <div className="text-[10px] font-mono uppercase text-cyan mb-1">Full citizen narrative</div>
+                <p className="text-foreground/90 text-[13px] leading-relaxed">{data.narrative_summary}</p>
+              </div>
+            )}
+            {gapFrames.fullOverview && (
+              <div>
+                <div className="text-[10px] font-mono uppercase text-amber-signal mb-1">Full gap overview</div>
+                <p className="text-foreground/90 text-[13px] leading-relaxed">{gapFrames.fullOverview}</p>
               </div>
             )}
             {(data.question_analysis ?? []).length > 0 && (

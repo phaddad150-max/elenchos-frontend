@@ -900,9 +900,39 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   const liveScore = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.score : undefined;
   const liveLabel = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.label : undefined;
   const shareUrl = `https://elenchos.live/topics?topic=${encodeURIComponent(topic.id)}`;
-  const shareText = useLive && typeof liveScore === "number"
-    ? `${topic.title} — Live citizen sentiment: ${liveScore}/100${liveLabel ? ` (${liveLabel})` : ""}. Real voices, paraphrased. via @ElenchosPulse`
-    : `${topic.title} — Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
+  const liveDiv =
+    useLive && liveData && typeof liveData.divergence_score === "number"
+      ? Math.round(liveData.divergence_score)
+      : null;
+  const liveGap =
+    useLive && liveData && typeof liveData.divergence_gap === "string"
+      ? liveData.divergence_gap.trim()
+      : "";
+  const liveNd =
+    useLive && liveData && liveData.narrative_divergence && typeof liveData.narrative_divergence === "object"
+      ? liveData.narrative_divergence
+      : null;
+  const shareText = (() => {
+    if (useLive && typeof liveScore === "number") {
+      const bits = [
+        `${shortTitle(topic.title)} · Sentiment ${liveScore}/100${liveLabel ? ` (${liveLabel})` : ""}`,
+      ];
+      if (liveDiv != null) bits[0] += ` · Gap ${liveDiv}`;
+      const citizen = liveNd?.citizen_frame?.trim();
+      const official = liveNd?.official_media_frame?.trim();
+      if (citizen && official) {
+        bits.push(`Citizens: ${citizen.slice(0, 90)}`);
+        bits.push(`Official/media: ${official.slice(0, 90)}`);
+      } else if (liveGap) {
+        bits.push(liveGap.split(/(?<=[.!?])\s+/)[0]?.slice(0, 120) ?? liveGap.slice(0, 120));
+      } else {
+        bits.push("Real voices, paraphrased.");
+      }
+      bits.push("via @ElenchosPulse");
+      return bits.join("\n");
+    }
+    return `${topic.title} — Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
+  })();
   const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
   const sentimentTone =

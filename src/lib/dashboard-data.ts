@@ -131,7 +131,13 @@ export function mergeTopicSnapshots(
     signals: content.signals ?? other.signals,
     top_3_key_stories: content.top_3_key_stories ?? other.top_3_key_stories,
     divergence_gap: content.divergence_gap ?? other.divergence_gap,
-    narrative_divergence: content.narrative_divergence ?? other.narrative_divergence,
+    narrative_divergence: (() => {
+      const c = content.narrative_divergence;
+      const o = other.narrative_divergence;
+      if (c && typeof c === "object") return c;
+      if (o && typeof o === "object") return o;
+      return content.narrative_divergence ?? other.narrative_divergence;
+    })(),
     last_updated: content.last_updated ?? other.last_updated,
     pipeline_last_updated:
       snapshotRecencyMs(latest) >= snapshotRecencyMs(historical)
@@ -220,10 +226,84 @@ export type TopicSnapshot = {
   pipeline_last_updated?: string;
   // Narrative-divergence block, when published by the backend.
   narrative_divergence?:
-    | { score?: number; label?: string; summary?: string }
+    | {
+        score?: number;
+        label?: string;
+        summary?: string;
+        /** Short citizen claim for dual-panel UI (≤160 chars). */
+        citizen_frame?: string;
+        /** Short official/media claim for dual-panel UI. */
+        official_media_frame?: string;
+        /** One-line clash headline. */
+        gap_headline?: string;
+      }
     | number
     | null;
 };
+
+/** Parse structured narrative-gap frames from a snapshot (legacy-safe). */
+export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
+  score: number | null;
+  citizenFrame: string;
+  officialMediaFrame: string;
+  gapHeadline: string;
+  fullOverview: string;
+} {
+  if (!snapshot) {
+    return { score: null, citizenFrame: "", officialMediaFrame: "", gapHeadline: "", fullOverview: "" };
+  }
+  let score: number | null =
+    typeof snapshot.divergence_score === "number" ? Math.round(snapshot.divergence_score) : null;
+  let citizenFrame = "";
+  let officialMediaFrame = "";
+  let gapHeadline = "";
+  let fullOverview = (snapshot.divergence_gap ?? "").trim();
+
+  const applyFrameObj = (raw: {
+    score?: number;
+    label?: string;
+    summary?: string;
+    citizen_frame?: string;
+    official_media_frame?: string;
+    gap_headline?: string;
+  }) => {
+    if (score === null && typeof raw.score === "number") score = Math.round(raw.score);
+    if (typeof raw.citizen_frame === "string" && raw.citizen_frame.trim())
+      citizenFrame = raw.citizen_frame.trim();
+    if (typeof raw.official_media_frame === "string" && raw.official_media_frame.trim())
+      officialMediaFrame = raw.official_media_frame.trim();
+    if (typeof raw.gap_headline === "string" && raw.gap_headline.trim())
+      gapHeadline = raw.gap_headline.trim();
+    else if (!gapHeadline && typeof raw.label === "string" && raw.label.trim())
+      gapHeadline = raw.label.trim();
+    if (!fullOverview && typeof raw.summary === "string") fullOverview = raw.summary.trim();
+  };
+
+  const nd = snapshot.narrative_divergence;
+  if (nd && typeof nd === "object") {
+    applyFrameObj(nd);
+  } else if (score === null && typeof nd === "number") {
+    score = Math.round(nd);
+  }
+
+  // Fallback: frames stored under raw_analysis when column missing
+  const rawA = snapshot.raw_analysis;
+  if (rawA && typeof rawA === "object") {
+    const frames = (rawA as { divergence_frames?: Record<string, unknown> }).divergence_frames;
+    if (frames && typeof frames === "object") {
+      applyFrameObj(frames as {
+        score?: number;
+        label?: string;
+        summary?: string;
+        citizen_frame?: string;
+        official_media_frame?: string;
+        gap_headline?: string;
+      });
+    }
+  }
+
+  return { score, citizenFrame, officialMediaFrame, gapHeadline, fullOverview };
+}
 
 /** Content layer precedence: Live (Pass 1) > Curated (Pass 2) > Static (illustrative). */
 export type ContentSource = "live" | "curated" | "static" | "loading";
