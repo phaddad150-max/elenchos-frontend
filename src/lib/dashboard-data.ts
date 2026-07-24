@@ -249,9 +249,38 @@ function firstSentence(text: string, max = 160): string {
   return s.length <= max ? s : s.slice(0, max - 1).trimEnd() + "…";
 }
 
+function normalizeProse(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Strip meta wrappers so the claim reads as the narrative itself. */
+export function cleanFrameText(text: string, max = 160): string {
+  let t = text.trim();
+  if (!t) return "";
+  t = t
+    .replace(
+      /^(?:x\s+posts?\s+show(?:s|ed)?|posts?\s+show(?:s|ed)?|citizens?\s+(?:on\s+x\s+)?(?:say|show|emphasize|argue|claim)|public\s+(?:discourse|voices?)\s+(?:show|emphasize)|the\s+data\s+shows?)\s+/i,
+      "",
+    )
+    .replace(
+      /^(?:official\s+(?:and\/or\s+)?(?:media\s+)?(?:narratives?|accounts?|messaging)?\s*(?:typically\s+)?(?:frame|emphasize|stress|claim|portray)?\s*:?\s*)/i,
+      "",
+    )
+    .replace(/^(?:official\/media|mainstream media)\s*:?\s*/i, "")
+    .trim();
+  // Capitalize first letter after strip
+  if (t && /^[a-z]/.test(t)) t = t.charAt(0).toUpperCase() + t.slice(1);
+  return firstSentence(t, max);
+}
+
 /**
  * Split a legacy long divergence_gap into citizen vs official/media sides
  * when structured frames were not stored yet.
+ * Never invent a synthetic "A vs B" headline — that just dumps truncated box text under the score.
  */
 export function splitGapOverviewIntoFrames(overview: string): {
   citizenFrame: string;
@@ -283,23 +312,16 @@ export function splitGapOverviewIntoFrames(overview: string): {
       citizenFrame = b;
       officialMediaFrame = a;
     }
-    const gapHeadline =
-      citizenFrame && officialMediaFrame
-        ? `${firstSentence(citizenFrame, 40).replace(/[.!?]$/, "")} vs ${firstSentence(officialMediaFrame, 40).replace(/[.!?]$/, "")}`.slice(
-            0,
-            100,
-          )
-        : "";
     return {
-      citizenFrame: firstSentence(citizenFrame, 160),
-      officialMediaFrame: firstSentence(officialMediaFrame, 160),
-      gapHeadline,
+      citizenFrame: cleanFrameText(citizenFrame, 160),
+      officialMediaFrame: cleanFrameText(officialMediaFrame, 160),
+      gapHeadline: "",
     };
   }
 
   // Single blob: use as citizen emphasis only (do not invent official frame)
   return {
-    citizenFrame: firstSentence(t, 160),
+    citizenFrame: cleanFrameText(t, 160),
     officialMediaFrame: "",
     gapHeadline: "",
   };
@@ -307,24 +329,66 @@ export function splitGapOverviewIntoFrames(overview: string): {
 
 /** True if a is essentially the same prose as b (avoid duplicate UI). */
 function isSameProse(a: string, b: string): boolean {
-  const norm = (s: string) =>
-    s
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-  const na = norm(a);
-  const nb = norm(b);
+  const na = normalizeProse(a);
+  const nb = normalizeProse(b);
   if (!na || !nb) return false;
   if (na === nb) return true;
   if (na.includes(nb) || nb.includes(na)) return true;
-  // high token overlap
   const ta = new Set(na.split(" ").filter((w) => w.length > 3));
   const tb = new Set(nb.split(" ").filter((w) => w.length > 3));
   if (ta.size === 0 || tb.size === 0) return false;
   let hit = 0;
   for (const w of ta) if (tb.has(w)) hit++;
-  return hit / Math.min(ta.size, tb.size) > 0.72;
+  return hit / Math.min(ta.size, tb.size) > 0.65;
+}
+
+/** Headline is just a mash-up of the two frame bodies (e.g. "citizens… vs official…"). */
+function isSyntheticVsHeadline(headline: string, citizen: string, official: string): boolean {
+  const h = headline.trim();
+  if (!h) return false;
+  if (!/\bvs\.?\b|versus|against\b/i.test(h)) {
+    // Still synthetic if it mostly copies one/both frames
+    return isSameProse(h, citizen) || isSameProse(h, official) || isSameProse(h, `${citizen} ${official}`);
+  }
+  const parts = h.split(/\s+(?:vs\.?|versus|against)\s+/i);
+  if (parts.length >= 2) {
+    const left = parts[0] ?? "";
+    const right = parts.slice(1).join(" ");
+    // Truncated frame dumps always share a long prefix with the boxes
+    if (citizen && left.length >= 12 && normalizeProse(citizen).includes(normalizeProse(left).slice(0, 24)))
+      return true;
+    if (official && right.length >= 12 && normalizeProse(official).includes(normalizeProse(right).slice(0, 24)))
+      return true;
+    if (isSameProse(left, citizen) || isSameProse(right, official)) return true;
+  }
+  // Overlap with either frame body
+  if (isSameProse(h, citizen) || isSameProse(h, official)) return true;
+  return false;
+}
+
+/**
+ * Overview only keeps value if it adds a distinct synthesis beyond the two frames.
+ * Most Pass-1 overviews simply restate both boxes — drop those.
+ */
+function overviewAddsNewContent(overview: string, citizen: string, official: string): boolean {
+  const o = overview.trim();
+  if (!o) return false;
+  if (!citizen && !official) return true;
+  if (isSameProse(o, `${citizen} ${official}`) || isSameProse(o, citizen) || isSameProse(o, official))
+    return false;
+
+  // Strip sentences that clearly restate a frame; keep leftovers
+  const sentences = o.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+  const novel = sentences.filter(
+    (s) =>
+      !isSameProse(s, citizen) &&
+      !isSameProse(s, official) &&
+      !(citizen && normalizeProse(s).includes(normalizeProse(citizen).slice(0, 36))) &&
+      !(official && normalizeProse(s).includes(normalizeProse(official).slice(0, 36))),
+  );
+  if (novel.length === 0) return false;
+  // Require a real extra claim (≥ 40 chars of novel prose)
+  return novel.join(" ").length >= 40;
 }
 
 /** Parse structured narrative-gap frames from a snapshot (legacy-safe). */
@@ -362,6 +426,7 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
       gapHeadline = raw.gap_headline.trim();
     else if (!gapHeadline && typeof raw.label === "string" && raw.label.trim())
       gapHeadline = raw.label.trim();
+    // Prefer dedicated overview fields; summary is often a rehash
     if (!fullOverview && typeof raw.summary === "string") fullOverview = raw.summary.trim();
   };
 
@@ -393,7 +458,7 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
     const split = splitGapOverviewIntoFrames(fullOverview);
     if (!citizenFrame && split.citizenFrame) citizenFrame = split.citizenFrame;
     if (!officialMediaFrame && split.officialMediaFrame) officialMediaFrame = split.officialMediaFrame;
-    if (!gapHeadline && split.gapHeadline) gapHeadline = split.gapHeadline;
+    // Never copy synthetic headlines from the splitter
   }
 
   // Citizen narrative fallback: first sentence of Pass 1 narrative_summary
@@ -402,24 +467,27 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
     if (ns) citizenFrame = firstSentence(ns, 160);
   }
 
-  // Drop overview when it only repeats what's already in the two frames
-  if (
-    fullOverview &&
-    citizenFrame &&
-    officialMediaFrame &&
-    (isSameProse(fullOverview, `${citizenFrame} ${officialMediaFrame}`) ||
-      (isSameProse(fullOverview, citizenFrame) && isSameProse(fullOverview, officialMediaFrame)) ||
-      (fullOverview.includes(citizenFrame.slice(0, 40)) &&
-        officialMediaFrame &&
-        fullOverview.includes(officialMediaFrame.slice(0, 40))))
-  ) {
-    // Keep overview only if substantially longer / adds new sentences
-    const extra = fullOverview.length > citizenFrame.length + officialMediaFrame.length + 80;
-    if (!extra) fullOverview = "";
+  // Display polish: strip meta wrappers, keep claims short
+  if (citizenFrame) citizenFrame = cleanFrameText(citizenFrame, 160);
+  if (officialMediaFrame) officialMediaFrame = cleanFrameText(officialMediaFrame, 160);
+
+  // Drop overview that only restates the two boxes (the common failure mode)
+  if (fullOverview && citizenFrame && officialMediaFrame) {
+    if (!overviewAddsNewContent(fullOverview, citizenFrame, officialMediaFrame)) {
+      fullOverview = "";
+    }
+  } else if (fullOverview && citizenFrame && isSameProse(fullOverview, citizenFrame)) {
+    fullOverview = "";
   }
 
-  // Gap headline should not duplicate either frame verbatim
-  if (gapHeadline && (isSameProse(gapHeadline, citizenFrame) || isSameProse(gapHeadline, officialMediaFrame))) {
+  // Kill dump-style headlines under the score ("citizens… vs official…")
+  if (
+    gapHeadline &&
+    (isSyntheticVsHeadline(gapHeadline, citizenFrame, officialMediaFrame) ||
+      isSameProse(gapHeadline, citizenFrame) ||
+      isSameProse(gapHeadline, officialMediaFrame) ||
+      gapHeadline.length > 90)
+  ) {
     gapHeadline = "";
   }
 

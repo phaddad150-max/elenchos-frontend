@@ -15,11 +15,11 @@ export type NarrativeGapPanelProps = {
 };
 
 /**
- * Dual-target narrative gap:
- * - Citizens box = citizen narrative only
- * - Official/media box = official/media narrative only
- * - Center = gap score (+ optional short clash headline)
- * No duplicated prose across boxes / overview.
+ * Dual-target narrative gap comparison:
+ * - Left box  = citizen narrative only
+ * - Right box = official/media narrative only
+ * - Center    = gap score (+ severity badge at top) — never dumps frame text
+ * - Detail    = only if overview adds NEW synthesis (not a restatement)
  */
 export function NarrativeGapPanel({
   topicLabel,
@@ -35,7 +35,13 @@ export function NarrativeGapPanel({
   const hasScore = typeof score === "number" && !Number.isNaN(score);
   const citizen = citizenFrame.trim();
   const official = officialMediaFrame.trim();
-  const headline = gapHeadline.trim();
+  // Only show a short clash label if it's distinct — never paste box bodies under the score
+  const headline =
+    gapHeadline.trim().length > 0 &&
+    gapHeadline.trim().length <= 72 &&
+    !/\bvs\.?\b/i.test(gapHeadline)
+      ? gapHeadline.trim()
+      : "";
   const overview = fullOverview.trim();
   const hasDual = Boolean(citizen && official);
   const color = hasScore ? divergenceColor(score!) : "var(--muted-foreground)";
@@ -57,13 +63,9 @@ export function NarrativeGapPanel({
       ? buildTwitterShareHref(shareText, shareUrl ?? window.location.href)
       : "#";
 
-  // Only offer expand when overview adds content beyond the two frames
-  const showOverviewToggle =
-    Boolean(overview) &&
-    !(
-      hasDual &&
-      overview.length < citizen.length + official.length + 40
-    );
+  // Expand only when dual frames exist AND overview was pre-filtered as novel.
+  // Never expand when overview is empty or when we only have one side (overview is that side).
+  const showOverviewToggle = Boolean(overview) && hasDual;
 
   return (
     <section
@@ -106,7 +108,7 @@ export function NarrativeGapPanel({
         </div>
       </div>
 
-      {/* Citizens | gap meter | official/media — narratives only inside their boxes */}
+      {/* Comparison table: Citizens | score | Official — narratives only inside their boxes */}
       <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 px-3 sm:px-4 pb-3 items-stretch">
         <FrameCard
           icon={<Users className="w-3.5 h-3.5" />}
@@ -119,8 +121,8 @@ export function NarrativeGapPanel({
           muted={!citizen}
         />
 
-        <div className="flex flex-col items-center justify-center gap-1.5 py-2 md:px-2 min-w-[5.5rem] order-first md:order-none">
-          <div className="relative w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] shrink-0">
+        <div className="flex flex-col items-center justify-center gap-1 py-1 md:px-3 min-w-[5.25rem] order-first md:order-none self-center">
+          <div className="relative w-16 h-16 sm:w-[4.25rem] sm:h-[4.25rem] shrink-0">
             <div
               className="absolute inset-0 rounded-full grid place-items-center"
               style={{
@@ -139,12 +141,12 @@ export function NarrativeGapPanel({
               </div>
             </div>
           </div>
-          <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground text-center">
+          <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground text-center leading-none">
             Gap score
           </div>
-          {/* Headline only if it doesn't repeat the box bodies */}
+          {/* Short clash label only — never a dump of the box bodies */}
           {headline ? (
-            <p className="text-[11px] sm:text-xs font-display font-semibold text-center leading-snug max-w-[14rem] md:max-w-[10.5rem] px-1 text-foreground/90">
+            <p className="text-[10px] sm:text-[11px] font-mono text-center leading-snug max-w-[9.5rem] px-0.5 text-muted-foreground">
               {headline}
             </p>
           ) : null}
@@ -162,7 +164,7 @@ export function NarrativeGapPanel({
         />
       </div>
 
-      {/* Optional deeper note — only when it adds content beyond the two boxes */}
+      {/* Optional synthesis — only when it is not a restatement of the boxes */}
       {showOverviewToggle && (
         <div className="relative border-t border-border/60">
           <button
@@ -170,7 +172,7 @@ export function NarrativeGapPanel({
             onClick={() => setExpanded((v) => !v)}
             className="w-full flex items-center justify-center gap-1.5 min-h-[44px] md:min-h-0 px-3 py-2.5 md:py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground hover:bg-secondary/20 transition-colors touch-manipulation"
           >
-            {expanded ? "Hide detail" : "How the gap shows up"}
+            {expanded ? "Hide synthesis" : "Why this gap matters"}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
           {expanded && (
@@ -198,24 +200,24 @@ function FrameCard({
   muted?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const long = body.length > 110;
+  const long = body.length > 140;
 
   return (
     <div
-      className="rounded-xl border bg-background/50 p-3 flex flex-col gap-1.5 min-h-[5.75rem] h-full"
+      className="rounded-xl border bg-background/50 p-3 sm:p-3.5 flex flex-col gap-2 min-h-[6.5rem] h-full"
       style={{ borderColor: `${accent}44`, borderTopWidth: 2, borderTopColor: accent }}
     >
       <div
-        className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em]"
+        className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] shrink-0"
         style={{ color: accent }}
       >
         {icon}
         {label}
       </div>
       <p
-        className={`text-[13px] leading-snug flex-1 ${open ? "" : "line-clamp-4 md:line-clamp-4"} ${
-          muted ? "text-muted-foreground italic" : "text-foreground/90"
-        }`}
+        className={`text-[13px] sm:text-[14px] leading-snug flex-1 ${
+          open ? "" : "line-clamp-3"
+        } ${muted ? "text-muted-foreground italic" : "text-foreground/90"}`}
       >
         {body}
       </p>
@@ -223,7 +225,7 @@ function FrameCard({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="self-start text-[11px] font-mono text-cyan hover:underline min-h-[36px] md:min-h-0 py-1 touch-manipulation"
+          className="self-start text-[11px] font-mono text-cyan hover:underline min-h-[36px] md:min-h-0 py-0.5 touch-manipulation"
         >
           {open ? "Show less" : "Read more"}
         </button>
