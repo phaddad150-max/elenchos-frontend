@@ -13,7 +13,6 @@ import {
   TrendingDown,
   TrendingUp,
   Minus,
-  Trophy,
   X,
 } from "lucide-react";
 import { buildInsightShareText, buildTwitterShareHref } from "@/lib/share-insight";
