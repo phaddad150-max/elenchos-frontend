@@ -339,7 +339,7 @@ export function TopicAnalysisPage({
         </div>
       </div>
 
-      {/* Citizen vs official/media — comparative gap with identified frictions */}
+      {/* Shared across all live topics — score + identified gaps only (no duplicate dual boxes) */}
       <NarrativeGapPanel
         topicLabel={headerLabel}
         score={gapFrames.score ?? divergence}
@@ -350,6 +350,9 @@ export function TopicAnalysisPage({
         scoreRationale={gapFrames.scoreRationale}
         gapPoints={gapFrames.gapPoints}
         sentimentScore={score}
+        shareUrl={
+          typeof window !== "undefined" ? window.location.href : undefined
+        }
       />
 
       {curated?.hero_headline && (

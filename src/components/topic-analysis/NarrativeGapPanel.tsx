@@ -18,9 +18,9 @@ export type NarrativeGapPanelProps = {
 };
 
 /**
- * Comparative narrative gap:
+ * Comparative narrative gap (shared by every live topic via TopicAnalysisPage):
  * - Score strip = score + why that score
- * - Identified gaps = concrete paired claims (no duplicate summary boxes above)
+ * - Identified gaps = concrete paired claims only (no duplicate dual summary boxes)
  */
 export function NarrativeGapPanel({
   topicLabel,
@@ -58,8 +58,8 @@ export function NarrativeGapPanel({
     topicLabel,
     sentimentScore,
     divergenceScore: score,
-    citizenFrame: citizen,
-    officialMediaFrame: official,
+    citizenFrame: citizen || points[0]?.claim_citizen,
+    officialMediaFrame: official || points[0]?.claim_official_media,
     gapHeadline: headline || points[0]?.why_it_matters,
     divergenceGap: overview || rationale,
   });
@@ -84,15 +84,15 @@ export function NarrativeGapPanel({
         }}
       />
 
-      <div className="relative px-3 sm:px-4 pt-3 pb-2 flex items-center justify-between gap-2 flex-wrap">
+      <div className="relative px-3 sm:px-4 pt-3 pb-2 flex items-start sm:items-center justify-between gap-2 flex-wrap">
         <div
-          className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em]"
+          className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] sm:tracking-[0.18em] max-w-[min(100%,18rem)] sm:max-w-none leading-snug"
           style={{ color }}
         >
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          Narrative gap · citizen vs official / media
+          <span>Narrative gap · citizen vs official / media</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span
             className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono border"
             style={{ color, borderColor: `${color}55`, background: `${color}14` }}
@@ -103,7 +103,7 @@ export function NarrativeGapPanel({
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 min-h-[36px] md:min-h-0 px-2.5 py-1.5 md:py-0.5 rounded-full text-[10px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 touch-manipulation"
+            className="inline-flex items-center gap-1 min-h-[40px] sm:min-h-[36px] px-2.5 py-1.5 rounded-full text-[10px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 active:bg-cyan/15 touch-manipulation"
             onClick={(e) => e.stopPropagation()}
           >
             <Share2 className="w-3 h-3" /> X
@@ -111,9 +111,9 @@ export function NarrativeGapPanel({
         </div>
       </div>
 
-      {/* Score strip — explains the number before the comparison */}
+      {/* Score strip */}
       <div className="relative mx-3 sm:mx-4 mb-3 rounded-xl border border-border/70 bg-background/60 px-3 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
             <div
               className="absolute inset-0 rounded-full grid place-items-center"
@@ -133,20 +133,27 @@ export function NarrativeGapPanel({
               </div>
             </div>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
               Gap score · 0–100
             </div>
             <div className="text-sm font-display font-semibold" style={{ color }}>
               {band}
             </div>
-            <p className="text-[11px] text-muted-foreground leading-snug max-w-xs">
-              Higher = wider split between citizens on X and official + mainstream/local media frames.
-            </p>
+            {/* Helper only when no rationale (avoid clutter on mobile) */}
+            {!rationale ? (
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Higher = wider split between citizens on X and official + media frames.
+              </p>
+            ) : (
+              <p className="hidden sm:block text-[11px] text-muted-foreground leading-snug max-w-xs">
+                Higher = wider split between citizens on X and official + media frames.
+              </p>
+            )}
           </div>
         </div>
         {rationale ? (
-          <div className="sm:border-l sm:border-border/70 sm:pl-4 min-w-0 flex-1">
+          <div className="sm:border-l sm:border-border/70 sm:pl-4 min-w-0 flex-1 pt-2 sm:pt-0 border-t border-border/50 sm:border-t-0">
             <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-0.5">
               Why this score
             </div>
@@ -158,11 +165,11 @@ export function NarrativeGapPanel({
         ) : null}
       </div>
 
-      {/* Identified gaps only — no duplicate dual summary boxes above */}
+      {/* Identified gaps — single comparison layer for all topics */}
       {points.length > 0 ? (
         <div className="relative border-t border-border/60 px-3 sm:px-4 py-3 space-y-2.5">
           <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-foreground/80">
-            <GitCompareArrows className="w-3.5 h-3.5 text-cyan" />
+            <GitCompareArrows className="w-3.5 h-3.5 text-cyan shrink-0" />
             Identified gaps · what each side claims
           </div>
           <div className="space-y-2">
@@ -171,10 +178,10 @@ export function NarrativeGapPanel({
             ))}
           </div>
         </div>
-      ) : (citizen || official) ? (
+      ) : citizen || official ? (
         <div className="relative border-t border-border/60 px-3 sm:px-4 py-3 space-y-2.5">
           <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-foreground/80">
-            <GitCompareArrows className="w-3.5 h-3.5 text-cyan" />
+            <GitCompareArrows className="w-3.5 h-3.5 text-cyan shrink-0" />
             Identified gaps · what each side claims
           </div>
           <GapPointRow
@@ -189,19 +196,20 @@ export function NarrativeGapPanel({
         </div>
       ) : null}
 
-      {/* Optional longer synthesis */}
       {showOverviewToggle && (
         <div className="relative border-t border-border/60">
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="w-full flex items-center justify-center gap-1.5 min-h-[44px] md:min-h-0 px-3 py-2.5 md:py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground hover:bg-secondary/20 transition-colors touch-manipulation"
+            className="w-full flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-0 px-3 py-2.5 sm:py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground hover:bg-secondary/20 active:bg-secondary/30 transition-colors touch-manipulation"
           >
             {expanded ? "Hide synthesis" : "Brief synthesis"}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
           {expanded && (
-            <p className="px-3 sm:px-4 pb-3 text-[13px] text-foreground/90 leading-relaxed">{overview}</p>
+            <p className="px-3 sm:px-4 pb-3 text-[13px] text-foreground/90 leading-relaxed break-words">
+              {overview}
+            </p>
           )}
         </div>
       )}
@@ -224,18 +232,18 @@ function GapPointRow({
 
   return (
     <div
-      className="rounded-xl border bg-background/50 p-3 space-y-2"
+      className="rounded-xl border bg-background/50 p-3 space-y-2.5"
       style={{ borderColor: `${color}33` }}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-2 min-w-0">
         <span
-          className="inline-flex items-center justify-center w-5 h-5 rounded-md text-[10px] font-mono font-semibold"
+          className="inline-flex items-center justify-center w-5 h-5 mt-0.5 rounded-md text-[10px] font-mono font-semibold shrink-0"
           style={{ color, background: `${color}18`, border: `1px solid ${color}44` }}
         >
           {index}
         </span>
         {why ? (
-          <p className="text-[12px] sm:text-[13px] font-display font-semibold text-foreground/90 leading-snug">
+          <p className="text-[12px] sm:text-[13px] font-display font-semibold text-foreground/90 leading-snug min-w-0 break-words">
             {why}
           </p>
         ) : (
@@ -245,24 +253,24 @@ function GapPointRow({
         )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="rounded-lg border border-cyan/25 bg-cyan/[0.05] px-2.5 py-2">
+        <div className="rounded-lg border border-cyan/25 bg-cyan/[0.05] px-2.5 py-2 min-w-0">
           <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan mb-1">
             Citizens say
           </div>
           <ExpandableText
             text={cit || "—"}
-            className="text-[12px] sm:text-[13px] text-foreground/90 leading-snug"
-            clampLines={3}
+            className="text-[12px] sm:text-[13px] text-foreground/90 leading-snug break-words"
+            clampLines={4}
           />
         </div>
-        <div className="rounded-lg border border-amber-signal/30 bg-amber-signal/[0.06] px-2.5 py-2">
+        <div className="rounded-lg border border-amber-signal/30 bg-amber-signal/[0.06] px-2.5 py-2 min-w-0">
           <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-amber-signal mb-1">
             Official / media say
           </div>
           <ExpandableText
             text={off || "—"}
-            className="text-[12px] sm:text-[13px] text-foreground/90 leading-snug"
-            clampLines={3}
+            className="text-[12px] sm:text-[13px] text-foreground/90 leading-snug break-words"
+            clampLines={4}
           />
         </div>
       </div>
@@ -270,57 +278,54 @@ function GapPointRow({
   );
 }
 
-/**
- * Reliable expand/collapse: measures overflow, always reveals full text on Read more.
- */
 function ExpandableText({
   text,
   className = "",
   clampLines = 3,
-  forceToggle = false,
 }: {
   text: string;
   className?: string;
   clampLines?: number;
-  forceToggle?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [overflows, setOverflows] = useState(forceToggle);
+  const [overflows, setOverflows] = useState(text.length > 120);
   const ref = useRef<HTMLParagraphElement>(null);
 
   useLayoutEffect(() => {
     if (open) return;
     const el = ref.current;
     if (!el) return;
-    const check = () => setOverflows(forceToggle || el.scrollHeight > el.clientHeight + 2);
+    const check = () => {
+      // Long text always gets a toggle; also measure real clamp overflow
+      setOverflows(text.length > 120 || el.scrollHeight > el.clientHeight + 2);
+    };
     check();
-    const t = window.setTimeout(check, 50);
+    const t = window.setTimeout(check, 80);
     return () => window.clearTimeout(t);
-  }, [text, open, clampLines, forceToggle]);
+  }, [text, open, clampLines]);
 
   useEffect(() => {
     setOpen(false);
   }, [text]);
 
-  const clampClass =
-    !open && clampLines === 3
-      ? "line-clamp-3"
-      : !open && clampLines === 4
-        ? "line-clamp-4"
-        : !open
-          ? "line-clamp-3"
-          : "";
+  const clampClass = !open
+    ? clampLines === 4
+      ? "line-clamp-4"
+      : clampLines === 2
+        ? "line-clamp-2"
+        : "line-clamp-3"
+    : "";
 
   return (
     <div className="min-w-0">
-      <p ref={ref} className={`${className} ${clampClass} ${open ? "whitespace-pre-wrap" : ""}`}>
+      <p ref={ref} className={`${className} ${clampClass}`}>
         {text}
       </p>
-      {(overflows || open) && (
+      {(overflows || open) && text !== "—" && (
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-1 self-start text-[11px] font-mono text-cyan hover:underline min-h-[36px] md:min-h-0 py-0.5 touch-manipulation"
+          className="mt-1 inline-flex items-center text-[11px] font-mono text-cyan hover:underline min-h-[40px] sm:min-h-[32px] py-1 touch-manipulation"
         >
           {open ? "Show less" : "Read more"}
         </button>
