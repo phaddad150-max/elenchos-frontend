@@ -61,6 +61,7 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "fifa-world-cup-2026": "archived",
   "arab-israeli-normalization": "weekly",
   "iranian-voices-vs-regime": "weekly",
+  "elon-musk-public-voices": "weekly",
   "us-ai-economy-boom": "weekly",
   "new-us-foreign-policy": "weekly",
   "crypto-regulation-financial-markets": "weekly",
@@ -292,6 +293,7 @@ function topicCategory(id: string): TopicCategory {
     return "Economic";
   if (id === "crime-safety-lawlessness" || id === "political-polarization-populism") return "Social";
   if (id === "fifa-world-cup-2026") return "Social";
+  if (id === "elon-musk-public-voices") return "Political";
   return "Political";
 }
 
@@ -498,6 +500,7 @@ function shortTitle(t: string): string {
     "US AI Economy Boom & American Technological Renaissance": "US AI Economy Boom",
     "FIFA World Cup 2026": "FIFA World Cup 2026",
     "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "US–Iran Confrontation",
+    "Public Voices on Elon Musk: Trust, Media Frames & Power": "Elon Musk · Public Voices",
   };
   return map[t] ?? t;
 }

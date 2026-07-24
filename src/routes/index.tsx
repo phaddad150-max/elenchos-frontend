@@ -180,6 +180,12 @@ const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat:
     lat: 38.91,
     lng: -77.04,
   },
+  "Public Voices on Elon Musk: Trust, Media Frames & Power": {
+    region: "Austin",
+    subregion: "Eastern Mediterranean",
+    lat: 30.27,
+    lng: -97.74,
+  },
   "US AI Economy Boom & American Technological Renaissance": { region: "Austin", subregion: "Eastern Mediterranean", lat: 30.27, lng: -97.74 },
 };
 
@@ -890,6 +896,7 @@ const TOPIC_GROUP_MAP: Record<string, TopicGroup> = {
   "Global AI Race": "Economic",
   "Cuba Sanctions & the Domino Effect": "Political",
   "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "Political",
+  "Public Voices on Elon Musk: Trust, Media Frames & Power": "Political",
   "fifa-world-cup-2026": "Social",
 };
 
@@ -1854,6 +1861,7 @@ function shortTopicLabel(t: string): string {
   if (t.startsWith("Government Performance")) return "Gov. Corruption";
   if (t.startsWith("Crime, Safety")) return "Crime & Safety";
   if (t.startsWith("US-Iran Confrontation")) return "US–Iran Confrontation";
+  if (t.startsWith("Public Voices on Elon Musk") || t.includes("Elon Musk")) return "Elon Musk";
   if (t.startsWith("Government Performance")) return "Gov & Corruption";
   if (t.startsWith("Political Polarization")) return "Polarization";
   if (t.startsWith("Global AI")) return "Global AI Race";

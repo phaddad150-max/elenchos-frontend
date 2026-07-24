@@ -901,6 +901,26 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
     compare: [],
   },
   {
+    id: "elon-musk-public-voices",
+    title: "Public Voices on Elon Musk: Trust, Media Frames & Power",
+    shortTitle: "Elon Musk · Public Voices",
+    description:
+      "Citizen discourse on Elon Musk — character, companies, free speech, and power — tested against media and official narratives. Same Elenchos method as every other topic: ground in public posts, surface gaps honestly.",
+    sampleSize: "",
+    confidence: "Moderate",
+    region: "Global",
+    trackers: [],
+    simulation: {
+      title: "Live data",
+      pathA: { label: "Live", series: [] },
+      pathB: { label: "Live", series: [] },
+      caption: "",
+    },
+    insights: { citizenSays: "", officialSays: "", gap: "" },
+    takeaway: "",
+    compare: [],
+  },
+  {
     id: "fifa-world-cup-2026",
     title: "FIFA World Cup 2026",
     shortTitle: "World Cup 2026",

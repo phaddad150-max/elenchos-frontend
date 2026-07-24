@@ -66,6 +66,10 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
     headerLabel: "US–Iran Confrontation",
   },
+  "elon-musk-public-voices": {
+    rootKey: "Public Voices on Elon Musk: Trust, Media Frames & Power",
+    headerLabel: "Elon Musk · Public Voices",
+  },
   "us-ai-economy-boom": {
     rootKey: "US AI Economy Boom & American Technological Renaissance",
     headerLabel: "US AI Economy Boom",
