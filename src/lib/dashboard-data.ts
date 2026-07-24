@@ -241,6 +241,92 @@ export type TopicSnapshot = {
     | null;
 };
 
+function firstSentence(text: string, max = 160): string {
+  const t = text.trim();
+  if (!t) return "";
+  const m = t.match(/^(.+?[.!?])(?:\s|$)/);
+  const s = (m?.[1] ?? t).trim();
+  return s.length <= max ? s : s.slice(0, max - 1).trimEnd() + "…";
+}
+
+/**
+ * Split a legacy long divergence_gap into citizen vs official/media sides
+ * when structured frames were not stored yet.
+ */
+export function splitGapOverviewIntoFrames(overview: string): {
+  citizenFrame: string;
+  officialMediaFrame: string;
+  gapHeadline: string;
+} {
+  const t = overview.trim();
+  if (!t) return { citizenFrame: "", officialMediaFrame: "", gapHeadline: "" };
+
+  // Contrast patterns common in Grok gap prose
+  const contrast =
+    t.match(
+      /^(.+?)\s*(?:,?\s*(?:while|whereas|however|but|yet)\s+|,\s*directly contradicting\s+|,\s*clashing with\s+|,\s*in contrast to\s+|versus\s+|vs\.?\s+)(.+)$/is,
+    ) ||
+    t.match(/^(.+?[.!?])\s+(.+)$/s);
+
+  if (contrast) {
+    let a = contrast[1].trim().replace(/^[.,\s]+|[.,\s]+$/g, "");
+    let b = contrast[2].trim().replace(/^[.,\s]+|[.,\s]+$/g, "");
+    // Orient by keywords: which side is official/media?
+    const officialish =
+      /official|government|regime|fifa|media|sponsor|authority|state|administration|marketing|messaging|claims?\b/i;
+    let citizenFrame = a;
+    let officialMediaFrame = b;
+    if (officialish.test(a) && !officialish.test(b)) {
+      citizenFrame = b;
+      officialMediaFrame = a;
+    } else if (!officialish.test(b) && /citizen|fan|public|ordinary|street|people/i.test(b)) {
+      citizenFrame = b;
+      officialMediaFrame = a;
+    }
+    const gapHeadline =
+      citizenFrame && officialMediaFrame
+        ? `${firstSentence(citizenFrame, 40).replace(/[.!?]$/, "")} vs ${firstSentence(officialMediaFrame, 40).replace(/[.!?]$/, "")}`.slice(
+            0,
+            100,
+          )
+        : "";
+    return {
+      citizenFrame: firstSentence(citizenFrame, 160),
+      officialMediaFrame: firstSentence(officialMediaFrame, 160),
+      gapHeadline,
+    };
+  }
+
+  // Single blob: use as citizen emphasis only (do not invent official frame)
+  return {
+    citizenFrame: firstSentence(t, 160),
+    officialMediaFrame: "",
+    gapHeadline: "",
+  };
+}
+
+/** True if a is essentially the same prose as b (avoid duplicate UI). */
+function isSameProse(a: string, b: string): boolean {
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  const na = norm(a);
+  const nb = norm(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  if (na.includes(nb) || nb.includes(na)) return true;
+  // high token overlap
+  const ta = new Set(na.split(" ").filter((w) => w.length > 3));
+  const tb = new Set(nb.split(" ").filter((w) => w.length > 3));
+  if (ta.size === 0 || tb.size === 0) return false;
+  let hit = 0;
+  for (const w of ta) if (tb.has(w)) hit++;
+  return hit / Math.min(ta.size, tb.size) > 0.72;
+}
+
 /** Parse structured narrative-gap frames from a snapshot (legacy-safe). */
 export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
   score: number | null;
@@ -300,6 +386,41 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
         gap_headline?: string;
       });
     }
+  }
+
+  // Legacy rows: only long divergence_gap — split into target boxes
+  if ((!citizenFrame || !officialMediaFrame) && fullOverview) {
+    const split = splitGapOverviewIntoFrames(fullOverview);
+    if (!citizenFrame && split.citizenFrame) citizenFrame = split.citizenFrame;
+    if (!officialMediaFrame && split.officialMediaFrame) officialMediaFrame = split.officialMediaFrame;
+    if (!gapHeadline && split.gapHeadline) gapHeadline = split.gapHeadline;
+  }
+
+  // Citizen narrative fallback: first sentence of Pass 1 narrative_summary
+  if (!citizenFrame && typeof snapshot.narrative_summary === "string") {
+    const ns = snapshot.narrative_summary.trim();
+    if (ns) citizenFrame = firstSentence(ns, 160);
+  }
+
+  // Drop overview when it only repeats what's already in the two frames
+  if (
+    fullOverview &&
+    citizenFrame &&
+    officialMediaFrame &&
+    (isSameProse(fullOverview, `${citizenFrame} ${officialMediaFrame}`) ||
+      (isSameProse(fullOverview, citizenFrame) && isSameProse(fullOverview, officialMediaFrame)) ||
+      (fullOverview.includes(citizenFrame.slice(0, 40)) &&
+        officialMediaFrame &&
+        fullOverview.includes(officialMediaFrame.slice(0, 40))))
+  ) {
+    // Keep overview only if substantially longer / adds new sentences
+    const extra = fullOverview.length > citizenFrame.length + officialMediaFrame.length + 80;
+    if (!extra) fullOverview = "";
+  }
+
+  // Gap headline should not duplicate either frame verbatim
+  if (gapHeadline && (isSameProse(gapHeadline, citizenFrame) || isSameProse(gapHeadline, officialMediaFrame))) {
+    gapHeadline = "";
   }
 
   return { score, citizenFrame, officialMediaFrame, gapHeadline, fullOverview };

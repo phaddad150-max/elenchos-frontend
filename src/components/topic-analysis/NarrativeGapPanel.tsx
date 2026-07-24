@@ -15,9 +15,11 @@ export type NarrativeGapPanelProps = {
 };
 
 /**
- * Visual dual-panel: citizens vs official/media, with gap meter.
- * Long prose stays collapsed — no wall of text by default.
- * Desktop 3-column layout preserved; mobile stacks + read-more on frames.
+ * Dual-target narrative gap:
+ * - Citizens box = citizen narrative only
+ * - Official/media box = official/media narrative only
+ * - Center = gap score (+ optional short clash headline)
+ * No duplicated prose across boxes / overview.
  */
 export function NarrativeGapPanel({
   topicLabel,
@@ -31,25 +33,37 @@ export function NarrativeGapPanel({
 }: NarrativeGapPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const hasScore = typeof score === "number" && !Number.isNaN(score);
-  const hasDual = Boolean(citizenFrame.trim() && officialMediaFrame.trim());
+  const citizen = citizenFrame.trim();
+  const official = officialMediaFrame.trim();
+  const headline = gapHeadline.trim();
+  const overview = fullOverview.trim();
+  const hasDual = Boolean(citizen && official);
   const color = hasScore ? divergenceColor(score!) : "var(--muted-foreground)";
   const band = hasScore ? divergenceBand(score!) : "—";
 
-  if (!hasScore && !fullOverview.trim() && !hasDual) return null;
+  if (!hasScore && !overview && !citizen && !official) return null;
 
   const shareText = buildInsightShareText({
     topicLabel,
     sentimentScore,
     divergenceScore: score,
-    citizenFrame,
-    officialMediaFrame,
-    gapHeadline,
-    divergenceGap: fullOverview,
+    citizenFrame: citizen,
+    officialMediaFrame: official,
+    gapHeadline: headline,
+    divergenceGap: overview,
   });
   const href =
     typeof window !== "undefined"
       ? buildTwitterShareHref(shareText, shareUrl ?? window.location.href)
       : "#";
+
+  // Only offer expand when overview adds content beyond the two frames
+  const showOverviewToggle =
+    Boolean(overview) &&
+    !(
+      hasDual &&
+      overview.length < citizen.length + official.length + 40
+    );
 
   return (
     <section
@@ -92,22 +106,20 @@ export function NarrativeGapPanel({
         </div>
       </div>
 
-      {/* Desktop: citizens | meter | official/media · Mobile: stack citizens → gap → media */}
+      {/* Citizens | gap meter | official/media — narratives only inside their boxes */}
       <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 px-3 sm:px-4 pb-3 items-stretch">
         <FrameCard
           icon={<Users className="w-3.5 h-3.5" />}
           label="Citizens on X"
           accent="var(--cyan)"
           body={
-            citizenFrame.trim() ||
-            (fullOverview
-              ? "Citizen emphasis summarized in gap note below"
-              : "Citizen frame not yet published for this snapshot")
+            citizen ||
+            "No distinct citizen frame in this snapshot yet. Run Pass 1 to refresh structured gap frames."
           }
-          muted={!citizenFrame.trim()}
+          muted={!citizen}
         />
 
-        <div className="flex flex-col items-center justify-center gap-1 py-2 md:px-3 min-w-[5.5rem] order-first md:order-none">
+        <div className="flex flex-col items-center justify-center gap-1.5 py-2 md:px-2 min-w-[5.5rem] order-first md:order-none">
           <div className="relative w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] shrink-0">
             <div
               className="absolute inset-0 rounded-full grid place-items-center"
@@ -130,9 +142,10 @@ export function NarrativeGapPanel({
           <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground text-center">
             Gap score
           </div>
-          {gapHeadline.trim() ? (
-            <p className="text-[11px] sm:text-xs font-display font-semibold text-center leading-snug max-w-[14rem] md:max-w-[11rem] px-1">
-              {gapHeadline.trim()}
+          {/* Headline only if it doesn't repeat the box bodies */}
+          {headline ? (
+            <p className="text-[11px] sm:text-xs font-display font-semibold text-center leading-snug max-w-[14rem] md:max-w-[10.5rem] px-1 text-foreground/90">
+              {headline}
             </p>
           ) : null}
         </div>
@@ -142,73 +155,32 @@ export function NarrativeGapPanel({
           label="Official / media"
           accent="var(--amber-signal)"
           body={
-            officialMediaFrame.trim() ||
-            (fullOverview
-              ? "Official/media frame summarized in gap note below"
-              : "Official/media frame not yet published for this snapshot")
+            official ||
+            "No distinct official/media frame in this snapshot yet. Run Pass 1 to refresh structured gap frames."
           }
-          muted={!officialMediaFrame.trim()}
+          muted={!official}
         />
       </div>
 
-      {!hasDual && fullOverview.trim() && (
-        <ExpandableProse
-          text={fullOverview.trim()}
-          expanded={expanded}
-          onToggle={() => setExpanded((v) => !v)}
-          className="relative px-3 sm:px-4 pb-2"
-        />
-      )}
-
-      {(fullOverview.trim() || hasDual) && (
+      {/* Optional deeper note — only when it adds content beyond the two boxes */}
+      {showOverviewToggle && (
         <div className="relative border-t border-border/60">
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             className="w-full flex items-center justify-center gap-1.5 min-h-[44px] md:min-h-0 px-3 py-2.5 md:py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground hover:bg-secondary/20 transition-colors touch-manipulation"
           >
-            {expanded ? "Hide full gap note" : "Full gap note"}
+            {expanded ? "Hide detail" : "How the gap shows up"}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
-          {expanded && fullOverview.trim() && (
-            <p className="px-3 sm:px-4 pb-3 text-[13px] sm:text-[13px] text-foreground/90 leading-relaxed">
-              {fullOverview.trim()}
+          {expanded && (
+            <p className="px-3 sm:px-4 pb-3 text-[13px] text-foreground/90 leading-relaxed">
+              {overview}
             </p>
           )}
         </div>
       )}
     </section>
-  );
-}
-
-function ExpandableProse({
-  text,
-  expanded,
-  onToggle,
-  className,
-}: {
-  text: string;
-  expanded: boolean;
-  onToggle: () => void;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <p
-        className={`text-[13px] text-foreground/85 leading-relaxed ${expanded ? "" : "line-clamp-2 md:line-clamp-2"}`}
-      >
-        {text}
-      </p>
-      {!expanded && text.length > 120 && (
-        <button
-          type="button"
-          onClick={onToggle}
-          className="mt-1 text-[11px] font-mono text-cyan hover:underline min-h-[36px] md:min-h-0 touch-manipulation"
-        >
-          Read more
-        </button>
-      )}
-    </div>
   );
 }
 
@@ -226,11 +198,11 @@ function FrameCard({
   muted?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const long = body.length > 100;
+  const long = body.length > 110;
 
   return (
     <div
-      className="rounded-xl border bg-background/50 p-3 flex flex-col gap-1.5 min-h-[5.5rem]"
+      className="rounded-xl border bg-background/50 p-3 flex flex-col gap-1.5 min-h-[5.75rem] h-full"
       style={{ borderColor: `${accent}44`, borderTopWidth: 2, borderTopColor: accent }}
     >
       <div
@@ -241,9 +213,9 @@ function FrameCard({
         {label}
       </div>
       <p
-        className={`text-[13px] sm:text-[13px] leading-snug ${
-          open ? "" : "line-clamp-3"
-        } ${muted ? "text-muted-foreground italic" : "text-foreground/90"}`}
+        className={`text-[13px] leading-snug flex-1 ${open ? "" : "line-clamp-4 md:line-clamp-4"} ${
+          muted ? "text-muted-foreground italic" : "text-foreground/90"
+        }`}
       >
         {body}
       </p>
