@@ -3,10 +3,13 @@ import { getTopic } from "@/lib/feature-topics";
 import { TopicsListPage } from "./-topics.shared";
 
 export const Route = createFileRoute("/topics/")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { topic?: string } => {
     /** Legacy query param — redirected to path form in beforeLoad */
-    topic: typeof search.topic === "string" ? search.topic : undefined,
-  }),
+    if (typeof search.topic === "string" && search.topic.trim()) {
+      return { topic: search.topic };
+    }
+    return {};
+  },
   beforeLoad: ({ search }) => {
     const legacy = search.topic;
     if (legacy && getTopic(legacy)) {

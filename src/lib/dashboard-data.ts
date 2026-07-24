@@ -200,6 +200,13 @@ export type TopicSignals = {
   key_signals?: string[];
 };
 
+/** One identified friction between citizen X discourse and official/media framing. */
+export type NarrativeGapPoint = {
+  claim_citizen?: string;
+  claim_official_media?: string;
+  why_it_matters?: string;
+};
+
 export type TopicSnapshot = {
   topic: string;
   month?: string;
@@ -230,12 +237,16 @@ export type TopicSnapshot = {
         score?: number;
         label?: string;
         summary?: string;
-        /** Short citizen claim for dual-panel UI (≤160 chars). */
+        /** Citizen claim for dual-panel UI. */
         citizen_frame?: string;
-        /** Short official/media claim for dual-panel UI. */
+        /** Official + mainstream/local media claim for dual-panel UI. */
         official_media_frame?: string;
         /** One-line clash headline. */
         gap_headline?: string;
+        /** Why this divergence_score was assigned. */
+        score_rationale?: string;
+        /** Concrete paired gaps (citizen claim vs official/media claim). */
+        gap_points?: NarrativeGapPoint[];
       }
     | number
     | null;
@@ -257,8 +268,17 @@ function normalizeProse(s: string): string {
     .trim();
 }
 
-/** Strip meta wrappers so the claim reads as the narrative itself. */
-export function cleanFrameText(text: string, max = 160): string {
+/** Soft word-boundary truncate — keeps multi-sentence claims intact for Read more. */
+function softTruncate(text: string, max: number): string {
+  const t = text.trim();
+  if (!t || t.length <= max) return t;
+  const cut = t.slice(0, max - 1);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > max * 0.55 ? cut.slice(0, sp) : cut).trimEnd() + "…";
+}
+
+/** Strip meta wrappers so the claim reads as the narrative itself (full text kept). */
+export function cleanFrameText(text: string, max = 320): string {
   let t = text.trim();
   if (!t) return "";
   t = t
@@ -272,9 +292,27 @@ export function cleanFrameText(text: string, max = 160): string {
     )
     .replace(/^(?:official\/media|mainstream media)\s*:?\s*/i, "")
     .trim();
-  // Capitalize first letter after strip
   if (t && /^[a-z]/.test(t)) t = t.charAt(0).toUpperCase() + t.slice(1);
-  return firstSentence(t, max);
+  // Preserve multi-sentence frames — do not collapse to first sentence only
+  return softTruncate(t, max);
+}
+
+function normalizeGapPoints(raw: unknown): NarrativeGapPoint[] {
+  if (!Array.isArray(raw)) return [];
+  const out: NarrativeGapPoint[] = [];
+  for (const item of raw.slice(0, 4)) {
+    if (!item || typeof item !== "object") continue;
+    const r = item as Record<string, unknown>;
+    const claim_citizen = String(r.claim_citizen ?? r.citizen ?? "").trim();
+    const claim_official_media = String(
+      r.claim_official_media ?? r.official ?? r.media ?? "",
+    ).trim();
+    const why_it_matters = String(r.why_it_matters ?? r.why ?? "").trim();
+    if (claim_citizen || claim_official_media) {
+      out.push({ claim_citizen, claim_official_media, why_it_matters });
+    }
+  }
+  return out;
 }
 
 /**
@@ -313,15 +351,15 @@ export function splitGapOverviewIntoFrames(overview: string): {
       officialMediaFrame = a;
     }
     return {
-      citizenFrame: cleanFrameText(citizenFrame, 160),
-      officialMediaFrame: cleanFrameText(officialMediaFrame, 160),
+      citizenFrame: cleanFrameText(citizenFrame, 320),
+      officialMediaFrame: cleanFrameText(officialMediaFrame, 320),
       gapHeadline: "",
     };
   }
 
   // Single blob: use as citizen emphasis only (do not invent official frame)
   return {
-    citizenFrame: cleanFrameText(t, 160),
+    citizenFrame: cleanFrameText(t, 320),
     officialMediaFrame: "",
     gapHeadline: "",
   };
@@ -398,9 +436,19 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
   officialMediaFrame: string;
   gapHeadline: string;
   fullOverview: string;
+  scoreRationale: string;
+  gapPoints: NarrativeGapPoint[];
 } {
   if (!snapshot) {
-    return { score: null, citizenFrame: "", officialMediaFrame: "", gapHeadline: "", fullOverview: "" };
+    return {
+      score: null,
+      citizenFrame: "",
+      officialMediaFrame: "",
+      gapHeadline: "",
+      fullOverview: "",
+      scoreRationale: "",
+      gapPoints: [],
+    };
   }
   let score: number | null =
     typeof snapshot.divergence_score === "number" ? Math.round(snapshot.divergence_score) : null;
@@ -408,6 +456,8 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
   let officialMediaFrame = "";
   let gapHeadline = "";
   let fullOverview = (snapshot.divergence_gap ?? "").trim();
+  let scoreRationale = "";
+  let gapPoints: NarrativeGapPoint[] = [];
 
   const applyFrameObj = (raw: {
     score?: number;
@@ -416,6 +466,8 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
     citizen_frame?: string;
     official_media_frame?: string;
     gap_headline?: string;
+    score_rationale?: string;
+    gap_points?: unknown;
   }) => {
     if (score === null && typeof raw.score === "number") score = Math.round(raw.score);
     if (typeof raw.citizen_frame === "string" && raw.citizen_frame.trim())
@@ -426,8 +478,10 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
       gapHeadline = raw.gap_headline.trim();
     else if (!gapHeadline && typeof raw.label === "string" && raw.label.trim())
       gapHeadline = raw.label.trim();
-    // Prefer dedicated overview fields; summary is often a rehash
     if (!fullOverview && typeof raw.summary === "string") fullOverview = raw.summary.trim();
+    if (!scoreRationale && typeof raw.score_rationale === "string" && raw.score_rationale.trim())
+      scoreRationale = raw.score_rationale.trim();
+    if (!gapPoints.length && raw.gap_points) gapPoints = normalizeGapPoints(raw.gap_points);
   };
 
   const nd = snapshot.narrative_divergence;
@@ -449,6 +503,8 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
         citizen_frame?: string;
         official_media_frame?: string;
         gap_headline?: string;
+        score_rationale?: string;
+        gap_points?: unknown;
       });
     }
   }
@@ -458,20 +514,33 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
     const split = splitGapOverviewIntoFrames(fullOverview);
     if (!citizenFrame && split.citizenFrame) citizenFrame = split.citizenFrame;
     if (!officialMediaFrame && split.officialMediaFrame) officialMediaFrame = split.officialMediaFrame;
-    // Never copy synthetic headlines from the splitter
   }
 
   // Citizen narrative fallback: first sentence of Pass 1 narrative_summary
   if (!citizenFrame && typeof snapshot.narrative_summary === "string") {
     const ns = snapshot.narrative_summary.trim();
-    if (ns) citizenFrame = firstSentence(ns, 160);
+    if (ns) citizenFrame = firstSentence(ns, 220);
   }
 
-  // Display polish: strip meta wrappers, keep claims short
-  if (citizenFrame) citizenFrame = cleanFrameText(citizenFrame, 160);
-  if (officialMediaFrame) officialMediaFrame = cleanFrameText(officialMediaFrame, 160);
+  // Display polish: strip meta wrappers; keep multi-sentence claims for Read more
+  if (citizenFrame) citizenFrame = cleanFrameText(citizenFrame, 320);
+  if (officialMediaFrame) officialMediaFrame = cleanFrameText(officialMediaFrame, 320);
 
-  // Drop overview that only restates the two boxes (the common failure mode)
+  // Legacy: if no structured gap_points, build one comparison row from the two frames
+  if (!gapPoints.length && citizenFrame && officialMediaFrame) {
+    gapPoints = [
+      {
+        claim_citizen: citizenFrame,
+        claim_official_media: officialMediaFrame,
+        why_it_matters:
+          scoreRationale ||
+          gapHeadline ||
+          "Primary friction between citizen X discourse and official/media framing on this topic.",
+      },
+    ];
+  }
+
+  // Prefer gap_points synthesis over a vague overview restatement
   if (fullOverview && citizenFrame && officialMediaFrame) {
     if (!overviewAddsNewContent(fullOverview, citizenFrame, officialMediaFrame)) {
       fullOverview = "";
@@ -491,7 +560,24 @@ export function getNarrativeGapFrames(snapshot?: TopicSnapshot | null): {
     gapHeadline = "";
   }
 
-  return { score, citizenFrame, officialMediaFrame, gapHeadline, fullOverview };
+  // Fallback score explanation so the number is never silent
+  if (!scoreRationale && score !== null) {
+    if (score >= 70)
+      scoreRationale = "Wide clash: citizen claims and official/media framing strongly contradict.";
+    else if (score >= 45)
+      scoreRationale = "Moderate clash: partial overlap but clear disagreements on causes or blame.";
+    else scoreRationale = "Narrower gap: citizen and official/media frames partially align.";
+  }
+
+  return {
+    score,
+    citizenFrame,
+    officialMediaFrame,
+    gapHeadline,
+    fullOverview,
+    scoreRationale,
+    gapPoints,
+  };
 }
 
 /** Content layer precedence: Live (Pass 1) > Curated (Pass 2) > Static (illustrative). */

@@ -339,7 +339,7 @@ export function TopicAnalysisPage({
         </div>
       </div>
 
-      {/* Citizen vs official/media — visual gap (primary scan; long prose collapsed) */}
+      {/* Citizen vs official/media — comparative gap with identified frictions */}
       <NarrativeGapPanel
         topicLabel={headerLabel}
         score={gapFrames.score ?? divergence}
@@ -347,6 +347,8 @@ export function TopicAnalysisPage({
         officialMediaFrame={gapFrames.officialMediaFrame}
         gapHeadline={gapFrames.gapHeadline}
         fullOverview={gapFrames.fullOverview}
+        scoreRationale={gapFrames.scoreRationale}
+        gapPoints={gapFrames.gapPoints}
         sentimentScore={score}
       />
 
