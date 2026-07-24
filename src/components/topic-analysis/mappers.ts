@@ -119,6 +119,10 @@ export function buildAudienceLenses(
 const PLACEHOLDER_QA_RE =
   /limited or unclear data|insufficient clear signals|insufficient signals|public discussion exists but is fragmented|zero posts|data collapse/i;
 
+/** Titles that are really our metric, not a citizen insight. */
+const SCORE_AS_INSIGHT_RE =
+  /^(sentiment|score|overall|divergence|pts?|point|rating|index)\b|^\d{1,3}\s*(\/100|pts?|%|points?)?$|sentiment\s*(score)?\s*[:=]?\s*\d|score\s*[:=]?\s*\d|^\d{1,3}\s*[·\-–—]\s*(mixed|positive|negative|stable)/i;
+
 export function isPlaceholderQuestion(q: QuestionAnalysis): boolean {
   const text = [q.summary, ...(q.key_points ?? [])].filter(Boolean).join(" ");
   return PLACEHOLDER_QA_RE.test(text);
@@ -129,19 +133,57 @@ function isPlaceholderCuratedQa(c: CuratedQaPair): boolean {
   return !text.trim() || PLACEHOLDER_QA_RE.test(text);
 }
 
+/** True if text is essentially a calculated score, not a citizen insight. */
+export function isScoreAsInsightText(text?: string | null): boolean {
+  const t = (text ?? "").trim();
+  if (!t) return true;
+  if (SCORE_AS_INSIGHT_RE.test(t)) return true;
+  // Pure label + number combos
+  if (/^(strongly\s+)?(positive|negative|mixed|leaning\s+positive|slightly\s+positive)\s*\(?\d{0,3}\)?$/i.test(t))
+    return true;
+  return false;
+}
+
+function isSubstantiveInsightCard(card: InsightCardModel): boolean {
+  if (isScoreAsInsightText(card.title) && isScoreAsInsightText(card.summary)) return false;
+  if (isScoreAsInsightText(card.title) && !(card.summary?.trim().length > 20)) return false;
+  // Need real prose somewhere
+  const body = `${card.title} ${card.summary} ${card.evidence.join(" ")}`.trim();
+  if (body.length < 12) return false;
+  if (/^\d+(\s*\/\s*100)?$/.test(body)) return false;
+  return true;
+}
+
+function insightTitleFromProse(text: string): string {
+  const t = text.trim();
+  if (!t || isScoreAsInsightText(t)) return "";
+  const first = t.split(/(?<=[.!?])\s+/)[0] ?? t;
+  if (isScoreAsInsightText(first)) {
+    // Skip score-like first sentence
+    const rest = t.slice(first.length).trim();
+    if (rest) return (rest.split(/(?<=[.!?])\s+/)[0] ?? rest).slice(0, 120);
+    return "";
+  }
+  return first.slice(0, 120);
+}
+
 export function keyInsightsToInsightCards(insights: string[]): InsightCardModel[] {
   return insights
-    .map((raw, i) => raw?.trim())
-    .filter((x): x is string => Boolean(x))
-    .map((text, i) => ({
-      id: `ki-${i}`,
-      title: text.split(/(?<=[.!?])\s+/)[0] ?? text,
-      summary: text,
-      score: 50,
-      evidence: [],
-      audiences: ["All audiences"],
-      wowDelta: null,
-    }));
+    .map((raw) => raw?.trim())
+    .filter((x): x is string => Boolean(x) && !PLACEHOLDER_QA_RE.test(x) && !isScoreAsInsightText(x))
+    .map((text, i) => {
+      const title = insightTitleFromProse(text) || text.slice(0, 100);
+      return {
+        id: `ki-${i}`,
+        title,
+        summary: text,
+        score: 50,
+        evidence: [],
+        audiences: ["All audiences"],
+        wowDelta: null,
+      };
+    })
+    .filter(isSubstantiveInsightCard);
 }
 
 /** Pass 2 QA → Pass 1 key_insights → substantive question_analysis (skips empty-run placeholders). */
@@ -153,45 +195,74 @@ export function buildInsightCards(
   const curated = qa.filter(
     (c) => (c.card_title?.trim() || c.card_summary?.trim()) && !isPlaceholderCuratedQa(c),
   );
-  if (curated.length) return qaToInsightCards(curated);
+  if (curated.length) {
+    const cards = qaToInsightCards(curated).filter(isSubstantiveInsightCard);
+    if (cards.length) return cards;
+  }
 
   const insights = (snapshot?.key_insights ?? [])
     .map((x) => x?.trim())
     .filter((x): x is string => Boolean(x) && !PLACEHOLDER_QA_RE.test(x));
-  if (insights.length) return keyInsightsToInsightCards(insights);
+  const fromKi = keyInsightsToInsightCards(insights);
+  if (fromKi.length) return fromKi;
 
   const substantive = questions.filter((q) => !isPlaceholderQuestion(q));
-  if (substantive.length) return questionsToInsightCards(substantive);
+  if (substantive.length) {
+    return questionsToInsightCards(substantive).filter(isSubstantiveInsightCard);
+  }
 
   return [];
 }
 
 export function qaToInsightCards(qa: CuratedQaPair[]): InsightCardModel[] {
-  return qa.map((c, i) => ({
-    id: `${c.question_slug ?? i}`,
-    title: c.card_title ?? "Insight",
-    summary: c.card_summary ?? "",
-    score: c.sentiment_score ?? 50,
-    label: c.sentiment_label,
-    evidence: (c.key_evidence ?? []).map((e) => e.point ?? "").filter(Boolean),
-    audiences: audienceTagsForTheme(c.theme),
-    theme: c.theme,
-    wowDelta: c.wow_delta,
-  }));
+  return qa.map((c, i) => {
+    let title = (c.card_title ?? "").trim();
+    let summary = (c.card_summary ?? "").trim();
+    if (isScoreAsInsightText(title)) {
+      // Prefer summary or first evidence point as the insight, not the score
+      const fromEvidence = (c.key_evidence ?? []).map((e) => e.point ?? "").find((p) => p && !isScoreAsInsightText(p));
+      title = insightTitleFromProse(summary) || fromEvidence || "Citizen insight";
+    }
+    if (isScoreAsInsightText(summary)) summary = "";
+    return {
+      id: `${c.question_slug ?? i}`,
+      title: title || "Citizen insight",
+      summary,
+      score: c.sentiment_score ?? 50,
+      label: c.sentiment_label,
+      evidence: (c.key_evidence ?? []).map((e) => e.point ?? "").filter(Boolean),
+      audiences: audienceTagsForTheme(c.theme),
+      theme: c.theme,
+      wowDelta: c.wow_delta,
+    };
+  });
 }
 
 export function questionsToInsightCards(questions: QuestionAnalysis[]): InsightCardModel[] {
-  return questions.map((q, i) => ({
-    id: `q-${i}`,
-    title: (q.summary ?? q.question ?? "Insight").split(/(?<=[.!?])\s+/)[0] ?? "Insight",
-    summary: q.summary ?? "",
-    score: q.sentiment_score ?? 50,
-    label: q.sentiment_label,
-    evidence: q.key_points ?? [],
-    audiences: ["All audiences"],
-    theme: undefined,
-    wowDelta: null,
-  }));
+  return questions.map((q, i) => {
+    const points = (q.key_points ?? []).filter((p) => p && !isScoreAsInsightText(p));
+    const summary = (q.summary ?? "").trim();
+    let title =
+      points[0] ||
+      insightTitleFromProse(summary) ||
+      (!isScoreAsInsightText(q.question) ? (q.question ?? "").slice(0, 100) : "") ||
+      "Citizen insight";
+    // Prefer not to use the full Socratic question as the insight title if we have a summary
+    if (title === q.question && summary && !isScoreAsInsightText(summary)) {
+      title = insightTitleFromProse(summary) || title;
+    }
+    return {
+      id: `q-${i}`,
+      title,
+      summary: isScoreAsInsightText(summary) ? points.slice(1).join(" ") || summary : summary,
+      score: q.sentiment_score ?? 50,
+      label: q.sentiment_label,
+      evidence: points,
+      audiences: ["All audiences"],
+      theme: undefined,
+      wowDelta: null,
+    };
+  });
 }
 
 function audienceTagsForTheme(theme?: string): string[] {

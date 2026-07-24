@@ -9,11 +9,14 @@ import {
   MessageSquare,
   Radio,
   Sparkles,
+  Share2,
   TrendingDown,
   TrendingUp,
   Minus,
   Trophy,
+  X,
 } from "lucide-react";
+import { buildInsightShareText, buildTwitterShareHref } from "@/lib/share-insight";
 import {
   Bar,
   BarChart,
@@ -143,6 +146,15 @@ export function TopicAnalysisPage({
   const { data, curated, qa, history, ready, loadError, retry } = useTopicBundle(rootKey);
   const [rawOpen, setRawOpen] = useState(false);
   const [pickedCard, setPickedCard] = useState<InsightCardModel | null>(null);
+  const [pickedThread, setPickedThread] = useState<{
+    theme?: string;
+    headline?: string;
+    summary?: string;
+    confidence?: string;
+    divergence_note?: string;
+  } | null>(null);
+  const [chartsOpen, setChartsOpen] = useState(false); // mobile default collapsed; desktop always shows
+  const [curatedExpanded, setCuratedExpanded] = useState(false);
 
   const curatedStale = useMemo(() => {
     if (!curated?.generated_at || !data?.last_updated) return false;
@@ -349,7 +361,25 @@ export function TopicAnalysisPage({
           </div>
           <h2 className="text-xl sm:text-2xl font-display font-semibold leading-tight">{curated.hero_headline}</h2>
           {curated.hero_summary && (
-            <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2">{curated.hero_summary}</p>
+            <>
+              <p
+                className={`text-sm text-foreground/90 leading-relaxed ${
+                  curatedExpanded ? "" : "line-clamp-2 md:line-clamp-2"
+                }`}
+              >
+                {curated.hero_summary}
+              </p>
+              {/* Mobile: explicit read more when clamped */}
+              {curated.hero_summary.length > 100 && (
+                <button
+                  type="button"
+                  onClick={() => setCuratedExpanded((v) => !v)}
+                  className="md:hidden text-[11px] font-mono text-cyan hover:underline min-h-[40px] touch-manipulation"
+                >
+                  {curatedExpanded ? "Show less" : "Read more"}
+                </button>
+              )}
+            </>
           )}
           <div className="flex flex-wrap gap-2 text-[10px] font-mono">
             {formatDelta(curated.sentiment_delta) && (
@@ -378,15 +408,17 @@ export function TopicAnalysisPage({
         </Link>
       )}
 
-      {/* Narrative threads */}
+      {/* Narrative threads — tappable; full text in sheet/modal */}
       {threads.length > 0 && (
         <section className="space-y-3">
-          <SectionLabel icon={<Lightbulb className="w-3.5 h-3.5" />} title="Narrative Threads" sub="Ranked storylines" />
+          <SectionLabel icon={<Lightbulb className="w-3.5 h-3.5" />} title="Narrative Threads" sub="Tap for full text" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {threads.map((t, i) => (
-              <div
+              <button
                 key={`${t.theme}-${i}`}
-                className="rounded-xl border border-border bg-secondary/20 p-4 space-y-1.5"
+                type="button"
+                onClick={() => setPickedThread(t)}
+                className="text-left rounded-xl border border-border bg-secondary/20 p-4 space-y-1.5 hover:border-cyan/40 active:bg-secondary/40 transition-colors touch-manipulation min-h-[44px]"
                 style={{ borderLeft: `3px solid ${confidenceColor(t.confidence)}` }}
               >
                 <div className="flex justify-between gap-2 text-[10px] font-mono uppercase text-muted-foreground">
@@ -394,19 +426,63 @@ export function TopicAnalysisPage({
                   {t.confidence && <span style={{ color: confidenceColor(t.confidence) }}>{t.confidence}</span>}
                 </div>
                 {t.headline && <h4 className="font-display font-semibold text-sm">{t.headline}</h4>}
-                {t.summary && <p className="text-[13px] text-foreground/85 leading-relaxed line-clamp-2">{t.summary}</p>}
-              </div>
+                {t.summary && (
+                  <p className="text-[13px] text-foreground/85 leading-relaxed line-clamp-2 md:line-clamp-2">
+                    {t.summary}
+                  </p>
+                )}
+                <span className="text-[10px] font-mono text-cyan md:hidden">Read full →</span>
+              </button>
             ))}
           </div>
         </section>
       )}
 
-      {/* Insight cards — Pass 2 QA, else Pass 1 key_insights / question_analysis */}
+      {/* Insight cards — mobile: substance-first chip score; desktop: existing score-hero layout */}
       {insightCards.length > 0 && (
       <section className="space-y-3">
-        <SectionLabel icon={<Brain className="w-3.5 h-3.5" />} title="Key Insights" sub={`${insightCards.length} cards`} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {insightCards.map((card, i) => (
+        <SectionLabel
+          icon={<Brain className="w-3.5 h-3.5" />}
+          title="Key Insights"
+          sub={`${insightCards.length} · tap to read`}
+        />
+        {/* Mobile: horizontal snap carousel */}
+        <div className="md:hidden flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory custom-scroll">
+          {insightCards.map((card) => (
+            <button
+              key={card.id}
+              type="button"
+              onClick={() => setPickedCard(card)}
+              className="snap-center shrink-0 w-[min(100%,20rem)] text-left rounded-xl border border-border bg-background/50 p-4 space-y-2.5 hover:border-cyan/40 active:scale-[0.99] transition-all touch-manipulation"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <h4 className="font-display font-semibold text-[15px] leading-snug flex-1">
+                  {card.title}
+                </h4>
+                <span
+                  className="shrink-0 text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border"
+                  style={{
+                    color: sentimentColor(card.score),
+                    borderColor: `${sentimentColor(card.score)}55`,
+                    background: `${sentimentColor(card.score)}14`,
+                  }}
+                  title="Calculated sentiment metric (not a citizen insight)"
+                >
+                  {card.score}
+                </span>
+              </div>
+              {card.summary && (
+                <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-3">
+                  {card.summary}
+                </p>
+              )}
+              <span className="text-[10px] font-mono text-cyan">Open full insight →</span>
+            </button>
+          ))}
+        </div>
+        {/* Desktop: original grid with score emphasis */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-3">
+          {insightCards.map((card) => (
             <button
               key={card.id}
               type="button"
@@ -439,10 +515,19 @@ export function TopicAnalysisPage({
       </section>
       )}
 
-      {/* Visual analytics */}
+      {/* Visual analytics — collapsed by default on mobile only */}
       <section className="space-y-3">
-        <SectionLabel icon={<Radio className="w-3.5 h-3.5" />} title="Visual Analytics" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <button
+          type="button"
+          onClick={() => setChartsOpen((v) => !v)}
+          className="md:pointer-events-none w-full md:w-auto flex items-center justify-between md:justify-start gap-2 min-h-[44px] md:min-h-0 touch-manipulation"
+        >
+          <SectionLabel icon={<Radio className="w-3.5 h-3.5" />} title="Visual Analytics" />
+          <ChevronDown
+            className={`w-4 h-4 text-muted-foreground md:hidden transition-transform ${chartsOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+        <div className={`${chartsOpen ? "grid" : "hidden"} md:grid grid-cols-1 lg:grid-cols-2 gap-4`}>
           <ChartPanel title="Sentiment trend">
             {sentimentSeries.length > 1 ? (
               <ResponsiveContainer width="100%" height={180}>
@@ -505,7 +590,7 @@ export function TopicAnalysisPage({
               <ComparePill label="WoW divergence" value={formatDelta(curated?.divergence_delta)} />
               <ComparePill label="Window" value={curated?.comparison_window?.toUpperCase() ?? "WOW"} />
               {curated?.evolution_note && (
-                <p className="w-full text-[12px] text-muted-foreground leading-relaxed mt-2 line-clamp-3">
+                <p className="w-full text-[13px] text-muted-foreground leading-relaxed mt-2">
                   {curated.evolution_note}
                 </p>
               )}
@@ -558,39 +643,148 @@ export function TopicAnalysisPage({
         )}
       </div>
 
-      {/* Insight modal */}
+      {/* Insight detail: mobile bottom sheet · desktop centered modal */}
       {pickedCard && (
-        <div
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md grid place-items-center p-4"
-          onClick={() => setPickedCard(null)}
-        >
-          <div
-            className="glass-strong rounded-2xl max-w-lg w-full p-5 space-y-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-[10px] font-mono uppercase text-cyan">Insight detail</div>
-            <h3 className="text-xl font-display font-semibold">{pickedCard.title}</h3>
-            <p className="text-sm text-foreground/90">{pickedCard.summary}</p>
-            {pickedCard.evidence.length > 0 && (
-              <ul className="space-y-1 text-[13px]">
-                {pickedCard.evidence.map((e, i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="text-cyan font-mono">{String(i + 1).padStart(2, "0")}</span>
-                    {e}
-                  </li>
-                ))}
-              </ul>
+        <DetailOverlay onClose={() => setPickedCard(null)}>
+          <div className="text-[10px] font-mono uppercase text-cyan tracking-[0.18em]">Insight detail</div>
+          <h3 className="text-xl font-display font-semibold leading-snug">{pickedCard.title}</h3>
+          {pickedCard.summary && (
+            <p className="text-[15px] sm:text-sm text-foreground/90 leading-relaxed">{pickedCard.summary}</p>
+          )}
+          {pickedCard.evidence.length > 0 && (
+            <ul className="space-y-2 text-[14px] sm:text-[13px]">
+              {pickedCard.evidence.map((e, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="text-cyan font-mono shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                  <span>{e}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span
+              className="text-[11px] font-mono px-2 py-1 rounded border"
+              style={{
+                color: sentimentColor(pickedCard.score),
+                borderColor: `${sentimentColor(pickedCard.score)}55`,
+              }}
+              title="Calculated metric — not the insight itself"
+            >
+              Metric {pickedCard.score}
+              {pickedCard.label ? ` · ${pickedCard.label}` : ""}
+            </span>
+            {pickedCard.wowDelta != null && pickedCard.wowDelta !== 0 && (
+              <span className="text-[11px] font-mono text-muted-foreground">
+                WoW {formatDelta(pickedCard.wowDelta)}
+              </span>
             )}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <a
+              href={buildTwitterShareHref(
+                buildInsightShareText({
+                  topicLabel: headerLabel,
+                  insightTitle: pickedCard.title,
+                  sentimentScore: pickedCard.score,
+                  divergenceScore: divergence,
+                  divergenceGap: gapFrames.fullOverview,
+                  citizenFrame: gapFrames.citizenFrame,
+                  officialMediaFrame: gapFrames.officialMediaFrame,
+                }),
+                typeof window !== "undefined" ? window.location.href : "https://elenchos.live",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan hover:bg-cyan/10 touch-manipulation"
+            >
+              <Share2 className="w-3.5 h-3.5" /> Share on X
+            </a>
             <button
               type="button"
               onClick={() => setPickedCard(null)}
-              className="text-xs font-mono text-cyan hover:underline"
+              className="inline-flex items-center justify-center min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-border text-muted-foreground hover:bg-secondary touch-manipulation"
             >
               Close
             </button>
           </div>
-        </div>
+        </DetailOverlay>
       )}
+
+      {pickedThread && (
+        <DetailOverlay onClose={() => setPickedThread(null)}>
+          <div className="text-[10px] font-mono uppercase text-cyan tracking-[0.18em]">
+            {pickedThread.theme ?? "Narrative thread"}
+          </div>
+          {pickedThread.headline && (
+            <h3 className="text-xl font-display font-semibold leading-snug">{pickedThread.headline}</h3>
+          )}
+          {pickedThread.summary && (
+            <p className="text-[15px] sm:text-sm text-foreground/90 leading-relaxed">{pickedThread.summary}</p>
+          )}
+          {pickedThread.divergence_note && (
+            <div className="rounded-lg border border-amber-signal/30 bg-amber-signal/[0.06] p-3 text-[13px] leading-relaxed">
+              <div className="text-[10px] font-mono uppercase text-amber-signal mb-1">Gap note</div>
+              {pickedThread.divergence_note}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setPickedThread(null)}
+            className="inline-flex items-center justify-center min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-border text-muted-foreground hover:bg-secondary touch-manipulation"
+          >
+            Close
+          </button>
+        </DetailOverlay>
+      )}
+    </div>
+  );
+}
+
+/** Mobile bottom sheet · desktop centered modal — full text always readable */
+function DetailOverlay({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md"
+      onClick={onClose}
+      role="presentation"
+    >
+      {/* Mobile sheet */}
+      <div
+        className="md:hidden absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-2xl border border-border border-b-0 bg-background shadow-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="flex justify-center pb-1">
+          <span className="w-10 h-1 rounded-full bg-border" aria-hidden />
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 rounded-full hover:bg-secondary min-h-[44px] min-w-[44px] grid place-items-center touch-manipulation"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4 text-muted-foreground" />
+        </button>
+        {children}
+      </div>
+      {/* Desktop modal — unchanged centered glass */}
+      <div className="hidden md:grid place-items-center p-4 h-full">
+        <div
+          className="glass-strong rounded-2xl max-w-lg w-full p-5 space-y-3 max-h-[85vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
