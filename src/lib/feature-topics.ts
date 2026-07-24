@@ -960,6 +960,26 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
     takeaway: "",
     compare: [],
   },
+  {
+    id: "save-europe-act",
+    title: "Save Europe Act: Citizens, Media & EU Bureaucracy",
+    shortTitle: "Save Europe Act",
+    description:
+      "Citizen discourse on X about the Save Europe Act — public support, lived concerns, and the gap with EU bureaucratic messaging and mainstream/local media narratives.",
+    sampleSize: "",
+    confidence: "Moderate",
+    region: "Europe / EU",
+    trackers: [],
+    simulation: {
+      title: "Live data",
+      pathA: { label: "Live", series: [] },
+      pathB: { label: "Live", series: [] },
+      caption: "",
+    },
+    insights: { citizenSays: "", officialSays: "", gap: "" },
+    takeaway: "",
+    compare: [],
+  },
 ];
 
 

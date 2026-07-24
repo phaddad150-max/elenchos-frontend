@@ -74,6 +74,10 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "US AI Economy Boom & American Technological Renaissance",
     headerLabel: "US AI Economy Boom",
   },
+  "save-europe-act": {
+    rootKey: "Save Europe Act: Citizens, Media & EU Bureaucracy",
+    headerLabel: "Save Europe Act",
+  },
 };
 
 /** Topics kept for history / read-only archive (not primary live monitors). */

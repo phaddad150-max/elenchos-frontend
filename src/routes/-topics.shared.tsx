@@ -62,7 +62,7 @@ import {
 const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
 
 /** Topics marked with a small NEW pill on the card (no layout change). */
-const NEW_TOPIC_IDS = new Set(["elon-musk-public-voices"]);
+const NEW_TOPIC_IDS = new Set(["save-europe-act"]);
 
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "archived"> = {
   "us-iran-confrontation": "realtime",
@@ -70,6 +70,7 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "arab-israeli-normalization": "weekly",
   "iranian-voices-vs-regime": "weekly",
   "elon-musk-public-voices": "weekly",
+  "save-europe-act": "weekly",
   "us-ai-economy-boom": "weekly",
   "new-us-foreign-policy": "weekly",
   "crypto-regulation-financial-markets": "weekly",
@@ -324,7 +325,8 @@ function TopicsFilterableGrid({
   const { activeTopics, archivedTopics } = useMemo(() => {
     const PRIORITY = [
       NEAR_REALTIME_TOPIC_ID,
-      "elon-musk-public-voices", // directly after live monitor
+      "elon-musk-public-voices",
+      "save-europe-act",
       "iranian-voices-vs-regime",
       "arab-israeli-normalization",
       "new-us-foreign-policy",
@@ -483,6 +485,7 @@ function shortTitle(t: string): string {
     "FIFA World Cup 2026": "FIFA World Cup 2026",
     "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "US–Iran Confrontation",
     "Public Voices on Elon Musk: Trust, Media Frames & Power": "Elon Musk · Public Voices",
+    "Save Europe Act: Citizens, Media & EU Bureaucracy": "Save Europe Act",
   };
   return map[t] ?? t;
 }
