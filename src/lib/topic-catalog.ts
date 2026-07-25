@@ -87,6 +87,36 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
 /** Topics kept for history / read-only archive (not primary live monitors). */
 export const ARCHIVED_TOPIC_IDS = ["fifa-world-cup-2026"] as const;
 
+/**
+ * When a topic first ships on the product (UTC calendar date YYYY-MM-DD).
+ * Cards show a NEW badge for {@link NEW_TOPIC_BADGE_DAYS} days from this date (inclusive of day 0).
+ * Add every newly launched topic here — not only the latest — so all new cards get the icon.
+ */
+export const TOPIC_ADDED_AT: Record<string, string> = {
+  "us-iran-confrontation": "2026-07-15",
+  "elon-musk-public-voices": "2026-07-20",
+  "us-ai-economy-boom": "2026-07-10",
+  "save-europe-act": "2026-07-24",
+  "commercial-space-race": "2026-07-25",
+};
+
+/** How long the NEW pill stays on topic cards after TOPIC_ADDED_AT. */
+export const NEW_TOPIC_BADGE_DAYS = 7;
+
+/**
+ * True while `now` is within NEW_TOPIC_BADGE_DAYS of the topic's ship date.
+ * All topics in TOPIC_ADDED_AT can show NEW at once if each is still in its window.
+ */
+export function isNewTopicBadge(id: string, now: Date = new Date()): boolean {
+  const raw = TOPIC_ADDED_AT[id];
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+  const startMs = Date.parse(`${raw}T00:00:00.000Z`);
+  if (Number.isNaN(startMs)) return false;
+  const endMs = startMs + NEW_TOPIC_BADGE_DAYS * 24 * 60 * 60 * 1000;
+  const t = now.getTime();
+  return t >= startMs && t < endMs;
+}
+
 export function isArchivedTopicId(id: string): boolean {
   return (ARCHIVED_TOPIC_IDS as readonly string[]).includes(id);
 }

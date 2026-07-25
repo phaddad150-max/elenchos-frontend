@@ -48,6 +48,7 @@ import {
   isLiveTopicId,
   liveTopicConfig,
   isArchivedTopicId,
+  isNewTopicBadge,
 } from "@/lib/topic-catalog";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -60,9 +61,6 @@ import {
 
 /** Primary near-real-time monitor (replaces FIFA after tournament close). */
 const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
-
-/** Topics marked with a small NEW pill on the card (no layout change). */
-const NEW_TOPIC_IDS = new Set(["commercial-space-race", "save-europe-act"]);
 
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "archived"> = {
   "us-iran-confrontation": "realtime",
@@ -388,7 +386,7 @@ function TopicsFilterableGrid({
         cadence={topicCadence(t.id)}
         snapshot={snap}
         wowTrend={wow}
-        isNew={NEW_TOPIC_IDS.has(t.id)}
+        isNew={isNewTopicBadge(t.id)}
         onOpen={() => onOpen(t.id)}
       />
     );
