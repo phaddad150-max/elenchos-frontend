@@ -36,6 +36,7 @@ import {
   Users,
   Radio,
   Flame,
+  FileDown,
 } from "lucide-react";
 
 import { SiteNav } from "@/components/SiteNav";
@@ -965,8 +966,45 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
               Simulated editorial data — not live Supabase analysis
             </span>
           )}
+          {isArchivedTopicId(topic.id) && (
+            <span className="text-[10px] font-mono uppercase tracking-[0.14em] px-2 py-0.5 rounded-full border border-border text-muted-foreground">
+              Archived
+            </span>
+          )}
         </div>
       </header>
+
+      {/* Archived FIFA: full fan-discourse PDF report */}
+      {topic.id === "fifa-world-cup-2026" && (
+        <div className="rounded-xl border border-muted-foreground/25 bg-secondary/30 px-4 py-3.5 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="p-2 rounded-lg border border-border bg-background/60 shrink-0">
+              <FileDown className="w-4 h-4 text-cyan" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-cyan">
+                Archive report
+              </div>
+              <p className="text-sm text-foreground/90 leading-snug">
+                Full fan-discourse retrospective from X — Pass 1 snapshots, sentiment timeline, and curated synthesis.
+              </p>
+              <p className="text-[11px] font-mono text-muted-foreground">
+                PDF · paraphrased aggregates only · not affiliated with FIFA
+              </p>
+            </div>
+          </div>
+          <a
+            href="/reports/fifa-world-cup-2026-archive.pdf"
+            download="Elenchos_FIFA_World_Cup_2026_Archive_Report.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 shrink-0 px-4 py-2.5 rounded-full text-[12px] font-mono font-semibold border border-cyan/45 bg-cyan/10 text-cyan hover:bg-cyan/15 active:bg-cyan/20 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            Download PDF
+          </a>
+        </div>
+      )}
 
       {/* Live data panel (real Supabase data for mapped topics) */}
       {useLive && liveCfg ? (
