@@ -31,6 +31,7 @@ export const CANONICAL_TOPICS = [
   "Public Voices on Elon Musk: Trust, Media Frames & Power",
   "US AI Economy Boom & American Technological Renaissance",
   "Save Europe Act: Citizens, Media & EU Bureaucracy",
+  "Commercial Space Race: SpaceX, Rivals & Public Trust",
 ] as const;
 
 const CANONICAL_TOPIC_SET = new Set<string>(CANONICAL_TOPICS);
@@ -60,6 +61,12 @@ export const TOPIC_ALIASES: Record<string, string> = {
   "save europe": "Save Europe Act: Citizens, Media & EU Bureaucracy",
   "save europe act: citizens, media & eu bureaucracy":
     "Save Europe Act: Citizens, Media & EU Bureaucracy",
+  "commercial space race": "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  "commercial-space-race": "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  "space race": "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  "spacex rivals": "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  "commercial space race: spacex, rivals & public trust":
+    "Commercial Space Race: SpaceX, Rivals & Public Trust",
 };
 
 /** Map any Supabase topic string to the canonical backend key, or null if unknown. */

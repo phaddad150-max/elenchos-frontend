@@ -62,7 +62,7 @@ import {
 const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
 
 /** Topics marked with a small NEW pill on the card (no layout change). */
-const NEW_TOPIC_IDS = new Set(["save-europe-act"]);
+const NEW_TOPIC_IDS = new Set(["commercial-space-race", "save-europe-act"]);
 
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "archived"> = {
   "us-iran-confrontation": "realtime",
@@ -70,6 +70,7 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "arab-israeli-normalization": "weekly",
   "iranian-voices-vs-regime": "weekly",
   "elon-musk-public-voices": "weekly",
+  "commercial-space-race": "weekly",
   "save-europe-act": "weekly",
   "us-ai-economy-boom": "weekly",
   "new-us-foreign-policy": "weekly",
@@ -326,6 +327,7 @@ function TopicsFilterableGrid({
     const PRIORITY = [
       NEAR_REALTIME_TOPIC_ID,
       "elon-musk-public-voices",
+      "commercial-space-race",
       "save-europe-act",
       "iranian-voices-vs-regime",
       "arab-israeli-normalization",
@@ -486,6 +488,7 @@ function shortTitle(t: string): string {
     "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "US–Iran Confrontation",
     "Public Voices on Elon Musk: Trust, Media Frames & Power": "Elon Musk · Public Voices",
     "Save Europe Act: Citizens, Media & EU Bureaucracy": "Save Europe Act",
+    "Commercial Space Race: SpaceX, Rivals & Public Trust": "Commercial Space Race",
   };
   return map[t] ?? t;
 }

@@ -78,6 +78,10 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "Save Europe Act: Citizens, Media & EU Bureaucracy",
     headerLabel: "Save Europe Act",
   },
+  "commercial-space-race": {
+    rootKey: "Commercial Space Race: SpaceX, Rivals & Public Trust",
+    headerLabel: "Commercial Space Race",
+  },
 };
 
 /** Topics kept for history / read-only archive (not primary live monitors). */

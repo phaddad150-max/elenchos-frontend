@@ -980,6 +980,26 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
     takeaway: "",
     compare: [],
   },
+  {
+    id: "commercial-space-race",
+    title: "Commercial Space Race: SpaceX, Rivals & Public Trust",
+    shortTitle: "Commercial Space Race",
+    description:
+      "Public perception of the commercial space race — SpaceX versus Blue Origin, Virgin Galactic and other rivals: trust, execution, tourism vs deep-space ambition, and media/official frames.",
+    sampleSize: "",
+    confidence: "Moderate",
+    region: "Global",
+    trackers: [],
+    simulation: {
+      title: "Live data",
+      pathA: { label: "Live", series: [] },
+      pathB: { label: "Live", series: [] },
+      caption: "",
+    },
+    insights: { citizenSays: "", officialSays: "", gap: "" },
+    takeaway: "",
+    compare: [],
+  },
 ];
 
 
