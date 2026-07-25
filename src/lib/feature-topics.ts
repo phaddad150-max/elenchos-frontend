@@ -368,14 +368,14 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
     ],
   },
   {
-    id: "maritime-ai-greece-global-role",
-    title: "Maritime AI Industry & Greece's Global Role",
-    shortTitle: "Maritime AI & Greece",
+    id: "greece-economic-recovery",
+    title: "Greece Economic Recovery: Resilience, Security & Digital Transformation",
+    shortTitle: "Greece Economic Recovery",
     description:
-      "Citizen sentiment on the maritime AI industry and Greece's global role in shipping, ports, and AI-driven maritime innovation.",
+      "Citizen discourse on Greece's recovery case study — economy and tourism rebound, digital state, borders and naturalization, Turkish pressure, and regional security costs versus official success narratives.",
     sampleSize: "",
     confidence: "Moderate",
-    region: "Global · Greece",
+    region: "Greece / Eastern Mediterranean",
     trackers: [],
     simulation: {
       title: "Live data",

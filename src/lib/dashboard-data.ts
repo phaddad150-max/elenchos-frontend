@@ -17,6 +17,7 @@ export const CANONICAL_TOPICS = [
   "Arab-Israeli Normalization / Abraham Accords",
   "Iranian Voices vs Regime",
   "Maritime AI Industry & Greece's Global Role",
+  "Greece Economic Recovery: Resilience, Security & Digital Transformation",
   "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
   "Trump Administration Actions & US Politics",
   "Crypto Regulation & Financial Markets Volatility",
@@ -67,6 +68,14 @@ export const TOPIC_ALIASES: Record<string, string> = {
   "spacex rivals": "Commercial Space Race: SpaceX, Rivals & Public Trust",
   "commercial space race: spacex, rivals & public trust":
     "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  "greece economic recovery":
+    "Greece Economic Recovery: Resilience, Security & Digital Transformation",
+  "greece-economic-recovery":
+    "Greece Economic Recovery: Resilience, Security & Digital Transformation",
+  "greece recovery":
+    "Greece Economic Recovery: Resilience, Security & Digital Transformation",
+  "greece economic recovery: resilience, security & digital transformation":
+    "Greece Economic Recovery: Resilience, Security & Digital Transformation",
 };
 
 /** Map any Supabase topic string to the canonical backend key, or null if unknown. */

@@ -18,9 +18,9 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "Iranian Voices vs Regime",
     headerLabel: "Iranian Voices",
   },
-  "maritime-ai-greece-global-role": {
-    rootKey: "Maritime AI Industry & Greece's Global Role",
-    headerLabel: "Maritime AI Industry & Greece's Global Role",
+  "greece-economic-recovery": {
+    rootKey: "Greece Economic Recovery: Resilience, Security & Digital Transformation",
+    headerLabel: "Greece Economic Recovery",
   },
   "levant-realignment": {
     rootKey: "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
@@ -86,6 +86,7 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
 
 /** Topics kept for history / read-only archive (not primary live monitors). */
 export const ARCHIVED_TOPIC_IDS = ["fifa-world-cup-2026"] as const;
+// Maritime AI Greece removed from LIVE_TOPIC_KEYS — historical DB rows remain under old rootKey.
 
 /**
  * When a topic first ships on the product (UTC calendar date YYYY-MM-DD).
@@ -98,6 +99,7 @@ export const TOPIC_ADDED_AT: Record<string, string> = {
   "us-ai-economy-boom": "2026-07-10",
   "save-europe-act": "2026-07-24",
   "commercial-space-race": "2026-07-25",
+  "greece-economic-recovery": "2026-07-25",
 };
 
 /** How long the NEW pill stays on topic cards after TOPIC_ADDED_AT. */

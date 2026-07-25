@@ -71,6 +71,7 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "elon-musk-public-voices": "weekly",
   "commercial-space-race": "weekly",
   "save-europe-act": "weekly",
+  "greece-economic-recovery": "weekly",
   "us-ai-economy-boom": "weekly",
   "new-us-foreign-policy": "weekly",
   "crypto-regulation-financial-markets": "weekly",
@@ -80,7 +81,6 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "political-polarization-populism": "weekly",
   "levant-realignment": "monthly",
   "global-ai-race": "monthly",
-  "maritime-ai-greece-global-role": "monthly",
   "cuba-sanctions-domino": "monthly",
 };
 
@@ -327,6 +327,7 @@ function TopicsFilterableGrid({
       NEAR_REALTIME_TOPIC_ID,
       "elon-musk-public-voices",
       "commercial-space-race",
+      "greece-economic-recovery",
       "save-europe-act",
       "iranian-voices-vs-regime",
       "arab-israeli-normalization",
@@ -472,7 +473,7 @@ function shortTitle(t: string): string {
     "Arab–Israeli Normalization": "Arab–Israeli Normalization",
     "Iranian Voices vs Islamic Regime": "Iranian Voices",
     "Iranian Voices vs Regime": "Iranian Voices",
-    "Maritime AI Industry & Greece's Global Role": "Greek Maritime AI",
+    "Greece Economic Recovery: Resilience, Security & Digital Transformation": "Greece Economic Recovery",
     "The Global AI Race": "Global AI Race",
     "Trump Administration Actions & US Politics": "Trump Admin & US Politics",
     "Crypto Regulation & Financial Markets Volatility": "Crypto & Markets",

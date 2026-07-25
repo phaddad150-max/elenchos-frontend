@@ -165,6 +165,7 @@ const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat:
   "Arab-Israeli Normalization / Abraham Accords": { region: "Riyadh", subregion: "GCC States", lat: 24.71, lng: 46.68 },
   "Iranian Voices vs Regime": { region: "Tehran", subregion: "Persian Gulf", lat: 35.69, lng: 51.39 },
   "Maritime AI Industry & Greece's Global Role": { region: "Athens", subregion: "Eastern Mediterranean", lat: 37.98, lng: 23.72 },
+  "Greece Economic Recovery: Resilience, Security & Digital Transformation": { region: "Athens", subregion: "Eastern Mediterranean", lat: 37.98, lng: 23.72 },
   "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)": { region: "Nicosia", subregion: "Eastern Mediterranean", lat: 35.17, lng: 33.36 },
   "Trump Administration Actions & US Politics": { region: "Washington", subregion: "Eastern Mediterranean", lat: 38.9, lng: -77.03 },
   "Crypto Regulation & Financial Markets Volatility": { region: "New York", subregion: "Eastern Mediterranean", lat: 40.71, lng: -74.0 },
