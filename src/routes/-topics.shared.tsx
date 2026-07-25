@@ -975,47 +975,35 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
         </div>
       </header>
 
-      {/* Archived FIFA: full report + one-page infographic */}
+      {/* Archived FIFA: full archive PDF only */}
       {topic.id === "fifa-world-cup-2026" && (
-        <div className="rounded-xl border border-muted-foreground/25 bg-secondary/30 px-4 py-3.5 sm:px-5 sm:py-4 space-y-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="p-2 rounded-lg border border-border bg-background/60 shrink-0">
+        <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-4 py-3.5 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="p-2 rounded-lg border border-cyan/35 bg-background/60 shrink-0">
               <FileDown className="w-4 h-4 text-cyan" />
             </div>
             <div className="min-w-0 space-y-1">
               <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-cyan">
-                Archive downloads
+                Archive report
               </div>
               <p className="text-sm text-foreground/90 leading-snug">
-                Fan-discourse retrospective from X — Pass 1 snapshots, sentiment trajectory, and curated synthesis.
+                Full fan-discourse retrospective — sentiment trajectory, narrative gaps, and curated synthesis from X.
               </p>
               <p className="text-[11px] font-mono text-muted-foreground">
                 PDF · paraphrased aggregates only · not affiliated with FIFA · elenchos.live
               </p>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:pl-12">
-            <a
-              href="/reports/fifa-world-cup-2026-infographic.pdf"
-              download="Elenchos_FIFA_2026_Infographic_1Pager.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[12px] font-mono font-semibold border border-cyan/45 bg-cyan/15 text-cyan hover:bg-cyan/20 active:bg-cyan/25 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
-            >
-              <FileDown className="w-3.5 h-3.5" />
-              1-page infographic
-            </a>
-            <a
-              href="/reports/fifa-world-cup-2026-archive.pdf"
-              download="Elenchos_FIFA_World_Cup_2026_Archive_Report.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[12px] font-mono font-semibold border border-border bg-background/50 text-foreground/90 hover:border-cyan/40 hover:text-cyan transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
-            >
-              <FileDown className="w-3.5 h-3.5" />
-              Full archive report
-            </a>
-          </div>
+          <a
+            href="/reports/fifa-world-cup-2026-archive.pdf"
+            download="Elenchos_FIFA_World_Cup_2026_Archive_Report.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 shrink-0 px-4 py-2.5 rounded-full text-[12px] font-mono font-semibold border border-cyan/45 bg-cyan/15 text-cyan hover:bg-cyan/20 active:bg-cyan/25 transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            Download full report
+          </a>
         </div>
       )}
 
