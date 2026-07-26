@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Layers, Info } from "lucide-react";
+import { LayoutDashboard, Layers, Info, FlaskConical } from "lucide-react";
 
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
@@ -8,6 +8,12 @@ const TABS = [
     label: "Topics",
     match: (p: string) => p === "/topics" || p.startsWith("/topics/"),
     icon: Layers,
+  },
+  {
+    to: "/research",
+    label: "Research",
+    match: (p: string) => p === "/research" || p.startsWith("/research/"),
+    icon: FlaskConical,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },
 ] as const;
@@ -21,7 +27,7 @@ export function MobileTabBar() {
       className="mobile-tab-bar md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="grid grid-cols-3 gap-0.5 px-1 pt-1 pb-0.5">
+      <ul className="grid grid-cols-4 gap-0.5 px-1 pt-1 pb-0.5">
         {TABS.map((t) => {
           const Icon = t.icon;
           const active = t.match(pathname);

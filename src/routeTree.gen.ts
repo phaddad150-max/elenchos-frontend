@@ -18,6 +18,8 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
+import { Route as ResearchIndexRouteImport } from './routes/research.index'
+import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
@@ -72,6 +74,16 @@ const TopicsIndexRoute = TopicsIndexRouteImport.update({
   path: '/topics/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchIndexRoute = ResearchIndexRouteImport.update({
+  id: '/research/',
+  path: '/research/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchSlugRoute = ResearchSlugRouteImport.update({
+  id: '/research/$slug',
+  path: '/research/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
   id: '/trackers/peace',
   path: '/trackers/peace',
@@ -124,11 +136,13 @@ export interface FileRoutesByFullPath {
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
+  '/research/$slug': typeof ResearchSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/topics/': typeof TopicsIndexRoute
+  '/research/': typeof ResearchIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -143,11 +157,13 @@ export interface FileRoutesByTo {
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
+  '/research/$slug': typeof ResearchSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/topics': typeof TopicsIndexRoute
+  '/research': typeof ResearchIndexRoute
   '/trackers': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -163,11 +179,13 @@ export interface FileRoutesById {
   '/admin/curation': typeof AdminCurationRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
+  '/research/$slug': typeof ResearchSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/topics/': typeof TopicsIndexRoute
+  '/research/': typeof ResearchIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -184,11 +202,13 @@ export interface FileRouteTypes {
     | '/admin/curation'
     | '/sponsor/success'
     | '/topics/$topicId'
+    | '/research/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
     | '/topics/'
+    | '/research/'
     | '/trackers/'
     | '/api/public/contact'
   fileRoutesByTo: FileRoutesByTo
@@ -203,11 +223,13 @@ export interface FileRouteTypes {
     | '/admin/curation'
     | '/sponsor/success'
     | '/topics/$topicId'
+    | '/research/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
     | '/topics'
+    | '/research'
     | '/trackers'
     | '/api/public/contact'
   id:
@@ -222,11 +244,13 @@ export interface FileRouteTypes {
     | '/admin/curation'
     | '/sponsor/success'
     | '/topics/$topicId'
+    | '/research/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
     | '/topics/'
+    | '/research/'
     | '/trackers/'
     | '/api/public/contact'
   fileRoutesById: FileRoutesById
@@ -241,11 +265,13 @@ export interface RootRouteChildren {
   SponsorRoute: typeof SponsorRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
+  ResearchSlugRoute: typeof ResearchSlugRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
+  ResearchIndexRoute: typeof ResearchIndexRoute
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
 }
@@ -313,6 +339,20 @@ declare module '@tanstack/react-router' {
       path: '/topics'
       fullPath: '/topics/'
       preLoaderRoute: typeof TopicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/': {
+      id: '/research/'
+      path: '/research'
+      fullPath: '/research/'
+      preLoaderRoute: typeof ResearchIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/$slug': {
+      id: '/research/$slug'
+      path: '/research/$slug'
+      fullPath: '/research/$slug'
+      preLoaderRoute: typeof ResearchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trackers/peace': {
@@ -395,11 +435,13 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorRoute: SponsorRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
+  ResearchSlugRoute: ResearchSlugRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
   TopicsIndexRoute: TopicsIndexRoute,
+  ResearchIndexRoute: ResearchIndexRoute,
   TrackersIndexRoute: TrackersIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
 }

@@ -10,8 +10,9 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { Search, Layers, Activity } from "lucide-react";
+import { Search, Layers, Activity, FlaskConical } from "lucide-react";
 import { LIVE_TOPIC_KEYS, topicIdForBackendName } from "@/lib/topic-catalog";
+import { listResearchBriefs } from "@/lib/research-catalog";
 import { loadCitizenSignals } from "@/lib/dashboard-data";
 import type { CitizenSignal } from "@/lib/dashboard-data";
 
@@ -67,6 +68,16 @@ export function GlobalSearch() {
     return out.slice(0, 20);
   }, [signals]);
 
+  const researchItems = useMemo(
+    () =>
+      listResearchBriefs().map((b) => ({
+        slug: b.slug,
+        label: b.title,
+        keywords: `${b.title} ${b.subtitle} ${b.themes.join(" ")} research thesis`.toLowerCase(),
+      })),
+    [],
+  );
+
   const go = useCallback(
     (to: string) => {
       setOpen(false);
@@ -85,7 +96,7 @@ export function GlobalSearch() {
         type="button"
         onClick={() => setOpen(true)}
         className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-secondary/40 text-muted-foreground hover:border-cyan/40 hover:text-foreground text-[11px] font-mono transition-colors min-w-[140px]"
-        aria-label="Search topics and signals"
+        aria-label="Search topics, research, and signals"
       >
         <Search className="w-3.5 h-3.5 shrink-0" />
         <span className="truncate">Search…</span>
@@ -103,7 +114,7 @@ export function GlobalSearch() {
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Topics and citizen signals…" />
+        <CommandInput placeholder="Topics, research, signals…" />
         <CommandList>
           <CommandEmpty>No matches.</CommandEmpty>
 
@@ -120,6 +131,25 @@ export function GlobalSearch() {
               </CommandItem>
             ))}
           </CommandGroup>
+
+          {researchItems.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Research">
+                {researchItems.map((r) => (
+                  <CommandItem
+                    key={r.slug}
+                    value={`research ${r.keywords}`}
+                    onSelect={() => go(`/research/${encodeURIComponent(r.slug)}`)}
+                  >
+                    <FlaskConical className="w-4 h-4 text-cyan" />
+                    <span className="truncate">{r.label}</span>
+                    <CommandShortcut>Thesis</CommandShortcut>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
 
           {signalItems.length > 0 && (
             <>
