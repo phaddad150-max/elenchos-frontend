@@ -381,26 +381,33 @@ const LEBANON: ResearchBrief = {
       id: "collector",
       label: "Collector pipeline shipped",
       done: true,
-      detail: "migration 010 + research_collect.py + GH workflow Research Collect",
+      detail: "Free-first: OpenAlex (S) + official seeds (O) + optional min-X · GH default all-free",
+    },
+    {
+      id: "free_run",
+      label: "NEXT: Run free collect (S + O)",
+      done: false,
+      detail:
+        "TODO — GH Action Research Collect · mode=all-free (no X spend). OpenAlex + World Bank/IMF/State seeds → research_sources.",
     },
     {
       id: "x_run",
-      label: "NEXT: Run X discourse collection",
+      label: "Optional: thin X sample",
       done: false,
       detail:
-        "TODO — not skipped. Run: python research_collect.py --brief lebanon-ai-collapse --blocks A,B,D  OR GitHub Action “Research Collect (Phase B)”. Then rows appear in research_sources.",
+        "Only if street frames needed — mode=x · blocks B,D · max 12/query. Skip on no-budget default.",
     },
     {
       id: "official",
-      label: "Official pack log (O)",
+      label: "Official pack (O)",
       done: false,
-      detail: "TODO after X pass — US / Lebanese / tech-coop statements (--manual --class O)",
+      detail: "Filled by mode=official or all-free (seed URLs). Add more via --manual if needed.",
     },
     {
       id: "constraints",
-      label: "Constraint matrix (S/V/W)",
+      label: "Constraint matrix (S)",
       done: false,
-      detail: "TODO — cited structural sources (--manual --class S)",
+      detail: "Filled by mode=structural or all-free (OpenAlex, no key).",
     },
     {
       id: "claims",
