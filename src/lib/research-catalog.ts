@@ -113,7 +113,7 @@ const LEBANON: ResearchBrief = {
   slug: "lebanon-ai-collapse",
   title: "Lebanon After Collapse: AI, US–Israeli Technology, and the Limits of Rapid Transformation",
   subtitle: "A research thesis on discourse, constraints, and conditional paths",
-  status: "method",
+  status: "collecting",
   region: "Levant",
   themes: [
     "AI",
@@ -381,7 +381,14 @@ const LEBANON: ResearchBrief = {
       id: "x_run",
       label: "X discourse collection",
       done: false,
-      detail: "Run Layer 1 citizen queries; code retained posts",
+      detail:
+        "research_collect.py + query_pack.json → research_sources (see COLLECT.md)",
+    },
+    {
+      id: "collector",
+      label: "Collector pipeline shipped",
+      done: true,
+      detail: "migration 010 + research_collect.py + GH workflow",
     },
     {
       id: "official",
