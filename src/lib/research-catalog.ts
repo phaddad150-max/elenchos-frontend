@@ -76,17 +76,38 @@ export interface ResearchBrief {
 }
 
 export const SOURCE_CLASS_LEGEND: ResearchBrief["sourceClasses"] = [
-  { code: "D", label: "Discourse", use: "Citizen / diaspora X voices" },
-  { code: "O", label: "Official", use: "Policy & government narrative" },
-  { code: "M", label: "Media", use: "Elite / press frames (gap side)" },
-  { code: "S", label: "Structural", use: "Cited constraints & baselines" },
-  { code: "I", label: "Inference", use: "Synthesis — must rest on D/O/M/S" },
+  { code: "D", label: "Discourse", use: "Citizen / public social — attitudes & frames" },
+  { code: "O", label: "Official", use: "Policy claims (scrutinize self-serving states)" },
+  {
+    code: "M",
+    label: "Media",
+    use: "Frames; tag M-state / high-scrutiny — never sole fact spine",
+  },
+  {
+    code: "S",
+    label: "Scholarly / structural",
+    use: "Journals, data, info-ops & propaganda literature",
+  },
+  { code: "I", label: "Inference", use: "Synthesis — must rest on D/O/M/S/V/W" },
   {
     code: "R",
     label: "Elenchos product",
-    use: "Prior topic/tracker signal — extra transparency only if relevant",
+    use: "Prior product signal — extra transparency only if relevant",
   },
 ];
+
+/** North-star copy for Research workbench */
+export const RESEARCH_NORTH_STAR =
+  "Human-gated, multi-source thesis research — surface evidence, expose deception, equip freer choices.";
+
+export const RESEARCH_HUMAN_FIRST =
+  "Machines may collect and draft. A human approves the source plan, gates every thesis claim, and approves publish. No auto-published claims.";
+
+export const RESEARCH_HUMANITY_FORWARD =
+  "Prefer findings that reduce deception, clarify power, and expand peaceful, accountable, evidence-based choice — including under corruption, proxy rule, and information warfare.";
+
+export const RESEARCH_SCRUTINY_NOTE =
+  "High-scrutiny applies to a multi-decade regional information environment—not one channel. Named outlets (e.g. Al Jazeera) are examples inside a wider field across Muslim-majority societies, state and movement media, and diaspora networks where noise and propaganda often bury surface truth. Use for narrative context; triangulate facts; never sole spine. Precision on orgs and funders — no collective guilt.";
 
 const LEBANON: ResearchBrief = {
   slug: "lebanon-ai-collapse",
@@ -99,13 +120,14 @@ const LEBANON: ResearchBrief = {
   researchQuestion:
     "Under what conditions, and over what time scales, can AI and US–Israeli technology meaningfully affect governance, economy, and attitudes in post-collapse Lebanon — and where do structural constraints (elite capture, proxy politics, demography, identity) bound those effects?",
   methodSummary:
-    "Research first, then synthesis, then thesis claims. Four layers: (1) citizen discourse, (2) official narratives, (3) structural constraints, (4) conditional scenarios. Thesis is an output of evidence — not an input. Not advocacy.",
+    "Human-first multi-source research: scholarly, surveys, open web, official, media frames, and discourse — not X-only. Thesis claims are an output of evidence and a human gate. High-scrutiny media and info-ops literature are tiered, not laundered as neutral fact. Not advocacy.",
   approach: [
-    "Fix method and corpus rules before conclusions",
-    "Describe discourse and structure before evaluation",
-    "Write 3–7 claims only where evidence supports them, each with a falsifier",
-    "Scenarios are if–then paths (12 / 36 / 60 months) — not prophecy",
-    "Prior Elenchos Topics/Trackers may be cited as R only if relevant; full external refs always",
+    "Human-first: source plan, claims, and PDF require a human gate",
+    "Multi-source: S/V/W/O/M/D — social discourse is one layer, not the spine",
+    "Scrutiny ladder: multi-decade regional noise field (state/movement media across the region — not one outlet); frame evidence; triangulate facts",
+    "Humanity-forward: recover truth under propaganda load; pro-agency; no dehumanization or collective guilt",
+    "Claims only with evidence mix + confidence + falsifier; empty when thin",
+    "Elenchos R only if relevant, over and above full external bibliography",
   ],
   sourceClasses: SOURCE_CLASS_LEGEND,
   phases: [
@@ -391,7 +413,7 @@ const LEBANON: ResearchBrief = {
   ],
   pdfUrl: null,
   notATopicBanner:
-    "Research thesis brief — separate from Topics. Method-first workbench; not live Pass-1 scores.",
+    "Research thesis brief — separate from Topics. Human-gated · multi-source · not live Pass-1 scores.",
 };
 
 const BRIEFS: ResearchBrief[] = [LEBANON];

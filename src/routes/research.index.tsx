@@ -6,6 +6,7 @@ import { ResearchModeBanner } from "@/components/research/ResearchModeBanner";
 import {
   listResearchBriefs,
   researchStatusLabel,
+  RESEARCH_NORTH_STAR,
   type ResearchStatus,
 } from "@/lib/research-catalog";
 
@@ -62,12 +63,12 @@ function ResearchLibraryPage() {
             Thesis briefs
           </h1>
           <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-            Method-first research products. Hold the question, evidence trail, gaps, and
-            claims in one place — separate from live Topics analysis.
+            {RESEARCH_NORTH_STAR} Hold the question, multi-source trail, gaps, and
+            human-gated claims — separate from live Topics.
           </p>
         </header>
 
-        <ResearchModeBanner message="Research is a separate product mode from Topics. No Pass-1 scores, no forced nine-question grid." />
+        <ResearchModeBanner message="Research is a separate paid-path product mode from Topics. Human-gated · multi-source · not Pass-1 scores." />
 
         <section aria-label="Research briefs" className="space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -131,11 +132,19 @@ function ResearchLibraryPage() {
           </ul>
         </section>
 
-        <aside className="rounded-xl border border-border/70 bg-secondary/20 px-4 py-3 text-[12.5px] text-muted-foreground leading-relaxed">
-          <strong className="text-foreground/90 font-medium">How this works: </strong>
-          Research → evidence synthesis → thesis claims with falsifiers. External sources
-          are the baseline. Optional Elenchos product references (class R) appear only when
-          relevant, for extra transparency — never as the spine of the study.
+        <aside className="rounded-xl border border-border/70 bg-secondary/20 px-4 py-3 text-[12.5px] text-muted-foreground leading-relaxed space-y-2">
+          <p>
+            <strong className="text-foreground/90 font-medium">How this works: </strong>
+            Multi-source research (scholarly, surveys, open web, official, media frames,
+            discourse) → synthesis → human-gated thesis claims with falsifiers. External
+            sources are the baseline. Class R (Elenchos product) is over-and-above only.
+          </p>
+          <p>
+            <strong className="text-foreground/90 font-medium">Under noise: </strong>
+            Briefs treat multi-decade regional propaganda and state/movement media as a
+            field to scrutinize — not one channel — so recoverable truth can surface for
+            researchers and citizens.
+          </p>
         </aside>
       </main>
 

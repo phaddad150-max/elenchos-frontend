@@ -31,6 +31,11 @@ export function ResearchSourceLegend({
         <span className="text-amber-400/90 font-mono">R</span> is over-and-above external
         sources for transparency — never instead of them, and never primary evidence.
       </p>
+      <p className="text-[11px] text-muted-foreground leading-snug">
+        <span className="text-cyan font-mono">M</span> includes high-scrutiny state/movement
+        media inside a multi-decade regional noise field — narrative use only unless
+        triangulated. Claims are human-gated.
+      </p>
     </div>
   );
 }

@@ -16,6 +16,9 @@ import { ResearchSourceLegend } from "@/components/research/ResearchSourceLegend
 import {
   getResearchBrief,
   researchStatusLabel,
+  RESEARCH_HUMAN_FIRST,
+  RESEARCH_HUMANITY_FORWARD,
+  RESEARCH_SCRUTINY_NOTE,
   type PhaseStatus,
   type ResearchBrief,
 } from "@/lib/research-catalog";
@@ -95,6 +98,12 @@ function ResearchBriefPage() {
               <span className="inline-flex rounded-full border border-cyan/30 bg-cyan/10 text-cyan px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
                 {researchStatusLabel(brief.status)}
               </span>
+              <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
+                Human-gated
+              </span>
+              <span className="inline-flex rounded-full border border-border bg-secondary/40 text-muted-foreground px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
+                Multi-source
+              </span>
               <span className="text-[10.5px] font-mono text-muted-foreground">
                 {brief.region} · Updated {brief.updatedAt}
               </span>
@@ -172,6 +181,32 @@ function ResearchBriefPage() {
                   </li>
                 ))}
               </ul>
+              <div className="grid gap-2 sm:grid-cols-2 pt-1">
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-emerald-300/90 mb-1">
+                    Human-first
+                  </p>
+                  <p className="text-[12px] text-muted-foreground leading-snug">
+                    {RESEARCH_HUMAN_FIRST}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-cyan/20 bg-cyan/5 px-3 py-2.5">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan mb-1">
+                    Humanity-forward
+                  </p>
+                  <p className="text-[12px] text-muted-foreground leading-snug">
+                    {RESEARCH_HUMANITY_FORWARD}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
+                <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-amber-400/90 mb-1">
+                  Under regional noise
+                </p>
+                <p className="text-[12px] text-muted-foreground leading-snug">
+                  {RESEARCH_SCRUTINY_NOTE}
+                </p>
+              </div>
             </section>
 
             <section id="phases" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
