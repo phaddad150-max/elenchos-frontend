@@ -115,7 +115,14 @@ const LEBANON: ResearchBrief = {
   subtitle: "A research thesis on discourse, constraints, and conditional paths",
   status: "method",
   region: "Levant",
-  themes: ["AI", "governance", "wasta", "security", "demography", "tech levers"],
+  themes: [
+    "AI",
+    "governance",
+    "corrupt patronage",
+    "security",
+    "demography",
+    "tech levers",
+  ],
   updatedAt: "2026-07-26",
   researchQuestion:
     "Under what conditions, and over what time scales, can AI and US–Israeli technology meaningfully affect governance, economy, and attitudes in post-collapse Lebanon — and where do structural constraints (elite capture, proxy politics, demography, identity) bound those effects?",
@@ -177,7 +184,7 @@ const LEBANON: ResearchBrief = {
       status: "outline",
       summary: "Why Lebanon is a hard case; what this study does and does not claim.",
       bullets: [
-        "Post-collapse economy, wasta, parallel power, demography, external patrons",
+        "Post-collapse economy, corrupt patronage (*wasta*), parallel power, demography, external patrons",
         "Why AI-recovery narratives overclaim",
         "Contribution: discourse + official gap + structural bounds",
       ],
@@ -187,7 +194,8 @@ const LEBANON: ResearchBrief = {
       number: "3",
       title: "Method",
       status: "ready",
-      summary: "Four layers; citizen vs gap side; insufficient-evidence rule; terminology (wasta).",
+      summary:
+        "Four layers; citizen vs gap side; insufficient-evidence rule; corrupt patronage system (local: *wasta* = existing corrupt system).",
       bullets: [
         "Layer 1 — X discourse (ordinary voices only)",
         "Layer 2 — Official narrative pack (objects of analysis)",
@@ -208,7 +216,8 @@ const LEBANON: ResearchBrief = {
       number: "5",
       title: "Citizen & diaspora discourse",
       status: "empty",
-      summary: "AI/digital, wasta, security, Israel/normalization frames, elite trust — after query pack runs.",
+      summary:
+        "AI/digital, corrupt patronage (*wasta*), security, Israel/normalization frames, elite trust — after query pack runs.",
     },
     {
       id: "gaps",
@@ -222,13 +231,14 @@ const LEBANON: ResearchBrief = {
       number: "7",
       title: "Structural constraints",
       status: "outline",
-      summary: "Power, banking, parallel state, human capital, wasta/elite capture, demography, patrons.",
+      summary:
+        "Power, banking, parallel state, human capital, corrupt patronage (*wasta*)/elite capture, demography, patrons.",
       bullets: [
         "Power & infrastructure",
         "Banking / capital flight",
         "Militia / parallel state / external patrons",
         "Emigration & human capital",
-        "Wasta & elite capture",
+        "Corrupt patronage (*wasta*) as existing system & social fabric",
         "Demography & identity blocs",
       ],
     },
@@ -278,7 +288,7 @@ const LEBANON: ResearchBrief = {
   claimSlots: [
     {
       id: "t1",
-      domain: "Governance / wasta",
+      domain: "Governance / corrupt patronage (*wasta*)",
       statement: null,
       confidence: null,
       falsifier: null,
@@ -365,7 +375,7 @@ const LEBANON: ResearchBrief = {
       id: "query",
       label: "Query pack v1",
       done: true,
-      detail: "QUERY_PACK.md · wasta · axes A–H · not yet executed",
+      detail: "QUERY_PACK.md · corrupt patronage (*wasta*) · axes A–H · not yet executed",
     },
     {
       id: "x_run",
@@ -399,7 +409,8 @@ const LEBANON: ResearchBrief = {
     },
   ],
   openQuestions: [
-    "How dense is clean citizen corpus on AI vs wasta after filtering media accounts?",
+    "How dense is clean citizen corpus on AI vs corrupt patronage (*wasta*) after filtering media accounts?",
+    "What is normalized as social fabric in Lebanon vs other Arab contexts (e.g. Gulf/UAE) on patronage and corruption — per evidence only?",
     "Which official timelines (if any) are explicit enough to gap-test?",
     "Where does discourse treat Israeli water/tech as survival vs betrayal?",
     "What can be said about demography without overclaiming from X alone?",
