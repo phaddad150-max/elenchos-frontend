@@ -1,151 +1,87 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BookOpen, ArrowRight, MapPin, FlaskConical } from "lucide-react";
+import { FlaskConical, Clock } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { ResearchModeBanner } from "@/components/research/ResearchModeBanner";
-import {
-  listResearchBriefs,
-  researchStatusLabel,
-  RESEARCH_NORTH_STAR,
-  type ResearchStatus,
-} from "@/lib/research-catalog";
+import { RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
 
 export const Route = createFileRoute("/research/")({
   head: () => ({
     meta: [
-      { title: "Research — Elenchos" },
+      { title: "Research — Coming soon · Elenchos" },
       {
         name: "description",
         content:
-          "Thesis-style research briefs: method-first workbenches separate from live Topics. Research → evidence → claims.",
+          "Elenchos Research: human-gated, multi-source thesis briefs for researchers. Coming soon — separate from live Topics.",
       },
-      { property: "og:title", content: "Research — Elenchos" },
+      { property: "og:title", content: "Research — Coming soon · Elenchos" },
       {
         property: "og:description",
         content:
-          "Long-form research thesis briefs for serious inquiry — not live topic scores.",
+          "Thesis-style research lane under construction. Human-gated multi-source briefs — not live topic scores.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
     ],
     links: [{ rel: "canonical", href: "https://elenchos.live/research" }],
   }),
-  component: ResearchLibraryPage,
+  component: ResearchComingSoonPage,
 });
 
-function statusTone(status: ResearchStatus): string {
-  switch (status) {
-    case "method":
-      return "bg-cyan/15 text-cyan border-cyan/30";
-    case "collecting":
-      return "bg-amber-500/15 text-amber-300 border-amber-500/30";
-    case "draft":
-      return "bg-violet-500/15 text-violet-300 border-violet-500/30";
-    case "published":
-      return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-  }
-}
-
-function ResearchLibraryPage() {
-  const briefs = listResearchBriefs();
-
+function ResearchComingSoonPage() {
   return (
     <div className="min-h-screen relative flex flex-col">
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1100px] mx-auto w-full px-4 md:px-8 py-6 md:py-10 mobile-safe-bottom md:pb-12 space-y-6 md:space-y-8 relative flex-1">
-        <header className="space-y-3">
-          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            <FlaskConical className="w-3.5 h-3.5 text-cyan" aria-hidden />
-            Research workbench
-          </div>
-          <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight text-glow-cyan">
-            Thesis briefs
-          </h1>
-          <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-            {RESEARCH_NORTH_STAR} Hold the question, multi-source trail, gaps, and
-            human-gated claims — separate from live Topics.
+      <main className="max-w-[720px] mx-auto w-full px-4 md:px-8 py-16 md:py-24 mobile-safe-bottom md:pb-24 relative flex-1 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground mb-5">
+          <FlaskConical className="w-3.5 h-3.5 text-cyan" aria-hidden />
+          Research
+        </div>
+
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan/35 bg-cyan/10 text-cyan px-3 py-1 text-[11px] font-mono uppercase tracking-[0.16em] mb-6">
+          <Clock className="w-3.5 h-3.5" aria-hidden />
+          Coming soon
+        </span>
+
+        <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-glow-cyan mb-4">
+          Thesis research, built for serious work
+        </h1>
+
+        <p className="text-[15px] md:text-base text-muted-foreground leading-relaxed max-w-xl mb-3">
+          {RESEARCH_NORTH_STAR}
+        </p>
+        <p className="text-[13.5px] text-muted-foreground/90 leading-relaxed max-w-lg mb-10">
+          Multi-source briefs (scholarly, surveys, open web, official, media frames, and
+          discourse) — human-gated claims, not live Topics scores. We&apos;re finishing the
+          lane before public launch.
+        </p>
+
+        <div className="rounded-2xl border border-border bg-card/40 px-5 py-4 text-left max-w-md w-full space-y-2 mb-10">
+          <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+            What&apos;s coming
           </p>
-        </header>
-
-        <ResearchModeBanner message="Research is a separate paid-path product mode from Topics. Human-gated · multi-source · not Pass-1 scores." />
-
-        <section aria-label="Research briefs" className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-              Library · {briefs.length} brief{briefs.length === 1 ? "" : "s"}
-            </h2>
-          </div>
-
-          <ul className="grid gap-3">
-            {briefs.map((b) => (
-              <li key={b.slug}>
-                <Link
-                  to="/research/$slug"
-                  params={{ slug: b.slug }}
-                  className="group block rounded-2xl border border-border bg-card/50 hover:border-cyan/40 hover:bg-card/80 transition-colors p-4 md:p-5"
-                >
-                  <div className="flex flex-wrap items-center gap-2 mb-2.5">
-                    <span
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] ${statusTone(b.status)}`}
-                    >
-                      {researchStatusLabel(b.status)}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[10.5px] font-mono text-muted-foreground">
-                      <MapPin className="w-3 h-3" aria-hidden />
-                      {b.region}
-                    </span>
-                    <span className="text-[10.5px] font-mono text-muted-foreground">
-                      Updated {b.updatedAt}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground/80 border border-border/80 rounded-full px-2 py-0.5">
-                      <BookOpen className="w-3 h-3" aria-hidden />
-                      Thesis · not a Topic
-                    </span>
-                  </div>
-
-                  <h3 className="text-base md:text-lg font-display font-semibold text-foreground group-hover:text-cyan transition-colors leading-snug">
-                    {b.title}
-                  </h3>
-                  <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">
-                    {b.subtitle}
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {b.themes.map((t) => (
-                      <span
-                        key={t}
-                        className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground bg-secondary/50 border border-border/60 rounded-md px-1.5 py-0.5"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-1.5 text-[12px] font-medium text-cyan">
-                    Open workbench
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </div>
-                </Link>
-              </li>
-            ))}
+          <ul className="text-[13px] text-foreground/85 space-y-1.5 leading-snug">
+            <li className="flex gap-2">
+              <span className="text-cyan shrink-0">·</span>
+              Method-first thesis workbenches
+            </li>
+            <li className="flex gap-2">
+              <span className="text-cyan shrink-0">·</span>
+              Full source logs and falsifiable claims
+            </li>
+            <li className="flex gap-2">
+              <span className="text-cyan shrink-0">·</span>
+              Separate from the Topics citizen pulse
+            </li>
           </ul>
-        </section>
+        </div>
 
-        <aside className="rounded-xl border border-border/70 bg-secondary/20 px-4 py-3 text-[12.5px] text-muted-foreground leading-relaxed space-y-2">
-          <p>
-            <strong className="text-foreground/90 font-medium">How this works: </strong>
-            Multi-source research (scholarly, surveys, open web, official, media frames,
-            discourse) → synthesis → human-gated thesis claims with falsifiers. External
-            sources are the baseline. Class R (Elenchos product) is over-and-above only.
-          </p>
-          <p>
-            <strong className="text-foreground/90 font-medium">Under noise: </strong>
-            Briefs treat multi-decade regional propaganda and state/movement media as a
-            field to scrutinize — not one channel — so recoverable truth can surface for
-            researchers and citizens.
-          </p>
-        </aside>
+        <Link
+          to="/topics"
+          className="inline-flex items-center gap-2 rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/20 text-cyan px-4 py-2 text-[13px] font-medium transition-colors"
+        >
+          Explore live Topics
+        </Link>
       </main>
 
       <SiteFooter />

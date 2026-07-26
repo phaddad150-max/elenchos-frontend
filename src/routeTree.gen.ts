@@ -20,6 +20,8 @@ import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as ResearchIndexRouteImport } from './routes/research.index'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
+import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
@@ -84,6 +86,16 @@ const ResearchSlugRoute = ResearchSlugRouteImport.update({
   path: '/research/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
+  id: '/research/preview/',
+  path: '/research/preview/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
+  id: '/research/preview/$slug',
+  path: '/research/preview/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
   id: '/trackers/peace',
   path: '/trackers/peace',
@@ -137,12 +149,14 @@ export interface FileRoutesByFullPath {
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/research/$slug': typeof ResearchSlugRoute
+  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/topics/': typeof TopicsIndexRoute
   '/research/': typeof ResearchIndexRoute
+  '/research/preview/': typeof ResearchPreviewIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -158,12 +172,14 @@ export interface FileRoutesByTo {
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/research/$slug': typeof ResearchSlugRoute
+  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/topics': typeof TopicsIndexRoute
   '/research': typeof ResearchIndexRoute
+  '/research/preview': typeof ResearchPreviewIndexRoute
   '/trackers': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -180,12 +196,14 @@ export interface FileRoutesById {
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/research/$slug': typeof ResearchSlugRoute
+  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/topics/': typeof TopicsIndexRoute
   '/research/': typeof ResearchIndexRoute
+  '/research/preview/': typeof ResearchPreviewIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
 }
@@ -203,12 +221,14 @@ export interface FileRouteTypes {
     | '/sponsor/success'
     | '/topics/$topicId'
     | '/research/$slug'
+    | '/research/preview/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
     | '/topics/'
     | '/research/'
+    | '/research/preview/'
     | '/trackers/'
     | '/api/public/contact'
   fileRoutesByTo: FileRoutesByTo
@@ -224,12 +244,14 @@ export interface FileRouteTypes {
     | '/sponsor/success'
     | '/topics/$topicId'
     | '/research/$slug'
+    | '/research/preview/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
     | '/topics'
     | '/research'
+    | '/research/preview'
     | '/trackers'
     | '/api/public/contact'
   id:
@@ -245,12 +267,14 @@ export interface FileRouteTypes {
     | '/sponsor/success'
     | '/topics/$topicId'
     | '/research/$slug'
+    | '/research/preview/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
     | '/topics/'
     | '/research/'
+    | '/research/preview/'
     | '/trackers/'
     | '/api/public/contact'
   fileRoutesById: FileRoutesById
@@ -266,12 +290,14 @@ export interface RootRouteChildren {
   AdminCurationRoute: typeof AdminCurationRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
+  ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
   ResearchIndexRoute: typeof ResearchIndexRoute
+  ResearchPreviewIndexRoute: typeof ResearchPreviewIndexRoute
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
 }
@@ -355,6 +381,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research/preview/': {
+      id: '/research/preview/'
+      path: '/research/preview'
+      fullPath: '/research/preview/'
+      preLoaderRoute: typeof ResearchPreviewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/preview/$slug': {
+      id: '/research/preview/$slug'
+      path: '/research/preview/$slug'
+      fullPath: '/research/preview/$slug'
+      preLoaderRoute: typeof ResearchPreviewSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trackers/peace': {
       id: '/trackers/peace'
       path: '/trackers/peace'
@@ -436,12 +476,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCurationRoute: AdminCurationRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   ResearchSlugRoute: ResearchSlugRoute,
+  ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
   TopicsIndexRoute: TopicsIndexRoute,
   ResearchIndexRoute: ResearchIndexRoute,
+  ResearchPreviewIndexRoute: ResearchPreviewIndexRoute,
   TrackersIndexRoute: TrackersIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
 }
