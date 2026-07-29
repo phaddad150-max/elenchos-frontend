@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Shield } from "lucide-react";
+import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
 
 /** Always-visible GDPR summary — shown on login and in footer areas. */
 export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean }) {
@@ -11,6 +12,10 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
         <Link to="/privacy" className="text-cyan hover:underline">
           Privacy Notice
         </Link>
+        {" · "}
+        <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+          {ELENCHOS_CONTACT_EMAIL}
+        </a>
       </p>
     );
   }
@@ -28,7 +33,11 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
         <Link to="/privacy" className="text-cyan hover:underline">
           Privacy Notice
         </Link>{" "}
-        for lawful basis, your rights, and deletion requests.
+        for lawful basis, your rights, and deletion requests. Contact:{" "}
+        <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+          {ELENCHOS_CONTACT_EMAIL}
+        </a>
+        .
       </p>
     </div>
   );

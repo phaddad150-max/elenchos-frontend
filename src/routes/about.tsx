@@ -25,6 +25,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -683,6 +684,10 @@ function LegalSection() {
             <Link to="/privacy" className="text-cyan hover:underline">
               Privacy Notice
             </Link>
+            . Contact / corrections:{" "}
+            <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+              {ELENCHOS_CONTACT_EMAIL}
+            </a>
             .
           </p>
           <p className="mt-3 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">

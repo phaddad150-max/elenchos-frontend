@@ -3,6 +3,7 @@ import { FlaskConical, Clock } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
+import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
 
 export const Route = createFileRoute("/research/")({
   head: () => ({
@@ -76,12 +77,20 @@ function ResearchComingSoonPage() {
           </ul>
         </div>
 
-        <Link
-          to="/topics"
-          className="inline-flex items-center gap-2 rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/20 text-cyan px-4 py-2 text-[13px] font-medium transition-colors"
-        >
-          Explore live Topics
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Link
+            to="/topics"
+            className="inline-flex items-center gap-2 rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/20 text-cyan px-4 py-2 text-[13px] font-medium transition-colors"
+          >
+            Explore live Topics
+          </Link>
+          <a
+            href={ELENCHOS_CONTACT_MAILTO}
+            className="text-[12px] font-mono text-muted-foreground hover:text-cyan transition-colors"
+          >
+            Contact: {ELENCHOS_CONTACT_EMAIL}
+          </a>
+        </div>
       </main>
 
       <SiteFooter />

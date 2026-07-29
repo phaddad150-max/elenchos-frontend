@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShieldCheck, Mail, Database, Cookie, Globe2, UserX } from "lucide-react";
+import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -74,11 +75,11 @@ function PrivacyPage() {
               Regulation (GDPR).
             </p>
             <p>
-              For questions or to exercise your rights, contact us at{" "}
-              <a href="mailto:privacy@elenchos.live" className="text-cyan hover:underline">
-                privacy@elenchos.live
+              For questions, corrections, challenges, or to exercise your rights, contact us at{" "}
+              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+                {ELENCHOS_CONTACT_EMAIL}
               </a>
-              .
+              . This address is the contact path for all Elenchos apps, live URLs, and games.
             </p>
           </Section>
 
@@ -148,8 +149,8 @@ function PrivacyPage() {
             </ul>
             <p>
               To exercise any right, email{" "}
-              <a href="mailto:privacy@elenchos.live" className="text-cyan hover:underline">
-                privacy@elenchos.live
+              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+                {ELENCHOS_CONTACT_EMAIL}
               </a>
               . We respond within 30 days.
             </p>
