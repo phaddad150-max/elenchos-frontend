@@ -84,12 +84,19 @@ function PrivacyPage() {
           </Section>
 
           <Section icon={Database} title="What we collect">
+            <p className="mb-2">
+              <strong>Public discourse analysis (product core):</strong> we process
+              publicly available posts retrieved via the X API for topic analysis.
+              That material is used to produce aggregated scores, narrative-gap
+              summaries, and research logs. It is not a private-message scrape and
+              is not sold as individual profiles.
+            </p>
             <ul className="list-disc pl-5 space-y-1">
               <li>
                 <strong>Authentication identifier:</strong> the OAuth subject ID
                 returned by Google or X when you sign in. We never see or store
                 your password — authentication happens entirely on the
-                provider's side.
+                provider&apos;s side.
               </li>
               <li>
                 <strong>Profile metadata:</strong> the email address, display
@@ -108,7 +115,9 @@ function PrivacyPage() {
             <p>
               We do <strong>not</strong> collect passwords, run email/password
               accounts, use advertising cookies, third-party analytics, or
-              behavioural tracking. We do not sell your data.
+              behavioural tracking. We do not sell your data. Processors supporting
+              the service typically include hosting/database (e.g. Vercel, Supabase),
+              X API, and xAI for analysis — all over TLS.
             </p>
           </Section>
 

@@ -493,13 +493,6 @@ export function TopicAnalysisPage({
               </div>
               <h4 className="font-display font-semibold text-sm leading-snug line-clamp-2">{card.title}</h4>
               <p className="text-[12px] text-muted-foreground line-clamp-2">{card.summary}</p>
-              <div className="flex flex-wrap gap-1">
-                {card.audiences.map((a) => (
-                  <span key={a} className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-secondary border border-border">
-                    {a}
-                  </span>
-                ))}
-              </div>
             </button>
           ))}
         </div>

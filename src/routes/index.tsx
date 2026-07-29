@@ -46,7 +46,7 @@ import { TeaserLock } from "@/components/TeaserLock";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
 import { MiniSparkline } from "@/components/MiniSparkline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { clearDashboardCaches } from "@/lib/data-cache";
+
 import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 
@@ -58,6 +58,7 @@ import {
   useSimMode,
   CANONICAL_TOPICS,
   normalizeTopicKey,
+  isLiveOutputTopic,
   type CuratedTopicInsights,
   type DashboardOverview,
   type IntelFeedItem,
@@ -164,7 +165,6 @@ function intelToSignal(item: IntelFeedItem, i: number): Signal {
 const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat: number; lng: number }> = {
   "Arab-Israeli Normalization / Abraham Accords": { region: "Riyadh", subregion: "GCC States", lat: 24.71, lng: 46.68 },
   "Iranian Voices vs Regime": { region: "Tehran", subregion: "Persian Gulf", lat: 35.69, lng: 51.39 },
-  "Maritime AI Industry & Greece's Global Role": { region: "Athens", subregion: "Eastern Mediterranean", lat: 37.98, lng: 23.72 },
   "Greece Economic Recovery: Resilience, Security & Digital Transformation": { region: "Athens", subregion: "Eastern Mediterranean", lat: 37.98, lng: 23.72 },
   "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)": { region: "Nicosia", subregion: "Eastern Mediterranean", lat: 35.17, lng: 33.36 },
   "Trump Administration Actions & US Politics": { region: "Washington", subregion: "Eastern Mediterranean", lat: 38.9, lng: -77.03 },
@@ -175,7 +175,6 @@ const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat:
   "Political Polarization & Populism Rise": { region: "Paris", subregion: "Eastern Mediterranean", lat: 48.86, lng: 2.35 },
   "Global AI Race": { region: "San Francisco", subregion: "Eastern Mediterranean", lat: 37.77, lng: -122.42 },
   "Cuba Sanctions & the Domino Effect": { region: "Havana", subregion: "Eastern Mediterranean", lat: 23.13, lng: -82.38 },
-  "fifa-world-cup-2026": { region: "Mexico City", subregion: "Eastern Mediterranean", lat: 19.43, lng: -99.13 },
   "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": {
     region: "Washington DC",
     subregion: "Eastern Mediterranean",
@@ -251,40 +250,6 @@ function Dashboard() {
     });
   }, []);
 
-  const handleManualRefresh = async () => {
-    clearDashboardCaches();
-    const [snap, ov, cs] = await Promise.all([
-      loadDashboardData(true),
-      loadDashboardOverview(true),
-      loadCitizenSignals(true),
-    ]);
-    setSnapshots(snap ?? null);
-    setOverview(ov);
-    setCitizenSignals(cs ?? []);
-    loadCuratedHighlights(6).then(setCuratedHighlights);
-    fetchLatestTrackers().then((rows) => {
-      const byType = new Map(rows.map((r) => [r.tracker_type, r]));
-      const leaderRow = byType.get("global_leader_trust");
-      const peaceRow = byType.get("peace_normalization");
-      const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
-      const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
-      const peaceScores = peaceCountries
-        .map((c) => c.peace_health_score)
-        .filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
-      setTrackerKpis({
-        leadersRanked: leaders.length || undefined,
-        peaceHealthIndex: peaceScores.length
-          ? peaceScores.reduce((sum, v) => sum + v, 0) / peaceScores.length
-          : undefined,
-      });
-    });
-    if (simMode) {
-      setSignals(seedSignals(28));
-      setFlips(generateFlips(4));
-    }
-    setRefreshedAt(new Date());
-  };
-
   // Simulated signal stream — only used when simMode is explicitly on.
   // Live data comes from Supabase (dashboard_overviews, topic_snapshots, citizen_signals).
   useEffect(() => {
@@ -310,7 +275,7 @@ function Dashboard() {
 
     if (overview?.intel_feed?.length) {
       overview.intel_feed.forEach((it, i) => {
-        if (it?.topic && !normalizeTopicKey(it.topic)) return;
+        if (!it?.topic || !isLiveOutputTopic(it.topic)) return;
         const sig = intelToSignal(it, i);
         if (seen.has(sig.id)) return;
         seen.add(sig.id);
@@ -342,7 +307,7 @@ function Dashboard() {
         }));
 
     source.forEach((it, i) => {
-      if (!it?.topic || !normalizeTopicKey(it.topic)) return;
+      if (!it?.topic || !isLiveOutputTopic(it.topic)) return;
       if (seen.has(it.topic)) return;
       seen.add(it.topic);
       const geo = topicGeo(it.topic);
@@ -520,18 +485,6 @@ function Dashboard() {
 
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5 relative flex-1 mobile-safe-bottom overflow-x-clip">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className={`w-full rounded-xl border px-3 sm:px-4 py-2.5 text-[11px] sm:text-[12px] font-mono flex items-start gap-2 ${isLive ? "border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal" : "border-amber-signal/40 bg-amber-signal/10 text-amber-signal"}`}>
-            <span className={`w-1.5 h-1.5 mt-1.5 rounded-full pulse-dot shrink-0 ${isLive ? "bg-emerald-signal" : "bg-amber-signal"}`} />
-            <span className="leading-relaxed">
-              <span className="uppercase tracking-[0.22em] text-[10px] sm:text-[11px] font-semibold mr-1.5">LIVE</span>
-              <span className="text-foreground/80">
-                <span className="sm:hidden">Small samples preserve authenticity in suppressed environments.</span>
-                <span className="hidden sm:inline">Small samples are intentional. They preserve authenticity in suppressed environments where loud voices drown out citizens.</span>
-              </span>
-            </span>
-          </div>
-        </div>
         <section className="fade-up">
           <div className="flex flex-col md:flex-row md:flex-wrap md:items-start md:justify-between gap-4">
             <div className="min-w-0 w-full md:flex-1">
@@ -539,16 +492,14 @@ function Dashboard() {
                 Real Citizen Voices vs{" "}
                 <span className="text-cyan">Official Narratives</span>
               </h1>
-              <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
-                Unfiltered insights from public discourse on X, powered by AI.
+              <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
+                Structured public-discourse samples on X — directional insights, not national polls.
+                Human-managed, AI-assisted.
               </p>
-
-              {/* CTA row removed — KPI grid below is the primary entry point. */}
             </div>
             <DataFreshnessBar
               sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
               refreshedAt={refreshedAt}
-              onRefresh={handleManualRefresh}
             />
           </div>
         </section>

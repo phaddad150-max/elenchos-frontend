@@ -1,5 +1,5 @@
 // Editorial metadata + live Supabase topic mapping (no simulated scores).
-import { normalizeTopicKey } from "@/lib/dashboard-data";
+import { normalizeTopicKey, isLiveOutputTopic as isLiveOutputTopicFromData } from "@/lib/dashboard-data";
 
 export type TopicCategory = "Political" | "Economic" | "Social";
 
@@ -136,3 +136,6 @@ export function topicIdForBackendName(backendName: string): string | null {
   const entry = Object.entries(LIVE_TOPIC_KEYS).find(([, cfg]) => cfg.rootKey === canonical);
   return entry ? entry[0] : null;
 }
+
+/** Re-export live-output filter (implementation in dashboard-data). */
+export const isLiveOutputTopic = isLiveOutputTopicFromData;

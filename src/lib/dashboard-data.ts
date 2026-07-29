@@ -13,10 +13,11 @@ const ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphY2JhbHNvbmd2cXZhcWxmc2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDg1MjgsImV4cCI6MjA5NTEyNDUyOH0.NZI55Xy8KpqQHdPfQohojnnc-GDef0L8dKQ2oOYI1EU";
 
 // Canonical topic names from the backend (exact match required for .eq filters).
+// Live product surfaces further filter via isLiveOutputTopic (topic-catalog).
+// Maritime AI Greece and FIFA remain matchable for history/archive only — not live UI.
 export const CANONICAL_TOPICS = [
   "Arab-Israeli Normalization / Abraham Accords",
   "Iranian Voices vs Regime",
-  "Maritime AI Industry & Greece's Global Role",
   "Greece Economic Recovery: Resilience, Security & Digital Transformation",
   "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
   "Trump Administration Actions & US Politics",
@@ -27,15 +28,49 @@ export const CANONICAL_TOPICS = [
   "Political Polarization & Populism Rise",
   "Global AI Race",
   "Cuba Sanctions & the Domino Effect",
-  "fifa-world-cup-2026",
   "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
   "Public Voices on Elon Musk: Trust, Media Frames & Power",
   "US AI Economy Boom & American Technological Renaissance",
   "Save Europe Act: Citizens, Media & EU Bureaucracy",
   "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  // History / archive keys (not live output — kept for normalize/legacy only)
+  "Maritime AI Industry & Greece's Global Role",
+  "fifa-world-cup-2026",
 ] as const;
 
 const CANONICAL_TOPIC_SET = new Set<string>(CANONICAL_TOPICS);
+
+/** Backend topic strings excluded from all live product surfaces (history may remain in DB). */
+export const LIVE_OUTPUT_EXCLUSIONS = new Set<string>([
+  "Maritime AI Industry & Greece's Global Role",
+  "fifa-world-cup-2026",
+  "FIFA World Cup 2026",
+]);
+
+/**
+ * True when a topic may appear in dashboard KPIs, signals, narratives, insights.
+ * Archived / cold / retired topics return false (data kept append-only in Supabase).
+ */
+export function isLiveOutputTopic(raw: string | null | undefined): boolean {
+  if (!raw?.trim()) return false;
+  const canonical = normalizeTopicKey(raw) ?? raw.trim();
+  if (LIVE_OUTPUT_EXCLUSIONS.has(canonical)) return false;
+  if (LIVE_OUTPUT_EXCLUSIONS.has(raw.trim())) return false;
+  // Only known non-excluded canonical keys that are not archive-only
+  if (canonical === "fifa-world-cup-2026") return false;
+  if (/maritime ai industry/i.test(canonical)) return false;
+  // Allow only if in the live product set (CANONICAL minus exclusions)
+  if (!CANONICAL_TOPIC_SET.has(canonical) && !CANONICAL_TOPIC_SET.has(raw.trim())) {
+    // Try alias path
+    if (!normalizeTopicKey(raw)) return false;
+  }
+  const key = normalizeTopicKey(raw);
+  if (!key) return false;
+  if (LIVE_OUTPUT_EXCLUSIONS.has(key)) return false;
+  if (key === "fifa-world-cup-2026") return false;
+  if (/maritime ai industry/i.test(key)) return false;
+  return true;
+}
 
 /** Legacy / truncated DB topic strings → canonical TOPIC_CONFIG keys (keep in sync with backend). */
 export const TOPIC_ALIASES: Record<string, string> = {
@@ -865,13 +900,14 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
       const keys = new Set([...Object.keys(historical), ...Object.keys(latestByTopic)]);
       const byTopic: Record<string, TopicSnapshot> = {};
       for (const key of keys) {
+        if (!isLiveOutputTopic(key)) continue;
         const merged = mergeTopicSnapshots(historical[key], latestByTopic[key]);
         if (merged) byTopic[key] = merged;
       }
 
       window.dashboardData = byTopic;
       window.dashboardMeta = {};
-      console.log("✅ Loaded topic snapshots (merged latest + history)", Object.keys(byTopic));
+      console.log("✅ Loaded live topic snapshots (archived/cold excluded)", Object.keys(byTopic));
       return byTopic;
     } catch (e) {
       console.error("Supabase latest_topic_snapshots fetch failed", e);
@@ -1088,6 +1124,7 @@ export async function loadCuratedHighlights(limit = 6): Promise<CuratedTopicInsi
     const out: CuratedTopicInsights[] = [];
     for (const row of rows ?? []) {
       if (!row.topic || seen.has(row.topic)) continue;
+      if (!isLiveOutputTopic(row.topic)) continue;
       if (isEmptyCuratedInsight(row)) continue;
       if (!row.hero_headline && !row.hero_summary) continue;
       seen.add(row.topic);
@@ -1298,9 +1335,9 @@ export async function loadCitizenSignals(force = false): Promise<CitizenSignal[]
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as CitizenSignal[];
-      const filtered = rows.filter((r) => normalizeTopicKey(r?.topic) != null);
+      const filtered = rows.filter((r) => isLiveOutputTopic(r?.topic));
       window.citizenSignals = filtered;
-      console.log("✅ Loaded citizen_signals", filtered.length);
+      console.log("✅ Loaded citizen_signals (live only)", filtered.length);
       return filtered;
     } catch (e) {
       console.error("Supabase citizen_signals fetch failed", e);

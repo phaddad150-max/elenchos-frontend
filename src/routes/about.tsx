@@ -162,13 +162,13 @@ function Hero() {
             className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed max-w-2xl space-y-3"
           >
             <span className="block">
-              Ancient Greek for cross examination. Socrates used it to expose the gaps between what people claimed to know and what they truly believed, revealing contradictions, shaky logic, and comforting illusions.
+              Ancient Greek for cross-examination. We seek truth and defend ordinary people through
+              citizen journalism and freedom of speech — human-managed, AI-assisted.
             </span>
             <span className="block">
-              This is the Socratic method: pursuing truth by testing ideas against reality.
-            </span>
-            <span className="block">
-              elenchos.live brings the same approach to X, examining real claims against beliefs and official narratives.
+              elenchos.live structures public discourse on X like a digital focus group per topic:
+              directional samples, not national polls. We surface the gap between citizen voices and
+              official or media frames — with method, limits, and sample size shown.
             </span>
           </motion.p>
         </div>
@@ -182,10 +182,10 @@ function Hero() {
 const PILLARS = [
   {
     icon: LineChart,
-    title: "Dashboard Overview",
+    title: "Dashboard",
     to: "/",
     blurb:
-      "A live map of citizen sentiment, narrative divergence, and the signals moving today's conversation.",
+      "Live citizen signals and divergence for active topics only — archived and retired topics stay out of live outputs.",
     accent: "cyan",
   },
   {
@@ -193,21 +193,34 @@ const PILLARS = [
     title: "Topics",
     to: "/topics",
     blurb:
-      "Deep dives on every monitored topic. Nine balanced questions, scored 0–100, with the gap to official narratives surfaced.",
+      "Per-topic digital focus groups: purposive X samples, nine Socratic questions, narrative gap vs official/media frames.",
     accent: "emerald",
+  },
+  {
+    icon: Microscope,
+    title: "Research",
+    to: "/research",
+    blurb:
+      "Thesis-style multi-source briefs (coming soon). Free scholarly and official sources first; human-gated claims.",
+    accent: "amber",
   },
 ] as const;
 
 const PILLAR_DETAILS: Record<string, string[]> = {
-  "Dashboard Overview": [
-    "Live KPI tiles with narrative divergence and peace indices",
-    "Citizen signal feed with curated Pass 2 highlights",
-    "3D globe heatmap anchored to real topic data",
+  Dashboard: [
+    "Only live, actively tracked topics",
+    "Citizen signal feed from real samples",
+    "Quiet freshness — no noisy alert chrome",
   ],
   Topics: [
-    "Nine balanced questions scored 0–100 per topic",
-    "Pass 2 curated insight threads and Q&A pairs",
-    "Historical sentiment sparklines across snapshots",
+    "Focus-group style samples (not national polls)",
+    "Citizen vs official/media narrative gap",
+    "Sample size shown so you can weigh the evidence",
+  ],
+  Research: [
+    "Method-first thesis briefs",
+    "OpenAlex + official sources; thin X only if needed",
+    "Contact for corrections: citizen.pulse101@gmail.com",
   ],
 };
 
@@ -218,8 +231,8 @@ function Pillars() {
     <section>
       <SectionHeading
         kicker="What you can do here"
-        title="Three lenses on the same public square"
-        sub="Three sections. One backend. Move between them to see what citizens really think, how much it differs from official stories, and how peace and more scores."
+        title="Dashboard, Topics, Research"
+        sub="Citizen pulse, narrative gaps, and deeper thesis work — human-managed, transparent limits."
       />
       <div className="mt-7 grid md:grid-cols-3 gap-3.5">
         {PILLARS.map((p, i) => {
@@ -302,27 +315,27 @@ function Pillars() {
 const STEPS = [
   {
     icon: Ear,
-    title: "Listen",
+    title: "Sample",
     body:
-      "We read thousands of unfiltered public posts on X — including places where speech is usually suppressed.",
+      "Like a digital focus group: we pull a purposive public sample of X posts on one topic — not a census of a whole country.",
   },
   {
     icon: Microscope,
     title: "Analyze",
     body:
-      "Grok parses each conversation for meaning, sentiment, sample size, and timestamp — no hand-curated takes.",
+      "Grok structures that sample under human management (Socratic questions, sentiment, timestamps). Sample size is shown.",
   },
   {
     icon: Scale,
-    title: "Score & Contrast",
+    title: "Contrast",
     body:
-      "Every topic gets a 0–100 divergence score against the official narrative.",
+      "We score the gap between citizen frames and official/media frames when both appear in the evidence — never invent outlets.",
   },
   {
     icon: Monitor,
     title: "Surface",
     body:
-      "Signals, trackers, and scorecards ship straight to the frontend — the backend is the single source of truth.",
+      "Live dashboard and topic pages show directional insights only for active topics. Archived/cold topics stay out of live outputs.",
   },
 ] as const;
 
@@ -333,8 +346,8 @@ function Method() {
     <section>
       <SectionHeading
         kicker="The Method"
-        title="Elenchos in four moves"
-        sub="ἔλεγχος — Socratic cross-examination — applied to a noisy modern public square."
+        title="Focus-group samples, not mega-polls"
+        sub="Small relevant samples preserve citizen signal where loud narratives dominate. Directional insight — always read the n."
       />
 
       <div className="mt-7 relative">

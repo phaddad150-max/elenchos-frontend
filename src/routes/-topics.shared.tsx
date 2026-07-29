@@ -42,7 +42,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
-import { clearDashboardCaches } from "@/lib/data-cache";
+
 import { FEATURE_TOPICS, getTopic, type FeatureTopic } from "@/lib/feature-topics";
 import {
   LIVE_TOPIC_KEYS,
@@ -141,38 +141,16 @@ function TopicsShell({ children }: { children: ReactNode }) {
     loadWowSentimentTrends().then(() => setTick((n) => n + 1));
   }, []);
 
-  const handleRefresh = async () => {
-    clearDashboardCaches();
-    await loadDashboardData(true);
-    const overview = await loadDashboardOverview(true);
-    await loadWowSentimentTrends(true);
-    setSourceUpdatedAt(overview?.generated_at ?? overview?.last_updated ?? null);
-    setTick((n) => n + 1);
-    setRefreshedAt(new Date());
-  };
-
   return (
     <div className="min-h-screen relative flex flex-col">
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-3">
-          <div className="rounded-xl border border-cyan/30 bg-cyan/[0.06] px-3 sm:px-4 py-2.5 text-[11px] sm:text-[12px] font-mono text-cyan flex items-start gap-2 w-full sm:flex-1 sm:min-w-0">
-            <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-cyan pulse-dot shrink-0" />
-            <span>
-              <span className="uppercase tracking-[0.22em] text-[11px] font-semibold mr-1.5">
-                Live · Real Data
-              </span>
-              <span className="text-foreground/80">
-                small samples shown transparently.
-              </span>
-            </span>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-end gap-3">
           <DataFreshnessBar
             sourceUpdatedAt={sourceUpdatedAt}
             refreshedAt={refreshedAt}
-            onRefresh={handleRefresh}
           />
         </div>
         {children}
