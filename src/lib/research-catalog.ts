@@ -113,7 +113,7 @@ const LEBANON: ResearchBrief = {
   slug: "lebanon-ai-collapse",
   title: "Lebanon After Collapse: AI, US–Israeli Technology, and the Limits of Rapid Transformation",
   subtitle: "A research thesis on discourse, constraints, and conditional paths",
-  status: "collecting",
+  status: "draft",
   region: "Levant",
   themes: [
     "AI",
@@ -385,35 +385,35 @@ const LEBANON: ResearchBrief = {
     },
     {
       id: "free_run",
-      label: "NEXT: Run free collect (S + O)",
-      done: false,
+      label: "Free collect (S + O) run",
+      done: true,
       detail:
-        "TODO — GH Action Research Collect · mode=all-free (no X spend). OpenAlex + World Bank/IMF/State seeds → research_sources.",
+        "Done — OpenAlex S (~191) + official/seeds O/W (12 usable: live HTML, Wayback, or curated excerpts). No X used.",
     },
     {
       id: "x_run",
       label: "Optional: thin X sample",
       done: false,
       detail:
-        "Only if street frames needed — mode=x · blocks B,D · max 12/query. Skip on no-budget default.",
+        "Skip for no-budget default. Only if street frames needed — mode=x · blocks B,D · max 12.",
     },
     {
       id: "official",
-      label: "Official pack (O)",
-      done: false,
-      detail: "Filled by mode=official or all-free (seed URLs). Add more via --manual if needed.",
+      label: "Official pack (O/W)",
+      done: true,
+      detail: "12 seeds usable (hard_fails=0). Some via Wayback/curated excerpt when live HTML blocked.",
     },
     {
       id: "constraints",
       label: "Constraint matrix (S)",
-      done: false,
-      detail: "Filled by mode=structural or all-free (OpenAlex, no key).",
+      done: true,
+      detail: "OpenAlex structural insert ~191 unique scholarly rows.",
     },
     {
       id: "claims",
       label: "Thesis claims",
       done: false,
-      detail: "Locked until evidence exists (human gate)",
+      detail: "NEXT — human gate only after synthesis chapters from evidence",
     },
     {
       id: "pdf",
