@@ -21,7 +21,18 @@ export function SiteFooter() {
             Privacy Notice
           </Link>
         </p>
-        <p className="text-[10px] sm:text-[11px] font-mono">&copy; 2026 Elenchos &bull; Independent Research Project</p>
+        <p className="text-[10px] sm:text-[11px] font-mono">
+          &copy; 2026 Elenchos &bull; Independent Research Project
+          <span className="hidden md:inline">
+            {" "}
+            &bull;{" "}
+            <Link to="/gap-runner" className="text-cyan hover:underline">
+              GapRunner
+            </Link>
+            {" "}
+            (desktop)
+          </span>
+        </p>
       </div>
     </footer>
   );

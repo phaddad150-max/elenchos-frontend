@@ -10,6 +10,7 @@ Elenchos applies the Socratic method (elenchos) to public discourse — surfacin
 - [Topics](/topics): All live topics — public-square sentiment scores and trends per topic.
 - [About](/about): What Elenchos is, the Socratic method behind it, and the mission.
 - [Privacy](/privacy): Privacy notice and OAuth data handling (GDPR).
+- [GapRunner](/gap-runner): Desktop awareness mini-game (Narrative Gap method). Entertainment only; real analysis on Topics.
 - Contact: citizen.pulse101@gmail.com (all Elenchos apps, live URLs, and games — privacy rights, corrections, challenges).
 
 

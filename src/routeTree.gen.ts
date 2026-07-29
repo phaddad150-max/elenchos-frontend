@@ -15,6 +15,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PeaceRouteImport } from './routes/peace'
 import { Route as LeadersRouteImport } from './routes/leaders'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as GapRunnerRouteImport } from './routes/gap-runner'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
@@ -59,6 +60,11 @@ const LeadersRoute = LeadersRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GapRunnerRoute = GapRunnerRouteImport.update({
+  id: '/gap-runner',
+  path: '/gap-runner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -140,6 +146,7 @@ const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/gap-runner': typeof GapRunnerRoute
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/gap-runner': typeof GapRunnerRoute
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/gap-runner': typeof GapRunnerRoute
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/gap-runner'
     | '/leaders'
     | '/peace'
     | '/privacy'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/gap-runner'
     | '/leaders'
     | '/peace'
     | '/privacy'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/gap-runner'
     | '/leaders'
     | '/peace'
     | '/privacy'
@@ -282,6 +294,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  GapRunnerRoute: typeof GapRunnerRoute
   LeadersRoute: typeof LeadersRoute
   PeaceRoute: typeof PeaceRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -344,6 +357,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gap-runner': {
+      id: '/gap-runner'
+      path: '/gap-runner'
+      fullPath: '/gap-runner'
+      preLoaderRoute: typeof GapRunnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -468,6 +488,7 @@ const SponsorRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  GapRunnerRoute: GapRunnerRoute,
   LeadersRoute: LeadersRoute,
   PeaceRoute: PeaceRoute,
   PrivacyRoute: PrivacyRoute,
