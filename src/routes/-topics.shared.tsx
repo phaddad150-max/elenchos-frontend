@@ -172,66 +172,54 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-5 sm:space-y-6"
       >
-        {/* Unified head banner: copy frame + brand art as one panel */}
+        {/* Compact unified banner: copy + art, short height, full-width subhead */}
         <header className="topics-hero-banner relative overflow-hidden rounded-2xl border border-cyan/30 bg-[color-mix(in_oklab,var(--card)_90%,var(--cyan)_5%)]">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-40"
             style={{
               background:
-                "radial-gradient(ellipse 55% 80% at 100% 50%, color-mix(in oklab, var(--cyan) 22%, transparent), transparent 70%)",
+                "radial-gradient(ellipse 50% 90% at 100% 50%, color-mix(in oklab, var(--cyan) 20%, transparent), transparent 68%)",
             }}
           />
-          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(160px,34%)] lg:grid-cols-[minmax(0,1fr)_minmax(200px,32%)] items-stretch min-h-0">
-            {/* Headline / subheadline frame */}
-            <div className="relative z-[1] flex flex-col justify-center gap-3 p-4 sm:p-5 md:p-6 lg:p-7 min-w-0">
+          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(140px,28%)] lg:grid-cols-[minmax(0,1fr)_minmax(180px,26%)] items-center min-h-0">
+            <div className="relative z-[1] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0">
               <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan w-fit">
                 <span className="w-1 h-3.5 bg-cyan rounded-sm" />
                 Topics
               </div>
-              <h1 className="text-[1.45rem] sm:text-3xl md:text-[2.35rem] lg:text-[2.65rem] font-display font-semibold tracking-tight leading-[1.12] break-words">
+              <h1 className="text-[1.35rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] font-display font-semibold tracking-tight leading-[1.12] break-words">
                 What citizens say vs{" "}
                 <span className="text-cyan">official stories</span>
               </h1>
-              <p className="text-[13px] sm:text-sm md:text-[15px] text-muted-foreground max-w-xl leading-relaxed">
-                Directional samples of public discourse on X, not national polls. Open a topic for
-                scores, gaps, and insights.
+              <p className="text-[12.5px] sm:text-[13px] md:text-sm text-muted-foreground leading-snug w-full max-w-none md:whitespace-nowrap md:overflow-hidden md:text-ellipsis">
+                Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
               </p>
               <button
                 type="button"
                 onClick={() => onOpen("commercial-space-race")}
-                className="mt-0.5 inline-flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 rounded-xl border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3.5 py-2.5 text-left max-w-xl transition-colors touch-manipulation min-h-[48px] w-fit"
+                className="mt-1 inline-flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2 text-left transition-colors touch-manipulation min-h-[40px] w-fit max-w-full"
               >
                 <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
                   Featured case study
                 </span>
-                <span className="text-[13px] font-display font-semibold text-foreground">
+                <span className="text-[12.5px] sm:text-[13px] font-display font-semibold text-foreground truncate">
                   Commercial Space Race: public trust vs rivals and official frames
                 </span>
               </button>
             </div>
 
-            {/* Banner art — same panel, edge-blended (not a floating sticker) */}
-            <div className="relative z-0 hidden md:block min-h-[160px] lg:min-h-[200px] select-none pointer-events-none">
+            <div className="relative z-0 hidden md:block h-[112px] lg:h-[128px] select-none pointer-events-none">
               <img
                 src="/brand/elenchos-image-1.png"
                 alt=""
-                className="absolute inset-0 w-full h-full object-contain object-right-bottom md:object-center scale-[1.02]"
+                className="absolute inset-0 w-full h-full object-contain object-right-bottom lg:object-center scale-[1.05]"
                 loading="eager"
                 decoding="async"
               />
-              {/* Soft blend into copy column */}
               <div
                 aria-hidden
-                className="absolute inset-y-0 left-0 w-[42%] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_92%,var(--cyan)_5%)] via-[color-mix(in_oklab,var(--card)_55%,transparent)] to-transparent"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[color-mix(in_oklab,var(--card)_70%,transparent)] to-transparent"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-[color-mix(in_oklab,var(--card)_45%,transparent)] to-transparent"
+                className="absolute inset-y-0 left-0 w-[48%] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_94%,var(--cyan)_5%)] via-[color-mix(in_oklab,var(--card)_50%,transparent)] to-transparent"
               />
             </div>
           </div>
