@@ -30,7 +30,7 @@ export const Route = createFileRoute("/research/preview/$slug")({
       : "Research preview. Elenchos";
     const description =
       brief?.subtitle ??
-      "Internal preview of thesis research brief. not public launch.";
+      "Internal preview of research brief. not public launch.";
     const url = `https://elenchos.live/research/preview/${params.slug}`;
     return {
       meta: [
@@ -111,7 +111,7 @@ function ResearchPreviewBriefPage() {
                 {researchStatusLabel(brief.status)}
               </span>
               <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
-                Human-gated
+                Human-reviewed
               </span>
               <span className="inline-flex rounded-full border border-border bg-secondary/40 text-muted-foreground px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
                 Corpus frozen · non-recurring
@@ -211,15 +211,15 @@ function ResearchPreviewBriefPage() {
                 <span className="text-foreground/80">X</span>, and that would be a{" "}
                 <span className="text-foreground/80">one-shot, capped sample</span>, not a Topics-style
                 recurring burn. Without it, this pilot stays a{" "}
-                <span className="text-foreground/80">constraint thesis</span>, not a pulse of public mood.
+                <span className="text-foreground/80">constraint-focused brief</span>, not a pulse of public mood.
               </p>
             </section>
 
             <section id="claims" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-sm font-display font-semibold">Thesis claims</h2>
+                <h2 className="text-sm font-display font-semibold">Claims</h2>
                 <span className="text-[11px] font-mono text-emerald-300/90">
-                  {readyClaims.length} human-gated
+                  {readyClaims.length} human-reviewed
                 </span>
               </div>
               <p className="text-[12px] text-muted-foreground">
@@ -346,9 +346,9 @@ function ResearchPreviewBriefPage() {
                 <div className="flex items-start gap-2.5">
                   <FileText className="w-4 h-4 text-cyan mt-0.5 shrink-0" />
                   <div>
-                    <h2 className="text-sm font-display font-semibold">PDF thesis brief</h2>
+                    <h2 className="text-sm font-display font-semibold">PDF research brief</h2>
                     <p className="text-[12px] text-muted-foreground mt-0.5">
-                      Short human-gated brief (S + O spine). Not a live Topics export.
+                      Short brief (S + O spine), human-reviewed before publish. Not a live Topics export.
                     </p>
                   </div>
                 </div>

@@ -55,14 +55,14 @@ function ResearchPreviewLibraryPage() {
             Research library
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight text-glow-cyan">
-            Thesis briefs
+            Research briefs
           </h1>
           <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
             {RESEARCH_NORTH_STAR} Separate from Topics scores.
           </p>
         </header>
 
-        <ResearchModeBanner message="Research is multi-source and human-gated, not a live Topics pulse." />
+        <ResearchModeBanner message="Research is multi-source and human-reviewed before publish, not a live Topics pulse." />
 
         <section aria-label="Research briefs" className="space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -94,7 +94,7 @@ function ResearchPreviewLibraryPage() {
                     </span>
                     <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground/80 border border-border/80 rounded-full px-2 py-0.5">
                       <BookOpen className="w-3 h-3" aria-hidden />
-                      Thesis · not a Topic
+                      Research · not a Topic
                     </span>
                   </div>
 
@@ -130,7 +130,7 @@ function ResearchPreviewLibraryPage() {
           <p>
             <strong className="text-foreground/90 font-medium">How this works: </strong>
             Multi-source research (scholarly, surveys, open web, official, media frames,
-            discourse) → synthesis → human-gated thesis claims with falsifiers. External
+            discourse), then synthesis, then human-reviewed claims with falsifiers. External
             sources are the baseline. Class R (Elenchos product) is over-and-above only.
           </p>
           <p>

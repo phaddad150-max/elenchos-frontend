@@ -198,7 +198,7 @@ const PILLARS = [
     title: "Research",
     to: "/research",
     blurb:
-      "Thesis-style multi-source briefs (coming soon). Free scholarly and official sources first; human-gated claims.",
+      "Multi-source research briefs. Free scholarly and official sources first; claims human-reviewed before publish.",
     accent: "amber",
   },
 ] as const;
@@ -215,7 +215,7 @@ const PILLAR_DETAILS: Record<string, string[]> = {
     "Sample size shown so you can weigh the evidence",
   ],
   Research: [
-    "Method-first thesis briefs",
+    "Method-first research briefs",
     "OpenAlex + official sources; thin X only if needed",
     "Corrections via Email me on elenchos.live",
   ],
@@ -229,7 +229,7 @@ function Pillars() {
       <SectionHeading
         kicker="What you can do here"
         title="Dashboard, Topics, Research"
-        sub="Citizen pulse, narrative gaps, and deeper thesis work. Human-managed, with transparent limits."
+        sub="Citizen pulse, narrative gaps, and deeper research briefs. Transparent limits; human review before publish."
       />
       <div className="mt-7 grid md:grid-cols-3 gap-3.5">
         {PILLARS.map((p, i) => {

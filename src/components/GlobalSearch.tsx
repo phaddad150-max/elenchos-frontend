@@ -124,11 +124,11 @@ export function GlobalSearch() {
           <CommandSeparator />
           <CommandGroup heading="Research">
             <CommandItem
-              value="research thesis briefs multi-source"
+              value="research briefs multi-source case study"
               onSelect={() => go("/research")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Research thesis briefs</span>
+              <span className="truncate">Research briefs</span>
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
           </CommandGroup>

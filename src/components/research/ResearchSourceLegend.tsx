@@ -34,7 +34,7 @@ export function ResearchSourceLegend({
       <p className="text-[11px] text-muted-foreground leading-snug">
         <span className="text-cyan font-mono">M</span> includes high-scrutiny state or movement
         media inside a multi-decade regional noise field. Narrative use only unless
-        triangulated. Claims are human-gated.
+        triangulated. Claims are human-reviewed before publish.
       </p>
     </div>
   );

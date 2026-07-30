@@ -1,5 +1,5 @@
 /**
- * Research thesis briefs — separate product surface from Topics.
+ * Research briefs (case studies) — separate product surface from Topics.
  * Catalog-driven v1 (not Pass-1 / not trackers).
  */
 
@@ -98,13 +98,13 @@ export const SOURCE_CLASS_LEGEND: ResearchBrief["sourceClasses"] = [
 
 /** North-star copy for Research workbench */
 export const RESEARCH_NORTH_STAR =
-  "Human-gated, multi-source thesis research: surface evidence, expose deception, equip freer choices.";
+  "Multi-source research briefs with human review before publish: evidence, gaps, and limits you can check.";
 
 export const RESEARCH_HUMAN_FIRST =
-  "Machines may collect and draft. A human approves the source plan, gates every thesis claim, and approves publish. No auto-published claims.";
+  "Machines may collect and draft. A human analyst reviews the source plan and every claim before publish. No auto-published claims.";
 
 export const RESEARCH_HUMANITY_FORWARD =
-  "Prefer findings that reduce deception, clarify power, and expand peaceful, accountable, evidence-based choice, including under corruption, proxy rule, and information warfare.";
+  "Prefer findings that clarify evidence and power, state limits clearly, and support accountable choices under hard constraints.";
 
 export const RESEARCH_SCRUTINY_NOTE =
   "High-scrutiny applies to a multi-decade regional information environment, not one channel. Named outlets (e.g. Al Jazeera) are examples inside a wider field across Muslim-majority societies, state and movement media, and diaspora networks where noise and propaganda often bury surface truth. Use for narrative context; triangulate facts; never sole spine. Precision on orgs and funders, with no collective guilt.";
@@ -112,7 +112,7 @@ export const RESEARCH_SCRUTINY_NOTE =
 const LEBANON: ResearchBrief = {
   slug: "lebanon-ai-collapse",
   title: "Lebanon After Collapse: AI, US–Israeli Technology, and the Limits of Rapid Transformation",
-  subtitle: "A research thesis on discourse, constraints, and conditional paths",
+  subtitle: "A structured research brief on discourse, constraints, and conditional paths",
   status: "draft",
   region: "Levant",
   themes: [
@@ -127,12 +127,12 @@ const LEBANON: ResearchBrief = {
   researchQuestion:
     "Under what conditions, and over what time scales, can AI and US–Israeli technology meaningfully affect governance, economy, and attitudes in post-collapse Lebanon, and where do structural constraints (elite capture, proxy politics, demography, identity) bound those effects?",
   methodSummary:
-    "Human-first multi-source research: scholarly, surveys, open web, official, media frames, and discourse, not X-only. Thesis claims are an output of evidence and a human gate. High-scrutiny media and info-ops literature are tiered, not laundered as neutral fact. Not advocacy.",
+    "Multi-source research: scholarly, surveys, open web, official, media frames, and discourse, not X-only. Uses a thesis-style structure: claims only with evidence, confidence, and falsifiers. High-scrutiny media and info-ops literature are tiered, not treated as neutral fact alone. Not advocacy.",
   approach: [
     "Spine first: scholarly (S) + official/open (O/W); claims only with confidence + falsifier",
     "Discourse (D) optional and non-recurring: one-shot X if street frames needed, not a Topics pulse",
     "Empty when thin: no invented citizen attitudes; T4 stays insufficient without D/V",
-    "Human gate on claims and PDF; free-first collect; freeze corpus after gate",
+    "Human analyst review on claims and PDF before publish; free-first collect; freeze corpus after gate",
   ],
   sourceClasses: SOURCE_CLASS_LEGEND,
   phases: [
@@ -156,9 +156,9 @@ const LEBANON: ResearchBrief = {
     },
     {
       id: "D",
-      label: "Thesis claims",
+      label: "Claims",
       status: "done",
-      note: "T1–T6 human-gated 2026-07-30 (approve-all)",
+      note: "T1–T6 human-reviewed 2026-07-30 (approve-all)",
     },
     {
       id: "E",
@@ -244,9 +244,9 @@ const LEBANON: ResearchBrief = {
     {
       id: "claims",
       number: "9",
-      title: "Thesis claims",
+      title: "Claims",
       status: "ready",
-      summary: "T1–T6 human-gated 2026-07-30 · short PDF v1.",
+      summary: "T1–T6 human-reviewed 2026-07-30 · short PDF v1.",
     },
     {
       id: "scenarios",
@@ -407,13 +407,13 @@ const LEBANON: ResearchBrief = {
     },
     {
       id: "claims",
-      label: "Thesis claims",
+      label: "Claims",
       done: true,
-      detail: "T1–T6 human-gated 2026-07-30 (approve-all). T4 remains insufficient (no D).",
+      detail: "T1–T6 human-reviewed 2026-07-30 (approve-all). T4 remains insufficient (no D).",
     },
     {
       id: "pdf",
-      label: "PDF thesis brief",
+      label: "PDF research brief",
       done: true,
       detail: "Short PDF v1. public/reports/lebanon-ai-collapse-thesis-brief.pdf",
     },
@@ -427,7 +427,7 @@ const LEBANON: ResearchBrief = {
   elenchosRefs: [],
   pdfUrl: "/reports/lebanon-ai-collapse-thesis-brief.pdf",
   notATopicBanner:
-    "Research thesis brief, separate from Topics. Human-gated · multi-source · not live Pass-1 scores.",
+    "Research brief (separate from Topics). Multi-source · human-reviewed before publish · not live topic scores.",
 };
 
 const BRIEFS: ResearchBrief[] = [LEBANON];

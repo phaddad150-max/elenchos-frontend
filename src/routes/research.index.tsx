@@ -12,13 +12,13 @@ export const Route = createFileRoute("/research/")({
       {
         name: "description",
         content:
-          "Human-gated multi-source thesis briefs: scholarly, official, and media evidence. Separate from Topics scores.",
+          "Multi-source research briefs: scholarly, official, and media evidence. Human-reviewed before publish. Separate from Topics scores.",
       },
       { property: "og:title", content: "Research · Elenchos" },
       {
         property: "og:description",
         content:
-          "Thesis-style research for citizens and serious readers: claims with falsifiers, not live topic scores.",
+          "Structured research briefs for citizens and serious readers: claims with confidence and falsifiers, not live topic scores.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
     ],
@@ -42,7 +42,7 @@ function ResearchIndexPage() {
             Research
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-glow-cyan mb-3">
-            Thesis briefs, not live scores
+            Research briefs, not live topic scores
           </h1>
           <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto">
             {RESEARCH_NORTH_STAR}
