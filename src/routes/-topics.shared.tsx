@@ -214,9 +214,7 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
                 decoding="async"
               />
               {/* Seamless merge into copy — not a floating collage frame */}
-              <div
-                className="absolute inset-y-0 left-0 w-[55%] max-w-[12rem] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_96%,var(--cyan)_4%)] from-0% via-[color-mix(in_oklab,var(--card)_55%,transparent)] via-45% to-transparent"
-              />
+              <div className="topics-hero-blend absolute inset-y-0 left-0 w-[55%] max-w-[12rem] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_96%,var(--cyan)_4%)] from-0% via-[color-mix(in_oklab,var(--card)_55%,transparent)] via-45% to-transparent" />
               <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-cyan/15 to-transparent" />
             </div>
           </div>

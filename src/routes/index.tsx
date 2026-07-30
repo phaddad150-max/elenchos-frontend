@@ -1319,10 +1319,8 @@ function KeyFindingsInteractive({ findings }: { findings: string[] }) {
               whileTap={{ scale: 0.99 }}
               onClick={() => setActive((cur) => (cur === i ? null : i))}
               aria-pressed={on}
-              className={`text-left rounded-xl border p-3.5 sm:p-4 min-h-[6.5rem] flex flex-col gap-2.5 transition-colors touch-manipulation border-cyan/40 shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_18%,transparent)] ${
-                on
-                  ? "border-cyan/65 bg-cyan/10 shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_35%,transparent),0_0_22px_-8px_var(--color-cyan-glow)]"
-                  : "bg-card/40 hover:border-cyan/55 hover:bg-cyan/5 hover:shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_28%,transparent),0_0_18px_-10px_var(--color-cyan-glow)]"
+              className={`finding-card text-left rounded-xl p-3.5 sm:p-4 min-h-[6.5rem] flex flex-col gap-2.5 transition-colors touch-manipulation ${
+                on ? "bg-cyan/10" : "bg-card/40 hover:bg-cyan/5"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -2200,7 +2198,7 @@ function KpiHeroTile({
             className={`text-[1.4rem] sm:text-[1.5rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.6rem] flex items-center justify-center ${
               flash ? "ticker-flash" : ""
             }`}
-            style={{ textShadow: "0 0 18px color-mix(in oklab, var(--cyan) 45%, transparent)" }}
+            style={{ textShadow: "0 0 14px var(--color-cyan-glow)" }}
           >
             {counted}
             {tile.format === "percent" && (
@@ -2263,7 +2261,7 @@ function KpiHeroTile({
             className="dash-kpi-popover absolute left-0 right-0 top-[calc(100%-2px)] z-30 px-2.5 pb-2.5 pt-1.5 sm:px-3"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="rounded-lg border border-cyan/30 bg-[color-mix(in_oklab,var(--card)_96%,var(--cyan)_4%)] p-2.5 space-y-2 shadow-[0_12px_32px_-12px_oklch(0_0_0/0.55)]">
+            <div className="dash-kpi-popover-panel rounded-lg p-2.5 space-y-2">
               <p className="text-[11px] text-foreground/85 leading-snug">{tile.liveNote}</p>
               {tile.liveFacts && tile.liveFacts.length > 0 && (
                 <ul className="space-y-1">

@@ -104,7 +104,7 @@ function ResearchIndexPage() {
             className="hidden lg:block sticky top-24 self-start select-none pointer-events-none"
             aria-hidden
           >
-            <div className="relative overflow-hidden rounded-2xl border border-cyan/25 bg-[color-mix(in_oklab,var(--card)_88%,var(--cyan)_4%)] shadow-[0_12px_36px_-18px_oklch(0_0_0/0.45)]">
+            <div className="research-side-banner relative overflow-hidden rounded-2xl">
               <img
                 src="/brand/research-side-banner.png"
                 alt=""
@@ -113,7 +113,7 @@ function ResearchIndexPage() {
                 decoding="async"
               />
               <div
-                className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[color-mix(in_oklab,var(--background)_35%,transparent)] to-transparent"
+                className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[color-mix(in_oklab,var(--background)_55%,transparent)] to-transparent"
                 aria-hidden
               />
             </div>
