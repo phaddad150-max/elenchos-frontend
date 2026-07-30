@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { PrivacyComplianceNotice } from "@/components/PrivacyComplianceNotice";
-import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 
 export function SiteFooter() {
   return (
@@ -9,14 +9,14 @@ export function SiteFooter() {
         <PrivacyComplianceNotice compact />
         <p className="text-[10px] sm:text-[11px] font-mono leading-relaxed">
           <strong className="text-foreground/80">Contact</strong>:{" "}
-          <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
-            {ELENCHOS_CONTACT_EMAIL}
-          </a>
-          {" "}
-          · privacy rights, corrections, challenges, general enquiries
+          <ContactEmailMe source="footer" variant="inline" className="text-[10px] sm:text-[11px] font-mono" />
+          {" · "}
+          privacy rights, corrections, challenges
         </p>
         <p className="text-[10px] sm:text-[11px] font-mono leading-relaxed sm:whitespace-nowrap sm:overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <strong className="text-foreground/80">Disclaimer</strong>: Independent research project for testing purposes only. Experimental analysis of public discourse. Provided &ldquo;as is&rdquo; with no warranties. Not professional advice. Use at your own risk.{" "}
+          <strong className="text-foreground/80">Disclaimer</strong>: Independent research project
+          for testing purposes only. Experimental analysis of public discourse. Provided &ldquo;as
+          is&rdquo; with no warranties. Not professional advice. Use at your own risk.{" "}
           <Link to="/privacy" className="text-cyan hover:underline">
             Privacy Notice
           </Link>

@@ -3,7 +3,7 @@ import { FlaskConical, ArrowRight, FileText } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { listResearchBriefs, RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
-import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 
 export const Route = createFileRoute("/research/")({
   head: () => ({
@@ -88,12 +88,11 @@ function ResearchIndexPage() {
           >
             Browse Topics
           </Link>
-          <a
-            href={ELENCHOS_CONTACT_MAILTO}
-            className="text-[12px] font-mono text-muted-foreground hover:text-cyan transition-colors"
-          >
-            {ELENCHOS_CONTACT_EMAIL}
-          </a>
+          <ContactEmailMe
+            source="research"
+            variant="inline"
+            className="text-[12px] font-mono"
+          />
         </div>
       </main>
 

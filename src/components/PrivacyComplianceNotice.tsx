@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Shield } from "lucide-react";
-import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 
 /** Always-visible GDPR summary — shown on login and in footer areas. */
 export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean }) {
@@ -13,9 +13,7 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
           Privacy Notice
         </Link>
         {" · "}
-        <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
-          {ELENCHOS_CONTACT_EMAIL}
-        </a>
+        <ContactEmailMe source="privacy-strip" variant="inline" className="text-[11px]" />
       </p>
     );
   }
@@ -28,16 +26,12 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
         We use a session cookie to keep you signed in and store your email and authentication
-        metadata on EU-region cloud infrastructure. No advertising or third-party tracking.
-        See our{" "}
+        metadata on EU-region cloud infrastructure. No advertising or third-party tracking. See our{" "}
         <Link to="/privacy" className="text-cyan hover:underline">
           Privacy Notice
         </Link>{" "}
         for lawful basis, your rights, and deletion requests. Contact:{" "}
-        <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
-          {ELENCHOS_CONTACT_EMAIL}
-        </a>
-        .
+        <ContactEmailMe source="privacy-box" variant="inline" className="text-xs" />.
       </p>
     </div>
   );

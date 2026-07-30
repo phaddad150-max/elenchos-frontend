@@ -25,7 +25,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -220,7 +220,7 @@ const PILLAR_DETAILS: Record<string, string[]> = {
   Research: [
     "Method-first thesis briefs",
     "OpenAlex + official sources; thin X only if needed",
-    "Contact for corrections: citizen.pulse101@gmail.com",
+    "Corrections via Email me on elenchos.live",
   ],
 };
 
@@ -698,13 +698,10 @@ function LegalSection() {
               Privacy Notice
             </Link>
             . Contact / corrections:{" "}
-            <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
-              {ELENCHOS_CONTACT_EMAIL}
-            </a>
-            .
+            <ContactEmailMe source="about" variant="inline" className="text-[13px]" />.
           </p>
           <p className="mt-3 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">
-            Status: Live · independent research
+            Status: Independent research · public beta
           </p>
         </CollapsibleContent>
       </Collapsible>

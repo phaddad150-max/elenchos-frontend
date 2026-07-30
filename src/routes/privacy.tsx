@@ -75,11 +75,12 @@ function PrivacyPage() {
               Regulation (GDPR).
             </p>
             <p>
-              For questions, corrections, challenges, or to exercise your rights, contact us at{" "}
-              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+              For questions, corrections, challenges, or to exercise your rights, contact the
+              controller at{" "}
+              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline break-all">
                 {ELENCHOS_CONTACT_EMAIL}
               </a>
-              . This address is the contact path for all Elenchos apps, live URLs, and games.
+              . You can also use <strong>Email me</strong> on the site (opens a short message form).
             </p>
           </Section>
 
@@ -157,11 +158,11 @@ function PrivacyPage() {
               </li>
             </ul>
             <p>
-              To exercise any right, email{" "}
-              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline">
+              To exercise any right, email the controller at{" "}
+              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline break-all">
                 {ELENCHOS_CONTACT_EMAIL}
-              </a>
-              . We respond within 30 days.
+              </a>{" "}
+              (this address is published here for GDPR transparency). We respond within 30 days.
             </p>
           </Section>
 

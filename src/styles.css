@@ -74,7 +74,17 @@
   --magenta: oklch(0.78 0.15 200);
   --amber-signal: oklch(0.82 0.17 75);
   --emerald-signal: oklch(0.78 0.17 160);
+  --emerald-strong: oklch(0.72 0.19 150);
+  --emerald-mid: oklch(0.78 0.17 155);
+  /* Leaning-positive: readable on dark cards */
+  --emerald-lean: oklch(0.82 0.14 155);
+  --orange-signal: oklch(0.78 0.16 55);
   --rose-signal: oklch(0.68 0.24 20);
+  --emerald-tint: oklch(0.72 0.17 155 / 0.16);
+  --emerald-lean-tint: oklch(0.82 0.14 155 / 0.14);
+  --amber-tint: oklch(0.82 0.17 75 / 0.14);
+  --orange-tint: oklch(0.78 0.16 55 / 0.14);
+  --rose-tint: oklch(0.68 0.24 20 / 0.14);
 
   --surface-1: oklch(0.16 0.022 250 / 0.7);
   --surface-2: oklch(0.2 0.025 250 / 0.85);
@@ -101,31 +111,41 @@
 }
 
 .light {
-  --background: oklch(0.93 0.003 240);
-  --foreground: oklch(0.36 0.06 228);
-  --card: oklch(0.97 0.002 240);
-  --card-foreground: oklch(0.36 0.06 228);
-  --popover: oklch(0.97 0.002 240);
-  --popover-foreground: oklch(0.36 0.06 228);
-  --primary: oklch(0.82 0.16 200);
-  --primary-foreground: oklch(0.14 0.02 250);
-  --secondary: oklch(0.9 0.004 240);
-  --secondary-foreground: oklch(0.36 0.06 228);
-  --muted: oklch(0.9 0.004 240);
-  --muted-foreground: oklch(0.48 0.05 228);
-  --accent: oklch(0.82 0.16 200);
-  --accent-foreground: oklch(0.14 0.02 250);
-  --border: oklch(0.82 0.006 240 / 0.9);
-  --input: oklch(0.88 0.005 240);
-  --ring: oklch(0.82 0.16 200);
+  --background: oklch(0.96 0.004 240);
+  --foreground: oklch(0.26 0.04 230);
+  --card: oklch(0.99 0.002 240);
+  --card-foreground: oklch(0.26 0.04 230);
+  --popover: oklch(0.99 0.002 240);
+  --popover-foreground: oklch(0.26 0.04 230);
+  --primary: oklch(0.48 0.12 210);
+  --primary-foreground: oklch(0.99 0.01 240);
+  --secondary: oklch(0.93 0.006 240);
+  --secondary-foreground: oklch(0.28 0.04 230);
+  --muted: oklch(0.93 0.006 240);
+  --muted-foreground: oklch(0.4 0.03 230);
+  --accent: oklch(0.48 0.12 210);
+  --accent-foreground: oklch(0.99 0.01 240);
+  --border: oklch(0.78 0.015 240 / 0.95);
+  --input: oklch(0.9 0.008 240);
+  --ring: oklch(0.48 0.12 210);
 
-  /* Brand cyan — matched to dark-mode logo color */
-  --cyan: oklch(0.78 0.16 200);
-  --cyan-glow: oklch(0.78 0.16 200 / 0.35);
-  --magenta: oklch(0.78 0.16 200);
-  --amber-signal: oklch(0.68 0.17 75);
-  --emerald-signal: oklch(0.58 0.17 160);
-  --rose-signal: oklch(0.58 0.22 25);
+  /* Brand + signals — darker for contrast on pale backgrounds */
+  --cyan: oklch(0.45 0.11 210);
+  --cyan-glow: oklch(0.5 0.11 210 / 0.25);
+  --magenta: oklch(0.48 0.11 210);
+  --amber-signal: oklch(0.52 0.15 70);
+  --emerald-signal: oklch(0.42 0.13 155);
+  --emerald-strong: oklch(0.38 0.14 150);
+  --emerald-mid: oklch(0.42 0.13 152);
+  /* Leaning-positive: was washed #86efac — now deep enough on white */
+  --emerald-lean: oklch(0.4 0.11 155);
+  --orange-signal: oklch(0.52 0.15 50);
+  --rose-signal: oklch(0.48 0.19 20);
+  --emerald-tint: oklch(0.42 0.13 155 / 0.12);
+  --emerald-lean-tint: oklch(0.4 0.11 155 / 0.1);
+  --amber-tint: oklch(0.52 0.15 70 / 0.12);
+  --orange-tint: oklch(0.52 0.15 50 / 0.12);
+  --rose-tint: oklch(0.48 0.19 20 / 0.12);
 
   --surface-1: oklch(0.96 0.002 240 / 0.92);
   --surface-2: oklch(0.97 0.002 240 / 0.95);

@@ -498,6 +498,39 @@ function Dashboard() {
               sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
             />
           </div>
+          {/* Case-study spotlights — keep the product focused */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-2xl">
+            <Link
+              to="/topics/$topicId"
+              params={{ topicId: "commercial-space-race" }}
+              className="rounded-xl border border-cyan/30 bg-cyan/5 hover:bg-cyan/10 px-3.5 py-3 text-left transition-colors min-h-[72px] touch-manipulation"
+            >
+              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan mb-1">
+                Topics case study
+              </p>
+              <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
+                Commercial Space Race
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                Citizen trust vs corporate &amp; official frames
+              </p>
+            </Link>
+            <Link
+              to="/research/preview/$slug"
+              params={{ slug: "lebanon-ai-collapse" }}
+              className="rounded-xl border border-border bg-secondary/30 hover:border-cyan/35 hover:bg-cyan/5 px-3.5 py-3 text-left transition-colors min-h-[72px] touch-manipulation"
+            >
+              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1">
+                Research case study
+              </p>
+              <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
+                Lebanon · AI after collapse
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                Multi-source thesis · human-gated claims
+              </p>
+            </Link>
+          </div>
         </section>
 
         {/* HERO: 5 KPI tiles — strictly from dashboard_overviews.kpis */}

@@ -184,6 +184,18 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
             Directional samples of public discourse on X — not national polls. Open a topic for
             scores, gaps, and insights.
           </p>
+          <button
+            type="button"
+            onClick={() => onOpen("commercial-space-race")}
+            className="mt-3 inline-flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 rounded-xl border border-cyan/35 bg-cyan/5 hover:bg-cyan/10 px-3.5 py-2.5 text-left max-w-xl transition-colors touch-manipulation min-h-[48px]"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
+              Featured case study
+            </span>
+            <span className="text-[13px] font-display font-semibold text-foreground">
+              Commercial Space Race — public trust vs rivals &amp; official frames
+            </span>
+          </button>
         </header>
 
         <h2 className="sr-only">All topics</h2>

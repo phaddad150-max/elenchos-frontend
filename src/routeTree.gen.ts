@@ -9,52 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SponsorRouteImport } from './routes/sponsor'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PeaceRouteImport } from './routes/peace'
-import { Route as LeadersRouteImport } from './routes/leaders'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as GapRunnerRouteImport } from './routes/gap-runner'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
-import { Route as TopicsIndexRouteImport } from './routes/topics.index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as LeadersRouteImport } from './routes/leaders'
+import { Route as PeaceRouteImport } from './routes/peace'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SponsorRouteImport } from './routes/sponsor'
+import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ResearchIndexRouteImport } from './routes/research.index'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
+import { Route as TopicsIndexRouteImport } from './routes/topics.index'
+import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
+import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
+import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
+import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
+import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
+import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
 import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
-import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
-import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
-import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
-import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
-import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
-import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
-import { Route as AdminCurationRouteImport } from './routes/admin.curation'
-import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 
-const SponsorRoute = SponsorRouteImport.update({
-  id: '/sponsor',
-  path: '/sponsor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PeaceRoute = PeaceRouteImport.update({
-  id: '/peace',
-  path: '/peace',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LeadersRoute = LeadersRouteImport.update({
-  id: '/leaders',
-  path: '/leaders',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -62,24 +41,34 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GapRunnerRoute = GapRunnerRouteImport.update({
-  id: '/gap-runner',
-  path: '/gap-runner',
+const LeadersRoute = LeadersRouteImport.update({
+  id: '/leaders',
+  path: '/leaders',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PeaceRoute = PeaceRouteImport.update({
+  id: '/peace',
+  path: '/peace',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersIndexRoute = TrackersIndexRouteImport.update({
-  id: '/trackers/',
-  path: '/trackers/',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TopicsIndexRoute = TopicsIndexRouteImport.update({
-  id: '/topics/',
-  path: '/topics/',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorRoute = SponsorRouteImport.update({
+  id: '/sponsor',
+  path: '/sponsor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCurationRoute = AdminCurationRouteImport.update({
+  id: '/admin/curation',
+  path: '/admin/curation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResearchIndexRoute = ResearchIndexRouteImport.update({
@@ -92,6 +81,51 @@ const ResearchSlugRoute = ResearchSlugRouteImport.update({
   path: '/research/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => SponsorRoute,
+} as any)
+const TopicsIndexRoute = TopicsIndexRouteImport.update({
+  id: '/topics/',
+  path: '/topics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
+  id: '/topics/$topicId',
+  path: '/topics/$topicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersIndexRoute = TrackersIndexRouteImport.update({
+  id: '/trackers/',
+  path: '/trackers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersFootballRoute = TrackersFootballRouteImport.update({
+  id: '/trackers/football',
+  path: '/trackers/football',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
+  id: '/trackers/leaders',
+  path: '/trackers/leaders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersMediaRoute = TrackersMediaRouteImport.update({
+  id: '/trackers/media',
+  path: '/trackers/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
+  id: '/trackers/peace',
+  path: '/trackers/peace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
   id: '/research/preview/',
   path: '/research/preview/',
@@ -102,254 +136,179 @@ const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
   path: '/research/preview/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
-  id: '/trackers/peace',
-  path: '/trackers/peace',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersMediaRoute = TrackersMediaRouteImport.update({
-  id: '/trackers/media',
-  path: '/trackers/media',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
-  id: '/trackers/leaders',
-  path: '/trackers/leaders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersFootballRoute = TrackersFootballRouteImport.update({
-  id: '/trackers/football',
-  path: '/trackers/football',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
-  id: '/topics/$topicId',
-  path: '/topics/$topicId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
-  id: '/success',
-  path: '/success',
-  getParentRoute: () => SponsorRoute,
-} as any)
-const AdminCurationRoute = AdminCurationRouteImport.update({
-  id: '/admin/curation',
-  path: '/admin/curation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
-  id: '/api/public/contact',
-  path: '/api/public/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/gap-runner': typeof GapRunnerRoute
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
+  '/research/$slug': typeof ResearchSlugRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
-  '/research/$slug': typeof ResearchSlugRoute
-  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
-  '/topics/': typeof TopicsIndexRoute
   '/research/': typeof ResearchIndexRoute
-  '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
+  '/research/preview/': typeof ResearchPreviewIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/gap-runner': typeof GapRunnerRoute
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
+  '/research/$slug': typeof ResearchSlugRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
-  '/research/$slug': typeof ResearchSlugRoute
-  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
-  '/topics': typeof TopicsIndexRoute
   '/research': typeof ResearchIndexRoute
-  '/research/preview': typeof ResearchPreviewIndexRoute
+  '/topics': typeof TopicsIndexRoute
   '/trackers': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
+  '/research/preview': typeof ResearchPreviewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/gap-runner': typeof GapRunnerRoute
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
+  '/research/$slug': typeof ResearchSlugRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
-  '/research/$slug': typeof ResearchSlugRoute
-  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
-  '/topics/': typeof TopicsIndexRoute
   '/research/': typeof ResearchIndexRoute
-  '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/research/preview/$slug': typeof ResearchPreviewSlugRoute
+  '/research/preview/': typeof ResearchPreviewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/gap-runner'
     | '/leaders'
     | '/peace'
     | '/privacy'
     | '/sitemap.xml'
     | '/sponsor'
     | '/admin/curation'
+    | '/research/$slug'
     | '/sponsor/success'
     | '/topics/$topicId'
-    | '/research/$slug'
-    | '/research/preview/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
-    | '/topics/'
     | '/research/'
-    | '/research/preview/'
+    | '/topics/'
     | '/trackers/'
     | '/api/public/contact'
+    | '/research/preview/$slug'
+    | '/research/preview/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/gap-runner'
     | '/leaders'
     | '/peace'
     | '/privacy'
     | '/sitemap.xml'
     | '/sponsor'
     | '/admin/curation'
+    | '/research/$slug'
     | '/sponsor/success'
     | '/topics/$topicId'
-    | '/research/$slug'
-    | '/research/preview/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
-    | '/topics'
     | '/research'
-    | '/research/preview'
+    | '/topics'
     | '/trackers'
     | '/api/public/contact'
+    | '/research/preview/$slug'
+    | '/research/preview'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/gap-runner'
     | '/leaders'
     | '/peace'
     | '/privacy'
     | '/sitemap.xml'
     | '/sponsor'
     | '/admin/curation'
+    | '/research/$slug'
     | '/sponsor/success'
     | '/topics/$topicId'
-    | '/research/$slug'
-    | '/research/preview/$slug'
     | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/media'
     | '/trackers/peace'
-    | '/topics/'
     | '/research/'
-    | '/research/preview/'
+    | '/topics/'
     | '/trackers/'
     | '/api/public/contact'
+    | '/research/preview/$slug'
+    | '/research/preview/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  GapRunnerRoute: typeof GapRunnerRoute
   LeadersRoute: typeof LeadersRoute
   PeaceRoute: typeof PeaceRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SponsorRoute: typeof SponsorRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
-  TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
-  ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
+  TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
-  TopicsIndexRoute: typeof TopicsIndexRoute
   ResearchIndexRoute: typeof ResearchIndexRoute
-  ResearchPreviewIndexRoute: typeof ResearchPreviewIndexRoute
+  TopicsIndexRoute: typeof TopicsIndexRoute
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
+  ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
+  ResearchPreviewIndexRoute: typeof ResearchPreviewIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sponsor': {
-      id: '/sponsor'
-      path: '/sponsor'
-      fullPath: '/sponsor'
-      preLoaderRoute: typeof SponsorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/peace': {
-      id: '/peace'
-      path: '/peace'
-      fullPath: '/peace'
-      preLoaderRoute: typeof PeaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/leaders': {
-      id: '/leaders'
-      path: '/leaders'
-      fullPath: '/leaders'
-      preLoaderRoute: typeof LeadersRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -359,32 +318,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/gap-runner': {
-      id: '/gap-runner'
-      path: '/gap-runner'
-      fullPath: '/gap-runner'
-      preLoaderRoute: typeof GapRunnerRouteImport
+    '/leaders': {
+      id: '/leaders'
+      path: '/leaders'
+      fullPath: '/leaders'
+      preLoaderRoute: typeof LeadersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/peace': {
+      id: '/peace'
+      path: '/peace'
+      fullPath: '/peace'
+      preLoaderRoute: typeof PeaceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trackers/': {
-      id: '/trackers/'
-      path: '/trackers'
-      fullPath: '/trackers/'
-      preLoaderRoute: typeof TrackersIndexRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/topics/': {
-      id: '/topics/'
-      path: '/topics'
-      fullPath: '/topics/'
-      preLoaderRoute: typeof TopicsIndexRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsor': {
+      id: '/sponsor'
+      path: '/sponsor'
+      fullPath: '/sponsor'
+      preLoaderRoute: typeof SponsorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/curation': {
+      id: '/admin/curation'
+      path: '/admin/curation'
+      fullPath: '/admin/curation'
+      preLoaderRoute: typeof AdminCurationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/research/': {
@@ -401,6 +374,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sponsor/success': {
+      id: '/sponsor/success'
+      path: '/success'
+      fullPath: '/sponsor/success'
+      preLoaderRoute: typeof SponsorSuccessRouteImport
+      parentRoute: typeof SponsorRoute
+    }
+    '/topics/': {
+      id: '/topics/'
+      path: '/topics'
+      fullPath: '/topics/'
+      preLoaderRoute: typeof TopicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/$topicId': {
+      id: '/topics/$topicId'
+      path: '/topics/$topicId'
+      fullPath: '/topics/$topicId'
+      preLoaderRoute: typeof TopicsTopicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/': {
+      id: '/trackers/'
+      path: '/trackers'
+      fullPath: '/trackers/'
+      preLoaderRoute: typeof TrackersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/football': {
+      id: '/trackers/football'
+      path: '/trackers/football'
+      fullPath: '/trackers/football'
+      preLoaderRoute: typeof TrackersFootballRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/leaders': {
+      id: '/trackers/leaders'
+      path: '/trackers/leaders'
+      fullPath: '/trackers/leaders'
+      preLoaderRoute: typeof TrackersLeadersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/media': {
+      id: '/trackers/media'
+      path: '/trackers/media'
+      fullPath: '/trackers/media'
+      preLoaderRoute: typeof TrackersMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/peace': {
+      id: '/trackers/peace'
+      path: '/trackers/peace'
+      fullPath: '/trackers/peace'
+      preLoaderRoute: typeof TrackersPeaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/preview/': {
       id: '/research/preview/'
       path: '/research/preview'
@@ -413,62 +449,6 @@ declare module '@tanstack/react-router' {
       path: '/research/preview/$slug'
       fullPath: '/research/preview/$slug'
       preLoaderRoute: typeof ResearchPreviewSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/peace': {
-      id: '/trackers/peace'
-      path: '/trackers/peace'
-      fullPath: '/trackers/peace'
-      preLoaderRoute: typeof TrackersPeaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/media': {
-      id: '/trackers/media'
-      path: '/trackers/media'
-      fullPath: '/trackers/media'
-      preLoaderRoute: typeof TrackersMediaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/leaders': {
-      id: '/trackers/leaders'
-      path: '/trackers/leaders'
-      fullPath: '/trackers/leaders'
-      preLoaderRoute: typeof TrackersLeadersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/football': {
-      id: '/trackers/football'
-      path: '/trackers/football'
-      fullPath: '/trackers/football'
-      preLoaderRoute: typeof TrackersFootballRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/topics/$topicId': {
-      id: '/topics/$topicId'
-      path: '/topics/$topicId'
-      fullPath: '/topics/$topicId'
-      preLoaderRoute: typeof TopicsTopicIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sponsor/success': {
-      id: '/sponsor/success'
-      path: '/success'
-      fullPath: '/sponsor/success'
-      preLoaderRoute: typeof SponsorSuccessRouteImport
-      parentRoute: typeof SponsorRoute
-    }
-    '/admin/curation': {
-      id: '/admin/curation'
-      path: '/admin/curation'
-      fullPath: '/admin/curation'
-      preLoaderRoute: typeof AdminCurationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/contact': {
-      id: '/api/public/contact'
-      path: '/api/public/contact'
-      fullPath: '/api/public/contact'
-      preLoaderRoute: typeof ApiPublicContactRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -488,36 +468,25 @@ const SponsorRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  GapRunnerRoute: GapRunnerRoute,
   LeadersRoute: LeadersRoute,
   PeaceRoute: PeaceRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SponsorRoute: SponsorRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
-  TopicsTopicIdRoute: TopicsTopicIdRoute,
   ResearchSlugRoute: ResearchSlugRoute,
-  ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
+  TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
-  TopicsIndexRoute: TopicsIndexRoute,
   ResearchIndexRoute: ResearchIndexRoute,
-  ResearchPreviewIndexRoute: ResearchPreviewIndexRoute,
+  TopicsIndexRoute: TopicsIndexRoute,
   TrackersIndexRoute: TrackersIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
+  ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
+  ResearchPreviewIndexRoute: ResearchPreviewIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
