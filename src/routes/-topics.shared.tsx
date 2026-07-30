@@ -207,7 +207,7 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               aria-hidden
             >
               <img
-                src="/brand/headbanner.jpg"
+                src="/brand/headbanner.png"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover object-[72%_center] lg:object-[70%_center]"
                 loading="eager"
