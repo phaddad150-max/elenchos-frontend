@@ -50,7 +50,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
 import { listResearchBriefs } from "@/lib/research-catalog";
-import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
+import {
+  accumulateTotalSampleAnalyzed,
+  appendKpiHistory,
+  peekTotalSampleAnalyzed,
+  readKpiHistory,
+} from "@/lib/kpi-history";
 import { useCountUp } from "@/hooks/use-count-up";
 
 import {
@@ -1888,8 +1893,19 @@ type KpiHeroTileModel = {
 /** Min dedicated research case studies before we hard-push /research from the hero. */
 const RESEARCH_LIBRARY_CTA_MIN = 3;
 
-/** Transparent pipeline confidence from live page data (SpaceXAI / Grok stack). */
-function computePipelineAccuracy(args: {
+function clampPct(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, Math.round(n)));
+}
+
+/**
+ * Honest *estimated* pipeline confidence for SpaceXAI / Grok on this product surface.
+ *
+ * This is NOT measured model accuracy and MUST NOT read like 95–99% “lab accuracy.”
+ * Public discourse sampling (X + multi-source packs) is purposive, incomplete, noisy;
+ * LLM reasoning is directional and interpretive; only research claims get human review.
+ * Stage scores sit in realistic bands with hard caps so coverage ≠ truth.
+ */
+function computePipelineConfidence(args: {
   snapshots: Record<string, TopicSnapshot> | null;
   liveTopicCount: number;
   overview: DashboardOverview | null;
@@ -1897,6 +1913,7 @@ function computePipelineAccuracy(args: {
 }): {
   composite: number | undefined;
   fetching: number;
+  cleaning: number;
   reasoning: number;
   reporting: number;
   lines: string[];
@@ -1905,13 +1922,36 @@ function computePipelineAccuracy(args: {
   const snapList = snapshots ? Object.values(snapshots) : [];
   const snapCount = snapList.length;
   const denom = Math.max(liveTopicCount, 1);
+  const coverage = snapCount / denom;
 
-  // Fetching: share of live topics with a snapshot row in this sample
-  const fetching = Math.round(Math.min(100, (snapCount / denom) * 100));
+  if (snapCount === 0 && !overview) {
+    return {
+      composite: undefined,
+      fetching: 0,
+      cleaning: 0,
+      reasoning: 0,
+      reporting: 0,
+      lines: [
+        "No sample loaded yet — confidence is undefined, not 100%.",
+        "When data lands, this tile estimates fetch → clean → reason → report quality bands for SpaceXAI/Grok on public discourse — not audited accuracy.",
+      ],
+    };
+  }
 
-  // Reasoning: share of snapshots that carry sentiment / divergence / summary
+  let totalSample = 0;
+  let thinTopics = 0;
   let reasoned = 0;
+  let withDivergence = 0;
   for (const s of snapList) {
+    const n =
+      typeof s.fetched_post_count === "number" && s.fetched_post_count > 0
+        ? s.fetched_post_count
+        : typeof s.sample_size === "number"
+          ? s.sample_size
+          : 0;
+    totalSample += n;
+    if (n > 0 && n < 25) thinTopics += 1;
+
     const hasSentiment =
       typeof s.overall_sentiment === "object" &&
       s.overall_sentiment &&
@@ -1924,34 +1964,76 @@ function computePipelineAccuracy(args: {
       Boolean(s.narrative_summary?.trim?.()) ||
       (Array.isArray(s.key_insights) && s.key_insights.length > 0);
     if (hasSentiment || hasDiv || hasText) reasoned += 1;
+    if (hasDiv) withDivergence += 1;
   }
-  const reasoning = snapCount
-    ? Math.round((reasoned / snapCount) * 100)
-    : 0;
 
-  // Reporting: overview summary + research briefs published (human-reviewed path)
-  let reportPts = 0;
-  if (overview?.grok_ai_summary?.trim()) reportPts += 40;
-  if (typeof overview?.kpis?.total_posts_analyzed === "number" && overview.kpis.total_posts_analyzed > 0) {
-    reportPts += 25;
-  }
-  if (researchCount > 0) reportPts += 20;
-  if (snapCount > 0) reportPts += 15;
-  const reporting = Math.min(100, reportPts);
+  const avgSample = snapCount ? totalSample / snapCount : 0;
+  const reasonedShare = snapCount ? reasoned / snapCount : 0;
+  const divShare = snapCount ? withDivergence / snapCount : 0;
+  const thinShare = snapCount ? thinTopics / snapCount : 0;
 
-  const parts = [fetching, reasoning, reporting].filter((n) => n > 0);
-  const composite = parts.length
-    ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length)
-    : undefined;
+  // Fetch — public APIs / purposive packs; rate limits; not a census of X
+  // Realistic band ~45–72 even when coverage looks “full”
+  let fetching = 48 + coverage * 16 + (avgSample >= 40 ? 5 : avgSample >= 15 ? 2 : 0);
+  fetching = clampPct(fetching, 38, 72);
+
+  // Clean / filter — bots, media bleed, language mix, dupes; we do not publish measured F1
+  let cleaning = 50 + (avgSample >= 40 ? 6 : avgSample >= 15 ? 3 : 0) - thinShare * 12;
+  cleaning = clampPct(cleaning, 36, 66);
+
+  // Reason — SpaceXAI/Grok directional analysis; interpretive, not ground-truth verified
+  let reasoning = 46 + reasonedShare * 12 + divShare * 5;
+  if (avgSample < 15 && snapCount > 0) reasoning -= 4;
+  reasoning = clampPct(reasoning, 38, 68);
+
+  // Report — structured outputs; human review on research raises integrity, still provisional
+  let reporting = 48;
+  if (overview?.grok_ai_summary?.trim()) reporting += 7;
+  if (researchCount > 0) reporting += 6; // human-reviewed research path exists
+  if (snapCount > 0) reporting += 4;
+  if (coverage >= 0.75) reporting += 3;
+  reporting = clampPct(reporting, 40, 72);
+
+  // Composite hard-capped: full topic coverage must never look like 98% “accuracy”
+  const composite = clampPct((fetching + cleaning + reasoning + reporting) / 4, 40, 70);
 
   const lines = [
-    `Fetching coverage: ${fetching}% — live topics with snapshot rows in this sample (${snapCount}/${liveTopicCount}).`,
-    `Reasoning completeness: ${reasoning}% — snapshots with sentiment, gap analysis, or SpaceXAI/Grok prose.`,
-    `Reporting readiness: ${reporting}% — cross-topic summary, posts analyzed, and human-reviewed research briefs.`,
-    "Stack: SpaceXAI + Grok for fetch synthesis, reasoning, and reporting. Not a lab-measured model accuracy score — a transparent composite of data on this page.",
+    `Fetch (est. ${fetching}%): public X / multi-source packs are purposive samples — incomplete universe, rate limits, not a platform census. Coverage here: ${snapCount}/${liveTopicCount} topics.`,
+    `Clean / filter (est. ${cleaning}%): residual bots, media accounts, language mix, and thin topics (${thinTopics} with under 25 posts) still distort signal. No published measured precision for this stack.`,
+    `Reason (est. ${reasoning}%): SpaceXAI + Grok produce directional sentiment, frames, and gap prose — interpretive LLM analysis, not verified ground truth or polls.`,
+    `Report (est. ${reporting}%): dashboard copy and topic briefs are structured model outputs; research claims get human review before publish. Still provisional, not certified accuracy.`,
+    `Composite ${composite}% is an engineering confidence band (hard-capped ≤70), not Grok/SpaceXAI “lab accuracy.” If a number near 95–99% ever appears, treat it as a bug.`,
   ];
 
-  return { composite, fetching, reasoning, reporting, lines };
+  return { composite, fetching, cleaning, reasoning, reporting, lines };
+}
+
+/** Current-window sample size from snapshots + overview KPI (not cumulative). */
+function currentWindowSampleSize(
+  snapshots: Record<string, TopicSnapshot> | null,
+  overview: DashboardOverview | null,
+): number {
+  let fromSnaps = 0;
+  if (snapshots) {
+    for (const s of Object.values(snapshots)) {
+      const n =
+        typeof s.fetched_post_count === "number" && s.fetched_post_count > 0
+          ? s.fetched_post_count
+          : typeof s.sample_size === "number"
+            ? s.sample_size
+            : 0;
+      fromSnaps += n;
+    }
+  }
+  const k = overview?.kpis;
+  const fromOverview =
+    typeof k?.total_posts_analyzed === "number"
+      ? k.total_posts_analyzed
+      : typeof overview?.total_posts_analyzed === "number"
+        ? overview.total_posts_analyzed
+        : 0;
+  // Prefer the larger signal for “this run” — avoid double-counting same posts
+  return Math.max(fromSnaps, fromOverview);
 }
 
 function KpiHeroTile({
@@ -2211,14 +2293,23 @@ function DashboardKpiGrid({
           note: "Dedicated research briefs are in the pipeline. Check back as the library grows.",
         };
 
-  const postsAnalyzed =
-    typeof k.total_posts_analyzed === "number"
-      ? k.total_posts_analyzed
-      : typeof overview?.total_posts_analyzed === "number"
-        ? overview.total_posts_analyzed
-        : undefined;
+  const windowSample = currentWindowSampleSize(snapshots, overview);
+  const runId = overview?.generated_at ?? overview?.last_updated ?? null;
+  // Cumulative across distinct pipeline runs (client-tracked); grows when a new run lands.
+  const [totalSampleAnalyzed, setTotalSampleAnalyzed] = useState<number | undefined>(() => {
+    if (windowSample > 0) return windowSample;
+    return peekTotalSampleAnalyzed();
+  });
+  useEffect(() => {
+    if (windowSample <= 0 && !runId) {
+      const peeked = peekTotalSampleAnalyzed();
+      if (typeof peeked === "number") setTotalSampleAnalyzed(peeked);
+      return;
+    }
+    setTotalSampleAnalyzed(accumulateTotalSampleAnalyzed(runId, windowSample));
+  }, [runId, windowSample]);
 
-  const accuracy = computePipelineAccuracy({
+  const accuracy = computePipelineConfidence({
     snapshots,
     liveTopicCount,
     overview,
@@ -2311,29 +2402,33 @@ function DashboardKpiGrid({
       cta: reportsCta,
     },
     {
-      id: "posts",
-      label: "Posts analyzed",
-      value: postsAnalyzed,
+      id: "sample",
+      label: "Total sample analyzed",
+      value: totalSampleAnalyzed,
       icon: Activity,
-      format: postsAnalyzed != null && postsAnalyzed >= 1000 ? "compact" : "number",
-      hint: "Public posts in the latest dashboard sample.",
-      expandTitle: "Sample volume",
+      format:
+        totalSampleAnalyzed != null && totalSampleAnalyzed >= 1000 ? "compact" : "number",
+      hint: "Cumulative posts/items across pipeline sample runs (grows each new run).",
+      expandTitle: "Sample volume (cumulative)",
       expandLines: [
+        `This run’s window sample: ${windowSample > 0 ? windowSample.toLocaleString() : "—"} (sum of topic sample sizes / overview KPI).`,
         typeof k.signals_generated === "number"
-          ? `Citizen signals generated: ${k.signals_generated}`
+          ? `Citizen signals generated (overview): ${k.signals_generated}`
           : "Signals count not on this overview row.",
-        "Volume is sample-based (purposive X / multi-source packs), not platform-wide totals.",
-        "Append-only history keeps prior samples when new overviews land.",
+        runId
+          ? `Run id: ${runId}. Each new overview timestamp adds that run’s window once — revisits do not double-count.`
+          : "No overview run timestamp yet — showing current window only until a run id is available.",
+        "Purposive X / multi-source packs, not a census of the whole platform. Cumulative total is tracked client-side until the backend publishes an authoritative lifetime sum.",
       ],
     },
     {
       id: "accuracy",
-      label: "AI data accuracy",
+      label: "Est. pipeline confidence",
       value: accuracy.composite,
       icon: ShieldCheck,
       format: "percent",
-      hint: "Pipeline confidence: fetching · reasoning · reporting (SpaceXAI & Grok).",
-      expandTitle: "Accuracy of data on this page",
+      hint: "Honest estimate: fetch · clean · reason · report (SpaceXAI & Grok). Not lab accuracy.",
+      expandTitle: "What this number is (and is not)",
       expandLines: accuracy.lines,
     },
   ];
@@ -2350,7 +2445,7 @@ function DashboardKpiGrid({
     leadersRanked,
     countriesMonitored,
     caseStudiesTotal,
-    postsAnalyzed,
+    totalSampleAnalyzed,
     accuracy.composite,
   ]);
 
