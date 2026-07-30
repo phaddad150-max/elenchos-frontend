@@ -77,7 +77,7 @@ function useTopicBundle(rootKey: string) {
 
     const timeoutId = window.setTimeout(() => {
       if (!cancelled) {
-        setLoadError("Loading timed out — use Retry below.");
+        setLoadError("Loading timed out. Use Retry below.");
         setReady(true);
       }
     }, BUNDLE_TIMEOUT_MS);
@@ -245,7 +245,7 @@ export function TopicAnalysisPage({
 
       {curatedStale && (
         <div className="rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-[12px] text-muted-foreground">
-          Headlines may lag the latest numbers — scores below still reflect the newest sample.
+          Headlines may lag the latest numbers. Scores below still reflect the newest sample.
         </div>
       )}
 
@@ -578,7 +578,7 @@ export function TopicAnalysisPage({
         {rawOpen && (
           <div className="px-4 pb-4 space-y-3 text-sm border-t border-border pt-3">
             <p className="text-muted-foreground text-[12px] leading-relaxed">
-              Based on <strong className="text-foreground">{sample}</strong> public posts (paraphrased aggregates only — no usernames or direct quotes stored).
+              Based on <strong className="text-foreground">{sample}</strong> public posts (paraphrased aggregates only; no usernames or direct quotes stored).
             </p>
             {data.narrative_summary && (
               <div>
@@ -632,7 +632,7 @@ export function TopicAnalysisPage({
                 color: sentimentColor(pickedCard.score),
                 borderColor: `${sentimentColor(pickedCard.score)}55`,
               }}
-              title="Calculated metric — not the insight itself"
+              title="Calculated metric, not the insight itself"
             >
               Metric {pickedCard.score}
               {pickedCard.label ? ` · ${pickedCard.label}` : ""}

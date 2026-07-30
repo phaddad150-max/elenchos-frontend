@@ -181,7 +181,7 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
             <span className="text-cyan">official stories</span>
           </h1>
           <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-            Directional samples of public discourse on X — not national polls. Open a topic for
+            Directional samples of public discourse on X, not national polls. Open a topic for
             scores, gaps, and insights.
           </p>
           <button
@@ -193,7 +193,7 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               Featured case study
             </span>
             <span className="text-[13px] font-display font-semibold text-foreground">
-              Commercial Space Race — public trust vs rivals &amp; official frames
+              Commercial Space Race: public trust vs rivals and official frames
             </span>
           </button>
         </header>
@@ -898,7 +898,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       bits.push("via @ElenchosPulse");
       return bits.join("\n");
     }
-    return `${topic.title} — Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
+    return `${topic.title}. Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
   })();
   const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
@@ -953,7 +953,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           <ContentSourceBadge source={contentSource} />
           {contentSource === "static" && (
             <span className="text-[10px] font-mono text-muted-foreground normal-case tracking-normal">
-              Simulated editorial data — not live Supabase analysis
+              Simulated editorial data, not live Supabase analysis
             </span>
           )}
           {isArchivedTopicId(topic.id) && (
@@ -976,7 +976,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
                 Archive report
               </div>
               <p className="text-sm text-foreground/90 leading-snug">
-                Full fan-discourse retrospective — sentiment trajectory, narrative gaps, and curated synthesis from X.
+                Full fan-discourse retrospective: sentiment trajectory, narrative gaps, and curated synthesis from X.
               </p>
               <p className="text-[11px] font-mono text-muted-foreground">
                 PDF · paraphrased aggregates only · not affiliated with FIFA · elenchos.live
@@ -1103,7 +1103,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           <p className="text-sm text-foreground/90 leading-relaxed">
             <span className="text-cyan font-medium">Citizens:</span> {topic.insights.citizenSays}{" "}
             <span className="text-muted-foreground font-medium">Officials & media:</span> {topic.insights.officialSays}{" "}
-            <span className="text-amber-signal font-medium">Bottom line —</span> {topic.takeaway}
+            <span className="text-amber-signal font-medium">Bottom line:</span> {topic.takeaway}
           </p>
           <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground pt-1 border-t border-border">
             Sample: {topic.sampleSize} · Confidence: {topic.confidence ?? (gap > 25 ? "High" : "Moderate")}
@@ -1861,7 +1861,7 @@ function LiveAbrahamPanel({
       <div className="relative rounded-xl border border-border bg-secondary/25 px-4 py-2.5 text-[12px] text-muted-foreground leading-relaxed">
         Based on{" "}
         <span className="text-foreground font-medium tabular-nums">{sample}</span> filtered public
-        posts — a focused sample, not a census. Views are paraphrased aggregates.{" "}
+        posts. A focused sample, not a census. Views are paraphrased aggregates.{" "}
         <Link to="/about" className="text-cyan hover:underline">
           How it works
         </Link>

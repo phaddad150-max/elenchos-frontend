@@ -13,13 +13,13 @@ import {
 export const Route = createFileRoute("/research/preview/")({
   head: () => ({
     meta: [
-      { title: "Research preview — Elenchos" },
+      { title: "Research preview · Elenchos" },
       {
         name: "description",
         content: "Internal preview of the Research workbench (not public launch).",
       },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Research preview — Elenchos" },
+      { property: "og:title", content: "Research preview · Elenchos" },
       { property: "og:url", content: "https://elenchos.live/research/preview" },
     ],
     links: [{ rel: "canonical", href: "https://elenchos.live/research" }],
@@ -62,7 +62,7 @@ function ResearchPreviewLibraryPage() {
           </p>
         </header>
 
-        <ResearchModeBanner message="Research is multi-source and human-gated — not a live Topics pulse." />
+        <ResearchModeBanner message="Research is multi-source and human-gated, not a live Topics pulse." />
 
         <section aria-label="Research briefs" className="space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -136,7 +136,7 @@ function ResearchPreviewLibraryPage() {
           <p>
             <strong className="text-foreground/90 font-medium">Under noise: </strong>
             Briefs treat multi-decade regional propaganda and state/movement media as a
-            field to scrutinize — not one channel — so recoverable truth can surface for
+            field to scrutinize (not one channel), so recoverable truth can surface for
             researchers and citizens.
           </p>
         </aside>

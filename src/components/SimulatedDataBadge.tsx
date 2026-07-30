@@ -8,7 +8,7 @@ export function SimulatedDataBadge({ className = "" }: { className?: string }) {
         className
       }
       title="This tracker is showing testing / preview data while we tune the model. Not live citizen data yet."
-      aria-label="Testing data — preview only"
+      aria-label="Testing data, preview only"
     >
       <FlaskConical className="w-3 h-3" strokeWidth={2.2} />
       Testing data · Preview

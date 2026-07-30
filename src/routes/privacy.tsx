@@ -7,13 +7,13 @@ import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Notice — Elenchos" },
+      { title: "Privacy Notice. Elenchos" },
       {
         name: "description",
         content:
           "How Elenchos collects, stores, and protects your data. GDPR-aligned privacy notice for EU citizens.",
       },
-      { property: "og:title", content: "Privacy Notice — Elenchos" },
+      { property: "og:title", content: "Privacy Notice. Elenchos" },
       {
         property: "og:description",
         content:
@@ -96,7 +96,7 @@ function PrivacyPage() {
               <li>
                 <strong>Authentication identifier:</strong> the OAuth subject ID
                 returned by Google or X when you sign in. We never see or store
-                your password — authentication happens entirely on the
+                your password. Authentication happens entirely on the
                 provider&apos;s side.
               </li>
               <li>
@@ -118,7 +118,7 @@ function PrivacyPage() {
               accounts, use advertising cookies, third-party analytics, or
               behavioural tracking. We do not sell your data. Processors supporting
               the service typically include hosting/database (e.g. Vercel, Supabase),
-              X API, and xAI for analysis — all over TLS.
+              X API, and xAI for analysis, all over TLS.
             </p>
           </Section>
 
@@ -140,16 +140,16 @@ function PrivacyPage() {
             <p>
               We use one strictly-necessary session cookie to keep you signed in.
               No tracking, advertising, or analytics cookies are set. You can
-              clear cookies at any time via your browser settings — you will be
+              clear cookies at any time via your browser settings. You will be
               signed out.
             </p>
           </Section>
 
           <Section icon={UserX} title="Your rights (GDPR)">
             <ul className="list-disc pl-5 space-y-1">
-              <li>Right to access (Art. 15) — request a copy of your data.</li>
-              <li>Right to rectification (Art. 16) — correct inaccurate data.</li>
-              <li>Right to erasure (Art. 17) — request account deletion.</li>
+              <li>Right to access (Art. 15): request a copy of your data.</li>
+              <li>Right to rectification (Art. 16): correct inaccurate data.</li>
+              <li>Right to erasure (Art. 17): request account deletion.</li>
               <li>Right to restrict / object to processing (Art. 18 & 21).</li>
               <li>Right to data portability (Art. 20).</li>
               <li>

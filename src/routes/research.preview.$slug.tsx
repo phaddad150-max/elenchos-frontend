@@ -27,10 +27,10 @@ export const Route = createFileRoute("/research/preview/$slug")({
     const brief = getResearchBrief(params.slug);
     const title = brief
       ? `${brief.title.slice(0, 60)}${brief.title.length > 60 ? "…" : ""} — Research preview · Elenchos`
-      : "Research preview — Elenchos";
+      : "Research preview. Elenchos";
     const description =
       brief?.subtitle ??
-      "Internal preview of thesis research brief — not public launch.";
+      "Internal preview of thesis research brief. not public launch.";
     const url = `https://elenchos.live/research/preview/${params.slug}`;
     return {
       meta: [
@@ -199,7 +199,7 @@ function ResearchPreviewBriefPage() {
                     Intentionally thin
                   </p>
                   <ul className="space-y-1 text-[12.5px] text-foreground/85 leading-snug">
-                    <li>· Live citizen frames (no X run — cost)</li>
+                    <li>· Live citizen frames (no X run; cost)</li>
                     <li>· Mass attitude claims (T4 = insufficient)</li>
                     <li>· “Lebanese AI plan” primary docs (thin O pack)</li>
                     <li>· Free social alternatives unlikely for this topic</li>
@@ -207,8 +207,8 @@ function ResearchPreviewBriefPage() {
                 </div>
               </div>
               <p className="text-[12px] text-muted-foreground leading-relaxed">
-                For futuristic AI + US–Israeli tech talk, the only dense street channel is usually{" "}
-                <span className="text-foreground/80">X</span> — and that would be a{" "}
+                For futuristic AI and US–Israeli tech talk, the only dense street channel is usually{" "}
+                <span className="text-foreground/80">X</span>, and that would be a{" "}
                 <span className="text-foreground/80">one-shot, capped sample</span>, not a Topics-style
                 recurring burn. Without it, this pilot stays a{" "}
                 <span className="text-foreground/80">constraint thesis</span>, not a pulse of public mood.

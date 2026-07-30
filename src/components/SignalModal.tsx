@@ -21,7 +21,7 @@ function intensityTone(intensity: Signal["intensity"]): string {
 function divergenceCopy(d: number): { citizen: string; official: string; gap: string; impact: string } {
   const pct = Math.round(d * 100);
   return {
-    citizen: `Citizens on X foreground lived impact — jobs, prices, mobility, security — and demand visible accountability.`,
+    citizen: `Citizens on X foreground lived impact (jobs, prices, mobility, security) and demand visible accountability.`,
     official: `Official channels and mainstream media frame the topic through diplomacy, process and risk hedging.`,
     gap: `${pct}-pt gap concentrated on framing of who benefits and how fast change is realistic.`,
     impact:
@@ -187,7 +187,7 @@ function Actionable({ signal }: { signal: Signal }) {
   const angle = `Underreported angle: ${signal.subregion} citizens are framing "${signal.topic}" through ${signal.sentiment} terms while ${signal.source.toLowerCase()} coverage leans process-first. ${Math.round(signal.divergence * 100)}-pt gap = a clear story hook.`;
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareText = `${signal.topic} — ${Math.round(signal.divergence * 100)}-pt citizen-vs-official gap in ${signal.region}. ${signal.headline} via @ElenchosPulse`;
+  const shareText = `${signal.topic}: ${Math.round(signal.divergence * 100)}-pt citizen vs official gap in ${signal.region}. ${signal.headline} via @ElenchosPulse`;
   const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
   return (

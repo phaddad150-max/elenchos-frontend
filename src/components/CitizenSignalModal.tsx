@@ -112,7 +112,7 @@ function Body({ signal, snapshot }: { signal: FeedCitizenSignal; snapshot?: Topi
     !narrativeKey.includes(excerptKey) &&
     !headlineKey.includes(excerptKey);
 
-  const shareText = `${signal.topic} — ${headline} via @ElenchosPulse`;
+  const shareText = `${signal.topic}: ${headline} via @ElenchosPulse`;
   const shareHref = typeof window !== "undefined"
     ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`
     : "#";

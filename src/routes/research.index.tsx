@@ -8,17 +8,17 @@ import { ContactEmailMe } from "@/components/ContactEmailMe";
 export const Route = createFileRoute("/research/")({
   head: () => ({
     meta: [
-      { title: "Research — Elenchos" },
+      { title: "Research · Elenchos" },
       {
         name: "description",
         content:
-          "Human-gated multi-source thesis briefs — scholarly, official, and media evidence. Separate from Topics scores.",
+          "Human-gated multi-source thesis briefs: scholarly, official, and media evidence. Separate from Topics scores.",
       },
-      { property: "og:title", content: "Research — Elenchos" },
+      { property: "og:title", content: "Research · Elenchos" },
       {
         property: "og:description",
         content:
-          "Thesis-style research for citizens and serious readers — claims with falsifiers, not live topic scores.",
+          "Thesis-style research for citizens and serious readers: claims with falsifiers, not live topic scores.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
     ],

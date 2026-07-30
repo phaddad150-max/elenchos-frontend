@@ -163,7 +163,7 @@ export function ContactEmailMe({
           <DialogTitle className="font-display text-lg">Email me</DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm leading-relaxed">
             Corrections, privacy rights, challenges, or a short note. We read every
-            message — this is a small independent project.
+            message. This is a small independent project.
           </DialogDescription>
         </DialogHeader>
 

@@ -76,17 +76,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Elenchos — Real Citizen Voices vs Official Narratives" },
+      { title: "Elenchos · Real Citizen Voices vs Official Narratives" },
       {
         name: "description",
         content:
           "Citizen sentiment analysis and narrative gaps, powered by AI. Compare public opinion on X against official statements across global topics, leader trust rankings and the Middle East peace tracker.",
       },
-      { property: "og:title", content: "Real Citizen Voices vs Official Narratives — Elenchos" },
+      { property: "og:title", content: "Real Citizen Voices vs Official Narratives · Elenchos" },
       {
         property: "og:description",
         content:
-          "Public discourse samples on X — citizen sentiment, narrative gaps, and trackers for ordinary citizens.",
+          "Public discourse samples on X: citizen sentiment, narrative gaps, and trackers for ordinary citizens.",
       },
       { property: "og:url", content: "https://elenchos.live/" },
     ],
@@ -491,7 +491,7 @@ function Dashboard() {
                 <span className="text-cyan">Official Narratives</span>
               </h1>
               <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
-                Public intelligence from structured X samples — directional, not a national poll.
+                Public intelligence from structured X samples. Directional insight, not a national poll.
               </p>
             </div>
             <DataFreshnessBar
@@ -550,7 +550,7 @@ function Dashboard() {
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Citizen signals"
-                subtitle="Latest sample — tap a row for detail."
+                subtitle="Latest sample. Tap a row for detail."
               />
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />

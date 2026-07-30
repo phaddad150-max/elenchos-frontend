@@ -69,7 +69,7 @@ export function AuthScreen({ hasConsent }: { hasConsent: boolean }) {
 
           <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6 shadow-xl">
             <p className="text-xs text-muted-foreground text-center mb-5 leading-relaxed">
-              Continue with your X account. We never see or store your password — only
+              Continue with your X account. We never see or store your password, only
               your basic profile (name, handle, avatar) is shared with us.
             </p>
 

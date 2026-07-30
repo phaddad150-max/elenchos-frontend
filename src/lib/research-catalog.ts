@@ -76,38 +76,38 @@ export interface ResearchBrief {
 }
 
 export const SOURCE_CLASS_LEGEND: ResearchBrief["sourceClasses"] = [
-  { code: "D", label: "Discourse", use: "Citizen / public social — attitudes & frames" },
+  { code: "D", label: "Discourse", use: "Citizen / public social: attitudes and frames" },
   { code: "O", label: "Official", use: "Policy claims (scrutinize self-serving states)" },
   {
     code: "M",
     label: "Media",
-    use: "Frames; tag M-state / high-scrutiny — never sole fact spine",
+    use: "Frames; tag M-state / high-scrutiny; never sole fact spine",
   },
   {
     code: "S",
     label: "Scholarly / structural",
-    use: "Journals, data, info-ops & propaganda literature",
+    use: "Journals, data, info-ops and propaganda literature",
   },
-  { code: "I", label: "Inference", use: "Synthesis — must rest on D/O/M/S/V/W" },
+  { code: "I", label: "Inference", use: "Synthesis; must rest on D/O/M/S/V/W" },
   {
     code: "R",
     label: "Elenchos product",
-    use: "Prior product signal — extra transparency only if relevant",
+    use: "Prior product signal; extra transparency only if relevant",
   },
 ];
 
 /** North-star copy for Research workbench */
 export const RESEARCH_NORTH_STAR =
-  "Human-gated, multi-source thesis research — surface evidence, expose deception, equip freer choices.";
+  "Human-gated, multi-source thesis research: surface evidence, expose deception, equip freer choices.";
 
 export const RESEARCH_HUMAN_FIRST =
   "Machines may collect and draft. A human approves the source plan, gates every thesis claim, and approves publish. No auto-published claims.";
 
 export const RESEARCH_HUMANITY_FORWARD =
-  "Prefer findings that reduce deception, clarify power, and expand peaceful, accountable, evidence-based choice — including under corruption, proxy rule, and information warfare.";
+  "Prefer findings that reduce deception, clarify power, and expand peaceful, accountable, evidence-based choice, including under corruption, proxy rule, and information warfare.";
 
 export const RESEARCH_SCRUTINY_NOTE =
-  "High-scrutiny applies to a multi-decade regional information environment—not one channel. Named outlets (e.g. Al Jazeera) are examples inside a wider field across Muslim-majority societies, state and movement media, and diaspora networks where noise and propaganda often bury surface truth. Use for narrative context; triangulate facts; never sole spine. Precision on orgs and funders — no collective guilt.";
+  "High-scrutiny applies to a multi-decade regional information environment, not one channel. Named outlets (e.g. Al Jazeera) are examples inside a wider field across Muslim-majority societies, state and movement media, and diaspora networks where noise and propaganda often bury surface truth. Use for narrative context; triangulate facts; never sole spine. Precision on orgs and funders, with no collective guilt.";
 
 const LEBANON: ResearchBrief = {
   slug: "lebanon-ai-collapse",
@@ -125,12 +125,12 @@ const LEBANON: ResearchBrief = {
   ],
   updatedAt: "2026-07-30",
   researchQuestion:
-    "Under what conditions, and over what time scales, can AI and US–Israeli technology meaningfully affect governance, economy, and attitudes in post-collapse Lebanon — and where do structural constraints (elite capture, proxy politics, demography, identity) bound those effects?",
+    "Under what conditions, and over what time scales, can AI and US–Israeli technology meaningfully affect governance, economy, and attitudes in post-collapse Lebanon, and where do structural constraints (elite capture, proxy politics, demography, identity) bound those effects?",
   methodSummary:
-    "Human-first multi-source research: scholarly, surveys, open web, official, media frames, and discourse — not X-only. Thesis claims are an output of evidence and a human gate. High-scrutiny media and info-ops literature are tiered, not laundered as neutral fact. Not advocacy.",
+    "Human-first multi-source research: scholarly, surveys, open web, official, media frames, and discourse, not X-only. Thesis claims are an output of evidence and a human gate. High-scrutiny media and info-ops literature are tiered, not laundered as neutral fact. Not advocacy.",
   approach: [
     "Spine first: scholarly (S) + official/open (O/W); claims only with confidence + falsifier",
-    "Discourse (D) optional and non-recurring — one-shot X if street frames needed; not a Topics pulse",
+    "Discourse (D) optional and non-recurring: one-shot X if street frames needed, not a Topics pulse",
     "Empty when thin: no invented citizen attitudes; T4 stays insufficient without D/V",
     "Human gate on claims and PDF; free-first collect; freeze corpus after gate",
   ],
@@ -152,7 +152,7 @@ const LEBANON: ResearchBrief = {
       id: "C",
       label: "Synthesis / gaps",
       status: "done",
-      note: "SYNTHESIS.md from S+O — locked for short brief",
+      note: "SYNTHESIS.md from S+O. locked for short brief",
     },
     {
       id: "D",
@@ -196,7 +196,7 @@ const LEBANON: ResearchBrief = {
         "Research → evidence → claims. Spine = S + O. Discourse optional one-shot. Corrupt patronage (*wasta*) named in English first.",
       bullets: [
         "Structural constraints (S) + official narratives (O) as objects of analysis",
-        "Optional D (X) only if owner authorizes — not free-social substitutes for this topic",
+        "Optional D (X) only if owner authorizes. not free-social substitutes for this topic",
         "Scenarios after evidence; insufficient-evidence rule",
       ],
     },
@@ -205,7 +205,7 @@ const LEBANON: ResearchBrief = {
       number: "4",
       title: "Official narratives",
       status: "draft",
-      summary: "See SYNTHESIS.md Ch.4 — WB/IMF/State/USAID frames; AI–Israel tech thin in O pack.",
+      summary: "See SYNTHESIS.md Ch.4. WB/IMF/State/USAID frames; AI–Israel tech thin in O pack.",
     },
     {
       id: "discourse",
@@ -219,14 +219,14 @@ const LEBANON: ResearchBrief = {
       number: "6",
       title: "Narrative gaps",
       status: "draft",
-      summary: "Partial without D — O vs S floors; street gap TBD. SYNTHESIS.md Ch.6.",
+      summary: "Partial without D. O vs S floors; street gap TBD. SYNTHESIS.md Ch.6.",
     },
     {
       id: "constraints",
       number: "7",
       title: "Structural constraints",
       status: "draft",
-      summary: "Constraint matrix from OpenAlex themes — SYNTHESIS.md Ch.7.",
+      summary: "Constraint matrix from OpenAlex themes. SYNTHESIS.md Ch.7.",
       bullets: [
         "Banking / electricity: high",
         "Parallel force + wasta: high",
@@ -239,7 +239,7 @@ const LEBANON: ResearchBrief = {
       number: "8",
       title: "Technology levers (conditional)",
       status: "draft",
-      summary: "Conditional accelerators only — SYNTHESIS.md Ch.8.",
+      summary: "Conditional accelerators only. SYNTHESIS.md Ch.8.",
     },
     {
       id: "claims",
@@ -253,7 +253,7 @@ const LEBANON: ResearchBrief = {
       number: "10",
       title: "Conditional scenarios",
       status: "ready",
-      summary: "A/B/C with evidence tags — SYNTHESIS + PDF.",
+      summary: "A/B/C with evidence tags. SYNTHESIS + PDF.",
     },
     {
       id: "open",
@@ -377,21 +377,21 @@ const LEBANON: ResearchBrief = {
       label: "Free collect (S + O) run",
       done: true,
       detail:
-        "Done — OpenAlex S (~191) + official/seeds O/W (12 usable: live HTML, Wayback, or curated excerpts). No X used.",
+        "Done. OpenAlex S (~191) + official/seeds O/W (12 usable: live HTML, Wayback, or curated excerpts). No X used.",
     },
     {
       id: "gdelt_run",
       label: "Optional: GDELT media (M)",
       done: false,
       detail:
-        "Free one-shot — mode=media-gdelt · class M media frames only · ≥5s/req · not citizen D.",
+        "Free one-shot. mode=media-gdelt · class M media frames only · ≥5s/req · not citizen D.",
     },
     {
       id: "x_run",
       label: "Optional: thin X sample",
       done: false,
       detail:
-        "Skip for no-budget default. Only if street frames needed — mode=x · blocks B,D · max 12.",
+        "Skip for no-budget default. Only if street frames needed. mode=x · blocks B,D · max 12.",
     },
     {
       id: "official",
@@ -415,19 +415,19 @@ const LEBANON: ResearchBrief = {
       id: "pdf",
       label: "PDF thesis brief",
       done: true,
-      detail: "Short PDF v1 — public/reports/lebanon-ai-collapse-thesis-brief.pdf",
+      detail: "Short PDF v1. public/reports/lebanon-ai-collapse-thesis-brief.pdf",
     },
   ],
   openQuestions: [
     "If a one-shot X sample is ever run: how dense is clean citizen talk on AI vs wasta after filtering media accounts?",
     "Which official timelines (if any) are explicit enough to gap-test against banking/power floors?",
-    "Where would street discourse treat Israeli water/tech as survival vs betrayal — only testable with D (likely X)?",
+    "Where would street discourse treat Israeli water/tech as survival vs betrayal? Only testable with D (likely X).",
     "What can be said about demography without overclaiming from structure alone?",
   ],
   elenchosRefs: [],
   pdfUrl: "/reports/lebanon-ai-collapse-thesis-brief.pdf",
   notATopicBanner:
-    "Research thesis brief — separate from Topics. Human-gated · multi-source · not live Pass-1 scores.",
+    "Research thesis brief, separate from Topics. Human-gated · multi-source · not live Pass-1 scores.",
 };
 
 const BRIEFS: ResearchBrief[] = [LEBANON];

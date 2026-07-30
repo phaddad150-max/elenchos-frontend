@@ -22,18 +22,18 @@ export function ResearchSourceLegend({
             </span>
             <span className="min-w-0">
               <span className="text-foreground/90 font-medium">{c.label}</span>
-              <span className="text-muted-foreground"> — {c.use}</span>
+              <span className="text-muted-foreground">: {c.use}</span>
             </span>
           </li>
         ))}
       </ul>
       <p className="text-[11px] text-muted-foreground leading-snug border-t border-border/60 pt-2">
         <span className="text-amber-400/90 font-mono">R</span> is over-and-above external
-        sources for transparency — never instead of them, and never primary evidence.
+        sources for transparency. Never instead of them, and never primary evidence.
       </p>
       <p className="text-[11px] text-muted-foreground leading-snug">
-        <span className="text-cyan font-mono">M</span> includes high-scrutiny state/movement
-        media inside a multi-decade regional noise field — narrative use only unless
+        <span className="text-cyan font-mono">M</span> includes high-scrutiny state or movement
+        media inside a multi-decade regional noise field. Narrative use only unless
         triangulated. Claims are human-gated.
       </p>
     </div>

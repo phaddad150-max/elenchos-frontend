@@ -30,17 +30,17 @@ import { ContactEmailMe } from "@/components/ContactEmailMe";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — Elenchos" },
+      { title: "About · Elenchos" },
       {
         name: "description",
         content:
-          "Elenchos applies the Socratic method to public discourse on X — measuring the gap between official narratives and what citizens actually say, across topics, leaders, and countries.",
+          "Elenchos applies the Socratic method to public discourse on X. We measure the gap between official narratives and what citizens actually say, across topics, leaders, and countries.",
       },
-      { property: "og:title", content: "About — Elenchos" },
+      { property: "og:title", content: "About · Elenchos" },
       {
         property: "og:description",
         content:
-          "Public Discourse vs Official Narratives. Live citizen sentiment, narrative divergence, and performance trackers — built for journalists, researchers, policymakers, and engaged citizens.",
+          "Public discourse vs official narratives. Citizen sentiment, narrative divergence, and trackers for journalists, researchers, policymakers, and engaged citizens.",
       },
       { property: "og:url", content: "https://elenchos.live/about" },
     ],
@@ -163,12 +163,12 @@ function Hero() {
           >
             <span className="block">
               Ancient Greek for cross-examination. We seek truth and defend ordinary people through
-              citizen journalism and freedom of speech — human-managed, AI-assisted.
+              citizen journalism and freedom of speech. Human-managed, AI-assisted.
             </span>
             <span className="block">
               elenchos.live structures public discourse on X like a digital focus group per topic:
               directional samples, not national polls. We surface the gap between citizen voices and
-              official or media frames — with method, limits, and sample size shown.
+              official or media frames, with method, limits, and sample size shown.
             </span>
           </motion.p>
         </div>
@@ -185,7 +185,7 @@ const PILLARS = [
     title: "Dashboard",
     to: "/",
     blurb:
-      "Live citizen signals and divergence for active topics only — archived and retired topics stay out of live outputs.",
+      "Citizen signals and divergence for active topics only. Archived and retired topics stay out of live outputs.",
     accent: "cyan",
   },
   {
@@ -210,7 +210,7 @@ const PILLAR_DETAILS: Record<string, string[]> = {
   Dashboard: [
     "Only live, actively tracked topics",
     "Citizen signal feed from real samples",
-    "Quiet freshness — no noisy alert chrome",
+    "Quiet freshness without noisy alert chrome",
   ],
   Topics: [
     "Focus-group style samples (not national polls)",
@@ -232,7 +232,7 @@ function Pillars() {
       <SectionHeading
         kicker="What you can do here"
         title="Dashboard, Topics, Research"
-        sub="Citizen pulse, narrative gaps, and deeper thesis work — human-managed, transparent limits."
+        sub="Citizen pulse, narrative gaps, and deeper thesis work. Human-managed, with transparent limits."
       />
       <div className="mt-7 grid md:grid-cols-3 gap-3.5">
         {PILLARS.map((p, i) => {
@@ -317,7 +317,7 @@ const STEPS = [
     icon: Ear,
     title: "Sample",
     body:
-      "Like a digital focus group: we pull a purposive public sample of X posts on one topic — not a census of a whole country.",
+      "Like a digital focus group: we pull a purposive public sample of X posts on one topic, not a census of a whole country.",
   },
   {
     icon: Microscope,
@@ -329,13 +329,13 @@ const STEPS = [
     icon: Scale,
     title: "Contrast",
     body:
-      "We score the gap between citizen frames and official/media frames when both appear in the evidence — never invent outlets.",
+      "We score the gap between citizen frames and official or media frames when both appear in the evidence. We never invent outlets.",
   },
   {
     icon: Monitor,
     title: "Surface",
     body:
-      "Live dashboard and topic pages show directional insights only for active topics. Archived/cold topics stay out of live outputs.",
+      "The dashboard and topic pages show directional insights only for active topics. Archived or cold topics stay out of live outputs.",
   },
 ] as const;
 
@@ -347,7 +347,7 @@ function Method() {
       <SectionHeading
         kicker="The Method"
         title="Focus-group samples, not mega-polls"
-        sub="Small relevant samples preserve citizen signal where loud narratives dominate. Directional insight — always read the n."
+        sub="Small relevant samples preserve citizen signal where loud narratives dominate. Directional insight only: always read the sample size (n)."
       />
 
       <div className="mt-7 relative">
@@ -426,7 +426,7 @@ const AUDIENCE = [
     headline: "Reproducible signals, transparent samples.",
     points: [
       "Nine balanced questions per topic, scored consistently across snapshots.",
-      "Small samples are kept small on purpose — authenticity over volume.",
+      "Small samples are kept small on purpose, because authenticity matters more than volume.",
       "Backend is the single source of truth; the dashboard never invents numbers.",
     ],
   },
@@ -437,7 +437,7 @@ const AUDIENCE = [
     headline: "The gap between what is said and what is felt.",
     points: [
       "Leader trust and country-level peace indices in one scorecard.",
-      "Identify regions where the government–public gap is widest.",
+      "Identify regions where the government and public gap is widest.",
       "Use divergence as an early-warning indicator, not a verdict.",
     ],
   },
@@ -447,7 +447,7 @@ const AUDIENCE = [
     icon: Users,
     headline: "Your voice, measured honestly.",
     points: [
-      "See how your peers actually feel — not what cable news says they feel.",
+      "See how your peers actually feel, not what cable news says they feel.",
       "Click any signal to read the reasoning behind the score.",
       "Free and open to read. No account required to explore.",
     ],
@@ -533,7 +533,7 @@ const STACK_ITEMS = [
     label: "X API",
     color: "cyan",
     icon: Globe2,
-    blurb: "Raw public posts — the unfiltered public square at global scale.",
+    blurb: "Raw public posts: the unfiltered public square at global scale.",
   },
   {
     id: "grok",
@@ -547,7 +547,7 @@ const STACK_ITEMS = [
     label: "Supabase",
     color: "emerald",
     icon: Database,
-    blurb: "Single source of truth — snapshots, trackers, and curated insights.",
+    blurb: "Single source of truth for snapshots, trackers, and curated insights.",
   },
   {
     id: "github",
@@ -580,7 +580,7 @@ function WhyX() {
         </div>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
           X currently offers the most open access to unfiltered public discussion at global scale.
-          That makes it the best available proxy for the public square — particularly in countries
+          That makes it the best available proxy for the public square, particularly in countries
           where state media dominates the official record.
         </p>
         <figure className="mt-5 rounded-xl border border-border bg-secondary/40 p-4">
@@ -589,7 +589,7 @@ function WhyX() {
             The unexamined narrative is not worth believing.
           </blockquote>
           <figcaption className="mt-2 text-[10.5px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            — after Socrates
+            After Socrates
           </figcaption>
         </figure>
       </div>
@@ -611,7 +611,7 @@ function WhyX() {
           Public posts from the <span className="text-cyan font-semibold">X API</span> are reasoned
           over by <span className="text-cyan font-semibold">xAI's Grok</span> and written straight
           into <span className="text-cyan font-semibold">Supabase</span> as the single source of
-          truth — no hand-edited numbers, no other models in the loop.
+          truth: no hand-edited numbers, and no other models in the loop.
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-2">
           {STACK_ITEMS.map((item) => {
@@ -659,7 +659,7 @@ function WhyX() {
 // ───────────────────────── Legal ─────────────────────────
 
 const DISCLAIMER_POINTS = [
-  "Independent experimental research — not a commercial business, news outlet, or advisory service.",
+  "Independent experimental research. Not a commercial business, news outlet, or advisory service.",
   "All insights are algorithmically generated. No warranties on accuracy, completeness, or timeliness.",
   "Not professional, financial, legal, or political advice. Verify before acting.",
   "Use of this dashboard is entirely at your own risk.",
