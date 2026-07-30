@@ -495,7 +495,7 @@ function Dashboard() {
           curatedCount={curatedHighlights.length}
         />
 
-        {/* Signals + heatmap — stretch so both panels share the same column height */}
+        {/* Signals + heatmap — equal outer panel height; globe stays proportionate */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -547,22 +547,18 @@ function Dashboard() {
             </div>
           </section>
 
-          <div className="xl:col-span-4 min-w-0 flex flex-col h-full">
-            <section className="dash-panel p-3 sm:p-4 relative overflow-hidden min-w-0 flex flex-col flex-1 h-full">
-              <div className="flex items-start justify-between gap-2 mb-2 pb-2 border-b border-border/80 shrink-0">
-                <div className="min-w-0">
-                  <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
-                  <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
-                    <span className="sm:hidden">Tap a point · {regionTiles.length} regions</span>
-                    <span className="hidden sm:inline">
-                      Hover a point for topic + score · {regionTiles.length} regions ·{" "}
-                      {fmtNum(kpis.postsAnalyzed)} posts
-                    </span>
-                  </div>
-                </div>
-              </div>
-              {/* Globe fills remaining panel height so heatmap matches signals column */}
-              <div className="flex-1 min-h-[200px] sm:min-h-[240px] xl:min-h-[220px] rounded-xl border border-border/70 overflow-hidden globe-stage">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-4 relative overflow-hidden min-w-0 flex flex-col h-full">
+            <div className="mb-3 pb-3 border-b border-border/80 shrink-0">
+              <Header
+                icon={<Globe2 className="w-4 h-4" />}
+                title="Global sentiment heatmap"
+                subtitle={`Tap or hover a point · ${regionTiles.length} regions · ${fmtNum(kpis.postsAnalyzed)} posts`}
+              />
+            </div>
+
+            {/* Proportionate square globe — does not stretch into a tall strip */}
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2.5">
+              <div className="w-full max-w-[min(100%,300px)] aspect-square max-h-[min(280px,42vw)] xl:max-h-[260px] rounded-xl border border-border/70 overflow-hidden globe-stage shrink-0">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -571,23 +567,24 @@ function Dashboard() {
                   }}
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-[11px] font-mono shrink-0">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-mono shrink-0">
                 <LegendDot color="var(--rose-signal)" label="Critical" />
                 <LegendDot color="var(--amber-signal)" label="High" />
                 <LegendDot color="var(--cyan)" label="Monitor" />
               </div>
-              {regionFilter && (
-                <button
-                  type="button"
-                  onClick={() => setRegionFilter(null)}
-                  className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-card border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[36px]"
-                >
-                  <MapPin className="w-3 h-3 inline mr-1" />
-                  {regionFilter} · clear
-                </button>
-              )}
-            </section>
-          </div>
+            </div>
+
+            {regionFilter && (
+              <button
+                type="button"
+                onClick={() => setRegionFilter(null)}
+                className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-card border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[36px]"
+              >
+                <MapPin className="w-3 h-3 inline mr-1" />
+                {regionFilter} · clear
+              </button>
+            )}
+          </section>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
