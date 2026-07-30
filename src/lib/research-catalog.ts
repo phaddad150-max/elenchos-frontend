@@ -131,7 +131,7 @@ const LEBANON: ResearchBrief = {
   approach: [
     "Spine first: scholarly (S) + official/open (O/W); claims only with confidence + falsifier",
     "Discourse (D) optional and non-recurring: one-shot X if street frames needed, not a Topics pulse",
-    "Empty when thin: no invented citizen attitudes; T4 stays insufficient without D/V",
+    "Empty when thin: no invented citizen attitudes; T4 stays non-poll even with thin D",
     "Human analyst review on claims and PDF before publish; free-first collect; freeze corpus after gate",
   ],
   sourceClasses: SOURCE_CLASS_LEGEND,
@@ -301,9 +301,9 @@ const LEBANON: ResearchBrief = {
       id: "t4",
       domain: "Attitude / hate change",
       statement:
-        "Insufficient pilot evidence that AI/US–Israeli tech rapidly shifts mass attitudes (D missing).",
-      confidence: "insufficient",
-      falsifier: "Longitudinal D + surveys show rapid tech-only attitude shifts.",
+        "Thin purposive D (n=38) + S still insufficient to claim AI/US–Israeli tech rapidly shifts mass attitudes (not a poll).",
+      confidence: "low",
+      falsifier: "Larger longitudinal D + surveys show rapid tech-only attitude shifts.",
       status: "ready",
     },
     {
