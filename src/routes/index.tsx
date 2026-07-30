@@ -44,7 +44,6 @@ import { TopicRequestModal } from "@/components/TopicRequestModal";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TeaserLock } from "@/components/TeaserLock";
-import { DataFreshnessBar } from "@/components/DataFreshnessBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
@@ -486,56 +485,6 @@ function Dashboard() {
 
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-7 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
-        <section className="fade-up dash-panel px-3.5 py-3 sm:px-5 sm:py-3.5">
-          <div className="flex flex-col gap-2 sm:gap-2.5 min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/8 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-40" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan" />
-                </span>
-                Free public research desk
-              </div>
-              <DataFreshnessBar
-                sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
-              />
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-2.5 lg:gap-6 min-w-0">
-              <div className="min-w-0 flex-1">
-                <h1 className="text-[1.35rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.1rem] font-display font-semibold tracking-tight leading-[1.15] break-words">
-                  Real Citizen Voices vs{" "}
-                  <span className="text-cyan">Official Narratives</span>
-                </h1>
-                <p className="mt-1.5 text-[12.5px] sm:text-[13px] md:text-sm text-muted-foreground leading-snug w-full max-w-none lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
-                  Research-grade citizen intelligence — premium desk quality, free for ordinary people · structured X samples · clear limits · human-reviewed claims · directional, not a national poll.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 shrink-0 lg:pb-0.5">
-                <Link
-                  to="/topics"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/10 hover:bg-cyan/20 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] sm:min-h-[36px] touch-manipulation"
-                >
-                  Browse topics
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-                <Link
-                  to="/research"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card hover:bg-secondary/80 text-foreground px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] sm:min-h-[36px] touch-manipulation"
-                >
-                  Research briefs
-                </Link>
-                <Link
-                  to="/about"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/40 transition-colors min-h-[40px] sm:min-h-[36px] touch-manipulation"
-                >
-                  Method &amp; limits
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* KPI hero — 6 equal tracking cards */}
         <DashboardKpiGrid
           overview={overview}
@@ -2563,11 +2512,12 @@ function DashboardKpiGrid({
     },
     {
       id: "accuracy",
-      label: "Est. pipeline confidence",
+      label: "Est. AI accuracy",
       value: accuracy.composite,
       icon: ShieldCheck,
       format: "percent",
-      liveNote: "Live confidence band for this page (not lab accuracy).",
+      liveNote:
+        "Estimated accuracy of data on this page (fetch · clean · reason · report). Engineering band for SpaceXAI/Grok — not a lab-measured model score.",
       liveFacts: accuracy.liveFacts,
       links: [
         { label: "How AI is used (xAI / SpaceXAI)", href: "/about" },
