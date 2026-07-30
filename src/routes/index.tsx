@@ -887,9 +887,9 @@ function buildCrossTopicFallback(
       : null;
   const lead =
     summaryParts.length > 0
-      ? summaryParts.join(" ")
+      ? summaryParts.join("\n\n")
       : avgDiv !== null
-        ? `Cross-topic monitoring shows an average narrative divergence of ${avgDiv}, with citizen voices diverging sharply from official narratives across multiple live topics.`
+        ? `Cross-topic monitoring shows an average narrative divergence of ${avgDiv}.\n\nCitizen voices diverge from official narratives across multiple live topics.`
         : "";
 
   return { summary: lead, findings: findings.slice(0, 5) };
@@ -1309,6 +1309,214 @@ function RotatingRegionTiles({
 }
 
 
+/**
+ * Split dense AI cross-analysis into breathing-space blocks (one analytical point per block).
+ * Prefer existing blank lines / bullets; otherwise one sentence per paragraph.
+ */
+function splitSummaryIntoPoints(text: string): string[] {
+  const raw = text.replace(/\r\n/g, "\n").trim();
+  if (!raw) return [];
+
+  if (/\n\s*\n/.test(raw)) {
+    return raw
+      .split(/\n\s*\n+/)
+      .map((b) => b.replace(/\s*\n\s*/g, " ").trim())
+      .filter(Boolean);
+  }
+
+  // Numbered or bulleted points
+  if (/(?:^|\n)\s*(?:\d+[.)]\s+|[-•*]\s+)/.test(raw)) {
+    return raw
+      .split(/(?:^|\n)\s*(?=\d+[.)]\s+|[-•*]\s+)/)
+      .map((b) => b.replace(/\s*\n\s*/g, " ").replace(/^\d+[.)]\s*/, "").replace(/^[-•*]\s*/, "").trim())
+      .filter(Boolean);
+  }
+
+  // Single dense paragraph → one block per sentence for eye relief
+  const sentences = raw.match(/[^.!?]+(?:[.!?]+(?:\s|$)|$)/g) ?? [raw];
+  return sentences.map((s) => s.trim()).filter((s) => s.length > 0);
+}
+
+function findingTone(i: number): { bar: string; chip: string; soft: string } {
+  const tones = [
+    { bar: "from-cyan/80 to-cyan", chip: "border-cyan/40 bg-cyan/12 text-cyan", soft: "rgba(34,211,238,0.12)" },
+    { bar: "from-amber-signal/80 to-amber-signal", chip: "border-amber-signal/40 bg-amber-signal/12 text-amber-signal", soft: "rgba(245,158,11,0.12)" },
+    { bar: "from-emerald-signal/80 to-emerald-signal", chip: "border-emerald-signal/40 bg-emerald-signal/12 text-emerald-signal", soft: "rgba(16,185,129,0.12)" },
+    { bar: "from-magenta/80 to-magenta", chip: "border-magenta/40 bg-magenta/12 text-magenta", soft: "rgba(217,70,239,0.12)" },
+    { bar: "from-cyan/60 to-emerald-signal/70", chip: "border-cyan/35 bg-cyan/10 text-cyan", soft: "rgba(34,211,238,0.10)" },
+  ];
+  return tones[i % tones.length];
+}
+
+function KeyFindingsInteractive({ findings }: { findings: string[] }) {
+  const [active, setActive] = useState(0);
+  const safeActive = Math.min(active, Math.max(0, findings.length - 1));
+  const current = findings[safeActive] ?? "";
+  const tone = findingTone(safeActive);
+
+  useEffect(() => {
+    if (active >= findings.length) setActive(0);
+  }, [findings.length, active]);
+
+  if (!findings.length) return null;
+
+  return (
+    <div className="mt-5 sm:mt-6 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan">
+          Key findings
+        </div>
+        <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+          {safeActive + 1} / {findings.length} · tap a card
+        </span>
+      </div>
+
+      {/* Interactive chips / progress rail */}
+      <div
+        className="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-0.5 -mx-0.5 px-0.5"
+        role="tablist"
+        aria-label="Key findings"
+      >
+        {findings.map((_, i) => {
+          const t = findingTone(i);
+          const on = i === safeActive;
+          return (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => setActive(i)}
+              className={`shrink-0 min-h-[36px] sm:min-h-[32px] px-2.5 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-[0.12em] transition-all touch-manipulation ${
+                on
+                  ? t.chip + " shadow-[0_0_16px_-6px_var(--color-cyan-glow)]"
+                  : "border-border bg-card/50 text-muted-foreground hover:border-cyan/35 hover:text-foreground"
+              }`}
+            >
+              {String(i + 1).padStart(2, "0")}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Featured finding — dynamic stage */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={safeActive}
+          role="tabpanel"
+          initial={{ opacity: 0, y: 8, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -6, scale: 0.99 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="relative overflow-hidden rounded-xl border border-cyan/30 bg-card/60 p-3.5 sm:p-4"
+          style={{ boxShadow: `inset 0 0 0 1px ${tone.soft}` }}
+        >
+          <div
+            className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r opacity-90"
+            style={{
+              backgroundImage: `linear-gradient(90deg, transparent, var(--cyan), transparent)`,
+            }}
+            aria-hidden
+          />
+          <div className="flex items-start gap-3">
+            <span
+              className={`shrink-0 w-9 h-9 rounded-lg grid place-items-center border text-[12px] font-mono font-semibold ${tone.chip}`}
+            >
+              {String(safeActive + 1).padStart(2, "0")}
+            </span>
+            <p className="text-[13.5px] sm:text-[14.5px] text-foreground/90 leading-relaxed min-w-0 pt-0.5">
+              {current}
+            </p>
+          </div>
+          <div className="mt-3.5 h-1 rounded-full bg-border/70 overflow-hidden">
+            <motion.div
+              className={`h-full rounded-full bg-gradient-to-r ${tone.bar}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${((safeActive + 1) / findings.length) * 100}%` }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+          <div className="mt-2.5 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              disabled={safeActive <= 0}
+              onClick={() => setActive((a) => Math.max(0, a - 1))}
+              className="text-[11px] font-mono text-muted-foreground hover:text-cyan disabled:opacity-30 disabled:hover:text-muted-foreground transition-colors min-h-[36px] sm:min-h-0 px-1 touch-manipulation"
+            >
+              ← Prev
+            </button>
+            <button
+              type="button"
+              disabled={safeActive >= findings.length - 1}
+              onClick={() => setActive((a) => Math.min(findings.length - 1, a + 1))}
+              className="text-[11px] font-mono text-muted-foreground hover:text-cyan disabled:opacity-30 disabled:hover:text-muted-foreground transition-colors min-h-[36px] sm:min-h-0 px-1 touch-manipulation"
+            >
+              Next →
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Card grid — all findings visible & clickable */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2.5">
+        {findings.map((f, i) => {
+          const t = findingTone(i);
+          const on = i === safeActive;
+          const teaser =
+            f.length > 96 ? `${f.slice(0, 93).trimEnd()}…` : f;
+          return (
+            <motion.button
+              key={i}
+              type="button"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.35 }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => setActive(i)}
+              aria-pressed={on}
+              className={`text-left rounded-xl border p-3 min-h-[5.5rem] flex flex-col gap-2 transition-colors touch-manipulation ${
+                on
+                  ? "border-cyan/50 bg-cyan/10 shadow-[0_0_20px_-10px_var(--color-cyan-glow)]"
+                  : "border-border/80 bg-card/40 hover:border-cyan/35 hover:bg-card/70"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={`text-[10px] font-mono uppercase tracking-[0.14em] px-1.5 py-0.5 rounded border ${
+                    on ? t.chip : "border-border text-muted-foreground"
+                  }`}
+                >
+                  Finding {String(i + 1).padStart(2, "0")}
+                </span>
+                <span
+                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${on ? "bg-cyan pulse-dot" : "bg-border"}`}
+                  aria-hidden
+                />
+              </div>
+              <p
+                className={`text-[12.5px] sm:text-[13px] leading-snug ${
+                  on ? "text-foreground/90" : "text-muted-foreground"
+                }`}
+              >
+                {on ? f : teaser}
+              </p>
+              <div className="mt-auto h-0.5 rounded-full bg-border/60 overflow-hidden">
+                <motion.div
+                  className={`h-full rounded-full bg-gradient-to-r ${t.bar}`}
+                  initial={false}
+                  animate={{ width: on ? "100%" : "28%" }}
+                  transition={{ duration: 0.35 }}
+                />
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AiAnalysisSummary({
   overview,
   snapshots,
@@ -1331,16 +1539,20 @@ function AiAnalysisSummary({
     [overview, snapshots, highlights, signals],
   );
   const summary = overview?.grok_ai_summary?.trim() || fallback.summary || null;
+  const summaryPoints = useMemo(
+    () => (summary ? splitSummaryIntoPoints(summary) : []),
+    [summary],
+  );
   const findings = fallback.findings;
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const k = overview?.kpis;
   return (
-    <section className="dash-panel p-4 sm:p-5 border-l-[3px] border-l-cyan">
+    <section className="dash-panel p-3.5 sm:p-5 border-l-[3px] border-l-cyan">
       <div className="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-border/80 flex-wrap">
         <Header
           icon={<Brain className="w-4 h-4" />}
-          title="Cross-topic snapshot"
-          subtitle="Built from the same Supabase sample as the signals above"
+          title="AI cross-topic analysis"
+          subtitle="Built from the same sample as the signals above"
         />
         <div className="flex items-center gap-2 flex-wrap">
           {lastUpdated && (
@@ -1354,10 +1566,17 @@ function AiAnalysisSummary({
         </div>
       </div>
 
-      {summary ? (
-        <p className="text-[14px] sm:text-[15px] leading-relaxed text-foreground/90">
-          {summary}
-        </p>
+      {summaryPoints.length > 0 ? (
+        <div className="space-y-4 sm:space-y-5">
+          {summaryPoints.map((point, i) => (
+            <p
+              key={i}
+              className="text-[14px] sm:text-[15px] leading-relaxed text-foreground/90"
+            >
+              {point}
+            </p>
+          ))}
+        </div>
       ) : (
         <p className="text-sm leading-relaxed text-muted-foreground">
           No cross-topic summary in this sample yet. Topic pages still carry full briefings when data
@@ -1365,38 +1584,33 @@ function AiAnalysisSummary({
         </p>
       )}
 
-      {findings.length > 0 && (
-        <div className="mt-4 space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan">
-            Key findings
-          </div>
-          <ul className="space-y-1.5">
-            {findings.map((f, i) => (
-              <li
-                key={i}
-                className="text-[13px] text-foreground/85 leading-snug flex gap-2"
-              >
-                <span className="text-cyan font-mono shrink-0">{String(i + 1).padStart(2, "0")}</span>
-                <span>{f}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {findings.length > 0 && <KeyFindingsInteractive findings={findings} />}
 
       {k && (
         <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] font-mono text-muted-foreground">
           {typeof k.total_topics_monitored === "number" && (
-            <span>Topics monitored: <span className="text-foreground/90 tabular-nums">{k.total_topics_monitored}</span></span>
+            <span>
+              Topics monitored:{" "}
+              <span className="text-foreground/90 tabular-nums">{k.total_topics_monitored}</span>
+            </span>
           )}
           {typeof k.regions_monitored === "number" && (
-            <span>Regions: <span className="text-foreground/90 tabular-nums">{k.regions_monitored}</span></span>
+            <span>
+              Regions: <span className="text-foreground/90 tabular-nums">{k.regions_monitored}</span>
+            </span>
           )}
           {typeof k.total_posts_analyzed === "number" && (
-            <span>Posts analyzed: <span className="text-foreground/90 tabular-nums">{k.total_posts_analyzed.toLocaleString()}</span></span>
+            <span>
+              Posts analyzed:{" "}
+              <span className="text-foreground/90 tabular-nums">
+                {k.total_posts_analyzed.toLocaleString()}
+              </span>
+            </span>
           )}
           {typeof k.signals_generated === "number" && (
-            <span>Signals: <span className="text-foreground/90 tabular-nums">{k.signals_generated}</span></span>
+            <span>
+              Signals: <span className="text-foreground/90 tabular-nums">{k.signals_generated}</span>
+            </span>
           )}
         </div>
       )}
