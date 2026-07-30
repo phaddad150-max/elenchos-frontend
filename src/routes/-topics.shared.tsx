@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   loadCuratedQaPairs,
   loadCuratedTopicInsights,
@@ -110,16 +111,17 @@ function cadenceLabel(
   cadence: "realtime" | "weekly" | "monthly" | "archived",
   short = false,
 ): string {
+  // Manual pipeline samples — not continuous live streams.
   if (short) {
-    if (cadence === "realtime") return "Live";
+    if (cadence === "realtime") return "Active";
     if (cadence === "weekly") return "Weekly";
     if (cadence === "archived") return "Archived";
     return "Monthly";
   }
-  if (cadence === "realtime") return "Live · Near real-time";
-  if (cadence === "weekly") return "Weekly refresh";
-  if (cadence === "archived") return "Archived tournament";
-  return "Monthly refresh";
+  if (cadence === "realtime") return "Active sample";
+  if (cadence === "weekly") return "Weekly sample";
+  if (cadence === "archived") return "Archived";
+  return "Monthly sample";
 }
 
 function avgDivergence(t: FeatureTopic) {
@@ -127,10 +129,9 @@ function avgDivergence(t: FeatureTopic) {
   return Math.round(t.compare.reduce((s, r) => s + r.divergence, 0) / t.compare.length);
 }
 
-/** Shared shell: nav, live badge, freshness bar, footer. */
+/** Shared shell: nav, sample timestamp, footer. */
 function TopicsShell({ children }: { children: ReactNode }) {
   const [, setTick] = useState(0);
-  const [refreshedAt, setRefreshedAt] = useState(() => new Date());
   const [sourceUpdatedAt, setSourceUpdatedAt] = useState<string | null>(null);
 
   useEffect(() => {
@@ -148,10 +149,7 @@ function TopicsShell({ children }: { children: ReactNode }) {
 
       <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-end gap-3">
-          <DataFreshnessBar
-            sourceUpdatedAt={sourceUpdatedAt}
-            refreshedAt={refreshedAt}
-          />
+          <DataFreshnessBar sourceUpdatedAt={sourceUpdatedAt} />
         </div>
         {children}
       </main>
@@ -176,14 +174,15 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
         <header className="space-y-3">
           <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
             <span className="w-1 h-3.5 bg-cyan rounded-sm" />
-            Live Topics
+            Topics
           </div>
           <h1 className="text-[1.55rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.1] break-words">
-            Live Topics:{" "}
-            <span className="text-cyan">Public Square Sentiment</span>
+            What citizens say vs{" "}
+            <span className="text-cyan">official stories</span>
           </h1>
           <p className="mt-3 text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-            Citizen sentiment and narrative divergence from real public discourse on X
+            Directional samples of public discourse on X — not national polls. Open a topic for
+            scores, gaps, and insights.
           </p>
         </header>
 
@@ -412,12 +411,12 @@ function TopicsFilterableGrid({
       {activeTopics.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan" />
             <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
-              Topics
+              Active topics
             </h2>
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
-              · Live, weekly &amp; monthly
+              · Sampled when workflows run
             </span>
           </div>
           <div className={topicGridClass}>
@@ -434,7 +433,7 @@ function TopicsFilterableGrid({
               Archived topics
             </h2>
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
-              · Historical snapshots · no longer near real-time
+              · Historical only
             </span>
           </div>
           <div className={`${topicGridClass} opacity-95`}>
@@ -1293,7 +1292,7 @@ function HeroSentimentCard({
 
       <div className="relative mt-auto text-[10px] sm:text-[11px] font-mono text-muted-foreground border-t border-border pt-2 flex flex-col sm:flex-row items-center sm:justify-between gap-1 sm:gap-0">
         <span>Sample · <span className="text-foreground/80 tabular-nums">{sample}</span></span>
-        <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: color }} /> Live</span>
+        <span className="inline-flex items-center gap-1 text-muted-foreground">Latest sample</span>
       </div>
     </div>
   );
@@ -1313,11 +1312,23 @@ function resolveContentSource(opts: {
 }
 
 function ContentSourceBadge({ source, compact }: { source: ContentSource; compact?: boolean }) {
-  const styles: Record<ContentSource, { label: string; color: string; dot?: boolean }> = {
-    live: { label: compact ? "Live" : "Live · streaming", color: "var(--emerald-signal)", dot: true },
-    curated: { label: compact ? "Curated" : "Curated synthesis", color: "var(--cyan)", dot: true },
-    static: { label: compact ? "Preview" : "Illustrative preview", color: "var(--amber-signal)" },
-    loading: { label: compact ? "Queued" : "Awaiting live data", color: "var(--muted-foreground)" },
+  const styles: Record<ContentSource, { label: string; color: string }> = {
+    live: {
+      label: compact ? "Sample" : "Latest sample",
+      color: "var(--emerald-signal)",
+    },
+    curated: {
+      label: compact ? "Curated" : "Human-reviewed synthesis",
+      color: "var(--cyan)",
+    },
+    static: {
+      label: compact ? "Preview" : "Illustrative preview",
+      color: "var(--amber-signal)",
+    },
+    loading: {
+      label: compact ? "Loading" : "Loading sample",
+      color: "var(--muted-foreground)",
+    },
   };
   const s = styles[source];
   return (
@@ -1325,7 +1336,6 @@ function ContentSourceBadge({ source, compact }: { source: ContentSource; compac
       className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider"
       style={{ color: s.color }}
     >
-      {s.dot && <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: s.color }} />}
       {s.label}
     </span>
   );
@@ -1818,7 +1828,7 @@ function LiveAbrahamPanel({
         <div className="inline-flex items-center gap-2 text-[9px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.24em] text-cyan leading-snug">
           <Brain className="w-3.5 h-3.5 shrink-0" />
           <span className="break-words">
-            Live Pulse · {headerLabel}
+            {headerLabel}
           </span>
         </div>
 
@@ -1836,16 +1846,13 @@ function LiveAbrahamPanel({
         <CuratedHeroSection insights={curated} />
       )}
 
-      {/* Small-sample warning — identical generic copy on every topic */}
-      <div className="relative rounded-xl border border-amber-signal/30 bg-amber-signal/[0.06] px-4 py-3 text-[12px] font-mono text-foreground/80 leading-relaxed flex gap-2.5 items-start">
-        <AlertTriangle className="w-4 h-4 text-amber-signal mt-0.5 shrink-0" />
-        <span>
-          Based on <span className="text-foreground font-medium tabular-nums">{sample}</span>{" "}
-          recent public posts after authenticity &amp; quality filters. Samples can be smaller than
-          traditional polls due to regional factors, speech realities, and quality/spam filters.
-          All citizen views are paraphrased aggregates — no usernames, direct quotes, or individual
-          accounts are stored. Interpret with appropriate caution. See methodology in About.
-        </span>
+      <div className="relative rounded-xl border border-border bg-secondary/25 px-4 py-2.5 text-[12px] text-muted-foreground leading-relaxed">
+        Based on{" "}
+        <span className="text-foreground font-medium tabular-nums">{sample}</span> filtered public
+        posts — a focused sample, not a census. Views are paraphrased aggregates.{" "}
+        <Link to="/about" className="text-cyan hover:underline">
+          How it works
+        </Link>
       </div>
 
       {/* Two equal hero cards — Overall Sentiment + Narrative Divergence */}

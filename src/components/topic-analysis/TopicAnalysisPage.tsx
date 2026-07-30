@@ -54,10 +54,8 @@ import {
   prettySegmentName,
   segScore,
   sentimentColor,
-  timeAgo,
 } from "./utils";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
-import { clearDashboardCaches } from "@/lib/data-cache";
 
 type LiveData = TopicSnapshot;
 
@@ -79,7 +77,7 @@ function useTopicBundle(rootKey: string) {
 
     const timeoutId = window.setTimeout(() => {
       if (!cancelled) {
-        setLoadError("Loading timed out — retry or refresh the page.");
+        setLoadError("Loading timed out — use Retry below.");
         setReady(true);
       }
     }, BUNDLE_TIMEOUT_MS);
@@ -209,7 +207,7 @@ export function TopicAnalysisPage({
       <section className="glass rounded-2xl p-6 border border-amber-signal/30 space-y-3">
         <h3 className="font-display font-semibold">{headerLabel}</h3>
         <p className="text-sm text-muted-foreground">
-          {loadError ?? "No live snapshot yet for this topic."}
+          {loadError ?? "No sample yet for this topic."}
         </p>
         {loadError && (
           <button
@@ -230,11 +228,6 @@ export function TopicAnalysisPage({
       ? TrendingDown
       : Minus;
 
-  const handleRefresh = async () => {
-    clearDashboardCaches();
-    retry();
-  };
-
   return (
     <div className="space-y-5 sm:space-y-6">
       {loadError && (
@@ -251,25 +244,19 @@ export function TopicAnalysisPage({
       )}
 
       {curatedStale && (
-        <div className="rounded-xl border border-amber-signal/35 bg-amber-signal/[0.06] px-4 py-3 flex items-start gap-2 text-sm text-foreground/90">
-          <AlertTriangle className="w-4 h-4 text-amber-signal shrink-0 mt-0.5" />
-          <span>
-            Curated synthesis is older than the latest snapshot — run Pass 2 curation to refresh headlines and insight cards.
-          </span>
+        <div className="rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-[12px] text-muted-foreground">
+          Headlines may lag the latest numbers — scores below still reflect the newest sample.
         </div>
       )}
 
-      {/* Intelligence Briefing — mobile: stacked panel; desktop: original inline row */}
+      {/* Topic hero — mobile */}
       <div className="md:hidden -mx-3 px-3 py-2">
         <div className="glass rounded-xl border border-cyan/30 p-4 space-y-4">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
-            <div className="font-display font-semibold text-xl tracking-tight">Intelligence Briefing</div>
+            <div className="font-display font-semibold text-xl tracking-tight">Topic briefing</div>
           </div>
-          <DataFreshnessBar
-            sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
-            onRefresh={handleRefresh}
-          />
+          <DataFreshnessBar sourceUpdatedAt={data.last_updated ?? curated?.generated_at} />
           <div className="grid grid-cols-3 divide-x divide-border/60 border-y border-border/60 py-3">
             <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} mobile />
             <HeroMetric
@@ -281,22 +268,19 @@ export function TopicAnalysisPage({
             />
             <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" mobile />
           </div>
-          <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-muted-foreground">
-            <span suppressHydrationWarning>{timeAgo(data.last_updated)}</span>
-            <div className="flex items-center gap-2 shrink-0">
-              {curated?.hero_confidence && (
-                <span
-                  className="px-1.5 py-0.5 rounded border uppercase"
-                  style={{
-                    color: confidenceColor(curated.hero_confidence),
-                    borderColor: `${confidenceColor(curated.hero_confidence)}44`,
-                  }}
-                >
-                  {curated.hero_confidence}
-                </span>
-              )}
-              <TrendIcon className="w-5 h-5" style={{ color: sentimentColor(score) }} />
-            </div>
+          <div className="flex items-center justify-end gap-2 text-[10px] font-mono text-muted-foreground">
+            {curated?.hero_confidence && (
+              <span
+                className="px-1.5 py-0.5 rounded border uppercase"
+                style={{
+                  color: confidenceColor(curated.hero_confidence),
+                  borderColor: `${confidenceColor(curated.hero_confidence)}44`,
+                }}
+              >
+                {curated.hero_confidence}
+              </span>
+            )}
+            <TrendIcon className="w-5 h-5" style={{ color: sentimentColor(score) }} />
           </div>
         </div>
       </div>
@@ -305,11 +289,10 @@ export function TopicAnalysisPage({
         <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 flex flex-wrap items-center gap-3 sm:gap-5">
           <div className="min-w-0 flex-1">
             <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
-            <div className="font-display font-semibold text-lg sm:text-xl truncate">Intelligence Briefing</div>
+            <div className="font-display font-semibold text-lg sm:text-xl truncate">Topic briefing</div>
           </div>
           <DataFreshnessBar
             sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
-            onRefresh={handleRefresh}
             className="shrink-0"
           />
           <HeroMetric label="Sentiment" value={String(score)} sub={label} color={sentimentColor(score)} />
@@ -320,20 +303,17 @@ export function TopicAnalysisPage({
             color={divergence !== null ? divergenceColor(divergence) : "var(--muted-foreground)"}
           />
           <HeroMetric label="Sample" value={sample} sub="posts" color="var(--cyan)" />
-          <div className="text-[10px] font-mono text-muted-foreground">
-            <span suppressHydrationWarning>{timeAgo(data.last_updated)}</span>
-            {curated?.hero_confidence && (
-              <span
-                className="ml-2 px-1.5 py-0.5 rounded border uppercase"
-                style={{
-                  color: confidenceColor(curated.hero_confidence),
-                  borderColor: `${confidenceColor(curated.hero_confidence)}44`,
-                }}
-              >
-                {curated.hero_confidence}
-              </span>
-            )}
-          </div>
+          {curated?.hero_confidence && (
+            <span
+              className="text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase"
+              style={{
+                color: confidenceColor(curated.hero_confidence),
+                borderColor: `${confidenceColor(curated.hero_confidence)}44`,
+              }}
+            >
+              {curated.hero_confidence}
+            </span>
+          )}
           <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
         </div>
       </div>

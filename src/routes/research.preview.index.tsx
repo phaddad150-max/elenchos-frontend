@@ -50,20 +50,19 @@ function ResearchPreviewLibraryPage() {
 
       <main className="max-w-[1100px] mx-auto w-full px-4 md:px-8 py-6 md:py-10 mobile-safe-bottom md:pb-12 space-y-6 md:space-y-8 relative flex-1">
         <header className="space-y-3">
-          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-amber-400/90">
-            <FlaskConical className="w-3.5 h-3.5" aria-hidden />
-            Preview only · not public launch
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+            <FlaskConical className="w-3.5 h-3.5 text-cyan" aria-hidden />
+            Research library
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight text-glow-cyan">
-            Thesis briefs (preview)
+            Thesis briefs
           </h1>
           <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-            {RESEARCH_NORTH_STAR} Hold the question, multi-source trail, gaps, and
-            human-gated claims — separate from live Topics.
+            {RESEARCH_NORTH_STAR} Separate from Topics scores.
           </p>
         </header>
 
-        <ResearchModeBanner message="Preview URL — soft-hidden while Research is under construction. Public /research shows Coming soon." />
+        <ResearchModeBanner message="Research is multi-source and human-gated — not a live Topics pulse." />
 
         <section aria-label="Research briefs" className="space-y-3">
           <div className="flex items-center justify-between gap-2">

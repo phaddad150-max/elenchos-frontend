@@ -86,7 +86,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Unfiltered insights from public discourse on X, powered by AI. Live citizen sentiment, narrative divergence and leader trust rankings.",
+          "Public discourse samples on X — citizen sentiment, narrative gaps, and trackers for ordinary citizens.",
       },
       { property: "og:url", content: "https://elenchos.live/" },
     ],
@@ -493,13 +493,11 @@ function Dashboard() {
                 <span className="text-cyan">Official Narratives</span>
               </h1>
               <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
-                Structured public-discourse samples on X — directional insights, not national polls.
-                Human-managed, AI-assisted.
+                Public intelligence from structured X samples — directional, not a national poll.
               </p>
             </div>
             <DataFreshnessBar
               sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
-              refreshedAt={refreshedAt}
             />
           </div>
         </section>
@@ -520,8 +518,8 @@ function Dashboard() {
             <div className="flex flex-col gap-3 mb-3">
               <Header
                 icon={<Radio className="w-4 h-4" />}
-                title="Real-Time Citizen Signals"
-                subtitle="Sentiment, divergence & trend — tap a row for detail."
+                title="Citizen signals"
+                subtitle="Latest sample — tap a row for detail."
               />
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
@@ -1600,7 +1598,7 @@ function AiInsights({
         <Header
           icon={<Brain className="w-4 h-4" />}
           title="Analysis & Insights"
-          subtitle="Live cross-source synthesis · cached 5min"
+          subtitle="From latest dashboard sample"
         />
         <span className="px-2 py-1 rounded bg-cyan/15 text-cyan border border-cyan/40 text-[11px] font-mono inline-flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />

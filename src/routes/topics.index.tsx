@@ -31,7 +31,8 @@ export const Route = createFileRoute("/topics/")({
       { property: "og:title", content: "Topics — Elenchos" },
       {
         property: "og:description",
-        content: "Live citizen sentiment from public X discourse, analyzed across nine dimensions per topic.",
+        content:
+          "Citizen sentiment and narrative gaps from public X samples — directional insights for ordinary people.",
       },
       { property: "og:url", content: "https://elenchos.live/topics" },
     ],
@@ -42,9 +43,9 @@ export const Route = createFileRoute("/topics/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Live Topics: Public Square Sentiment",
+          name: "Topics — Public Square Sentiment · Elenchos",
           description:
-            "Live citizen sentiment from public X discourse, analyzed across nine dimensions per topic.",
+            "Citizen sentiment and narrative gaps from public X samples — directional insights for ordinary people.",
           url: "https://elenchos.live/topics",
         }),
       },

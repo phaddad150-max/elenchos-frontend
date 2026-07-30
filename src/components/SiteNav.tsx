@@ -37,12 +37,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
   return (
     <>
       <nav className="sticky top-0 z-30 nav-shell" aria-label="Main">
-        <div className="border-b border-border/40 bg-background/40">
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 flex items-center justify-center">
-            <ThemePreferenceTabs />
-          </div>
-        </div>
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between gap-2 sm:gap-3">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3 flex items-center justify-between gap-2 sm:gap-3">
           <Link to="/" className="flex items-center gap-2 md:gap-3 group min-w-0" aria-label="Elenchos home">
             <div className="brand-mark w-9 h-9 md:w-10 md:h-10 rounded-full grid place-items-center shrink-0">
               <Radio className="w-4 h-4 text-cyan" strokeWidth={2.5} />
@@ -53,7 +48,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
                   Elenchos
                 </span>
                 <span className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mt-1">
-                  Cross-examined public discourse
+                  Public intelligence for citizens
                 </span>
               </div>
             </div>
@@ -81,6 +76,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <GlobalSearch />
+            <ThemePreferenceTabs />
             <UserMenu />
             {rightSlot}
             <a
