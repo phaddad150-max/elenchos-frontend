@@ -162,6 +162,7 @@ export function generateSignal(seed?: number, topicOverride?: string): Signal {
     engagement,
     posts,
     divergence: Math.min(1, r(0.1, 0.95)),
+    divergenceKnown: true,
     velocity: r(-45, 220),
     headline: rand(HEADLINES),
     excerpt:
