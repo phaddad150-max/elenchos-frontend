@@ -487,8 +487,8 @@ function Dashboard() {
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-7 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <section className="fade-up dash-panel px-3.5 py-3.5 sm:px-5 sm:py-5">
-          <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-between gap-3 sm:gap-4">
-            <div className="min-w-0 w-full lg:flex-1 lg:min-w-0">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 sm:gap-4">
+            <div className="min-w-0 w-full md:flex-1">
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/8 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-cyan mb-2 sm:mb-2.5">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-40" />
@@ -506,20 +506,7 @@ function Dashboard() {
                 insight, not a national poll.
               </p>
             </div>
-            {/* Desktop only: brand art fills header empty space — panel size/layout unchanged */}
-            <div
-              className="hidden lg:flex shrink-0 self-center items-center justify-center w-[min(240px,26vw)] max-w-[260px] pointer-events-none select-none"
-              aria-hidden
-            >
-              <img
-                src="/brand/elenchos-image-1.png"
-                alt=""
-                className="max-h-[132px] w-auto max-w-full object-contain object-center"
-                loading="eager"
-                decoding="async"
-              />
-            </div>
-            <div className="shrink-0 w-full lg:w-auto flex lg:items-start lg:justify-end">
+            <div className="shrink-0 w-full md:w-auto flex md:items-start md:justify-end">
               <DataFreshnessBar
                 sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
               />

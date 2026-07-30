@@ -406,6 +406,18 @@
   box-shadow: 0 8px 24px -14px oklch(0.55 0.08 210 / 0.35);
 }
 
+/* Topics index: unified hero banner (copy + art one surface) */
+.topics-hero-banner {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--foreground) 4%, transparent),
+    0 14px 36px -22px oklch(0 0 0 / 0.4);
+}
+.light .topics-hero-banner {
+  background: oklch(0.995 0.003 240);
+  border-color: oklch(0.68 0.06 210 / 0.5);
+  box-shadow: 0 8px 28px -18px oklch(0.4 0.04 240 / 0.28);
+}
+
 /* Landing: quieter background so panels read as cards */
 .dash-landing {
   --dash-gap: 1rem;
