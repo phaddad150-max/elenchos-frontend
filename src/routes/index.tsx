@@ -520,79 +520,74 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Primary: real signals first (tap → modal with snapshot fallbacks) */}
-        <motion.section
+        {/* KPI hero (no sparklines / deltas) */}
+        <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
+
+        {/* Signals + heatmap (original two-column placement) */}
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-4 sm:p-5 overflow-hidden"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-4"
         >
-          <div className="flex flex-col gap-3 mb-3 sm:flex-row sm:items-end sm:justify-between">
-            <Header
-              icon={<Radio className="w-4 h-4" />}
-              title="Citizen signals"
-              subtitle="From the latest sample. Tap any row for the full briefing."
-            />
-            <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll sm:max-w-[55%]">
-              <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
+          <section className="glass rounded-2xl p-4 sm:p-5 xl:col-span-8 overflow-hidden">
+            <div className="flex flex-col gap-3 mb-3">
+              <Header
+                icon={<Radio className="w-4 h-4" />}
+                title="Citizen signals"
+                subtitle="From the latest sample. Tap any row for the full briefing."
+              />
+              <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll">
+                <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
+              </div>
             </div>
-          </div>
 
-          <TooltipProvider delayDuration={200}>
-            <CitizenSignalsFeed
-              onPick={setPickedCitizen}
-              signals={mergedFeedSignals}
-              groupFilter={topicFilter}
-              fallback={
-                <div className="space-y-1.5">
-                  <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
-                  <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
-                  <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
-                </div>
-              }
-              useFallback={
-                mergedFeedSignals.length === 0 &&
-                intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length > 0
-              }
-            />
-          </TooltipProvider>
+            <TooltipProvider delayDuration={200}>
+              <CitizenSignalsFeed
+                onPick={setPickedCitizen}
+                signals={mergedFeedSignals}
+                groupFilter={topicFilter}
+                fallback={
+                  <div className="space-y-1.5">
+                    <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
+                    <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
+                    <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
+                  </div>
+                }
+                useFallback={
+                  mergedFeedSignals.length === 0 &&
+                  intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length > 0
+                }
+              />
+            </TooltipProvider>
 
-          {mergedFeedSignals.length === 0 &&
-            intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
-            !simMode && (
-              <p className="mt-4 text-[13px] text-muted-foreground leading-relaxed">
-                No citizen signal rows in this sample yet. Open{" "}
-                <Link to="/topics" className="text-cyan hover:underline">
-                  Topics
-                </Link>{" "}
-                for full briefings, or check back after the next workflow run.
-              </p>
-            )}
-        </motion.section>
+            {mergedFeedSignals.length === 0 &&
+              intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
+              !simMode && (
+                <p className="mt-4 text-[13px] text-muted-foreground leading-relaxed">
+                  No citizen signal rows in this sample yet. Open{" "}
+                  <Link to="/topics" className="text-cyan hover:underline">
+                    Topics
+                  </Link>{" "}
+                  for full briefings, or check back after the next workflow run.
+                </p>
+              )}
+          </section>
 
-        {/* Secondary: snapshot metrics (no sparklines) + map + cross-topic text */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-          <div className="xl:col-span-8 space-y-3">
-            <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground px-0.5">
-              Snapshot metrics
-            </p>
-            <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
-            <AiAnalysisSummary
-              snapshots={snapshots}
-              signals={mergedFeedSignals}
-              highlights={curatedHighlights}
-              overview={overview}
-            />
-          </div>
-
-          <div className="xl:col-span-4">
-            <section className="glass rounded-2xl p-3 sm:p-4 globe-panel relative overflow-hidden h-full min-h-[280px]">
-              <div className="mb-1">
-                <div className="text-sm font-display font-semibold">Where signals map</div>
-                <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
-                  Geographic anchors for topics in the current sample
+          <div className="xl:col-span-4 space-y-4">
+            <section className="glass rounded-2xl p-3 sm:p-4 globe-panel relative overflow-hidden">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <div>
+                  <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
+                  <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
+                    <span className="sm:hidden">Tap a point for detail · {regionTiles.length} regions</span>
+                    <span className="hidden sm:inline">
+                      Hover a point for topic + score · {regionTiles.length} regions ·{" "}
+                      {fmtNum(kpis.postsAnalyzed)} posts
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="h-[220px] sm:h-[280px] xl:h-[260px] -mx-1">
+              <div className="h-[220px] sm:h-[320px] xl:h-[280px] -mx-1">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -618,7 +613,16 @@ function Dashboard() {
               )}
             </section>
           </div>
-        </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <AiAnalysisSummary
+            snapshots={snapshots}
+            signals={mergedFeedSignals}
+            highlights={curatedHighlights}
+            overview={overview}
+          />
+        </motion.div>
 
       </main>
 
