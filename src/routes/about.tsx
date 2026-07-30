@@ -555,8 +555,8 @@ function WhyX() {
         <div className="mt-4 flex-1 min-h-[200px] md:min-h-[240px] flex flex-col">
           <div className="relative flex-1 rounded-xl border border-cyan/25 overflow-hidden bg-secondary/20">
             <img
-              src="/brand/elenchos-characters.jpg"
-              alt="Elenchos characters: analyst and Socrates, brand art from @elenchospulse"
+              src="/brand/elenchos-image-3.png"
+              alt="Elenchos characters: brand art from @elenchospulse"
               className="absolute inset-0 w-full h-full object-cover object-center"
               loading="lazy"
               decoding="async"
