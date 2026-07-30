@@ -574,9 +574,11 @@ function WhyX() {
           before they stand as the public record.
         </p>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
-          The same model family assists coding and development of this site. The product itself is
-          not run by a bot: a person with research, communications, data analysis, and digital
-          ecosystem experience owns every publish decision.
+          elenchos.live is run and managed by a human: an ordinary person with experience in
+          communications, research, data analysis, digital ecosystems, APIs, and AI tools. This
+          dashboard is not operated by an autonomous agent or bot. AI assistance (xAI / SpaceXAI
+          models) is used for coding, development, fetching, filtering, analysis, and reasoning under
+          that human&apos;s direction. Every publish decision stays with that person.
         </p>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
           The goal is a freemium research tool ordinary citizens, researchers, and truth-seekers can
@@ -612,7 +614,6 @@ const DISCLAIMER_POINTS = [
   "Insights are machine-assisted and human-managed. No warranties on accuracy, completeness, or timeliness.",
   "Not professional, financial, legal, or political advice. Verify before acting.",
   "Use of this dashboard is entirely at your own risk.",
-  "elenchos.live is run and managed by an ordinary person, not by an autonomous agent or bot. AI assistance is used as a tool under that human’s direction.",
 ];
 
 function LegalSection() {
