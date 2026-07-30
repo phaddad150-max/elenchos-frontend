@@ -156,8 +156,14 @@ function intelToSignal(item: IntelFeedItem, i: number): Signal {
     intensityScore,
     engagement: item.engagement ?? 0,
     posts: item.posts ?? 0,
-    divergence: typeof item.divergence === "number" ? (item.divergence > 1 ? item.divergence / 100 : item.divergence) : 0.5,
-    velocity: item.velocity ?? 0,
+    divergence:
+      typeof item.divergence === "number"
+        ? item.divergence > 1
+          ? item.divergence / 100
+          : item.divergence
+        : 0,
+    divergenceKnown: typeof item.divergence === "number",
+    velocity: typeof item.velocity === "number" ? item.velocity : 0,
     headline: item.headline ?? item.topic ?? "Live signal",
     excerpt: item.excerpt ?? "",
     source: item.source ?? "Live citizen signal",
@@ -327,9 +333,10 @@ function Dashboard() {
         sentiment,
         intensity,
         intensityScore,
-        engagement: it.sample_size ?? 0,
-        posts: it.sample_size ?? 0,
-        divergence: 0.5,
+        engagement: 0,
+        posts: typeof it.sample_size === "number" && it.sample_size > 0 ? it.sample_size : 0,
+        divergence: 0,
+        divergenceKnown: false,
         velocity: 0,
         headline: (it.headline ?? it.summary ?? it.topic ?? "Citizen signal").slice(0, 140),
         excerpt: it.excerpt ?? it.summary ?? "",

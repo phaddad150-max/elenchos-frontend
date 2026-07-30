@@ -117,35 +117,36 @@
   --card-foreground: oklch(0.26 0.04 230);
   --popover: oklch(0.99 0.002 240);
   --popover-foreground: oklch(0.26 0.04 230);
-  --primary: oklch(0.48 0.12 210);
-  --primary-foreground: oklch(0.99 0.01 240);
+  /* Brand primary = same neon cyan as dark logo / hero KPI numbers */
+  --primary: oklch(0.72 0.15 200);
+  --primary-foreground: oklch(0.14 0.02 250);
   --secondary: oklch(0.93 0.006 240);
   --secondary-foreground: oklch(0.28 0.04 230);
   --muted: oklch(0.93 0.006 240);
   --muted-foreground: oklch(0.4 0.03 230);
-  --accent: oklch(0.48 0.12 210);
-  --accent-foreground: oklch(0.99 0.01 240);
+  --accent: oklch(0.72 0.15 200);
+  --accent-foreground: oklch(0.14 0.02 250);
   --border: oklch(0.78 0.015 240 / 0.95);
   --input: oklch(0.9 0.008 240);
-  --ring: oklch(0.48 0.12 210);
+  --ring: oklch(0.72 0.15 200);
 
-  /* Brand + signals — darker for contrast on pale backgrounds */
-  --cyan: oklch(0.45 0.11 210);
-  --cyan-glow: oklch(0.5 0.11 210 / 0.25);
-  --magenta: oklch(0.48 0.11 210);
-  --amber-signal: oklch(0.52 0.15 70);
-  --emerald-signal: oklch(0.42 0.13 155);
-  --emerald-strong: oklch(0.38 0.14 150);
-  --emerald-mid: oklch(0.42 0.13 152);
-  /* Leaning-positive: was washed #86efac — now deep enough on white */
-  --emerald-lean: oklch(0.4 0.11 155);
-  --orange-signal: oklch(0.52 0.15 50);
-  --rose-signal: oklch(0.48 0.19 20);
-  --emerald-tint: oklch(0.42 0.13 155 / 0.12);
-  --emerald-lean-tint: oklch(0.4 0.11 155 / 0.1);
-  --amber-tint: oklch(0.52 0.15 70 / 0.12);
-  --orange-tint: oklch(0.52 0.15 50 / 0.12);
-  --rose-tint: oklch(0.48 0.19 20 / 0.12);
+  /* Neon brand cyan — match dark-mode logo / hero KPI numbers */
+  --cyan: oklch(0.82 0.16 200);
+  --cyan-glow: oklch(0.82 0.16 200 / 0.35);
+  --magenta: oklch(0.78 0.15 200);
+  /* Scoring palette: same bands as dark, greens darkened for light-bg readability */
+  --amber-signal: oklch(0.72 0.16 75);
+  --emerald-signal: oklch(0.48 0.14 155);
+  --emerald-strong: oklch(0.42 0.15 150);
+  --emerald-mid: oklch(0.46 0.14 152);
+  --emerald-lean: oklch(0.44 0.12 155);
+  --orange-signal: oklch(0.62 0.15 50);
+  --rose-signal: oklch(0.55 0.2 20);
+  --emerald-tint: oklch(0.48 0.14 155 / 0.14);
+  --emerald-lean-tint: oklch(0.44 0.12 155 / 0.12);
+  --amber-tint: oklch(0.72 0.16 75 / 0.14);
+  --orange-tint: oklch(0.62 0.15 50 / 0.14);
+  --rose-tint: oklch(0.55 0.2 20 / 0.14);
 
   --surface-1: oklch(0.96 0.002 240 / 0.92);
   --surface-2: oklch(0.97 0.002 240 / 0.95);
@@ -476,52 +477,106 @@
     0 8px 22px -12px oklch(0.45 0.08 210 / 0.25);
 }
 
-/* Topics index: unified hero banner (copy + art one surface) */
-.topics-hero-banner {
+/*
+ * Shared page hero (Topics · Research · About) — same type + panel chrome as dash-panel.
+ * Art blends into the panel (no hard image frame). Outer border stays visible.
+ */
+.page-hero-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--cyan) 28%, var(--border));
+  background: color-mix(in oklab, var(--card) 88%, var(--background));
   box-shadow:
     0 0 0 1px color-mix(in oklab, var(--foreground) 4%, transparent),
-    0 14px 36px -22px oklch(0 0 0 / 0.4);
+    0 12px 36px -20px oklch(0 0 0 / 0.45);
 }
-.topics-hero-banner img {
-  /* Avoid harsh sticker edges; parent clips to rounded-2xl */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 18%, black 100%);
+.page-hero-banner .page-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--cyan);
 }
-.light .topics-hero-banner {
-  background: oklch(0.995 0.003 240);
-  border-color: oklch(0.68 0.06 210 / 0.55);
-  box-shadow:
-    0 0 0 1px oklch(0.82 0.03 220 / 0.6),
-    0 10px 28px -16px oklch(0.4 0.04 240 / 0.22);
+.page-hero-banner .page-hero-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: var(--foreground);
 }
-.light .topics-hero-banner .topics-hero-blend {
+.page-hero-banner .page-hero-sub {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+.page-hero-art {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  /* No hard border around art — soft blend into panel */
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+.page-hero-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 22%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 22%, black 100%);
+}
+.page-hero-blend {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 55%;
+  max-width: 12rem;
   background: linear-gradient(
     to right,
-    oklch(0.995 0.003 240) 0%,
-    oklch(0.995 0.003 240 / 0.85) 35%,
-    oklch(0.995 0.003 240 / 0.35) 65%,
+    color-mix(in oklab, var(--card) 96%, var(--background)) 0%,
+    color-mix(in oklab, var(--card) 55%, transparent) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.light .page-hero-banner {
+  background: oklch(0.995 0.002 240);
+  border-color: oklch(0.72 0.06 210 / 0.55);
+  box-shadow:
+    0 0 0 1px oklch(0.82 0.04 210 / 0.35),
+    0 10px 28px -16px oklch(0.4 0.04 240 / 0.2);
+}
+.light .page-hero-blend {
+  background: linear-gradient(
+    to right,
+    oklch(0.995 0.002 240) 0%,
+    oklch(0.995 0.002 240 / 0.88) 40%,
     transparent 100%
   );
 }
+.light .page-hero-art img {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 28%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 28%, black 100%);
+}
 
-/* Research index side banner */
-.research-side-banner {
-  border: 1px solid color-mix(in oklab, var(--cyan) 25%, var(--border));
-  background: color-mix(in oklab, var(--card) 88%, var(--cyan) 4%);
-  box-shadow: 0 12px 36px -18px oklch(0 0 0 / 0.45);
+/* Match Topics / Research / About page wash to dashboard dark landing */
+.page-shell {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
-.light .research-side-banner {
-  border-color: oklch(0.68 0.06 210 / 0.5);
-  background: oklch(0.995 0.003 240);
-  box-shadow:
-    0 0 0 1px oklch(0.82 0.03 220 / 0.55),
-    0 12px 32px -16px oklch(0.4 0.04 240 / 0.22);
+.page-shell .grid-bg {
+  opacity: 0.12;
 }
-.light .dash-landing {
-  /* Keep landing clean; panels carry contrast */
-}
-.light .dash-landing main {
-  color: var(--foreground);
+.light .page-shell .grid-bg {
+  display: none;
 }
 
 /* Landing: quieter background so panels read as cards */

@@ -51,8 +51,8 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   return (
-    <div className="min-h-screen relative flex flex-col">
-      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+    <div className="page-shell dash-landing">
+      <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
       <main className="max-w-[1180px] mx-auto w-full px-4 md:px-8 py-6 md:py-12 mobile-safe-bottom md:pb-12 space-y-12 md:space-y-20 relative flex-1 overflow-x-clip">
@@ -73,34 +73,26 @@ function AboutPage() {
 
 function Hero() {
   return (
-    <section className="relative">
-      <div className="mb-6 flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+    <section className="relative space-y-4">
+      <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
         <Link to="/" className="hover:text-cyan transition-colors inline-flex items-center gap-1.5">
           <ArrowRight className="w-3 h-3 rotate-180" />
-          Back to dashboard
+          Back to homepage
         </Link>
         <span className="opacity-40">/</span>
         <span className="text-foreground/70">About</span>
       </div>
 
-      <div
-        aria-hidden
-        className="absolute -inset-x-20 -top-20 h-[360px] opacity-60 pointer-events-none blur-3xl"
-        style={{
-          background:
-            "radial-gradient(60% 60% at 30% 30%, color-mix(in oklab, var(--cyan) 35%, transparent), transparent), radial-gradient(50% 50% at 80% 60%, color-mix(in oklab, var(--emerald-signal) 25%, transparent), transparent)",
-        }}
-      />
-
-      <div className="relative flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+      <div className="page-hero-banner">
+        <div className="relative flex flex-col md:flex-row md:items-center gap-5 md:gap-8 p-4 sm:p-5 md:p-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
-          className="relative shrink-0 w-24 h-24 md:w-28 md:h-28"
+          className="relative shrink-0 w-20 h-20 md:w-24 md:h-24"
         >
           <div className="brand-mark w-full h-full rounded-full grid place-items-center relative overflow-hidden">
-            <Radio className="w-8 h-8 text-cyan relative z-10" strokeWidth={2.5} />
+            <Radio className="w-7 h-7 text-cyan relative z-10" strokeWidth={2.5} />
             <motion.div
               aria-hidden
               className="absolute inset-2 rounded-full border border-cyan/25"
@@ -133,7 +125,7 @@ function Hero() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan"
+            className="page-hero-kicker"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-60" />
@@ -146,7 +138,7 @@ function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.05 }}
-            className="mt-4 font-display font-semibold tracking-tight leading-[1.08] text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl break-words"
+            className="page-hero-title mt-3 text-[1.55rem] sm:text-3xl md:text-[2.35rem] lg:text-4xl break-words"
           >
             Elenchos <span className="text-cyan">ἔλεγχος</span>
           </motion.h1>
@@ -155,7 +147,7 @@ function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.1 }}
-            className="mt-5 text-[15px] md:text-lg text-foreground/85 leading-relaxed max-w-2xl space-y-3"
+            className="page-hero-sub mt-3 max-w-2xl space-y-2.5 text-[14px] md:text-[15px]"
           >
             <span className="block">
               Ancient Greek for cross-examination. We seek truth and defend ordinary people through
@@ -168,6 +160,7 @@ function Hero() {
               official or media frames, with method, limits, and sample size shown.
             </span>
           </motion.p>
+        </div>
         </div>
       </div>
     </section>

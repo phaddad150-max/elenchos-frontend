@@ -144,8 +144,8 @@ function TopicsShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="min-h-screen relative flex flex-col">
-      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+    <div className="page-shell dash-landing">
+      <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
@@ -172,19 +172,18 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-5 sm:space-y-6"
       >
-        {/* Unified banner: copy left + wide headbanner art right (cropped, edge-blended) */}
-        <header className="topics-hero-banner relative overflow-hidden rounded-2xl border border-cyan/30 bg-[color-mix(in_oklab,var(--card)_92%,var(--cyan)_4%)]">
+        <header className="page-hero-banner">
           <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(200px,38%)] lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,36%)] items-stretch min-h-0">
             <div className="relative z-[2] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0">
-              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan w-fit">
+              <div className="page-hero-kicker">
                 <span className="w-1 h-3.5 bg-cyan rounded-sm" />
                 Topics
               </div>
-              <h1 className="text-[1.35rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] font-display font-semibold tracking-tight leading-[1.12] break-words">
+              <h1 className="page-hero-title text-[1.35rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] break-words">
                 What citizens say vs{" "}
-                <span className="text-cyan">official stories</span>
+                <span className="text-cyan">official narratives</span>
               </h1>
-              <p className="text-[12.5px] sm:text-[13px] md:text-sm text-muted-foreground leading-snug w-full max-w-none whitespace-normal lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
+              <p className="page-hero-sub w-full max-w-none whitespace-normal lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
                 Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
               </p>
               <button
@@ -201,21 +200,18 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               </button>
             </div>
 
-            {/* Wide art: cover-crop into slot, inherits banner corner radius via parent overflow */}
             <div
-              className="relative z-[1] hidden md:block min-h-[118px] lg:min-h-[132px] select-none pointer-events-none overflow-hidden"
+              className="page-hero-art z-[1] hidden md:block min-h-[118px] lg:min-h-[132px]"
               aria-hidden
             >
               <img
                 src="/brand/headbanner.png"
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover object-[72%_center] lg:object-[70%_center]"
+                className="absolute inset-0 object-[72%_center] lg:object-[70%_center]"
                 loading="eager"
                 decoding="async"
               />
-              {/* Seamless merge into copy — not a floating collage frame */}
-              <div className="topics-hero-blend absolute inset-y-0 left-0 w-[55%] max-w-[12rem] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_96%,var(--cyan)_4%)] from-0% via-[color-mix(in_oklab,var(--card)_55%,transparent)] via-45% to-transparent" />
-              <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-cyan/15 to-transparent" />
+              <div className="page-hero-blend" />
             </div>
           </div>
         </header>

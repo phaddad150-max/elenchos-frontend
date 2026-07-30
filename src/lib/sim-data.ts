@@ -31,8 +31,11 @@ export interface Signal {
   intensityScore: number; // 0..1
   engagement: number;
   posts: number;
-  divergence: number; // 0..1 — citizen vs official+media
-  velocity: number; // % change last 60min
+  /** 0..1 or 0..100 — only show when divergenceKnown */
+  divergence: number;
+  /** When false/undefined with placeholder 0.5, UI hides fabricated gap metrics */
+  divergenceKnown?: boolean;
+  velocity: number; // % change last 60min; 0 = unknown (hidden in map modal)
   headline: string;
   excerpt: string;
   source: string;

@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FlaskConical, ArrowRight, FileText } from "lucide-react";
+import { motion } from "framer-motion";
+import { FlaskConical, ArrowRight, FileText, Home } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { listResearchBriefs, RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
-import { ContactEmailMe } from "@/components/ContactEmailMe";
+import { listResearchBriefs, RESEARCH_NORTH_STAR, researchStatusLabel } from "@/lib/research-catalog";
 
 export const Route = createFileRoute("/research/")({
   head: () => ({
@@ -31,93 +31,109 @@ function ResearchIndexPage() {
   const briefs = listResearchBriefs();
 
   return (
-    <div className="min-h-screen relative flex flex-col">
-      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+    <div className="page-shell dash-landing">
+      <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-8 py-8 sm:py-10 md:py-14 mobile-safe-bottom md:pb-20 relative flex-1 overflow-x-clip">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(220px,34%)] gap-6 sm:gap-8 lg:gap-10 items-start min-w-0">
-          {/* Left: research content */}
-          <div className="min-w-0 w-full">
-            <div className="text-center lg:text-left mb-8 sm:mb-10">
-              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground mb-3 sm:mb-4">
-                <FlaskConical className="w-3.5 h-3.5 text-cyan" aria-hidden />
+      <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-8 py-6 sm:py-8 md:py-10 mobile-safe-bottom md:pb-16 relative flex-1 overflow-x-clip">
+        {/* Shared page hero — same type/chrome as Topics / About */}
+        <header className="page-hero-banner mb-6 sm:mb-8">
+          <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(200px,34%)] items-stretch min-h-0">
+            <div className="relative z-[2] flex flex-col justify-center gap-2 p-4 sm:p-5 md:p-6 min-w-0">
+              <div className="page-hero-kicker">
+                <FlaskConical className="w-3.5 h-3.5" aria-hidden />
                 Research
               </div>
-              <h1 className="text-[1.65rem] sm:text-3xl md:text-4xl font-display font-semibold tracking-tight text-glow-cyan mb-3 break-words">
+              <h1 className="page-hero-title text-[1.45rem] sm:text-2xl md:text-[1.9rem] lg:text-[2.15rem] break-words">
                 Research briefs, not live topic scores
               </h1>
-              <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
-                {RESEARCH_NORTH_STAR}
-              </p>
-            </div>
-
-            <div className="space-y-3 mb-10">
-              {briefs.map((b) => (
-                <Link
-                  key={b.slug}
-                  to="/research/preview/$slug"
-                  params={{ slug: b.slug }}
-                  className="block rounded-2xl border border-border bg-card/40 hover:border-cyan/40 hover:bg-cyan/5 active:bg-cyan/8 transition-colors px-3.5 sm:px-4 py-3.5 sm:py-4 text-left touch-manipulation min-w-0"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 space-y-1">
-                      <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan">
-                        Pilot · {b.region}
-                      </p>
-                      <h2 className="text-[15px] font-display font-semibold text-foreground leading-snug">
-                        {b.title}
-                      </h2>
-                      <p className="text-[12.5px] text-muted-foreground leading-relaxed">
-                        {b.subtitle}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-cyan shrink-0 mt-1" />
-                  </div>
-                  {b.pdfUrl ? (
-                    <span className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
-                      <FileText className="w-3 h-3" />
-                      Short PDF available
-                    </span>
-                  ) : null}
-                </Link>
-              ))}
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 text-center lg:text-left">
+              <p className="page-hero-sub max-w-xl">{RESEARCH_NORTH_STAR}</p>
               <Link
-                to="/topics"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/40 hover:bg-secondary/70 text-foreground px-4 py-2 text-[13px] font-medium transition-colors"
+                to="/"
+                className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
               >
-                Browse Topics
+                <Home className="w-3.5 h-3.5" />
+                Back to homepage
               </Link>
-              <ContactEmailMe
-                source="research"
-                variant="inline"
-                className="text-[12px] font-mono"
-              />
             </div>
-          </div>
 
-          {/* Right: brand side banner (lg+) */}
-          <aside
-            className="hidden lg:block sticky top-24 self-start select-none pointer-events-none"
-            aria-hidden
-          >
-            <div className="research-side-banner relative overflow-hidden rounded-2xl">
+            <div
+              className="page-hero-art hidden lg:block min-h-[140px] relative"
+              aria-hidden
+            >
               <img
                 src="/brand/research-side-banner.png"
                 alt=""
-                className="w-full h-auto object-cover object-center max-h-[min(72vh,560px)]"
+                className="absolute inset-0 object-cover object-center"
                 loading="eager"
                 decoding="async"
               />
-              <div
-                className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[color-mix(in_oklab,var(--background)_55%,transparent)] to-transparent"
-                aria-hidden
-              />
+              <div className="page-hero-blend" />
             </div>
-          </aside>
+          </div>
+        </header>
+
+        {/* Dynamic brief grid */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2 px-0.5">
+            <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-cyan">
+              Case studies &amp; briefs
+            </p>
+            <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+              {briefs.length} published
+            </span>
+          </div>
+
+          {briefs.map((b, i) => (
+            <motion.div
+              key={b.slug}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.35 }}
+            >
+              <Link
+                to="/research/preview/$slug"
+                params={{ slug: b.slug }}
+                className="group block rounded-2xl border border-border/90 bg-card/50 hover:border-cyan/45 hover:bg-cyan/[0.06] active:bg-cyan/10 transition-all px-3.5 sm:px-5 py-4 text-left touch-manipulation min-w-0 shadow-[0_1px_0_color-mix(in_oklab,var(--foreground)_5%,transparent)] hover:shadow-[0_0_24px_-12px_var(--color-cyan-glow)]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan">
+                        Pilot · {b.region}
+                      </p>
+                      <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground border border-border/80 rounded-full px-2 py-0.5">
+                        {researchStatusLabel(b.status)}
+                      </span>
+                    </div>
+                    <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground leading-snug group-hover:text-cyan transition-colors">
+                      {b.title}
+                    </h2>
+                    <p className="text-[12.5px] sm:text-[13px] text-muted-foreground leading-relaxed">
+                      {b.subtitle}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {b.themes.slice(0, 4).map((t) => (
+                        <span
+                          key={t}
+                          className="text-[10px] font-mono text-muted-foreground/90 border border-border/70 rounded-md px-1.5 py-0.5"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-cyan shrink-0 mt-1 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                </div>
+                {b.pdfUrl ? (
+                  <span className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
+                    <FileText className="w-3 h-3 text-cyan" />
+                    Short PDF available
+                  </span>
+                ) : null}
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </main>
 
