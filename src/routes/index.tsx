@@ -47,6 +47,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
+import { useCountUp } from "@/hooks/use-count-up";
 
 import {
   loadCuratedHighlights,
@@ -1884,6 +1885,80 @@ function avgDivergenceFromSnapshots(
   return sentimentSpread.reduce((sum, v) => sum + v, 0) / sentimentSpread.length;
 }
 
+function KpiHeroTile({
+  label,
+  value,
+  icon: Icon,
+  format,
+  delay = 0,
+}: {
+  label: string;
+  value: number | undefined;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  format: "number" | "percent";
+  delay?: number;
+}) {
+  const has = typeof value === "number" && !Number.isNaN(value);
+  const target = has ? value : 0;
+  const counted = useCountUp(target, {
+    duration: 1100,
+    format: has && format === "number" && value >= 1000 ? "compact" : "number",
+    decimals: 0,
+  });
+  const display = has ? counted : null;
+  const brand = "var(--cyan)";
+  const barPct =
+    has && format === "percent" ? Math.min(100, Math.max(0, Math.round(value))) : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      className="glass rounded-xl border border-cyan/25 px-3 py-2.5 sm:px-3.5 sm:py-3 min-w-0 flex flex-col justify-center gap-1.5"
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className="shrink-0 w-7 h-7 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10"
+          aria-hidden
+        >
+          <Icon className="w-3.5 h-3.5 text-cyan" strokeWidth={2.4} />
+        </span>
+        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground leading-snug line-clamp-2">
+          {label}
+        </span>
+      </div>
+      {display != null ? (
+        <div className="flex items-end justify-between gap-2 pl-0.5">
+          <div
+            className="text-[1.65rem] sm:text-2xl md:text-[1.75rem] font-display font-semibold tabular-nums leading-none tracking-tight"
+            style={{ color: brand }}
+          >
+            {display}
+            {format === "percent" && (
+              <span className="text-sm font-mono text-muted-foreground ml-0.5">%</span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="text-[11px] font-mono text-muted-foreground leading-snug pl-0.5">
+          Not in sample
+        </div>
+      )}
+      {barPct != null && (
+        <div className="h-1 rounded-full bg-border/70 overflow-hidden">
+          <motion.div
+            className="h-full rounded-full bg-cyan/80"
+            initial={{ width: 0 }}
+            animate={{ width: `${barPct}%` }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: delay * 0.5 }}
+          />
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 function DashboardKpiGrid({
   overview,
   snapshots,
@@ -1899,14 +1974,13 @@ function DashboardKpiGrid({
   type Tile = {
     label: string;
     value: number | undefined;
-    icon: React.ComponentType<{ className?: string }>;
+    icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
     format: "number" | "percent";
   };
 
   const tiles: Tile[] = [
     {
-      label: "Avg. Narrative Divergence",
-      // Backend field: kpis.average_narrative_divergence (0–100).
+      label: "Avg. narrative gap",
       value:
         typeof k.average_narrative_divergence === "number"
           ? k.average_narrative_divergence
@@ -1915,8 +1989,7 @@ function DashboardKpiGrid({
       format: "percent",
     },
     {
-      label: "Topics Monitored",
-      // Backend field: kpis.total_topics_monitored (fallback: active_topics).
+      label: "Topics monitored",
       value:
         typeof k.total_topics_monitored === "number"
           ? k.total_topics_monitored
@@ -1927,8 +2000,7 @@ function DashboardKpiGrid({
       format: "number",
     },
     {
-      label: "Leaders Ranked",
-      // Backend field: kpis.leaders_ranked.
+      label: "Leaders ranked",
       value:
         typeof k.leaders_ranked === "number"
           ? k.leaders_ranked
@@ -1937,8 +2009,7 @@ function DashboardKpiGrid({
       format: "number",
     },
     {
-      label: "Peace Health Index",
-      // Backend field: kpis.peace_health_index.
+      label: "Peace health",
       value:
         typeof k.peace_health_index === "number"
           ? k.peace_health_index
@@ -1948,54 +2019,22 @@ function DashboardKpiGrid({
     },
   ];
 
-  const fmt = (n: number | undefined, mode: "number" | "percent") => {
-    if (typeof n !== "number" || Number.isNaN(n)) return null;
-    if (mode === "percent") return `${Math.round(n)}`;
-    return n.toLocaleString();
-  };
-
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3"
+      className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-2.5"
     >
-      {tiles.map((t, i) => {
-        const brand = "var(--cyan)";
-        const Icon = t.icon;
-        const display = fmt(t.value, t.format);
-        return (
-          <motion.div
-            key={t.label}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="glass rounded-2xl p-3 sm:p-4 relative overflow-hidden min-w-0"
-            style={{ borderColor: `${brand}33` }}
-          >
-            <span className="relative inline-flex items-start gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-mono leading-tight min-w-0 mb-2">
-              <Icon className="w-3 h-3 mt-0.5 shrink-0" />
-              <span className="break-words">{t.label}</span>
-            </span>
-            {display ? (
-              <div
-                className="relative text-2xl sm:text-3xl md:text-4xl font-display font-semibold tabular-nums leading-none"
-                style={{ color: brand }}
-              >
-                {display}
-                {t.format === "percent" && (
-                  <span className="text-base sm:text-lg text-muted-foreground ml-0.5">%</span>
-                )}
-              </div>
-            ) : (
-              <div className="relative text-[11px] sm:text-xs font-mono text-muted-foreground leading-snug pt-1">
-                Not in this sample
-              </div>
-            )}
-          </motion.div>
-        );
-      })}
+      {tiles.map((t, i) => (
+        <KpiHeroTile
+          key={t.label}
+          label={t.label}
+          value={t.value}
+          icon={t.icon}
+          format={t.format}
+          delay={i * 0.05}
+        />
+      ))}
     </motion.div>
   );
 }
