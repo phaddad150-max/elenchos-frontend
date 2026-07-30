@@ -17,14 +17,10 @@ import {
   ArrowRight,
   Quote,
   Radio,
-  ChevronDown,
-  Github,
-  Database,
-  Cpu,
+  Brain,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 
 export const Route = createFileRoute("/about")({
@@ -163,12 +159,14 @@ function Hero() {
           >
             <span className="block">
               Ancient Greek for cross-examination. We seek truth and defend ordinary people through
-              citizen journalism and freedom of speech. Human-managed, AI-assisted.
+              citizen journalism and freedom of speech. Human-managed, AI-assisted (xAI / SpaceXAI
+              models only).
             </span>
             <span className="block">
               elenchos.live structures public discourse on X like a digital focus group per topic:
               directional samples, not national polls. We surface the gap between citizen voices and
-              official or media frames, with method, limits, and sample size shown.
+              official or media frames, with method, limits, and sample size shown. Built so people
+              who cannot run a research lab still get honest big-picture analysis free.
             </span>
           </motion.p>
         </div>
@@ -323,7 +321,7 @@ const STEPS = [
     icon: Microscope,
     title: "Analyze",
     body:
-      "Grok structures that sample under human management (Socratic questions, sentiment, timestamps). Sample size is shown.",
+      "xAI models structure that sample under human management (Socratic questions, sentiment, timestamps). Sample size is shown.",
   },
   {
     icon: Scale,
@@ -525,48 +523,9 @@ function Audience() {
   );
 }
 
-// ───────────────────────── Why X / Stack ─────────────────────────
-
-const STACK_ITEMS = [
-  {
-    id: "x-api",
-    label: "X API",
-    color: "cyan",
-    icon: Globe2,
-    blurb: "Raw public posts: the unfiltered public square at global scale.",
-  },
-  {
-    id: "grok",
-    label: "xAI · Grok",
-    color: "cyan",
-    icon: Cpu,
-    blurb: "Reasoning layer: sentiment, divergence, and narrative synthesis.",
-  },
-  {
-    id: "supabase",
-    label: "Supabase",
-    color: "emerald",
-    icon: Database,
-    blurb: "Single source of truth for snapshots, trackers, and curated insights.",
-  },
-  {
-    id: "github",
-    label: "GitHub",
-    color: "muted",
-    icon: Github,
-    blurb: "Scheduled workflows for Pass 1 snapshots and Pass 2 curation.",
-  },
-  {
-    id: "cursor",
-    label: "Cursor",
-    color: "muted",
-    icon: Sparkles,
-    blurb: "Frontend and pipeline development environment.",
-  },
-] as const;
+// ───────────────────────── Why X / AI + human ─────────────────────────
 
 function WhyX() {
-  const [stackHover, setStackHover] = useState<string | null>(null);
   return (
     <section className="grid md:grid-cols-2 gap-4">
       <div className="glass rounded-2xl p-6 md:p-7 relative overflow-hidden">
@@ -601,110 +560,101 @@ function WhyX() {
         />
         <div className="flex items-center gap-2 text-cyan">
           <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
-            <Sparkles className="w-4 h-4" />
+            <Brain className="w-4 h-4" />
           </div>
           <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">
-            The stack
+            AI, under a human
           </h2>
         </div>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
-          Public posts from the <span className="text-cyan font-semibold">X API</span> are reasoned
-          over by <span className="text-cyan font-semibold">xAI's Grok</span> and written straight
-          into <span className="text-cyan font-semibold">Supabase</span> as the single source of
-          truth: no hand-edited numbers, and no other models in the loop.
+          Public posts from the <span className="text-cyan font-semibold">X API</span> are filtered,
+          structured, and reasoned over with{" "}
+          <span className="text-cyan font-semibold">xAI models (Grok / SpaceXAI stack)</span> only.
+          No other AI vendors in the analysis loop. Scores and claims still pass through a human
+          before they stand as the public record.
         </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          {STACK_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = stackHover === item.id;
-            const colorClass =
-              item.color === "cyan"
-                ? "border-cyan/40 bg-cyan/10 text-cyan"
-                : item.color === "emerald"
-                  ? "border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal"
-                  : "border-border bg-secondary/60 text-muted-foreground";
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onMouseEnter={() => setStackHover(item.id)}
-                onMouseLeave={() => setStackHover(null)}
-                onFocus={() => setStackHover(item.id)}
-                onBlur={() => setStackHover(null)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10.5px] font-mono uppercase tracking-[0.18em] transition-all hover:-translate-y-0.5 ${colorClass} ${
-                  active ? "ring-1 ring-cyan/40 shadow-[0_0_20px_-10px_var(--cyan-glow)]" : ""
-                }`}
-              >
-                <Icon className="w-3 h-3" />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-        <motion.p
-          key={stackHover ?? "default"}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-3 text-[12.5px] text-muted-foreground leading-relaxed min-h-[2.5rem]"
-        >
-          {stackHover
-            ? STACK_ITEMS.find((s) => s.id === stackHover)?.blurb
-            : "Hover a layer to see how it fits the pipeline."}
-        </motion.p>
+        <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
+          The same model family assists coding and development of this site. The product itself is
+          not run by a bot: a person with research, communications, data analysis, and digital
+          ecosystem experience owns every publish decision.
+        </p>
+        <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
+          The goal is a freemium research tool ordinary citizens, researchers, and truth-seekers can
+          actually use, free analysis for people who cannot build their own stack, while large firms
+          still charge for similar narrative work. We are early and imperfect. The public good is
+          the point.
+        </p>
+        <ul className="mt-4 space-y-2">
+          {[
+            "Fetch: public X samples via the X API",
+            "Filter and structure: quality gates under human rules",
+            "Analyze and reason: xAI models only, human-gated outputs",
+            "Build the product: same model family as coding assistant, human owner",
+          ].map((line) => (
+            <li
+              key={line}
+              className="flex gap-2.5 text-[13px] text-foreground/85 leading-relaxed"
+            >
+              <span className="text-cyan font-mono mt-0.5 shrink-0">›</span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
 }
 
-// ───────────────────────── Legal ─────────────────────────
+// ───────────────────────── Legal (always expanded) ─────────────────────────
 
 const DISCLAIMER_POINTS = [
   "Independent experimental research. Not a commercial business, news outlet, or advisory service.",
-  "All insights are algorithmically generated. No warranties on accuracy, completeness, or timeliness.",
+  "Insights are machine-assisted and human-managed. No warranties on accuracy, completeness, or timeliness.",
   "Not professional, financial, legal, or political advice. Verify before acting.",
   "Use of this dashboard is entirely at your own risk.",
+  "elenchos.live is run and managed by an ordinary person, not by an autonomous agent or bot. AI assistance is used as a tool under that human’s direction.",
 ];
 
 function LegalSection() {
   return (
-    <section>
-      <Collapsible defaultOpen={false} className="glass rounded-2xl p-6 md:p-7">
-        <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 text-left group">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="p-1.5 rounded-md bg-secondary border border-border">
-              <ScrollText className="w-4 h-4" />
-            </div>
-            <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">
-              Legal Disclaimer
-            </h2>
+    <section className="space-y-4">
+      <SectionHeading
+        kicker="Legal notice"
+        title="Disclaimer and accountability"
+        sub="Same visibility as every other section. Read this before relying on any score or claim."
+      />
+      <div className="glass rounded-2xl p-6 md:p-7 border border-border">
+        <div className="flex items-center gap-2 text-cyan mb-4">
+          <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
+            <ScrollText className="w-4 h-4" />
           </div>
-          <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <ul className="mt-4 space-y-2">
-            {DISCLAIMER_POINTS.map((p) => (
-              <li
-                key={p}
-                className="flex gap-2.5 text-[13px] text-foreground/85 leading-relaxed"
-              >
-                <span className="text-cyan font-mono mt-0.5 shrink-0">›</span>
-                <span>{p}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-[13px] text-foreground/85 leading-relaxed">
-            For data processing, cookies, and your GDPR rights, see our{" "}
-            <Link to="/privacy" className="text-cyan hover:underline">
-              Privacy Notice
-            </Link>
-            . Contact / corrections:{" "}
-            <ContactEmailMe source="about" variant="inline" className="text-[13px]" />.
-          </p>
-          <p className="mt-3 text-[10.5px] font-mono uppercase tracking-[0.2em] text-emerald-signal">
-            Status: Independent research · public beta
-          </p>
-        </CollapsibleContent>
-      </Collapsible>
+          <h3 className="font-display font-semibold tracking-[0.14em] uppercase text-sm">
+            Full notice
+          </h3>
+        </div>
+        <ul className="space-y-2.5">
+          {DISCLAIMER_POINTS.map((p) => (
+            <li
+              key={p}
+              className="flex gap-2.5 text-[13px] md:text-[14px] text-foreground/90 leading-relaxed"
+            >
+              <span className="text-cyan font-mono mt-0.5 shrink-0">›</span>
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-5 text-[13px] md:text-[14px] text-foreground/90 leading-relaxed">
+          For data processing, cookies, and your GDPR rights, see our{" "}
+          <Link to="/privacy" className="text-cyan hover:underline">
+            Privacy Notice
+          </Link>
+          . Contact for corrections or rights requests:{" "}
+          <ContactEmailMe source="about" variant="inline" className="text-[13px] md:text-[14px]" />.
+        </p>
+        <p className="mt-4 text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-signal">
+          Status: Independent research · public beta · human-managed
+        </p>
+      </div>
     </section>
   );
 }
