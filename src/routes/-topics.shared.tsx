@@ -184,13 +184,13 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
                 What citizens say vs{" "}
                 <span className="text-cyan">official stories</span>
               </h1>
-              <p className="text-[12.5px] sm:text-[13px] md:text-sm text-muted-foreground leading-snug w-full max-w-none md:whitespace-nowrap md:overflow-hidden md:text-ellipsis">
+              <p className="text-[12.5px] sm:text-[13px] md:text-sm text-muted-foreground leading-snug w-full max-w-none whitespace-normal lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
                 Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
               </p>
               <button
                 type="button"
                 onClick={() => onOpen("commercial-space-race")}
-                className="mt-1 inline-flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2 text-left transition-colors touch-manipulation min-h-[40px] w-fit max-w-full"
+                className="mt-1 inline-flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2.5 sm:py-2 text-left transition-colors touch-manipulation min-h-[44px] sm:min-h-[40px] w-full sm:w-fit max-w-full"
               >
                 <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
                   Featured case study

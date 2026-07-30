@@ -539,29 +539,85 @@
   position: relative;
 }
 
-/* Landing mobile: tighter KPI faces, safe popovers, less overflow */
-@media (max-width: 639px) {
+/* Landing mobile / tablet: responsive after heavy KPI + panel redesign */
+@media (max-width: 1279px) {
+  /* Popover becomes in-flow so it is not clipped and fits the card width */
   .dash-kpi-hero {
-    min-height: 8.25rem;
-  }
-  .dash-kpi-hero > button {
-    min-height: 8.25rem !important;
-    padding: 0.55rem 0.45rem !important;
+    overflow: hidden;
   }
   .dash-kpi-popover {
-    left: 0;
-    right: 0;
-    max-height: min(52vh, 280px);
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    max-height: min(48vh, 320px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.65rem;
+  }
+}
+@media (max-width: 639px) {
+  .dash-landing main {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+    padding-top: 0.85rem;
+  }
+  .dash-kpi-hero {
+    min-height: 7.75rem;
+  }
+  .dash-kpi-hero > button {
+    min-height: 7.75rem !important;
+    padding: 0.5rem 0.4rem !important;
+    gap: 0.25rem !important;
+  }
+  .dash-kpi-hero .dash-kpi-label {
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    min-height: 1.75rem;
+  }
+  .dash-kpi-hero .dash-kpi-value {
+    font-size: 1.25rem;
   }
   .dash-landing .globe-stage {
+    width: min(100%, 260px) !important;
+    max-height: 240px !important;
     min-height: 200px;
+    margin-inline: auto;
+  }
+  .dash-panel {
+    border-radius: 0.85rem;
+  }
+  .finding-card {
+    min-height: 0;
+    padding: 0.85rem;
+  }
+  /* Topics: allow subhead wrap; avoid horizontal bleed */
+  .topics-hero-banner h1 {
+    font-size: 1.3rem;
+    line-height: 1.15;
+  }
+  .topics-hero-banner p {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
   }
 }
 @media (min-width: 640px) and (max-width: 1023px) {
   .dash-kpi-hero {
-    min-height: 8.5rem;
+    min-height: 8.25rem;
+  }
+}
+@media (min-width: 1280px) {
+  .dash-kpi-hero {
+    overflow: visible;
+  }
+  .dash-kpi-popover {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - 2px);
   }
 }
 

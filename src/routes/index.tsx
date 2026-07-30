@@ -484,7 +484,7 @@ function Dashboard() {
       <div className="absolute inset-0 grid-bg opacity-12 pointer-events-none" />
 
       <SiteNav />
-      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-7 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
+      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-4 sm:py-7 space-y-4 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
         {/* KPI hero — 6 equal tracking cards */}
         <DashboardKpiGrid
           overview={overview}
@@ -497,9 +497,9 @@ function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-stretch"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-stretch min-w-0"
         >
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col h-full">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col h-full max-w-full">
             <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 pb-3 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
@@ -554,9 +554,9 @@ function Dashboard() {
               />
             </div>
 
-            {/* Proportionate square globe — does not stretch into a tall strip */}
-            <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2.5">
-              <div className="w-full max-w-[min(100%,300px)] aspect-square max-h-[min(280px,42vw)] xl:max-h-[260px] rounded-xl border border-border/70 overflow-hidden globe-stage shrink-0">
+            {/* Proportionate square globe — mobile-safe max size */}
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2.5 py-1">
+              <div className="w-full max-w-[min(100%,280px)] sm:max-w-[min(100%,300px)] aspect-square max-h-[220px] sm:max-h-[260px] xl:max-h-[260px] rounded-xl border border-border/70 overflow-hidden globe-stage shrink-0 mx-auto">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -1093,10 +1093,9 @@ function CitizenSignalRow({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 3 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      whileHover={{ x: 2, scale: 1.005 }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="group w-full text-left px-3 py-2.5 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation"
+      className="group w-full max-w-full text-left px-2.5 sm:px-3 py-2.5 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation min-w-0 overflow-hidden"
     >
       <div className="flex items-center gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
@@ -2169,7 +2168,9 @@ function KpiHeroTile({
   return (
     <div
       className={`dash-kpi dash-kpi-hero relative min-w-0 w-full h-full ${
-        expanded ? "dash-kpi-hero-open z-20" : "z-0"
+        expanded
+          ? "dash-kpi-hero-open z-20 col-span-2 sm:col-span-3 xl:col-span-1"
+          : "z-0"
       } ${flash ? "dash-kpi-flash" : ""}`}
     >
       <motion.button
@@ -2181,21 +2182,21 @@ function KpiHeroTile({
         whileTap={{ scale: 0.99 }}
         onClick={onToggle}
         aria-expanded={expanded}
-        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-1 px-2.5 py-2.5 sm:px-3 sm:py-3 min-h-[8.75rem]"
+        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-1 px-2.5 py-2.5 sm:px-3 sm:py-3 min-h-[8.75rem] touch-manipulation"
       >
         <span className="dash-kpi-glow" aria-hidden />
         <span
-          className="shrink-0 w-8 h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 transition-colors"
+          className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 transition-colors"
           aria-hidden
         >
-          <tile.icon className="w-4 h-4 text-cyan data-pulse" strokeWidth={2.2} />
+          <tile.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan data-pulse" strokeWidth={2.2} />
         </span>
-        <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground leading-tight line-clamp-2 min-h-[2rem] w-full flex items-center justify-center text-center px-0.5">
+        <span className="dash-kpi-label text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground leading-tight line-clamp-2 min-h-[2rem] w-full flex items-center justify-center text-center px-0.5">
           {tile.label}
         </span>
         {has ? (
           <div
-            className={`text-[1.4rem] sm:text-[1.5rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.6rem] flex items-center justify-center ${
+            className={`dash-kpi-value text-[1.4rem] sm:text-[1.5rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.6rem] flex items-center justify-center ${
               flash ? "ticker-flash" : ""
             }`}
             style={{ textShadow: "0 0 14px var(--color-cyan-glow)" }}
@@ -2559,7 +2560,7 @@ function DashboardKpiGrid({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch"
+      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch min-w-0"
     >
       {tiles.map((t, i) => (
         <KpiHeroTile

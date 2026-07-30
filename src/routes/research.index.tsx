@@ -35,19 +35,19 @@ function ResearchIndexPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1100px] mx-auto w-full px-4 md:px-8 py-10 md:py-14 mobile-safe-bottom md:pb-20 relative flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(220px,34%)] gap-8 lg:gap-10 items-start">
+      <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-8 py-8 sm:py-10 md:py-14 mobile-safe-bottom md:pb-20 relative flex-1 overflow-x-clip">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(220px,34%)] gap-6 sm:gap-8 lg:gap-10 items-start min-w-0">
           {/* Left: research content */}
-          <div className="min-w-0">
-            <div className="text-center lg:text-left mb-10">
-              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground mb-4">
+          <div className="min-w-0 w-full">
+            <div className="text-center lg:text-left mb-8 sm:mb-10">
+              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground mb-3 sm:mb-4">
                 <FlaskConical className="w-3.5 h-3.5 text-cyan" aria-hidden />
                 Research
               </div>
-              <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-glow-cyan mb-3">
+              <h1 className="text-[1.65rem] sm:text-3xl md:text-4xl font-display font-semibold tracking-tight text-glow-cyan mb-3 break-words">
                 Research briefs, not live topic scores
               </h1>
-              <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
                 {RESEARCH_NORTH_STAR}
               </p>
             </div>
@@ -58,7 +58,7 @@ function ResearchIndexPage() {
                   key={b.slug}
                   to="/research/preview/$slug"
                   params={{ slug: b.slug }}
-                  className="block rounded-2xl border border-border bg-card/40 hover:border-cyan/40 hover:bg-cyan/5 transition-colors px-4 py-4 text-left"
+                  className="block rounded-2xl border border-border bg-card/40 hover:border-cyan/40 hover:bg-cyan/5 active:bg-cyan/8 transition-colors px-3.5 sm:px-4 py-3.5 sm:py-4 text-left touch-manipulation min-w-0"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1">
