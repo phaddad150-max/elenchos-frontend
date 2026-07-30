@@ -323,6 +323,60 @@
   box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
 }
 
+/* Hero KPI: compact equal tiles, hover glow, expandable */
+.dash-kpi-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 7.25rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    background 0.2s ease;
+}
+.dash-kpi-hero:hover,
+.dash-kpi-hero:focus-visible {
+  border-color: color-mix(in oklab, var(--cyan) 55%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--cyan) 22%, transparent),
+    0 10px 28px -16px color-mix(in oklab, var(--cyan) 45%, transparent);
+  outline: none;
+}
+.dash-kpi-hero-open {
+  border-color: color-mix(in oklab, var(--cyan) 50%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--cyan) 18%, transparent),
+    0 12px 32px -14px color-mix(in oklab, var(--cyan) 40%, transparent);
+}
+.dash-kpi-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -40% -20% auto;
+  height: 70%;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    color-mix(in oklab, var(--cyan) 18%, transparent),
+    transparent 70%
+  );
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+.dash-kpi-hero:hover .dash-kpi-glow,
+.dash-kpi-hero-open .dash-kpi-glow {
+  opacity: 0.9;
+}
+.dash-kpi-flash {
+  animation: dash-kpi-flash 0.9s ease-out;
+}
+@keyframes dash-kpi-flash {
+  0% {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--cyan) 50%, transparent),
+      0 0 24px color-mix(in oklab, var(--cyan) 35%, transparent);
+  }
+  100% {
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+  }
+}
+
 .light .dash-panel {
   background: oklch(0.995 0.002 240);
   border-color: oklch(0.72 0.04 220 / 0.85);
@@ -336,6 +390,12 @@
   background: oklch(0.995 0.003 240);
   border-color: oklch(0.68 0.06 210 / 0.55);
   box-shadow: 0 1px 0 oklch(0.5 0.02 240 / 0.06);
+}
+.light .dash-kpi-hero:hover,
+.light .dash-kpi-hero:focus-visible,
+.light .dash-kpi-hero-open {
+  border-color: oklch(0.62 0.1 210 / 0.75);
+  box-shadow: 0 8px 24px -14px oklch(0.55 0.08 210 / 0.35);
 }
 
 /* Landing: quieter background so panels read as cards */

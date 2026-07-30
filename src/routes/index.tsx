@@ -1,26 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { cleanHeadline } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
-  AlertTriangle,
   Brain,
+  ChevronDown,
+  FileStack,
   Globe2,
+  Layers,
   MapPin,
+  MapPinned,
   Radio,
   TrendingUp,
-  MessageSquare,
   ArrowUpRight,
   ArrowDownRight,
   ChevronRight,
   Flame,
   ShieldAlert,
+  ShieldCheck,
   LineChart,
   Users,
   Sparkles,
   ArrowRight,
-  Heart,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { CitizenSignalModal } from "@/components/CitizenSignalModal";
@@ -47,6 +49,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
+import { listResearchBriefs } from "@/lib/research-catalog";
+import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
 import { useCountUp } from "@/hooks/use-count-up";
 
 import {
@@ -215,7 +219,7 @@ function Dashboard() {
   const [citizenSignals, setCitizenSignals] = useState<CitizenSignal[]>([]);
   const [trackerKpis, setTrackerKpis] = useState<{
     leadersRanked?: number;
-    peaceHealthIndex?: number;
+    countriesMonitored?: number;
   }>({});
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [simMode] = useSimMode();
@@ -235,14 +239,9 @@ function Dashboard() {
       const peaceRow = byType.get("peace_normalization");
       const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
       const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
-      const peaceScores = peaceCountries
-        .map((c) => c.peace_health_score)
-        .filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
       setTrackerKpis({
         leadersRanked: leaders.length || undefined,
-        peaceHealthIndex: peaceScores.length
-          ? peaceScores.reduce((sum, v) => sum + v, 0) / peaceScores.length
-          : undefined,
+        countriesMonitored: peaceCountries.length || undefined,
       });
     });
   }, []);
@@ -521,8 +520,13 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* KPI hero (no sparklines / deltas) */}
-        <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
+        {/* KPI hero — 6 equal tracking cards */}
+        <DashboardKpiGrid
+          overview={overview}
+          snapshots={snapshots}
+          trackerKpis={trackerKpis}
+          curatedCount={curatedHighlights.length}
+        />
 
         {/* Signals + heatmap (original two-column placement) */}
         <motion.div
@@ -1849,113 +1853,296 @@ function shortTopicLabel(t: string): string {
 }
 
 
-// ── Dashboard KPI grid (5 tiles, color-coded) ───────────────────────────
-// Source: dashboard_overviews.kpis (Supabase). Numbers are tone-coded —
-// green for healthy/high, amber for medium, red for low/concern — matching
-// the cross-page sentiment palette.
+// ── Dashboard KPI hero grid (6 equal tracking cards) ─────────────────────
+// Metrics tracked client-side via localStorage history. Expand for full
+// methodology / breakdown. No fake accuracy claims — pipeline confidence
+// is derived transparently from coverage on this page.
 
-function kpiTone(v: number | undefined, good: number, mid: number): { color: string; tint: string; band: string } {
-  if (typeof v !== "number" || Number.isNaN(v)) {
-    return { color: "var(--muted-foreground)", tint: "rgba(148,163,184,0.10)", band: "—" };
-  }
-  if (v >= good) return { color: "var(--emerald-signal)", tint: "rgba(16,185,129,0.12)", band: "Healthy" };
-  if (v >= mid) return { color: "var(--amber-signal)", tint: "rgba(245,158,11,0.12)", band: "Moderate" };
-  return { color: "var(--rose-signal)", tint: "rgba(244,63,94,0.12)", band: "Low" };
-}
+type KpiHeroFormat = "number" | "percent" | "compact";
 
-function avgDivergenceFromSnapshots(
-  snapshots: Record<string, TopicSnapshot> | null,
-): number | undefined {
-  if (!snapshots) return undefined;
-  const scores = Object.values(snapshots)
-    .map((s) => s.divergence_score)
-    .filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
-  if (scores.length) return scores.reduce((sum, v) => sum + v, 0) / scores.length;
+/** Optional expand-panel action. Nested Link uses stopPropagation so expand still works. */
+type KpiHeroCta = {
+  label: string;
+  /** When true, render muted non-link “coming soon” instead of navigation. */
+  comingSoon?: boolean;
+  note?: string;
+  /** Primary path when ready; soft paths use muted styling. */
+  href?: "/research" | "/topics" | "/trackers" | "/trackers/leaders" | "/trackers/peace";
+  /** "primary" = brand CTA; "soft" = secondary text link while catalog is thin. */
+  emphasis?: "primary" | "soft";
+};
 
-  const sentimentSpread = Object.values(snapshots)
-    .map((s) => {
-      const overall = s.overall_sentiment;
-      if (typeof overall === "object" && overall && typeof overall.score === "number") {
-        return Math.abs(overall.score - 50);
-      }
-      return undefined;
-    })
-    .filter((v): v is number => typeof v === "number");
-  if (!sentimentSpread.length) return undefined;
-  return sentimentSpread.reduce((sum, v) => sum + v, 0) / sentimentSpread.length;
-}
-
-function KpiHeroTile({
-  label,
-  value,
-  icon: Icon,
-  format,
-  delay = 0,
-}: {
+type KpiHeroTileModel = {
+  id: string;
   label: string;
   value: number | undefined;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  format: "number" | "percent";
+  format: KpiHeroFormat;
+  unit?: string;
+  hint: string;
+  expandTitle: string;
+  expandLines: string[];
+  cta?: KpiHeroCta;
+};
+
+/** Min dedicated research case studies before we hard-push /research from the hero. */
+const RESEARCH_LIBRARY_CTA_MIN = 3;
+
+/** Transparent pipeline confidence from live page data (SpaceXAI / Grok stack). */
+function computePipelineAccuracy(args: {
+  snapshots: Record<string, TopicSnapshot> | null;
+  liveTopicCount: number;
+  overview: DashboardOverview | null;
+  researchCount: number;
+}): {
+  composite: number | undefined;
+  fetching: number;
+  reasoning: number;
+  reporting: number;
+  lines: string[];
+} {
+  const { snapshots, liveTopicCount, overview, researchCount } = args;
+  const snapList = snapshots ? Object.values(snapshots) : [];
+  const snapCount = snapList.length;
+  const denom = Math.max(liveTopicCount, 1);
+
+  // Fetching: share of live topics with a snapshot row in this sample
+  const fetching = Math.round(Math.min(100, (snapCount / denom) * 100));
+
+  // Reasoning: share of snapshots that carry sentiment / divergence / summary
+  let reasoned = 0;
+  for (const s of snapList) {
+    const hasSentiment =
+      typeof s.overall_sentiment === "object" &&
+      s.overall_sentiment &&
+      typeof s.overall_sentiment.score === "number";
+    const hasDiv =
+      typeof s.divergence_score === "number" ||
+      s.narrative_divergence != null ||
+      Boolean(s.divergence_gap?.trim?.());
+    const hasText =
+      Boolean(s.narrative_summary?.trim?.()) ||
+      (Array.isArray(s.key_insights) && s.key_insights.length > 0);
+    if (hasSentiment || hasDiv || hasText) reasoned += 1;
+  }
+  const reasoning = snapCount
+    ? Math.round((reasoned / snapCount) * 100)
+    : 0;
+
+  // Reporting: overview summary + research briefs published (human-reviewed path)
+  let reportPts = 0;
+  if (overview?.grok_ai_summary?.trim()) reportPts += 40;
+  if (typeof overview?.kpis?.total_posts_analyzed === "number" && overview.kpis.total_posts_analyzed > 0) {
+    reportPts += 25;
+  }
+  if (researchCount > 0) reportPts += 20;
+  if (snapCount > 0) reportPts += 15;
+  const reporting = Math.min(100, reportPts);
+
+  const parts = [fetching, reasoning, reporting].filter((n) => n > 0);
+  const composite = parts.length
+    ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length)
+    : undefined;
+
+  const lines = [
+    `Fetching coverage: ${fetching}% — live topics with snapshot rows in this sample (${snapCount}/${liveTopicCount}).`,
+    `Reasoning completeness: ${reasoning}% — snapshots with sentiment, gap analysis, or SpaceXAI/Grok prose.`,
+    `Reporting readiness: ${reporting}% — cross-topic summary, posts analyzed, and human-reviewed research briefs.`,
+    "Stack: SpaceXAI + Grok for fetch synthesis, reasoning, and reporting. Not a lab-measured model accuracy score — a transparent composite of data on this page.",
+  ];
+
+  return { composite, fetching, reasoning, reporting, lines };
+}
+
+function KpiHeroTile({
+  tile,
+  history,
+  delay = 0,
+}: {
+  tile: KpiHeroTileModel;
+  history: number[];
   delay?: number;
 }) {
-  const has = typeof value === "number" && !Number.isNaN(value);
-  const target = has ? value : 0;
+  const [expanded, setExpanded] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const prevRef = useRef<number | undefined>(undefined);
+
+  const numericValue =
+    typeof tile.value === "number" && !Number.isNaN(tile.value) ? tile.value : undefined;
+  const has = numericValue !== undefined;
+  const target = has ? numericValue : 0;
+  const countFormat: "number" | "compact" =
+    tile.format === "compact" || (has && tile.format === "number" && numericValue >= 1000)
+      ? "compact"
+      : "number";
   const counted = useCountUp(target, {
     duration: 1100,
-    format: has && format === "number" && value >= 1000 ? "compact" : "number",
+    format: countFormat,
     decimals: 0,
   });
-  const display = has ? counted : null;
-  const brand = "var(--cyan)";
+
+  // Flash + re-count when tracked value changes
+  useEffect(() => {
+    if (!has) return;
+    if (prevRef.current !== undefined && prevRef.current !== numericValue) {
+      setFlash(true);
+      const t = window.setTimeout(() => setFlash(false), 900);
+      prevRef.current = numericValue;
+      return () => window.clearTimeout(t);
+    }
+    prevRef.current = numericValue;
+  }, [has, numericValue]);
+
+  const prevHist = history.length >= 2 ? history[history.length - 2] : undefined;
+  const delta =
+    has && typeof prevHist === "number" && prevHist !== numericValue
+      ? numericValue - prevHist
+      : null;
+
   const barPct =
-    has && format === "percent" ? Math.min(100, Math.max(0, Math.round(value))) : null;
+    has && tile.format === "percent" ? Math.min(100, Math.max(0, Math.round(numericValue))) : null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      className="dash-kpi px-3 py-2.5 sm:px-3.5 sm:py-3 min-w-0 flex flex-col justify-center gap-1.5"
+    <motion.button
+      type="button"
+      layout
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.985 }}
+      onClick={() => setExpanded((v) => !v)}
+      aria-expanded={expanded}
+      className={`dash-kpi dash-kpi-hero group relative min-w-0 w-full text-left cursor-pointer flex flex-col items-center justify-start gap-1.5 px-2.5 py-2.5 sm:px-3 sm:py-3 ${
+        expanded ? "dash-kpi-hero-open" : ""
+      } ${flash ? "dash-kpi-flash" : ""}`}
     >
-      <div className="flex items-center gap-2 min-w-0">
+      <span className="dash-kpi-glow" aria-hidden />
+      <div className="relative z-[1] flex flex-col items-center text-center gap-1.5 w-full min-h-[5.75rem]">
         <span
-          className="shrink-0 w-7 h-7 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10"
+          className="shrink-0 w-8 h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 group-hover:bg-cyan/15 transition-colors"
           aria-hidden
         >
-          <Icon className="w-3.5 h-3.5 text-cyan" strokeWidth={2.4} />
+          <tile.icon className="w-4 h-4 text-cyan data-pulse" strokeWidth={2.2} />
         </span>
-        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground leading-snug line-clamp-2">
-          {label}
+        <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground leading-tight line-clamp-2 min-h-[2rem] flex items-center justify-center px-0.5">
+          {tile.label}
         </span>
-      </div>
-      {display != null ? (
-        <div className="flex items-end justify-between gap-2 pl-0.5">
+        {has ? (
           <div
-            className="text-[1.65rem] sm:text-2xl md:text-[1.75rem] font-display font-semibold tabular-nums leading-none tracking-tight"
-            style={{ color: brand }}
+            className={`text-[1.45rem] sm:text-[1.55rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan ${
+              flash ? "ticker-flash" : ""
+            }`}
+            style={{ textShadow: "0 0 18px color-mix(in oklab, var(--cyan) 45%, transparent)" }}
           >
-            {display}
-            {format === "percent" && (
-              <span className="text-sm font-mono text-muted-foreground ml-0.5">%</span>
+            {counted}
+            {tile.format === "percent" && (
+              <span className="text-xs font-mono text-muted-foreground ml-0.5">%</span>
+            )}
+            {tile.unit && tile.format !== "percent" && (
+              <span className="text-[10px] font-mono text-muted-foreground ml-0.5">{tile.unit}</span>
             )}
           </div>
-        </div>
-      ) : (
-        <div className="text-[11px] font-mono text-muted-foreground leading-snug pl-0.5">
-          Not in sample
-        </div>
-      )}
-      {barPct != null && (
-        <div className="h-1 rounded-full bg-border/70 overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-cyan/80"
-            initial={{ width: 0 }}
-            animate={{ width: `${barPct}%` }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: delay * 0.5 }}
+        ) : (
+          <div className="text-[11px] font-mono text-muted-foreground leading-snug">—</div>
+        )}
+        {delta != null && (
+          <span
+            className={`text-[9px] font-mono tabular-nums ${
+              delta > 0 ? "text-emerald-signal" : delta < 0 ? "text-rose-signal" : "text-muted-foreground"
+            }`}
+          >
+            {delta > 0 ? "+" : ""}
+            {Math.round(delta)}
+            {tile.format === "percent" ? " pts" : ""} vs last
+          </span>
+        )}
+        {barPct != null && (
+          <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden mt-0.5">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
+              initial={{ width: 0 }}
+              animate={{ width: `${barPct}%` }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: delay * 0.4 }}
+            />
+          </div>
+        )}
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-muted-foreground/80 mt-auto pt-0.5">
+          <ChevronDown
+            className={`w-3 h-3 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
           />
-        </div>
-      )}
-    </motion.div>
+          {expanded ? "Less" : "Details"}
+        </span>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22 }}
+            className="relative z-[1] w-full overflow-hidden"
+          >
+            <div className="mt-1.5 pt-2 border-t border-cyan/20 text-left space-y-1.5">
+              <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
+                {tile.expandTitle}
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-snug">{tile.hint}</p>
+              <ul className="space-y-1">
+                {tile.expandLines.map((line, i) => (
+                  <li
+                    key={i}
+                    className="text-[11px] text-foreground/80 leading-snug flex gap-1.5"
+                  >
+                    <span className="text-cyan font-mono shrink-0 text-[10px]">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              {history.length > 1 && (
+                <p className="text-[10px] font-mono text-muted-foreground pt-1">
+                  Tracked samples: {history.slice(-6).join(" → ")}
+                </p>
+              )}
+              {tile.cta && (
+                <div className="pt-2 space-y-1.5" onClick={(e) => e.stopPropagation()}>
+                  {tile.cta.note && (
+                    <p className="text-[10px] font-mono text-muted-foreground leading-snug">
+                      {tile.cta.note}
+                    </p>
+                  )}
+                  {tile.cta.comingSoon || !tile.cta.href ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/60 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                      <Sparkles className="w-3 h-3 text-cyan/70" strokeWidth={2.2} />
+                      {tile.cta.label}
+                    </span>
+                  ) : tile.cta.emphasis === "primary" ? (
+                    <Link
+                      to={tile.cta.href}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[32px] touch-manipulation"
+                    >
+                      {tile.cta.label}
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  ) : (
+                    <Link
+                      to={tile.cta.href}
+                      className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors"
+                    >
+                      {tile.cta.label}
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
   );
 }
 
@@ -1963,76 +2150,227 @@ function DashboardKpiGrid({
   overview,
   snapshots,
   trackerKpis,
+  curatedCount = 0,
 }: {
   overview: DashboardOverview | null;
   snapshots: Record<string, TopicSnapshot> | null;
-  trackerKpis?: { leadersRanked?: number; peaceHealthIndex?: number };
+  trackerKpis?: { leadersRanked?: number; countriesMonitored?: number };
+  curatedCount?: number;
 }) {
   const k = overview?.kpis ?? {};
-  const computedDivergence = avgDivergenceFromSnapshots(snapshots);
+  const liveTopicCount = Object.keys(LIVE_TOPIC_KEYS).length;
+  const researchBriefs = listResearchBriefs();
+  const researchCount = researchBriefs.length;
 
-  type Tile = {
-    label: string;
-    value: number | undefined;
-    icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-    format: "number" | "percent";
-  };
+  const topicsMonitored =
+    typeof k.total_topics_monitored === "number"
+      ? k.total_topics_monitored
+      : typeof k.active_topics === "number"
+        ? k.active_topics
+        : liveTopicCount || undefined;
 
-  const tiles: Tile[] = [
+  const leadersRanked =
+    typeof k.leaders_ranked === "number" ? k.leaders_ranked : trackerKpis?.leadersRanked;
+
+  const countriesMonitored =
+    typeof trackerKpis?.countriesMonitored === "number" && trackerKpis.countriesMonitored > 0
+      ? trackerKpis.countriesMonitored
+      : typeof k.regions_monitored === "number"
+        ? k.regions_monitored
+        : undefined;
+
+  // Topic intelligence reports + research case studies + curated/new highlights
+  const topicReports = typeof topicsMonitored === "number" ? topicsMonitored : liveTopicCount;
+  const caseStudiesTotal = topicReports + researchCount + (curatedCount > 0 ? curatedCount : 0);
+  const publishedResearch = researchBriefs.filter((b) => b.status === "published").length;
+  const libraryReady =
+    researchCount >= RESEARCH_LIBRARY_CTA_MIN || publishedResearch >= RESEARCH_LIBRARY_CTA_MIN;
+
+  /**
+   * Gated CTA for case studies & reports:
+   * - Hard-push /research only when the dedicated library is thick enough.
+   * - Until then: soft link to Topics (where reports already exist), with a clear “building” note.
+   */
+  const reportsCta: KpiHeroCta = libraryReady
+    ? {
+        label: "Browse case studies & reports",
+        href: "/research",
+        emphasis: "primary",
+        note: `${researchCount} research briefs in the library · open the full desk.`,
+      }
+    : topicReports > 0
+      ? {
+          label: "Browse topic reports",
+          href: "/topics",
+          emphasis: "soft",
+          note: `Research library building (${researchCount}/${RESEARCH_LIBRARY_CTA_MIN} case studies). Full “browse library” CTA unlocks at ${RESEARCH_LIBRARY_CTA_MIN}+ dedicated briefs — not pushing a thin shelf yet.`,
+        }
+      : {
+          label: "Case studies coming soon",
+          comingSoon: true,
+          note: "Dedicated research briefs are in the pipeline. Check back as the library grows.",
+        };
+
+  const postsAnalyzed =
+    typeof k.total_posts_analyzed === "number"
+      ? k.total_posts_analyzed
+      : typeof overview?.total_posts_analyzed === "number"
+        ? overview.total_posts_analyzed
+        : undefined;
+
+  const accuracy = computePipelineAccuracy({
+    snapshots,
+    liveTopicCount,
+    overview,
+    researchCount,
+  });
+
+  const tiles: KpiHeroTileModel[] = [
     {
-      label: "Avg. narrative gap",
-      value:
-        typeof k.average_narrative_divergence === "number"
-          ? k.average_narrative_divergence
-          : computedDivergence,
-      icon: AlertTriangle,
-      format: "percent",
-    },
-    {
+      id: "topics",
       label: "Topics monitored",
-      value:
-        typeof k.total_topics_monitored === "number"
-          ? k.total_topics_monitored
-          : typeof k.active_topics === "number"
-            ? k.active_topics
-            : undefined,
-      icon: MessageSquare,
+      value: topicsMonitored,
+      icon: Layers,
       format: "number",
+      hint: "Live topic intelligence monitors on Elenchos.",
+      expandTitle: "Topic coverage",
+      expandLines: [
+        `${liveTopicCount} catalog topics mapped to Supabase snapshots.`,
+        typeof k.core_topics_refreshed === "number"
+          ? `${k.core_topics_refreshed} core topics refreshed in the latest pipeline pass.`
+          : "Core refresh count not in this overview row yet.",
+        "Open Topics for full briefings; each card is human-reviewed before publish.",
+      ],
+      cta: {
+        label: "Browse topics",
+        href: "/topics",
+        emphasis: "soft",
+      },
     },
     {
+      id: "leaders",
       label: "Leaders ranked",
-      value:
-        typeof k.leaders_ranked === "number"
-          ? k.leaders_ranked
-          : trackerKpis?.leadersRanked,
+      value: leadersRanked,
       icon: Users,
       format: "number",
+      hint: "Leaders in the global trust tracker tables.",
+      expandTitle: "Leader trust tracker",
+      expandLines: [
+        "Counts rows propagated from the global leader trust tracker.",
+        "Scores come from public discourse samples — directional, not polls.",
+        "Open Trackers → Leaders for the full ranking.",
+      ],
+      cta: {
+        label: "Open leaders tracker",
+        href: "/trackers/leaders",
+        emphasis: "soft",
+      },
     },
     {
-      label: "Peace health",
-      value:
-        typeof k.peace_health_index === "number"
-          ? k.peace_health_index
-          : trackerKpis?.peaceHealthIndex,
-      icon: Heart,
+      id: "countries",
+      label: "Countries monitored",
+      value: countriesMonitored,
+      icon: MapPinned,
       format: "number",
+      hint: "Countries present in peace / region tracker tables.",
+      expandTitle: "Geographic coverage",
+      expandLines: [
+        trackerKpis?.countriesMonitored
+          ? `${trackerKpis.countriesMonitored} countries in the peace & normalization tracker dataset.`
+          : "Country count derived from regions_monitored when peace table is empty.",
+        typeof k.regions_monitored === "number"
+          ? `Overview also reports ${k.regions_monitored} regions monitored.`
+          : "Region count not set on this overview row.",
+        "Tables update when new tracker snapshots are appended (append-only history).",
+      ],
+      cta: {
+        label: "Open peace tracker",
+        href: "/trackers/peace",
+        emphasis: "soft",
+      },
+    },
+    {
+      id: "reports",
+      label: "Case studies & reports",
+      value: caseStudiesTotal,
+      icon: FileStack,
+      format: "number",
+      hint: "Topic reports + research case studies + curated additions.",
+      expandTitle: "Published research surface",
+      expandLines: [
+        `Topic intelligence reports: ${topicReports}`,
+        `Research case studies: ${researchCount}${researchBriefs[0] ? ` (e.g. ${researchBriefs[0].title})` : ""}`,
+        curatedCount > 0
+          ? `Curated / new highlights on page: ${curatedCount}`
+          : "No extra curated highlights counted in this load.",
+        libraryReady
+          ? "Library threshold met — case-study desk is ready to browse."
+          : `Library gate: ${researchCount}/${RESEARCH_LIBRARY_CTA_MIN} dedicated research briefs before we hard-push /research.`,
+        "Total = topics + research briefs + curated highlights. Grows as new work is published.",
+      ],
+      cta: reportsCta,
+    },
+    {
+      id: "posts",
+      label: "Posts analyzed",
+      value: postsAnalyzed,
+      icon: Activity,
+      format: postsAnalyzed != null && postsAnalyzed >= 1000 ? "compact" : "number",
+      hint: "Public posts in the latest dashboard sample.",
+      expandTitle: "Sample volume",
+      expandLines: [
+        typeof k.signals_generated === "number"
+          ? `Citizen signals generated: ${k.signals_generated}`
+          : "Signals count not on this overview row.",
+        "Volume is sample-based (purposive X / multi-source packs), not platform-wide totals.",
+        "Append-only history keeps prior samples when new overviews land.",
+      ],
+    },
+    {
+      id: "accuracy",
+      label: "AI data accuracy",
+      value: accuracy.composite,
+      icon: ShieldCheck,
+      format: "percent",
+      hint: "Pipeline confidence: fetching · reasoning · reporting (SpaceXAI & Grok).",
+      expandTitle: "Accuracy of data on this page",
+      expandLines: accuracy.lines,
     },
   ];
+
+  // Track value changes across visits / refreshes
+  const [historyStore, setHistoryStore] = useState<Record<string, number[]>>({});
+  useEffect(() => {
+    const payload: Record<string, number | undefined> = {};
+    for (const t of tiles) payload[t.id] = t.value;
+    setHistoryStore(appendKpiHistory(payload));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- track when numeric values change
+  }, [
+    topicsMonitored,
+    leadersRanked,
+    countriesMonitored,
+    caseStudiesTotal,
+    postsAnalyzed,
+    accuracy.composite,
+  ]);
+
+  // Hydrate history on first client paint
+  useEffect(() => {
+    setHistoryStore(readKpiHistory());
+  }, []);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-2.5"
+      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-2.5 items-start"
     >
       {tiles.map((t, i) => (
         <KpiHeroTile
-          key={t.label}
-          label={t.label}
-          value={t.value}
-          icon={t.icon}
-          format={t.format}
-          delay={i * 0.05}
+          key={t.id}
+          tile={t}
+          history={historyStore[t.id] ?? []}
+          delay={i * 0.04}
         />
       ))}
     </motion.div>
