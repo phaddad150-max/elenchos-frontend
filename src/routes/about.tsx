@@ -526,9 +526,9 @@ function Audience() {
 
 function WhyX() {
   return (
-    <section className="grid md:grid-cols-2 gap-4">
-      <div className="glass rounded-2xl p-6 md:p-7 relative overflow-hidden">
-        <div className="flex items-center gap-2 text-cyan">
+    <section className="grid md:grid-cols-2 gap-4 md:items-stretch">
+      <div className="glass rounded-2xl p-6 md:p-7 relative overflow-hidden flex flex-col h-full min-h-0">
+        <div className="flex items-center gap-2 text-cyan shrink-0">
           <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
             <Globe2 className="w-4 h-4" />
           </div>
@@ -536,23 +536,48 @@ function WhyX() {
             Why X
           </h2>
         </div>
-        <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
+        <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed shrink-0">
           X currently offers the most open access to unfiltered public discussion at global scale.
           That makes it the best available proxy for the public square, particularly in countries
           where state media dominates the official record.
         </p>
-        <figure className="mt-5 rounded-xl border border-border bg-secondary/40 p-4">
+        <figure className="mt-4 rounded-xl border border-border bg-secondary/40 p-3.5 shrink-0">
           <Quote className="w-4 h-4 text-cyan/80" />
-          <blockquote className="mt-2 text-[14px] italic text-foreground/85 leading-relaxed">
+          <blockquote className="mt-1.5 text-[13.5px] italic text-foreground/85 leading-relaxed">
             The unexamined narrative is not worth believing.
           </blockquote>
-          <figcaption className="mt-2 text-[10.5px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+          <figcaption className="mt-1.5 text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
             After Socrates
           </figcaption>
         </figure>
+
+        {/* Brand characters (@elenchospulse) fill remaining height to match AI column */}
+        <div className="mt-4 flex-1 min-h-[200px] md:min-h-[240px] flex flex-col">
+          <div className="relative flex-1 rounded-xl border border-cyan/25 overflow-hidden bg-secondary/20">
+            <img
+              src="/brand/elenchos-characters.jpg"
+              alt="Elenchos characters: analyst and Socrates, brand art from @elenchospulse"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              loading="lazy"
+              decoding="async"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-background/80 to-transparent"
+            />
+          </div>
+          <a
+            href="https://x.com/elenchospulse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors shrink-0"
+          >
+            Characters · @elenchospulse on X
+          </a>
+        </div>
       </div>
 
-      <div className="glass rounded-2xl p-6 md:p-7 relative overflow-hidden">
+      <div className="glass rounded-2xl p-6 md:p-7 relative overflow-hidden flex flex-col h-full">
         <div
           aria-hidden
           className="absolute -bottom-20 -right-16 w-64 h-64 rounded-full opacity-15 blur-3xl bg-cyan"
