@@ -941,6 +941,26 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
  compare: [],
  },
  {
+ id: "maritime-ai-greece",
+ title: "Maritime AI Industry & Greece's Global Role",
+ shortTitle: "Maritime AI · Greece",
+ description:
+ "Archived case study. Citizen and industry discourse on maritime AI, Greek shipping leadership, and the gap with official digital-shipping narratives.",
+ sampleSize: "",
+ confidence: "Moderate",
+ region: "Greece / Maritime",
+ trackers: [],
+ simulation: {
+ title: "Live data",
+ pathA: { label: "Live", series: [] },
+ pathB: { label: "Live", series: [] },
+ caption: "",
+ },
+ insights: { citizenSays: "", officialSays: "", gap: "" },
+ takeaway: "",
+ compare: [],
+ },
+ {
  id: "us-ai-economy-boom",
  title: "US AI Economy Boom & American Technological Renaissance",
  shortTitle: "US AI Economy Boom",

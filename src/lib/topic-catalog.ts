@@ -82,11 +82,25 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "Commercial Space Race: SpaceX, Rivals & Public Trust",
     headerLabel: "Commercial Space Race",
   },
+  /** Archived — history only; still mapped for Topics archive section + snapshot reads */
+  "maritime-ai-greece": {
+    rootKey: "Maritime AI Industry & Greece's Global Role",
+    headerLabel: "Maritime AI · Greece",
+  },
 };
 
 /** Topics kept for history / read-only archive (not primary live monitors). */
-export const ARCHIVED_TOPIC_IDS = ["fifa-world-cup-2026"] as const;
-// Maritime AI Greece removed from LIVE_TOPIC_KEYS — historical DB rows remain under old rootKey.
+export const ARCHIVED_TOPIC_IDS = ["fifa-world-cup-2026", "maritime-ai-greece"] as const;
+
+/** Active (non-archived) live monitors — product surface count. */
+export function activeLiveTopicCount(): number {
+  return Object.keys(LIVE_TOPIC_KEYS).filter((id) => !isArchivedTopicId(id)).length;
+}
+
+/** Archived catalog topics that still appear under Topics → Archived. */
+export function archivedLiveTopicCount(): number {
+  return Object.keys(LIVE_TOPIC_KEYS).filter((id) => isArchivedTopicId(id)).length;
+}
 
 /**
  * When a topic first ships on the product (UTC calendar date YYYY-MM-DD).

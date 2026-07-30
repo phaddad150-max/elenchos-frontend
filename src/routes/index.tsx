@@ -48,7 +48,7 @@ import { DataFreshnessBar } from "@/components/DataFreshnessBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
-import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
+import { LIVE_TOPIC_KEYS, activeLiveTopicCount, isArchivedTopicId } from "@/lib/topic-catalog";
 import { listResearchBriefs } from "@/lib/research-catalog";
 import {
   accumulateTotalSampleAnalyzed,
@@ -486,47 +486,62 @@ function Dashboard() {
 
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-7 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
-        <section className="fade-up dash-panel px-4 py-4 sm:px-5 sm:py-5">
-          <div className="flex flex-col md:flex-row md:flex-wrap md:items-start md:justify-between gap-4">
-            <div className="min-w-0 w-full md:flex-1">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/8 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-cyan mb-2.5">
+        <section className="fade-up dash-panel px-3.5 py-3.5 sm:px-5 sm:py-5">
+          <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-between gap-3 sm:gap-4">
+            <div className="min-w-0 w-full lg:flex-1 lg:min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/8 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-cyan mb-2 sm:mb-2.5">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-40" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan" />
                 </span>
                 Free public research desk
               </div>
-              <h1 className="text-[1.65rem] sm:text-3xl md:text-[2.35rem] lg:text-4xl font-display font-semibold tracking-tight leading-[1.12] break-words">
+              <h1 className="text-[1.4rem] xs:text-[1.55rem] sm:text-3xl md:text-[2.35rem] lg:text-4xl font-display font-semibold tracking-tight leading-[1.14] break-words">
                 Real Citizen Voices vs{" "}
                 <span className="text-cyan">Official Narratives</span>
               </h1>
-              <p className="mt-2.5 text-sm md:text-[15px] text-muted-foreground leading-relaxed max-w-2xl">
+              <p className="mt-2 sm:mt-2.5 text-[13px] sm:text-sm md:text-[15px] text-muted-foreground leading-relaxed max-w-2xl">
                 Research-grade citizen intelligence — the kind firms sell at a premium — open free for
                 ordinary people. Structured X samples, clear limits, human-reviewed claims. Directional
                 insight, not a national poll.
               </p>
             </div>
-            <DataFreshnessBar
-              sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
-            />
+            {/* Desktop only: brand art fills header empty space — panel size/layout unchanged */}
+            <div
+              className="hidden lg:flex shrink-0 self-center items-center justify-center w-[min(240px,26vw)] max-w-[260px] pointer-events-none select-none"
+              aria-hidden
+            >
+              <img
+                src="/brand/elenchos-image-1.png"
+                alt=""
+                className="max-h-[132px] w-auto max-w-full object-contain object-center"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+            <div className="shrink-0 w-full lg:w-auto flex lg:items-start lg:justify-end">
+              <DataFreshnessBar
+                sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
+              />
+            </div>
           </div>
-          <div className="mt-3.5 flex flex-wrap gap-2">
+          <div className="mt-3 sm:mt-3.5 flex flex-wrap gap-2">
             <Link
               to="/topics"
-              className="inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/10 hover:bg-cyan/20 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/10 hover:bg-cyan/20 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation flex-1 sm:flex-initial min-w-[9.5rem]"
             >
               Browse topics
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <Link
               to="/research"
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card hover:bg-secondary/80 text-foreground px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card hover:bg-secondary/80 text-foreground px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation flex-1 sm:flex-initial min-w-[9.5rem]"
             >
               Research briefs
             </Link>
             <Link
               to="/about"
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/40 transition-colors min-h-[40px] touch-manipulation"
+              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/40 transition-colors min-h-[44px] sm:min-h-[40px] touch-manipulation flex-1 sm:flex-initial min-w-[9.5rem]"
             >
               Method &amp; limits
             </Link>
@@ -545,16 +560,16 @@ function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5"
         >
-          <section className="dash-panel p-4 sm:p-5 xl:col-span-8 overflow-hidden">
-            <div className="flex flex-col gap-3 mb-3 pb-3 border-b border-border/80">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0">
+            <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 pb-3 border-b border-border/80">
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Citizen signals"
                 subtitle="From the latest sample. Tap any row for the full briefing."
               />
-              <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll">
+              <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll overscroll-x-contain">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
               </div>
             </div>
@@ -591,13 +606,13 @@ function Dashboard() {
               )}
           </section>
 
-          <div className="xl:col-span-4 space-y-4">
-            <section className="dash-panel p-3 sm:p-4 relative overflow-hidden">
+          <div className="xl:col-span-4 space-y-3 sm:space-y-4 min-w-0">
+            <section className="dash-panel p-3 sm:p-4 relative overflow-hidden min-w-0">
               <div className="flex items-start justify-between gap-2 mb-2 pb-2 border-b border-border/80">
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
                   <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
-                    <span className="sm:hidden">Tap a point for detail · {regionTiles.length} regions</span>
+                    <span className="sm:hidden">Tap a point · {regionTiles.length} regions</span>
                     <span className="hidden sm:inline">
                       Hover a point for topic + score · {regionTiles.length} regions ·{" "}
                       {fmtNum(kpis.postsAnalyzed)} posts
@@ -605,7 +620,7 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="h-[220px] sm:h-[300px] xl:h-[268px] rounded-xl border border-border/70 overflow-hidden globe-stage">
+              <div className="h-[200px] sm:h-[280px] md:h-[300px] xl:h-[268px] rounded-xl border border-border/70 overflow-hidden globe-stage">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -921,10 +936,11 @@ function CitizenGroupFilter({
     { key: "Social", color: "var(--magenta)" },
   ];
   return (
-    <div className="flex items-center gap-1 text-[11px] font-mono flex-nowrap min-w-max">
+    <div className="flex items-center gap-1.5 text-[11px] font-mono flex-nowrap min-w-max">
       <button
+        type="button"
         onClick={() => onChange(null)}
-        className={`px-2.5 py-1 rounded-full uppercase tracking-wider border transition-colors ${
+        className={`px-3 py-2 sm:px-2.5 sm:py-1 rounded-full uppercase tracking-wider border transition-colors min-h-[40px] sm:min-h-0 touch-manipulation ${
           value === null
             ? "bg-cyan text-primary-foreground border-cyan"
             : "bg-transparent border-border hover:border-cyan/40 text-muted-foreground hover:text-foreground"
@@ -936,9 +952,10 @@ function CitizenGroupFilter({
         const active = value === g.key;
         return (
           <button
+            type="button"
             key={g.key}
             onClick={() => onChange(active ? null : g.key)}
-            className="px-2.5 py-1 rounded-full uppercase tracking-wider border transition-colors"
+            className="px-3 py-2 sm:px-2.5 sm:py-1 rounded-full uppercase tracking-wider border transition-colors min-h-[40px] sm:min-h-0 touch-manipulation"
             style={
               active
                 ? { background: g.color, color: "var(--background)", borderColor: g.color }
@@ -2274,16 +2291,14 @@ function DashboardKpiGrid({
   curatedCount?: number;
 }) {
   const k = overview?.kpis ?? {};
-  const liveTopicCount = Object.keys(LIVE_TOPIC_KEYS).length;
+  // Product surface: active monitors only (exclude archived). Matches Topics page active count.
+  // Do not trust overview.kpis.total_topics_monitored alone — backend can include retired/history keys (was 21 vs 18).
+  const activeTopicCount = activeLiveTopicCount();
+  const liveTopicCount = activeTopicCount;
   const researchBriefs = listResearchBriefs();
   const researchCount = researchBriefs.length;
 
-  const topicsMonitored =
-    typeof k.total_topics_monitored === "number"
-      ? k.total_topics_monitored
-      : typeof k.active_topics === "number"
-        ? k.active_topics
-        : liveTopicCount || undefined;
+  const topicsMonitored = activeTopicCount > 0 ? activeTopicCount : undefined;
 
   const leadersRanked =
     typeof k.leaders_ranked === "number" ? k.leaders_ranked : trackerKpis?.leadersRanked;
@@ -2357,9 +2372,10 @@ function DashboardKpiGrid({
       value: topicsMonitored,
       icon: Layers,
       format: "number",
-      liveNote: "Live topic monitors on this desk.",
+      liveNote: "Active topic monitors on this desk (archived excluded).",
       liveFacts: [
-        `Catalog topics: ${liveTopicCount}`,
+        `Active monitors: ${activeTopicCount}`,
+        `Archived (history only): ${Object.keys(LIVE_TOPIC_KEYS).filter((id) => isArchivedTopicId(id)).length}`,
         typeof k.core_topics_refreshed === "number"
           ? `Core refreshed this pass: ${k.core_topics_refreshed}`
           : "Core refresh count not in this overview yet.",
@@ -2490,7 +2506,7 @@ function DashboardKpiGrid({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-2.5 items-stretch"
+      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch"
     >
       {tiles.map((t, i) => (
         <KpiHeroTile

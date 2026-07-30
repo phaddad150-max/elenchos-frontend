@@ -67,6 +67,7 @@ const NEAR_REALTIME_TOPIC_ID = "us-iran-confrontation";
 const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "archived"> = {
   "us-iran-confrontation": "realtime",
   "fifa-world-cup-2026": "archived",
+  "maritime-ai-greece": "archived",
   "arab-israeli-normalization": "weekly",
   "iranian-voices-vs-regime": "weekly",
   "elon-musk-public-voices": "weekly",
@@ -258,7 +259,8 @@ function topicCategory(id: string): TopicCategory {
   if (
     id === "crypto-regulation-financial-markets" ||
     id === "global-ai-race" ||
-    id === "us-ai-economy-boom"
+    id === "us-ai-economy-boom" ||
+    id === "maritime-ai-greece"
   )
     return "Economic";
   if (id === "crime-safety-lawlessness" || id === "political-polarization-populism") return "Social";
@@ -365,7 +367,7 @@ function TopicsFilterableGrid({
   const topicGridClass =
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
 
-  const renderTopicCard = (t: FeatureTopic, i: number) => {
+  const renderTopicCard = (t: FeatureTopic, i: number, archived = false) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
     const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
     const wow = liveKey && !simMode ? readWowTrend(liveKey) : null;
@@ -377,7 +379,7 @@ function TopicsFilterableGrid({
         cadence={topicCadence(t.id)}
         snapshot={snap}
         wowTrend={wow}
-        isNew={isNewTopicBadge(t.id)}
+        isNew={!archived && isNewTopicBadge(t.id)}
         onOpen={() => onOpen(t.id)}
       />
     );
@@ -409,8 +411,14 @@ function TopicsFilterableGrid({
             ))}
           </div>
         </div>
-        <span className="text-[12px] sm:text-[13px] font-display font-medium text-muted-foreground sm:ml-auto shrink-0">
-          {visibleCount} topics
+        <span className="text-[12px] sm:text-[13px] font-display font-medium text-muted-foreground sm:ml-auto shrink-0 tabular-nums">
+          <span className="text-cyan">{activeTopics.length}</span> active
+          {archivedTopics.length > 0 && (
+            <>
+              <span className="text-border mx-1.5">·</span>
+              <span>{archivedTopics.length} archived</span>
+            </>
+          )}
         </span>
       </div>
 
@@ -421,35 +429,57 @@ function TopicsFilterableGrid({
       )}
 
       {activeTopics.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan" />
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan">
+        <section className="space-y-3" aria-labelledby="topics-active-heading">
+          <div className="flex items-center gap-2 flex-wrap pb-1 border-b border-cyan/25">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan shrink-0" aria-hidden />
+            <h2
+              id="topics-active-heading"
+              className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan"
+            >
               Active topics
             </h2>
+            <span className="text-[10px] font-mono text-muted-foreground tracking-[0.08em] tabular-nums">
+              {activeTopics.length}
+            </span>
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
               · Sampled when workflows run
             </span>
           </div>
           <div className={topicGridClass}>
-            {activeTopics.map((t, i) => renderTopicCard(t, i))}
+            {activeTopics.map((t, i) => renderTopicCard(t, i, false))}
           </div>
         </section>
       )}
 
       {archivedTopics.length > 0 && (
-        <section className="space-y-3 pt-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
+        <section
+          className="space-y-3 pt-5 mt-1 border-t border-dashed border-border/90"
+          aria-labelledby="topics-archived-heading"
+        >
+          <div className="flex items-center gap-2 flex-wrap pb-1 border-b border-border/70">
+            <span
+              className="w-1.5 h-1.5 rounded-full bg-muted-foreground/55 shrink-0"
+              aria-hidden
+            />
+            <h2
+              id="topics-archived-heading"
+              className="text-[11px] font-mono uppercase tracking-[0.24em] text-muted-foreground"
+            >
               Archived topics
             </h2>
+            <span className="text-[10px] font-mono text-muted-foreground tracking-[0.08em] tabular-nums">
+              {archivedTopics.length}
+            </span>
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
-              · Historical only
+              · Historical only · not live monitors
             </span>
           </div>
-          <div className={`${topicGridClass} opacity-95`}>
-            {archivedTopics.map((t, i) => renderTopicCard(t, i))}
+          <p className="text-[11px] sm:text-[12px] text-muted-foreground leading-relaxed max-w-2xl">
+            Read-only history. These topics stay available for review but are not part of the active
+            monitoring desk.
+          </p>
+          <div className={`${topicGridClass} opacity-90`}>
+            {archivedTopics.map((t, i) => renderTopicCard(t, i, true))}
           </div>
         </section>
       )}
@@ -474,6 +504,7 @@ function shortTitle(t: string): string {
     "Cuba Sanctions & the Domino Effect": "Cuba Sanctions",
     "US AI Economy Boom & American Technological Renaissance": "US AI Economy Boom",
     "FIFA World Cup 2026": "FIFA World Cup 2026",
+    "Maritime AI Industry & Greece's Global Role": "Maritime AI · Greece",
     "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "US–Iran Confrontation",
     "Public Voices on Elon Musk: Trust, Media Frames & Power": "Elon Musk · Public Voices",
     "Save Europe Act: Citizens, Media & EU Bureaucracy": "Save Europe Act",
