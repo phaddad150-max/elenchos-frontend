@@ -489,12 +489,21 @@ function Dashboard() {
         <section className="fade-up dash-panel px-4 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col md:flex-row md:flex-wrap md:items-start md:justify-between gap-4">
             <div className="min-w-0 w-full md:flex-1">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/8 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-cyan mb-2.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-40" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan" />
+                </span>
+                Free public research desk
+              </div>
               <h1 className="text-[1.65rem] sm:text-3xl md:text-[2.35rem] lg:text-4xl font-display font-semibold tracking-tight leading-[1.12] break-words">
                 Real Citizen Voices vs{" "}
                 <span className="text-cyan">Official Narratives</span>
               </h1>
               <p className="mt-2.5 text-sm md:text-[15px] text-muted-foreground leading-relaxed max-w-2xl">
-                Public intelligence from structured X samples. Directional insight, not a national poll.
+                Research-grade citizen intelligence — the kind firms sell at a premium — open free for
+                ordinary people. Structured X samples, clear limits, human-reviewed claims. Directional
+                insight, not a national poll.
               </p>
             </div>
             <DataFreshnessBar
@@ -516,11 +525,10 @@ function Dashboard() {
               Research briefs
             </Link>
             <Link
-              to="/topics/$topicId"
-              params={{ topicId: "commercial-space-race" }}
+              to="/about"
               className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/40 transition-colors min-h-[40px] touch-manipulation"
             >
-              Case study: Space Race
+              Method &amp; limits
             </Link>
           </div>
         </section>
@@ -1859,23 +1867,28 @@ function shortTopicLabel(t: string): string {
 
 
 // ── Dashboard KPI hero grid (6 equal tracking cards) ─────────────────────
-// Metrics tracked client-side via localStorage history. Expand for full
-// methodology / breakdown. No fake accuracy claims — pipeline confidence
-// is derived transparently from coverage on this page.
+// Expand shows live numbers only + links (About for method; no About-duplicate prose).
 
 type KpiHeroFormat = "number" | "percent" | "compact";
+
+type KpiHeroHref =
+  | "/about"
+  | "/research"
+  | "/topics"
+  | "/trackers"
+  | "/trackers/leaders"
+  | "/trackers/peace";
 
 /** Optional expand-panel action. Nested Link uses stopPropagation so expand still works. */
 type KpiHeroCta = {
   label: string;
-  /** When true, render muted non-link “coming soon” instead of navigation. */
   comingSoon?: boolean;
   note?: string;
-  /** Primary path when ready; soft paths use muted styling. */
-  href?: "/research" | "/topics" | "/trackers" | "/trackers/leaders" | "/trackers/peace";
-  /** "primary" = brand CTA; "soft" = secondary text link while catalog is thin. */
+  href?: KpiHeroHref;
   emphasis?: "primary" | "soft";
 };
+
+type KpiHeroLink = { label: string; href: KpiHeroHref };
 
 type KpiHeroTileModel = {
   id: string;
@@ -1884,9 +1897,11 @@ type KpiHeroTileModel = {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   format: KpiHeroFormat;
   unit?: string;
-  hint: string;
-  expandTitle: string;
-  expandLines: string[];
+  /** One-line live readout only (no methodology — that lives on About). */
+  liveNote: string;
+  /** Extra live facts (counts, run window) — keep short. */
+  liveFacts?: string[];
+  links?: KpiHeroLink[];
   cta?: KpiHeroCta;
 };
 
@@ -1916,7 +1931,7 @@ function computePipelineConfidence(args: {
   cleaning: number;
   reasoning: number;
   reporting: number;
-  lines: string[];
+  liveFacts: string[];
 } {
   const { snapshots, liveTopicCount, overview, researchCount } = args;
   const snapList = snapshots ? Object.values(snapshots) : [];
@@ -1931,10 +1946,7 @@ function computePipelineConfidence(args: {
       cleaning: 0,
       reasoning: 0,
       reporting: 0,
-      lines: [
-        "No sample loaded yet — confidence is undefined, not 100%.",
-        "When data lands, this tile estimates fetch → clean → reason → report quality bands for SpaceXAI/Grok on public discourse — not audited accuracy.",
-      ],
+      liveFacts: ["No sample loaded yet — confidence undefined, not 100%."],
     };
   }
 
@@ -1997,15 +2009,14 @@ function computePipelineConfidence(args: {
   // Composite hard-capped: full topic coverage must never look like 98% “accuracy”
   const composite = clampPct((fetching + cleaning + reasoning + reporting) / 4, 40, 70);
 
-  const lines = [
-    `Fetch (est. ${fetching}%): public X / multi-source packs are purposive samples — incomplete universe, rate limits, not a platform census. Coverage here: ${snapCount}/${liveTopicCount} topics.`,
-    `Clean / filter (est. ${cleaning}%): residual bots, media accounts, language mix, and thin topics (${thinTopics} with under 25 posts) still distort signal. No published measured precision for this stack.`,
-    `Reason (est. ${reasoning}%): SpaceXAI + Grok produce directional sentiment, frames, and gap prose — interpretive LLM analysis, not verified ground truth or polls.`,
-    `Report (est. ${reporting}%): dashboard copy and topic briefs are structured model outputs; research claims get human review before publish. Still provisional, not certified accuracy.`,
-    `Composite ${composite}% is an engineering confidence band (hard-capped ≤70), not Grok/SpaceXAI “lab accuracy.” If a number near 95–99% ever appears, treat it as a bug.`,
+  // Live readout only — full method/limits live on About (no duplicate essays here).
+  const liveFacts = [
+    `Est. bands — fetch ${fetching}% · clean ${cleaning}% · reason ${reasoning}% · report ${reporting}%`,
+    `This page: ${snapCount}/${liveTopicCount} topics with sample rows · ${thinTopics} thin (under 25 posts)`,
+    "Hard-capped ≤70%. Not lab accuracy.",
   ];
 
-  return { composite, fetching, cleaning, reasoning, reporting, lines };
+  return { composite, fetching, cleaning, reasoning, reporting, liveFacts };
 }
 
 /** Current-window sample size from snapshots + overview KPI (not cumulative). */
@@ -2040,12 +2051,15 @@ function KpiHeroTile({
   tile,
   history,
   delay = 0,
+  expanded,
+  onToggle,
 }: {
   tile: KpiHeroTileModel;
   history: number[];
   delay?: number;
+  expanded: boolean;
+  onToggle: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [flash, setFlash] = useState(false);
   const prevRef = useRef<number | undefined>(undefined);
 
@@ -2063,7 +2077,6 @@ function KpiHeroTile({
     decimals: 0,
   });
 
-  // Flash + re-count when tracked value changes
   useEffect(() => {
     if (!has) return;
     if (prevRef.current !== undefined && prevRef.current !== numericValue) {
@@ -2085,34 +2098,35 @@ function KpiHeroTile({
     has && tile.format === "percent" ? Math.min(100, Math.max(0, Math.round(numericValue))) : null;
 
   return (
-    <motion.button
-      type="button"
-      layout
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.985 }}
-      onClick={() => setExpanded((v) => !v)}
-      aria-expanded={expanded}
-      className={`dash-kpi dash-kpi-hero group relative min-w-0 w-full text-left cursor-pointer flex flex-col items-center justify-start gap-1.5 px-2.5 py-2.5 sm:px-3 sm:py-3 ${
-        expanded ? "dash-kpi-hero-open" : ""
+    <div
+      className={`dash-kpi dash-kpi-hero relative min-w-0 w-full h-full ${
+        expanded ? "dash-kpi-hero-open z-20" : "z-0"
       } ${flash ? "dash-kpi-flash" : ""}`}
     >
-      <span className="dash-kpi-glow" aria-hidden />
-      <div className="relative z-[1] flex flex-col items-center text-center gap-1.5 w-full min-h-[5.75rem]">
+      <motion.button
+        type="button"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={{ y: -1 }}
+        whileTap={{ scale: 0.99 }}
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-1 px-2.5 py-2.5 sm:px-3 sm:py-3 min-h-[8.75rem]"
+      >
+        <span className="dash-kpi-glow" aria-hidden />
         <span
-          className="shrink-0 w-8 h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 group-hover:bg-cyan/15 transition-colors"
+          className="shrink-0 w-8 h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 transition-colors"
           aria-hidden
         >
           <tile.icon className="w-4 h-4 text-cyan data-pulse" strokeWidth={2.2} />
         </span>
-        <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground leading-tight line-clamp-2 min-h-[2rem] flex items-center justify-center px-0.5">
+        <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground leading-tight line-clamp-2 min-h-[2rem] w-full flex items-center justify-center text-center px-0.5">
           {tile.label}
         </span>
         {has ? (
           <div
-            className={`text-[1.45rem] sm:text-[1.55rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan ${
+            className={`text-[1.4rem] sm:text-[1.5rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.6rem] flex items-center justify-center ${
               flash ? "ticker-flash" : ""
             }`}
             style={{ textShadow: "0 0 18px color-mix(in oklab, var(--cyan) 45%, transparent)" }}
@@ -2126,97 +2140,117 @@ function KpiHeroTile({
             )}
           </div>
         ) : (
-          <div className="text-[11px] font-mono text-muted-foreground leading-snug">—</div>
+          <div className="text-[11px] font-mono text-muted-foreground min-h-[1.6rem] flex items-center">
+            —
+          </div>
         )}
-        {delta != null && (
-          <span
-            className={`text-[9px] font-mono tabular-nums ${
-              delta > 0 ? "text-emerald-signal" : delta < 0 ? "text-rose-signal" : "text-muted-foreground"
-            }`}
-          >
-            {delta > 0 ? "+" : ""}
-            {Math.round(delta)}
-            {tile.format === "percent" ? " pts" : ""} vs last
-          </span>
-        )}
-        {barPct != null && (
-          <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden mt-0.5">
+        {/* Fixed delta slot so all cards share the same height */}
+        <span
+          className={`text-[9px] font-mono tabular-nums min-h-[0.95rem] leading-none ${
+            delta == null
+              ? "text-transparent select-none"
+              : delta > 0
+                ? "text-emerald-signal"
+                : delta < 0
+                  ? "text-rose-signal"
+                  : "text-muted-foreground"
+          }`}
+          aria-hidden={delta == null}
+        >
+          {delta == null
+            ? "·"
+            : `${delta > 0 ? "+" : ""}${Math.round(delta)}${tile.format === "percent" ? " pts" : ""} vs last`}
+        </span>
+        <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden shrink-0">
+          {barPct != null ? (
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
               initial={{ width: 0 }}
               animate={{ width: `${barPct}%` }}
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: delay * 0.4 }}
             />
-          </div>
-        )}
-        <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-muted-foreground/80 mt-auto pt-0.5">
+          ) : (
+            <div className="h-full w-0" />
+          )}
+        </div>
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-muted-foreground/80">
           <ChevronDown
             className={`w-3 h-3 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
           />
           {expanded ? "Less" : "Details"}
         </span>
-      </div>
+      </motion.button>
 
+      {/* Popover expand — keeps all face cards equal height */}
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.22 }}
-            className="relative z-[1] w-full overflow-hidden"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18 }}
+            className="dash-kpi-popover absolute left-0 right-0 top-[calc(100%-2px)] z-30 px-2.5 pb-2.5 pt-1.5 sm:px-3"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="mt-1.5 pt-2 border-t border-cyan/20 text-left space-y-1.5">
-              <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
-                {tile.expandTitle}
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-snug">{tile.hint}</p>
-              <ul className="space-y-1">
-                {tile.expandLines.map((line, i) => (
-                  <li
-                    key={i}
-                    className="text-[11px] text-foreground/80 leading-snug flex gap-1.5"
-                  >
-                    <span className="text-cyan font-mono shrink-0 text-[10px]">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span>{line}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="rounded-lg border border-cyan/30 bg-[color-mix(in_oklab,var(--card)_96%,var(--cyan)_4%)] p-2.5 space-y-2 shadow-[0_12px_32px_-12px_oklch(0_0_0/0.55)]">
+              <p className="text-[11px] text-foreground/85 leading-snug">{tile.liveNote}</p>
+              {tile.liveFacts && tile.liveFacts.length > 0 && (
+                <ul className="space-y-1">
+                  {tile.liveFacts.map((line, i) => (
+                    <li
+                      key={i}
+                      className="text-[10.5px] font-mono text-muted-foreground leading-snug flex gap-1.5"
+                    >
+                      <span className="text-cyan shrink-0">›</span>
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               {history.length > 1 && (
-                <p className="text-[10px] font-mono text-muted-foreground pt-1">
-                  Tracked samples: {history.slice(-6).join(" → ")}
+                <p className="text-[10px] font-mono text-muted-foreground/90">
+                  Tracked: {history.slice(-5).join(" → ")}
                 </p>
               )}
-              {tile.cta && (
-                <div className="pt-2 space-y-1.5" onClick={(e) => e.stopPropagation()}>
-                  {tile.cta.note && (
-                    <p className="text-[10px] font-mono text-muted-foreground leading-snug">
-                      {tile.cta.note}
-                    </p>
-                  )}
-                  {tile.cta.comingSoon || !tile.cta.href ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/60 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
-                      <Sparkles className="w-3 h-3 text-cyan/70" strokeWidth={2.2} />
-                      {tile.cta.label}
-                    </span>
-                  ) : tile.cta.emphasis === "primary" ? (
+              {(tile.links?.length || tile.cta) && (
+                <div className="pt-1.5 border-t border-border/70 flex flex-col gap-1.5">
+                  {tile.links?.map((lnk) => (
                     <Link
-                      to={tile.cta.href}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[32px] touch-manipulation"
+                      key={lnk.href + lnk.label}
+                      to={lnk.href}
+                      className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan hover:text-cyan/80 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {tile.cta.label}
+                      {lnk.label}
                       <ArrowRight className="w-3 h-3" />
                     </Link>
-                  ) : (
-                    <Link
-                      to={tile.cta.href}
-                      className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors"
-                    >
-                      {tile.cta.label}
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                  ))}
+                  {tile.cta && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      {tile.cta.note && (
+                        <p className="text-[10px] font-mono text-muted-foreground leading-snug mb-1">
+                          {tile.cta.note}
+                        </p>
+                      )}
+                      {tile.cta.comingSoon || !tile.cta.href ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/60 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                          <Sparkles className="w-3 h-3 text-cyan/70" strokeWidth={2.2} />
+                          {tile.cta.label}
+                        </span>
+                      ) : (
+                        <Link
+                          to={tile.cta.href}
+                          className={
+                            tile.cta.emphasis === "primary"
+                              ? "inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[32px]"
+                              : "inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors"
+                          }
+                        >
+                          {tile.cta.label}
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -2224,7 +2258,7 @@ function KpiHeroTile({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.button>
+    </div>
   );
 }
 
@@ -2323,20 +2357,17 @@ function DashboardKpiGrid({
       value: topicsMonitored,
       icon: Layers,
       format: "number",
-      hint: "Live topic intelligence monitors on Elenchos.",
-      expandTitle: "Topic coverage",
-      expandLines: [
-        `${liveTopicCount} catalog topics mapped to Supabase snapshots.`,
+      liveNote: "Live topic monitors on this desk.",
+      liveFacts: [
+        `Catalog topics: ${liveTopicCount}`,
         typeof k.core_topics_refreshed === "number"
-          ? `${k.core_topics_refreshed} core topics refreshed in the latest pipeline pass.`
-          : "Core refresh count not in this overview row yet.",
-        "Open Topics for full briefings; each card is human-reviewed before publish.",
+          ? `Core refreshed this pass: ${k.core_topics_refreshed}`
+          : "Core refresh count not in this overview yet.",
       ],
-      cta: {
-        label: "Browse topics",
-        href: "/topics",
-        emphasis: "soft",
-      },
+      links: [
+        { label: "Open topics", href: "/topics" },
+        { label: "Method & limits", href: "/about" },
+      ],
     },
     {
       id: "leaders",
@@ -2344,18 +2375,15 @@ function DashboardKpiGrid({
       value: leadersRanked,
       icon: Users,
       format: "number",
-      hint: "Leaders in the global trust tracker tables.",
-      expandTitle: "Leader trust tracker",
-      expandLines: [
-        "Counts rows propagated from the global leader trust tracker.",
-        "Scores come from public discourse samples — directional, not polls.",
-        "Open Trackers → Leaders for the full ranking.",
+      liveNote: "Rows in the global leader trust table.",
+      liveFacts:
+        typeof leadersRanked === "number"
+          ? [`Leaders in current tracker: ${leadersRanked}`]
+          : ["Leader table not loaded for this sample."],
+      links: [
+        { label: "Open leaders tracker", href: "/trackers/leaders" },
+        { label: "How scoring works", href: "/about" },
       ],
-      cta: {
-        label: "Open leaders tracker",
-        href: "/trackers/leaders",
-        emphasis: "soft",
-      },
     },
     {
       id: "countries",
@@ -2363,22 +2391,19 @@ function DashboardKpiGrid({
       value: countriesMonitored,
       icon: MapPinned,
       format: "number",
-      hint: "Countries present in peace / region tracker tables.",
-      expandTitle: "Geographic coverage",
-      expandLines: [
+      liveNote: "Countries in peace / region tracker tables.",
+      liveFacts: [
         trackerKpis?.countriesMonitored
-          ? `${trackerKpis.countriesMonitored} countries in the peace & normalization tracker dataset.`
-          : "Country count derived from regions_monitored when peace table is empty.",
+          ? `Peace tracker countries: ${trackerKpis.countriesMonitored}`
+          : "Peace country count not loaded.",
         typeof k.regions_monitored === "number"
-          ? `Overview also reports ${k.regions_monitored} regions monitored.`
-          : "Region count not set on this overview row.",
-        "Tables update when new tracker snapshots are appended (append-only history).",
+          ? `Overview regions: ${k.regions_monitored}`
+          : "Region KPI not set on this overview.",
       ],
-      cta: {
-        label: "Open peace tracker",
-        href: "/trackers/peace",
-        emphasis: "soft",
-      },
+      links: [
+        { label: "Open peace tracker", href: "/trackers/peace" },
+        { label: "About Elenchos", href: "/about" },
+      ],
     },
     {
       id: "reports",
@@ -2386,19 +2411,13 @@ function DashboardKpiGrid({
       value: caseStudiesTotal,
       icon: FileStack,
       format: "number",
-      hint: "Topic reports + research case studies + curated additions.",
-      expandTitle: "Published research surface",
-      expandLines: [
-        `Topic intelligence reports: ${topicReports}`,
-        `Research case studies: ${researchCount}${researchBriefs[0] ? ` (e.g. ${researchBriefs[0].title})` : ""}`,
-        curatedCount > 0
-          ? `Curated / new highlights on page: ${curatedCount}`
-          : "No extra curated highlights counted in this load.",
-        libraryReady
-          ? "Library threshold met — case-study desk is ready to browse."
-          : `Library gate: ${researchCount}/${RESEARCH_LIBRARY_CTA_MIN} dedicated research briefs before we hard-push /research.`,
-        "Total = topics + research briefs + curated highlights. Grows as new work is published.",
+      liveNote: "Topic reports + research case studies + curated highlights.",
+      liveFacts: [
+        `Topic reports: ${topicReports}`,
+        `Research case studies: ${researchCount}`,
+        curatedCount > 0 ? `Curated highlights: ${curatedCount}` : "No curated highlights this load.",
       ],
+      links: [{ label: "Method & product pillars", href: "/about" }],
       cta: reportsCta,
     },
     {
@@ -2408,17 +2427,17 @@ function DashboardKpiGrid({
       icon: Activity,
       format:
         totalSampleAnalyzed != null && totalSampleAnalyzed >= 1000 ? "compact" : "number",
-      hint: "Cumulative posts/items across pipeline sample runs (grows each new run).",
-      expandTitle: "Sample volume (cumulative)",
-      expandLines: [
-        `This run’s window sample: ${windowSample > 0 ? windowSample.toLocaleString() : "—"} (sum of topic sample sizes / overview KPI).`,
+      liveNote: "Cumulative sample volume across pipeline runs.",
+      liveFacts: [
+        `This run window: ${windowSample > 0 ? windowSample.toLocaleString() : "—"}`,
         typeof k.signals_generated === "number"
-          ? `Citizen signals generated (overview): ${k.signals_generated}`
-          : "Signals count not on this overview row.",
-        runId
-          ? `Run id: ${runId}. Each new overview timestamp adds that run’s window once — revisits do not double-count.`
-          : "No overview run timestamp yet — showing current window only until a run id is available.",
-        "Purposive X / multi-source packs, not a census of the whole platform. Cumulative total is tracked client-side until the backend publishes an authoritative lifetime sum.",
+          ? `Signals (overview): ${k.signals_generated}`
+          : "Signals count not on this overview.",
+        runId ? `Run: ${runId}` : "No overview run timestamp yet.",
+      ],
+      links: [
+        { label: "Sampling method", href: "/about" },
+        { label: "Browse topics", href: "/topics" },
       ],
     },
     {
@@ -2427,14 +2446,18 @@ function DashboardKpiGrid({
       value: accuracy.composite,
       icon: ShieldCheck,
       format: "percent",
-      hint: "Honest estimate: fetch · clean · reason · report (SpaceXAI & Grok). Not lab accuracy.",
-      expandTitle: "What this number is (and is not)",
-      expandLines: accuracy.lines,
+      liveNote: "Live confidence band for this page (not lab accuracy).",
+      liveFacts: accuracy.liveFacts,
+      links: [
+        { label: "How AI is used (xAI / SpaceXAI)", href: "/about" },
+        { label: "Limits & samples", href: "/about" },
+      ],
     },
   ];
 
-  // Track value changes across visits / refreshes
   const [historyStore, setHistoryStore] = useState<Record<string, number[]>>({});
+  const [openId, setOpenId] = useState<string | null>(null);
+
   useEffect(() => {
     const payload: Record<string, number | undefined> = {};
     for (const t of tiles) payload[t.id] = t.value;
@@ -2449,16 +2472,25 @@ function DashboardKpiGrid({
     accuracy.composite,
   ]);
 
-  // Hydrate history on first client paint
   useEffect(() => {
     setHistoryStore(readKpiHistory());
   }, []);
+
+  // Close popover on outside click / Escape
+  useEffect(() => {
+    if (!openId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openId]);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-2.5 items-start"
+      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-2.5 items-stretch"
     >
       {tiles.map((t, i) => (
         <KpiHeroTile
@@ -2466,6 +2498,8 @@ function DashboardKpiGrid({
           tile={t}
           history={historyStore[t.id] ?? []}
           delay={i * 0.04}
+          expanded={openId === t.id}
+          onToggle={() => setOpenId((cur) => (cur === t.id ? null : t.id))}
         />
       ))}
     </motion.div>

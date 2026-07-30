@@ -323,18 +323,19 @@
   box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
 }
 
-/* Hero KPI: compact equal tiles, hover glow, expandable */
+/* Hero KPI: equal-size faces; expand is a popover (does not stretch siblings) */
 .dash-kpi-hero {
   position: relative;
-  overflow: hidden;
-  min-height: 7.25rem;
+  overflow: visible;
+  height: 100%;
+  min-height: 8.75rem;
   transition:
     border-color 0.2s ease,
     box-shadow 0.25s ease,
     background 0.2s ease;
 }
 .dash-kpi-hero:hover,
-.dash-kpi-hero:focus-visible {
+.dash-kpi-hero:focus-within {
   border-color: color-mix(in oklab, var(--cyan) 55%, var(--border));
   box-shadow:
     0 0 0 1px color-mix(in oklab, var(--cyan) 22%, transparent),
@@ -346,6 +347,10 @@
   box-shadow:
     0 0 0 1px color-mix(in oklab, var(--cyan) 18%, transparent),
     0 12px 32px -14px color-mix(in oklab, var(--cyan) 40%, transparent);
+}
+.dash-kpi-hero > button {
+  overflow: hidden;
+  border-radius: inherit;
 }
 .dash-kpi-glow {
   pointer-events: none;
@@ -363,6 +368,9 @@
 .dash-kpi-hero:hover .dash-kpi-glow,
 .dash-kpi-hero-open .dash-kpi-glow {
   opacity: 0.9;
+}
+.dash-kpi-popover {
+  pointer-events: auto;
 }
 .dash-kpi-flash {
   animation: dash-kpi-flash 0.9s ease-out;
