@@ -1023,7 +1023,8 @@ function CitizenSignalsFeed({
     return out;
   }, [signals, groupFilter]);
 
-  const COLLAPSED = 5;
+  /** Collapsed: 4 rows so the panel height tracks the right-side heatmap. */
+  const COLLAPSED = 4;
 
   // Live rotation — every 7s shift the queue so the panel feels alive.
   // We only rotate WITHIN the current items array; no data is invented.
@@ -1042,7 +1043,7 @@ function CitizenSignalsFeed({
 
   if (useFallback || items.length === 0) {
     return (
-      <div className="max-h-[640px] overflow-y-auto custom-scroll pr-1 space-y-3">
+      <div className="max-h-[320px] overflow-y-auto custom-scroll pr-1 space-y-3">
         {useFallback ? (
           fallback
         ) : signals.length === 0 ? (
@@ -1059,7 +1060,7 @@ function CitizenSignalsFeed({
   }
 
   const visible = expanded ? items : rotated.slice(0, COLLAPSED);
-  const hidden = Math.max(0, items.length - visible.length);
+  const hidden = Math.max(0, items.length - COLLAPSED);
 
 
   return (
@@ -1073,8 +1074,9 @@ function CitizenSignalsFeed({
       </motion.div>
       {(hidden > 0 || expanded) && (
         <button
+          type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full mt-2 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground"
+          className="w-full mt-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[40px] touch-manipulation"
         >
           {expanded ? "Show less" : `Show ${hidden} more topic${hidden === 1 ? "" : "s"}`}
         </button>
