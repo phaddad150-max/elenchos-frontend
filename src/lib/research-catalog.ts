@@ -146,19 +146,19 @@ const LEBANON: ResearchBrief = {
       id: "B",
       label: "Empirical layers",
       status: "done",
-      note: "S~191 OpenAlex · O/W 12 usable seeds · D skipped (cost)",
+      note: "S~191 · O/W 12 · M 29 (GDELT) · D 38 (thin X) · GH 2026-07-29/30",
     },
     {
       id: "C",
       label: "Synthesis / gaps",
       status: "done",
-      note: "SYNTHESIS.md from S+O. locked for short brief",
+      note: "SYNTHESIS.md multi-source · short brief v1.1",
     },
     {
       id: "D",
       label: "Claims",
       status: "done",
-      note: "T1–T6 human-reviewed 2026-07-30 (approve-all)",
+      note: "T1–T6 human-reviewed 2026-07-30; T4 low (thin D, not a poll)",
     },
     {
       id: "E",
@@ -377,21 +377,21 @@ const LEBANON: ResearchBrief = {
       label: "Free collect (S + O) run",
       done: true,
       detail:
-        "Done. OpenAlex S (~191) + official/seeds O/W (12 usable: live HTML, Wayback, or curated excerpts). No X used.",
+        "Done. OpenAlex S (~191) + official/seeds O/W (12 usable: live HTML, Wayback, or curated excerpts).",
     },
     {
       id: "gdelt_run",
       label: "Optional: GDELT media (M)",
-      done: false,
+      done: true,
       detail:
-        "Free one-shot. mode=media-gdelt · class M media frames only · ≥5s/req · not citizen D.",
+        "Done 2026-07-30. mode=media-gdelt · n=29 unique · class M media frames only · not citizen D.",
     },
     {
       id: "x_run",
       label: "Optional: thin X sample",
-      done: false,
+      done: true,
       detail:
-        "Skip for no-budget default. Only if street frames needed. mode=x · blocks B,D · max 12.",
+        "Done 2026-07-30. mode=x · blocks B,D · max 12 · n=38 unique · purposive, not a poll.",
     },
     {
       id: "official",
@@ -409,19 +409,20 @@ const LEBANON: ResearchBrief = {
       id: "claims",
       label: "Claims",
       done: true,
-      detail: "T1–T6 human-reviewed 2026-07-30 (approve-all). T4 remains insufficient (no D).",
+      detail:
+        "T1–T6 human-reviewed 2026-07-30. T4 low (thin D present; still not mass-attitude claim).",
     },
     {
       id: "pdf",
       label: "PDF research brief",
       done: true,
-      detail: "Short PDF v1. public/reports/lebanon-ai-collapse-thesis-brief.pdf",
+      detail: "Short PDF v1.1 multi-source. public/reports/lebanon-ai-collapse-thesis-brief.pdf",
     },
   ],
   openQuestions: [
-    "If a one-shot X sample is ever run: how dense is clean citizen talk on AI vs wasta after filtering media accounts?",
+    "How dense is clean citizen talk on AI vs wasta after filtering media accounts in the thin D sample?",
     "Which official timelines (if any) are explicit enough to gap-test against banking/power floors?",
-    "Where would street discourse treat Israeli water/tech as survival vs betrayal? Only testable with D (likely X).",
+    "Where does thin street discourse treat Israeli water/tech as survival vs betrayal (directional only)?",
     "What can be said about demography without overclaiming from structure alone?",
   ],
   elenchosRefs: [],
