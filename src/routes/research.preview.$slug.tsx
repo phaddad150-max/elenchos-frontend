@@ -8,6 +8,7 @@ import {
   Download,
   HelpCircle,
   ListOrdered,
+  AlertTriangle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -16,11 +17,9 @@ import { ResearchSourceLegend } from "@/components/research/ResearchSourceLegend
 import {
   getResearchBrief,
   researchStatusLabel,
-  RESEARCH_HUMAN_FIRST,
-  RESEARCH_HUMANITY_FORWARD,
-  RESEARCH_SCRUTINY_NOTE,
   type PhaseStatus,
   type ResearchBrief,
+  type ResearchClaimSlot,
 } from "@/lib/research-catalog";
 
 export const Route = createFileRoute("/research/preview/$slug")({
@@ -68,12 +67,21 @@ function chapterStatusLabel(status: ResearchBrief["chapters"][0]["status"]) {
   }
 }
 
+function claimConfidenceLabel(c: ResearchClaimSlot["confidence"]) {
+  if (!c) return "—";
+  return c;
+}
+
 function ResearchPreviewBriefPage() {
   const { slug } = Route.useParams();
   const brief = getResearchBrief(slug);
   if (!brief) throw notFound();
 
   const doneChecks = brief.corpusChecks.filter((c) => c.done).length;
+  const readyClaims = brief.claimSlots.filter((c) => c.status === "ready" && c.statement);
+  const substantiveChapters = brief.chapters.filter(
+    (ch) => !["abstract", "method", "greece", "biblio"].includes(ch.id),
+  );
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -106,7 +114,7 @@ function ResearchPreviewBriefPage() {
                 Human-gated
               </span>
               <span className="inline-flex rounded-full border border-border bg-secondary/40 text-muted-foreground px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
-                Multi-source
+                Corpus frozen · non-recurring
               </span>
               <span className="text-[10.5px] font-mono text-muted-foreground">
                 {brief.region} · Updated {brief.updatedAt}
@@ -125,35 +133,34 @@ function ResearchPreviewBriefPage() {
           className="sticky top-[4.5rem] z-20 mb-6 rounded-xl border border-cyan/25 bg-background/95 backdrop-blur-md px-4 py-3 shadow-lg shadow-black/20"
         >
           <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan mb-1.5">
-            Research question (locked)
+            Research question
           </p>
           <p className="text-[13px] sm:text-[14px] text-foreground/95 leading-relaxed">
             {brief.researchQuestion}
           </p>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_260px] gap-5 lg:gap-6 items-start">
-          {/* Spine */}
+        <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)_240px] gap-5 lg:gap-6 items-start">
+          {/* Spine — findings first */}
           <nav
             aria-label="Research spine"
             className="lg:sticky lg:top-[9.5rem] rounded-xl border border-border bg-card/40 p-3.5 space-y-3 order-2 lg:order-1"
           >
             <h2 className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
               <ListOrdered className="w-3.5 h-3.5" />
-              Spine
+              On this brief
             </h2>
             <ol className="space-y-1.5 text-[12px]">
               {[
                 { href: "#question", label: "Question" },
-                { href: "#method", label: "Method" },
-                { href: "#phases", label: "Phases A–E" },
-                { href: "#chapters", label: "Chapters" },
-                { href: "#claims", label: "Thesis claims" },
+                { href: "#strength", label: "What holds" },
+                { href: "#claims", label: "Claims" },
                 { href: "#scenarios", label: "Scenarios" },
-                { href: "#corpus", label: "Corpus checklist" },
-                { href: "#sources", label: "Sources" },
-                { href: "#open", label: "Open questions" },
-                { href: "#pdf", label: "PDF export" },
+                { href: "#findings", label: "Evidence map" },
+                { href: "#pdf", label: "PDF" },
+                { href: "#corpus", label: "Corpus" },
+                { href: "#method", label: "Method" },
+                { href: "#open", label: "Open" },
               ].map((item) => (
                 <li key={item.href}>
                   <a
@@ -167,83 +174,144 @@ function ResearchPreviewBriefPage() {
             </ol>
           </nav>
 
-          {/* Main */}
+          {/* Main — thesis first, instructions last */}
           <div className="space-y-5 order-1 lg:order-2 min-w-0">
-            <section id="method" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
-              <h2 className="text-sm font-display font-semibold text-foreground">Method</h2>
-              <p className="text-[13.5px] text-muted-foreground leading-relaxed">
-                {brief.methodSummary}
+            <section
+              id="strength"
+              className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3"
+            >
+              <h2 className="text-sm font-display font-semibold">What this brief can and cannot say</h2>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2.5">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-emerald-300/90 mb-1.5">
+                    Strong as-is (S + O)
+                  </p>
+                  <ul className="space-y-1 text-[12.5px] text-foreground/85 leading-snug">
+                    <li>· Structural floors: banks, power, wasta, parallel force</li>
+                    <li>· Official recovery path vs those floors</li>
+                    <li>· AI/tech as conditional accelerator, not magic</li>
+                    <li>· Claims T1–T3, T5–T6 with falsifiers</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2.5">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-amber-400/90 mb-1.5 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Intentionally thin
+                  </p>
+                  <ul className="space-y-1 text-[12.5px] text-foreground/85 leading-snug">
+                    <li>· Live citizen frames (no X run — cost)</li>
+                    <li>· Mass attitude claims (T4 = insufficient)</li>
+                    <li>· “Lebanese AI plan” primary docs (thin O pack)</li>
+                    <li>· Free social alternatives unlikely for this topic</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                For futuristic AI + US–Israeli tech talk, the only dense street channel is usually{" "}
+                <span className="text-foreground/80">X</span> — and that would be a{" "}
+                <span className="text-foreground/80">one-shot, capped sample</span>, not a Topics-style
+                recurring burn. Without it, this pilot stays a{" "}
+                <span className="text-foreground/80">constraint thesis</span>, not a pulse of public mood.
               </p>
-              <ul className="space-y-1.5">
-                {brief.approach.map((a) => (
-                  <li
-                    key={a}
-                    className="text-[13px] text-foreground/85 leading-snug flex gap-2"
-                  >
-                    <span className="text-cyan shrink-0">·</span>
-                    <span>{a}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="grid gap-2 sm:grid-cols-2 pt-1">
-                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
-                  <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-emerald-300/90 mb-1">
-                    Human-first
-                  </p>
-                  <p className="text-[12px] text-muted-foreground leading-snug">
-                    {RESEARCH_HUMAN_FIRST}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-cyan/20 bg-cyan/5 px-3 py-2.5">
-                  <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan mb-1">
-                    Humanity-forward
-                  </p>
-                  <p className="text-[12px] text-muted-foreground leading-snug">
-                    {RESEARCH_HUMANITY_FORWARD}
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
-                <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-amber-400/90 mb-1">
-                  Under regional noise
-                </p>
-                <p className="text-[12px] text-muted-foreground leading-snug">
-                  {RESEARCH_SCRUTINY_NOTE}
-                </p>
-              </div>
             </section>
 
-            <section id="phases" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
-              <h2 className="text-sm font-display font-semibold">Phases</h2>
-              <ul className="space-y-2">
-                {brief.phases.map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex gap-3 rounded-lg border border-border/70 bg-background/40 px-3 py-2.5"
-                  >
-                    <span className="mt-0.5 shrink-0">{phaseIcon(p.status)}</span>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-[11px] text-cyan">Phase {p.id}</span>
-                        <span className="text-[13px] font-medium">{p.label}</span>
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                          {p.status}
-                        </span>
-                      </div>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">{p.note}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section id="chapters" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
-              <h2 className="text-sm font-display font-semibold">Chapters</h2>
+            <section id="claims" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="text-sm font-display font-semibold">Thesis claims</h2>
+                <span className="text-[11px] font-mono text-emerald-300/90">
+                  {readyClaims.length} human-gated
+                </span>
+              </div>
               <p className="text-[12px] text-muted-foreground">
-                Outline-driven. Empty slots stay empty until evidence exists.
+                Owner-approved. Each claim: statement · confidence · falsifier. Prefer “evidence
+                suggests” over prophecy.
+              </p>
+              <ul className="grid gap-2 sm:grid-cols-1">
+                {brief.claimSlots.map((c) => {
+                  const ready = c.status === "ready" && c.statement;
+                  return (
+                    <li
+                      key={c.id}
+                      className={`rounded-lg border px-3 py-3 ${
+                        ready
+                          ? "border-border/80 bg-background/35"
+                          : "border-dashed border-border bg-background/20"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
+                          {c.id.toUpperCase()}
+                        </span>
+                        <span className="text-[12px] font-medium text-foreground/90">{c.domain}</span>
+                        {ready ? (
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-300/90">
+                            {claimConfidenceLabel(c.confidence)}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                            <Lock className="w-3 h-3" /> empty
+                          </span>
+                        )}
+                      </div>
+                      {ready ? (
+                        <>
+                          <p className="text-[13px] text-foreground/90 leading-relaxed">{c.statement}</p>
+                          {c.falsifier && (
+                            <p className="text-[11.5px] text-muted-foreground mt-1.5 leading-snug">
+                              <span className="text-foreground/60">Falsifier: </span>
+                              {c.falsifier}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-[11.5px] text-muted-foreground italic">
+                          Awaiting evidence
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+
+            <section id="scenarios" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
+              <h2 className="text-sm font-display font-semibold">Conditional scenarios</h2>
+              <p className="text-[12px] text-muted-foreground">
+                If–then only. None is destiny. Street support unknown without a one-shot discourse sample.
+              </p>
+              <div className="grid gap-2 md:grid-cols-3">
+                {brief.scenarios.map((s) => (
+                  <div
+                    key={s.id}
+                    className="rounded-lg border border-border/80 bg-background/30 p-3 space-y-2"
+                  >
+                    <p className="font-mono text-[11px] text-cyan">
+                      {s.id} · {s.name}
+                    </p>
+                    <p className="text-[12px] text-foreground/85">
+                      <span className="text-muted-foreground">Politics: </span>
+                      {s.politics}
+                    </p>
+                    <p className="text-[12px] text-foreground/85">
+                      <span className="text-muted-foreground">Tech may accelerate: </span>
+                      {s.techMayAccelerate}
+                    </p>
+                    <p className="text-[12px] text-foreground/85">
+                      <span className="text-muted-foreground">Unlikely fast: </span>
+                      {s.unlikelyFast}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section id="findings" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
+              <h2 className="text-sm font-display font-semibold">Evidence map</h2>
+              <p className="text-[12px] text-muted-foreground">
+                What the corpus covers. Empty stays empty — no invented street data.
               </p>
               <ol className="space-y-2">
-                {brief.chapters.map((ch) => (
+                {substantiveChapters.map((ch) => (
                   <li
                     key={ch.id}
                     className="rounded-lg border border-border/70 bg-background/30 px-3 py-2.5"
@@ -273,59 +341,31 @@ function ResearchPreviewBriefPage() {
               </ol>
             </section>
 
-            <section id="claims" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
-              <h2 className="text-sm font-display font-semibold">Thesis claims</h2>
-              <p className="text-[12px] text-muted-foreground">
-                Slots reserved. Claims unlock only after evidence chapters — each needs
-                evidence mix, confidence, and a falsifier.
-              </p>
-              <ul className="grid gap-2 sm:grid-cols-2">
-                {brief.claimSlots.map((c) => (
-                  <li
-                    key={c.id}
-                    className="rounded-lg border border-dashed border-border bg-background/20 px-3 py-3 min-h-[88px]"
-                  >
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mb-1.5">
-                      <Lock className="w-3 h-3" />
-                      {c.id.toUpperCase()} · empty
-                    </div>
-                    <p className="text-[13px] font-medium text-foreground/80">{c.domain}</p>
-                    <p className="text-[11.5px] text-muted-foreground mt-1 italic">
-                      Awaiting evidence (Phase D locked)
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section id="scenarios" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
-              <h2 className="text-sm font-display font-semibold">Conditional scenarios</h2>
-              <p className="text-[12px] text-muted-foreground">
-                If–then structures for 12 / 36 / 60 months. None is destiny.
-              </p>
-              <div className="grid gap-2 md:grid-cols-3">
-                {brief.scenarios.map((s) => (
-                  <div
-                    key={s.id}
-                    className="rounded-lg border border-border/80 bg-background/30 p-3 space-y-2"
-                  >
-                    <p className="font-mono text-[11px] text-cyan">
-                      {s.id} · {s.name}
-                    </p>
-                    <p className="text-[12px] text-foreground/85">
-                      <span className="text-muted-foreground">Politics: </span>
-                      {s.politics}
-                    </p>
-                    <p className="text-[12px] text-foreground/85">
-                      <span className="text-muted-foreground">Tech may accelerate: </span>
-                      {s.techMayAccelerate}
-                    </p>
-                    <p className="text-[12px] text-foreground/85">
-                      <span className="text-muted-foreground">Unlikely fast: </span>
-                      {s.unlikelyFast}
+            <section id="pdf" className="rounded-2xl border border-cyan/25 bg-card/40 p-4 md:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                <div className="flex items-start gap-2.5">
+                  <FileText className="w-4 h-4 text-cyan mt-0.5 shrink-0" />
+                  <div>
+                    <h2 className="text-sm font-display font-semibold">PDF thesis brief</h2>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">
+                      Short human-gated brief (S + O spine). Not a live Topics export.
                     </p>
                   </div>
-                ))}
+                </div>
+                {brief.pdfUrl ? (
+                  <a
+                    href={brief.pdfUrl}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan px-3.5 py-2 text-[12px] font-medium hover:bg-cyan/20"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download PDF
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 text-muted-foreground px-3.5 py-2 text-[12px]">
+                    <Lock className="w-3.5 h-3.5" />
+                    Not available yet
+                  </span>
+                )}
               </div>
             </section>
 
@@ -360,6 +400,41 @@ function ResearchPreviewBriefPage() {
               </ul>
             </section>
 
+            <section id="method" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
+              <h2 className="text-sm font-display font-semibold">Method (short)</h2>
+              <p className="text-[13.5px] text-muted-foreground leading-relaxed">
+                {brief.methodSummary}
+              </p>
+              <ul className="space-y-1.5">
+                {brief.approach.map((a) => (
+                  <li
+                    key={a}
+                    className="text-[13px] text-foreground/85 leading-snug flex gap-2"
+                  >
+                    <span className="text-cyan shrink-0">·</span>
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="pt-1">
+                <h3 className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                  Phases
+                </h3>
+                <ul className="space-y-1.5">
+                  {brief.phases.map((p) => (
+                    <li key={p.id} className="flex gap-2.5 items-start text-[12.5px]">
+                      <span className="mt-0.5 shrink-0">{phaseIcon(p.status)}</span>
+                      <span>
+                        <span className="font-mono text-cyan text-[11px]"> {p.id} </span>
+                        <span className="font-medium text-foreground/90">{p.label}</span>
+                        <span className="text-muted-foreground"> — {p.note}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+
             <section id="open" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
               <h2 className="text-sm font-display font-semibold flex items-center gap-2">
                 <HelpCircle className="w-4 h-4 text-cyan" />
@@ -376,82 +451,13 @@ function ResearchPreviewBriefPage() {
                 ))}
               </ul>
             </section>
-
-            <section id="pdf" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-                <div className="flex items-start gap-2.5">
-                  <FileText className="w-4 h-4 text-cyan mt-0.5 shrink-0" />
-                  <div>
-                    <h2 className="text-sm font-display font-semibold">PDF thesis brief</h2>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">
-                      Branded export when draft content is ready (FIFA-report quality bar).
-                    </p>
-                  </div>
-                </div>
-                {brief.pdfUrl ? (
-                  <a
-                    href={brief.pdfUrl}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan px-3.5 py-2 text-[12px] font-medium hover:bg-cyan/20"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Download PDF
-                  </a>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 text-muted-foreground px-3.5 py-2 text-[12px]">
-                    <Lock className="w-3.5 h-3.5" />
-                    Not available yet
-                  </span>
-                )}
-              </div>
-            </section>
           </div>
 
-          {/* Right tools */}
+          {/* Right — compact tools only */}
           <aside className="space-y-4 order-3 lg:sticky lg:top-[9.5rem]">
             <div id="sources">
               <ResearchSourceLegend classes={brief.sourceClasses} />
             </div>
-
-            <div className="rounded-xl border border-border bg-card/40 p-3.5 space-y-2.5">
-              <h3 className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                Claim discipline
-              </h3>
-              <p className="text-[12px] text-muted-foreground leading-snug">
-                Every published claim needs: statement · source mix (D/O/M/S) · confidence ·
-                falsifier. Prefer “evidence suggests” over “will.”
-              </p>
-            </div>
-
-            {brief.elenchosRefs.length > 0 && (
-              <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3.5 space-y-2.5">
-                <h3 className="text-[10px] font-mono uppercase tracking-[0.18em] text-amber-400/90">
-                  Optional Elenchos R
-                </h3>
-                <p className="text-[11px] text-muted-foreground leading-snug">
-                  Prior product signals — only if a point is relevant. Over and above full
-                  external references. Not primary evidence.
-                </p>
-                <ul className="space-y-2">
-                  {brief.elenchosRefs.map((r) => (
-                    <li key={r.label} className="text-[12px]">
-                      {r.href ? (
-                        <a
-                          href={r.href}
-                          className="text-amber-300/90 hover:text-amber-200 font-medium"
-                        >
-                          {r.label}
-                        </a>
-                      ) : (
-                        <span className="text-foreground/85 font-medium">{r.label}</span>
-                      )}
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        {r.note}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
             <div className="rounded-xl border border-border bg-card/40 p-3.5 space-y-1.5">
               <h3 className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">

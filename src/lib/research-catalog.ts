@@ -129,12 +129,10 @@ const LEBANON: ResearchBrief = {
   methodSummary:
     "Human-first multi-source research: scholarly, surveys, open web, official, media frames, and discourse — not X-only. Thesis claims are an output of evidence and a human gate. High-scrutiny media and info-ops literature are tiered, not laundered as neutral fact. Not advocacy.",
   approach: [
-    "Human-first: source plan, claims, and PDF require a human gate",
-    "Multi-source: S/V/W/O/M/D — social discourse is one layer, not the spine",
-    "Scrutiny ladder: multi-decade regional noise field (state/movement media across the region — not one outlet); frame evidence; triangulate facts",
-    "Humanity-forward: recover truth under propaganda load; pro-agency; no dehumanization or collective guilt",
-    "Claims only with evidence mix + confidence + falsifier; empty when thin",
-    "Elenchos R only if relevant, over and above full external bibliography",
+    "Spine first: scholarly (S) + official/open (O/W); claims only with confidence + falsifier",
+    "Discourse (D) optional and non-recurring — one-shot X if street frames needed; not a Topics pulse",
+    "Empty when thin: no invented citizen attitudes; T4 stays insufficient without D/V",
+    "Human gate on claims and PDF; free-first collect; freeze corpus after gate",
   ],
   sourceClasses: SOURCE_CLASS_LEGEND,
   phases: [
@@ -195,13 +193,11 @@ const LEBANON: ResearchBrief = {
       title: "Method",
       status: "ready",
       summary:
-        "Four layers; citizen vs gap side; insufficient-evidence rule; corrupt patronage system (local: *wasta* = existing corrupt system).",
+        "Research → evidence → claims. Spine = S + O. Discourse optional one-shot. Corrupt patronage (*wasta*) named in English first.",
       bullets: [
-        "Layer 1 — X discourse (ordinary voices only)",
-        "Layer 2 — Official narrative pack (objects of analysis)",
-        "Layer 3 — Constraint matrix (cited)",
-        "Layer 4 — Conditional scenarios after evidence",
-        "R = optional Elenchos product ref only if relevant",
+        "Structural constraints (S) + official narratives (O) as objects of analysis",
+        "Optional D (X) only if owner authorizes — not free-social substitutes for this topic",
+        "Scenarios after evidence; insufficient-evidence rule",
       ],
     },
     {
@@ -260,22 +256,15 @@ const LEBANON: ResearchBrief = {
       summary: "A/B/C with evidence tags — SYNTHESIS + PDF.",
     },
     {
-      id: "greece",
-      number: "11",
-      title: "Greece side-note",
-      status: "outline",
-      summary: "Weak analogy only — different sovereignty and constraint set.",
-    },
-    {
       id: "open",
-      number: "12",
+      number: "11",
       title: "Open questions",
       status: "outline",
-      summary: "Further research without forcing early claims.",
+      summary: "Further research without forcing early claims. No weak cross-country analogies.",
     },
     {
       id: "biblio",
-      number: "13",
+      number: "12",
       title: "Bibliography & source log",
       status: "empty",
       summary: "Full external sources required; R optional and labeled.",
@@ -423,19 +412,12 @@ const LEBANON: ResearchBrief = {
     },
   ],
   openQuestions: [
-    "How dense is clean citizen corpus on AI vs corrupt patronage (*wasta*) after filtering media accounts?",
-    "What is normalized as social fabric in Lebanon vs other Arab contexts (e.g. Gulf/UAE) on patronage and corruption — per evidence only?",
-    "Which official timelines (if any) are explicit enough to gap-test?",
-    "Where does discourse treat Israeli water/tech as survival vs betrayal?",
-    "What can be said about demography without overclaiming from X alone?",
+    "If a one-shot X sample is ever run: how dense is clean citizen talk on AI vs wasta after filtering media accounts?",
+    "Which official timelines (if any) are explicit enough to gap-test against banking/power floors?",
+    "Where would street discourse treat Israeli water/tech as survival vs betrayal — only testable with D (likely X)?",
+    "What can be said about demography without overclaiming from structure alone?",
   ],
-  elenchosRefs: [
-    {
-      label: "Peace / normalization tracker (Lebanon row)",
-      note: "Optional R only if discussing normalization/attitude points — bucketed regional sample, not a national poll. Not incorporated into method spine.",
-      href: "/peace",
-    },
-  ],
+  elenchosRefs: [],
   pdfUrl: "/reports/lebanon-ai-collapse-thesis-brief.pdf",
   notATopicBanner:
     "Research thesis brief — separate from Topics. Human-gated · multi-source · not live Pass-1 scores.",
