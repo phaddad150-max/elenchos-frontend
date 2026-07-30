@@ -302,6 +302,57 @@
   box-shadow: var(--shadow-elevated);
 }
 
+/* Dashboard panels: clearer edges, less muddy glass-on-glass */
+.dash-panel {
+  background: color-mix(in oklab, var(--card) 88%, var(--background));
+  border: 1px solid color-mix(in oklab, var(--cyan) 28%, var(--border));
+  border-radius: 1rem;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--foreground) 4%, transparent),
+    0 12px 36px -20px oklch(0 0 0 / 0.45);
+}
+.dash-panel-soft {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 90%, var(--cyan));
+  border-radius: 0.75rem;
+}
+.dash-kpi {
+  background: color-mix(in oklab, var(--card) 92%, var(--cyan) 4%);
+  border: 1px solid color-mix(in oklab, var(--cyan) 32%, var(--border));
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
+.light .dash-panel {
+  background: oklch(0.995 0.002 240);
+  border-color: oklch(0.72 0.04 220 / 0.85);
+  box-shadow: 0 8px 28px -18px oklch(0.4 0.04 240 / 0.35);
+}
+.light .dash-panel-soft {
+  background: oklch(0.98 0.004 240);
+  border-color: oklch(0.78 0.03 220 / 0.9);
+}
+.light .dash-kpi {
+  background: oklch(0.995 0.003 240);
+  border-color: oklch(0.68 0.06 210 / 0.55);
+  box-shadow: 0 1px 0 oklch(0.5 0.02 240 / 0.06);
+}
+
+/* Landing: quieter background so panels read as cards */
+.dash-landing {
+  --dash-gap: 1rem;
+}
+.dash-landing .grid-bg {
+  opacity: 0.12;
+}
+.dark .dash-landing,
+:root:not(.light) .dash-landing {
+  /* slightly lift page bg under main content */
+}
+.dash-landing > main {
+  position: relative;
+}
+
 .brand-mark {
   background: oklch(0.82 0.16 200 / 0.1);
   border: 1px solid var(--color-cyan);
@@ -314,8 +365,13 @@
 
 .globe-panel {
   background:
-    radial-gradient(circle at 50% 52%, oklch(0.48 0.15 205 / 0.28), transparent 26rem),
-    linear-gradient(135deg, oklch(0.14 0.045 210 / 0.86), oklch(0.09 0.035 255 / 0.9));
+    radial-gradient(circle at 50% 52%, oklch(0.48 0.15 205 / 0.18), transparent 26rem),
+    linear-gradient(135deg, oklch(0.16 0.04 210 / 0.75), oklch(0.12 0.03 255 / 0.82));
+}
+
+/* Heatmap sits inside dash-panel — keep outer card clean */
+.dash-panel .globe-stage {
+  border-radius: 0.75rem;
 }
 
 .globe-stage {

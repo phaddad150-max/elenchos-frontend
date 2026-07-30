@@ -477,19 +477,19 @@ function Dashboard() {
   }, [filtered]);
 
   return (
-    <div className="min-h-screen relative flex flex-col">
-      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+    <div className="min-h-screen relative flex flex-col dash-landing">
+      <div className="absolute inset-0 grid-bg opacity-12 pointer-events-none" />
 
       <SiteNav />
-      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5 relative flex-1 mobile-safe-bottom overflow-x-clip">
-        <section className="fade-up">
+      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-7 space-y-5 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip">
+        <section className="fade-up dash-panel px-4 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col md:flex-row md:flex-wrap md:items-start md:justify-between gap-4">
             <div className="min-w-0 w-full md:flex-1">
-              <h1 className="text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-display font-semibold tracking-tight leading-[1.08] break-words">
+              <h1 className="text-[1.65rem] sm:text-3xl md:text-[2.35rem] lg:text-4xl font-display font-semibold tracking-tight leading-[1.12] break-words">
                 Real Citizen Voices vs{" "}
                 <span className="text-cyan">Official Narratives</span>
               </h1>
-              <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
+              <p className="mt-2.5 text-sm md:text-[15px] text-muted-foreground leading-relaxed max-w-2xl">
                 Public intelligence from structured X samples. Directional insight, not a national poll.
               </p>
             </div>
@@ -497,24 +497,24 @@ function Dashboard() {
               sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
             />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3.5 flex flex-wrap gap-2">
             <Link
               to="/topics"
-              className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/20 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
+              className="inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/10 hover:bg-cyan/20 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
             >
               Browse topics
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <Link
               to="/research"
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 hover:bg-secondary/70 text-foreground px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card hover:bg-secondary/80 text-foreground px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
             >
               Research briefs
             </Link>
             <Link
               to="/topics/$topicId"
               params={{ topicId: "commercial-space-race" }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/35 transition-colors min-h-[40px] touch-manipulation"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/40 transition-colors min-h-[40px] touch-manipulation"
             >
               Case study: Space Race
             </Link>
@@ -528,10 +528,10 @@ function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-4"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5"
         >
-          <section className="glass rounded-2xl p-4 sm:p-5 xl:col-span-8 overflow-hidden">
-            <div className="flex flex-col gap-3 mb-3">
+          <section className="dash-panel p-4 sm:p-5 xl:col-span-8 overflow-hidden">
+            <div className="flex flex-col gap-3 mb-3 pb-3 border-b border-border/80">
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Citizen signals"
@@ -575,8 +575,8 @@ function Dashboard() {
           </section>
 
           <div className="xl:col-span-4 space-y-4">
-            <section className="glass rounded-2xl p-3 sm:p-4 globe-panel relative overflow-hidden">
-              <div className="flex items-start justify-between gap-2 mb-1">
+            <section className="dash-panel p-3 sm:p-4 relative overflow-hidden">
+              <div className="flex items-start justify-between gap-2 mb-2 pb-2 border-b border-border/80">
                 <div>
                   <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
                   <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
@@ -588,7 +588,7 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="h-[220px] sm:h-[320px] xl:h-[280px] -mx-1">
+              <div className="h-[220px] sm:h-[300px] xl:h-[268px] rounded-xl border border-border/70 overflow-hidden globe-stage">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -597,7 +597,7 @@ function Dashboard() {
                   }}
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] font-mono">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-[11px] font-mono">
                 <LegendDot color="var(--rose-signal)" label="Critical" />
                 <LegendDot color="var(--amber-signal)" label="High" />
                 <LegendDot color="var(--cyan)" label="Monitor" />
@@ -606,7 +606,7 @@ function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setRegionFilter(null)}
-                  className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-cyan/15 text-cyan border border-cyan/40 hover:bg-cyan/25 min-h-[36px]"
+                  className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-card border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[36px]"
                 >
                   <MapPin className="w-3 h-3 inline mr-1" />
                   {regionFilter} · clear
@@ -1123,7 +1123,7 @@ function CitizenSignalRow({
       whileHover={{ x: 2, scale: 1.005 }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="group w-full text-left px-3 py-3 rounded-lg bg-secondary/30 border border-border hover:border-cyan/50 hover:bg-secondary/60 hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] active:bg-secondary/70 transition-all flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation"
+      className="group w-full text-left px-3 py-2.5 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation"
     >
       <div className="flex items-center gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
@@ -1132,8 +1132,8 @@ function CitizenSignalRow({
       <span className="flex-1 min-w-0">
         <span className="flex items-center gap-1.5 mb-0.5">
           <span
-            className="w-1 h-1 rounded-full pulse-dot shrink-0"
-            style={{ background: tone.color, boxShadow: `0 0 6px ${tone.color}` }}
+            className="w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ background: tone.color }}
           />
           <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80 truncate">
             {signal.topic}
@@ -1301,8 +1301,8 @@ function AiAnalysisSummary({
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const k = overview?.kpis;
   return (
-    <section className="glass rounded-2xl p-4 sm:p-5 border-l-2 border-l-cyan">
-      <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
+    <section className="dash-panel p-4 sm:p-5 border-l-[3px] border-l-cyan">
+      <div className="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-border/80 flex-wrap">
         <Header
           icon={<Brain className="w-4 h-4" />}
           title="Cross-topic snapshot"
@@ -1310,7 +1310,7 @@ function AiAnalysisSummary({
         />
         <div className="flex items-center gap-2 flex-wrap">
           {lastUpdated && (
-            <span className="px-2 py-1 rounded bg-secondary/60 border border-border text-muted-foreground text-[11px] font-mono">
+            <span className="px-2 py-1 rounded-md bg-card border border-border text-muted-foreground text-[11px] font-mono">
               Sample{" "}
               <span className="text-foreground/90" suppressHydrationWarning>
                 {timeAgo(lastUpdated)}
@@ -1915,7 +1915,7 @@ function KpiHeroTile({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
-      className="glass rounded-xl border border-cyan/25 px-3 py-2.5 sm:px-3.5 sm:py-3 min-w-0 flex flex-col justify-center gap-1.5"
+      className="dash-kpi px-3 py-2.5 sm:px-3.5 sm:py-3 min-w-0 flex flex-col justify-center gap-1.5"
     >
       <div className="flex items-center gap-2 min-w-0">
         <span
