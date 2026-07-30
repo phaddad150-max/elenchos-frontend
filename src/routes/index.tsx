@@ -546,14 +546,14 @@ function Dashboard() {
           curatedCount={curatedHighlights.length}
         />
 
-        {/* Signals + heatmap (original two-column placement) */}
+        {/* Signals + heatmap — stretch so both panels share the same column height */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-stretch"
         >
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0">
-            <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 pb-3 border-b border-border/80">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col h-full">
+            <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 pb-3 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Citizen signals"
@@ -564,41 +564,43 @@ function Dashboard() {
               </div>
             </div>
 
-            <TooltipProvider delayDuration={200}>
-              <CitizenSignalsFeed
-                onPick={setPickedCitizen}
-                signals={mergedFeedSignals}
-                groupFilter={topicFilter}
-                fallback={
-                  <div className="space-y-1.5">
-                    <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
-                    <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
-                    <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
-                  </div>
-                }
-                useFallback={
-                  mergedFeedSignals.length === 0 &&
-                  intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length > 0
-                }
-              />
-            </TooltipProvider>
+            <div className="flex-1 min-h-0 flex flex-col">
+              <TooltipProvider delayDuration={200}>
+                <CitizenSignalsFeed
+                  onPick={setPickedCitizen}
+                  signals={mergedFeedSignals}
+                  groupFilter={topicFilter}
+                  fallback={
+                    <div className="space-y-1.5">
+                      <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
+                      <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
+                      <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
+                    </div>
+                  }
+                  useFallback={
+                    mergedFeedSignals.length === 0 &&
+                    intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length > 0
+                  }
+                />
+              </TooltipProvider>
 
-            {mergedFeedSignals.length === 0 &&
-              intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
-              !simMode && (
-                <p className="mt-4 text-[13px] text-muted-foreground leading-relaxed">
-                  No citizen signal rows in this sample yet. Open{" "}
-                  <Link to="/topics" className="text-cyan hover:underline">
-                    Topics
-                  </Link>{" "}
-                  for full briefings, or check back after the next workflow run.
-                </p>
-              )}
+              {mergedFeedSignals.length === 0 &&
+                intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
+                !simMode && (
+                  <p className="mt-4 text-[13px] text-muted-foreground leading-relaxed">
+                    No citizen signal rows in this sample yet. Open{" "}
+                    <Link to="/topics" className="text-cyan hover:underline">
+                      Topics
+                    </Link>{" "}
+                    for full briefings, or check back after the next workflow run.
+                  </p>
+                )}
+            </div>
           </section>
 
-          <div className="xl:col-span-4 space-y-3 sm:space-y-4 min-w-0">
-            <section className="dash-panel p-3 sm:p-4 relative overflow-hidden min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-2 pb-2 border-b border-border/80">
+          <div className="xl:col-span-4 min-w-0 flex flex-col h-full">
+            <section className="dash-panel p-3 sm:p-4 relative overflow-hidden min-w-0 flex flex-col flex-1 h-full">
+              <div className="flex items-start justify-between gap-2 mb-2 pb-2 border-b border-border/80 shrink-0">
                 <div className="min-w-0">
                   <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
                   <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
@@ -610,7 +612,8 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="h-[200px] sm:h-[280px] md:h-[300px] xl:h-[268px] rounded-xl border border-border/70 overflow-hidden globe-stage">
+              {/* Globe fills remaining panel height so heatmap matches signals column */}
+              <div className="flex-1 min-h-[200px] sm:min-h-[240px] xl:min-h-[220px] rounded-xl border border-border/70 overflow-hidden globe-stage">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -619,7 +622,7 @@ function Dashboard() {
                   }}
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-[11px] font-mono">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-[11px] font-mono shrink-0">
                 <LegendDot color="var(--rose-signal)" label="Critical" />
                 <LegendDot color="var(--amber-signal)" label="High" />
                 <LegendDot color="var(--cyan)" label="Monitor" />
@@ -1372,10 +1375,10 @@ function KeyFindingsInteractive({ findings }: { findings: string[] }) {
               whileTap={{ scale: 0.99 }}
               onClick={() => setActive((cur) => (cur === i ? null : i))}
               aria-pressed={on}
-              className={`text-left rounded-xl border p-3.5 sm:p-4 min-h-[6.5rem] flex flex-col gap-2.5 transition-colors touch-manipulation ${
+              className={`text-left rounded-xl border p-3.5 sm:p-4 min-h-[6.5rem] flex flex-col gap-2.5 transition-colors touch-manipulation border-cyan/40 shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_18%,transparent)] ${
                 on
-                  ? "border-cyan/50 bg-cyan/10 shadow-[0_0_20px_-10px_var(--color-cyan-glow)]"
-                  : "border-border/80 bg-card/40 hover:border-cyan/35 hover:bg-card/70"
+                  ? "border-cyan/65 bg-cyan/10 shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_35%,transparent),0_0_22px_-8px_var(--color-cyan-glow)]"
+                  : "bg-card/40 hover:border-cyan/55 hover:bg-cyan/5 hover:shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_28%,transparent),0_0_18px_-10px_var(--color-cyan-glow)]"
               }`}
             >
               <div className="flex items-center justify-between gap-2">

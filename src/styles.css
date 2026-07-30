@@ -330,22 +330,39 @@
   height: 100%;
   min-height: 8.75rem;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.25s ease,
-    background 0.2s ease;
+    border-color 0.25s ease,
+    box-shadow 0.3s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
 }
 .dash-kpi-hero:hover,
 .dash-kpi-hero:focus-within {
-  border-color: color-mix(in oklab, var(--cyan) 55%, var(--border));
+  border-color: color-mix(in oklab, var(--cyan) 85%, white 8%);
+  background: color-mix(in oklab, var(--card) 78%, var(--cyan) 12%);
   box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--cyan) 22%, transparent),
-    0 10px 28px -16px color-mix(in oklab, var(--cyan) 45%, transparent);
+    0 0 0 1px color-mix(in oklab, var(--cyan) 55%, transparent),
+    0 0 22px color-mix(in oklab, var(--cyan) 38%, transparent),
+    0 0 48px -8px color-mix(in oklab, var(--cyan) 42%, transparent),
+    0 12px 28px -14px oklch(0 0 0 / 0.45);
   outline: none;
 }
+.dash-kpi-hero:hover .dash-kpi-glow,
+.dash-kpi-hero:focus-within .dash-kpi-glow {
+  opacity: 1;
+  inset: -30% -10% auto;
+  height: 90%;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    color-mix(in oklab, var(--cyan) 42%, transparent),
+    color-mix(in oklab, var(--cyan) 12%, transparent) 45%,
+    transparent 72%
+  );
+}
 .dash-kpi-hero-open {
-  border-color: color-mix(in oklab, var(--cyan) 50%, var(--border));
+  border-color: color-mix(in oklab, var(--cyan) 75%, white 5%);
   box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--cyan) 18%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--cyan) 40%, transparent),
+    0 0 28px color-mix(in oklab, var(--cyan) 32%, transparent),
     0 12px 32px -14px color-mix(in oklab, var(--cyan) 40%, transparent);
 }
 .dash-kpi-hero > button {
@@ -363,11 +380,7 @@
     transparent 70%
   );
   opacity: 0.55;
-  transition: opacity 0.25s ease;
-}
-.dash-kpi-hero:hover .dash-kpi-glow,
-.dash-kpi-hero-open .dash-kpi-glow {
-  opacity: 0.9;
+  transition: opacity 0.3s ease, inset 0.3s ease, height 0.3s ease, background 0.3s ease;
 }
 .dash-kpi-popover {
   pointer-events: auto;
@@ -400,10 +413,14 @@
   box-shadow: 0 1px 0 oklch(0.5 0.02 240 / 0.06);
 }
 .light .dash-kpi-hero:hover,
-.light .dash-kpi-hero:focus-visible,
+.light .dash-kpi-hero:focus-within,
 .light .dash-kpi-hero-open {
-  border-color: oklch(0.62 0.1 210 / 0.75);
-  box-shadow: 0 8px 24px -14px oklch(0.55 0.08 210 / 0.35);
+  border-color: oklch(0.55 0.14 210 / 0.9);
+  background: oklch(0.99 0.02 210);
+  box-shadow:
+    0 0 0 1px oklch(0.62 0.12 210 / 0.45),
+    0 0 20px oklch(0.7 0.12 210 / 0.28),
+    0 10px 28px -12px oklch(0.5 0.08 210 / 0.35);
 }
 
 /* Topics index: unified hero banner (copy + art one surface) */
