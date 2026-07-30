@@ -202,7 +202,6 @@ function topicGeo(topic: string) {
 }
 
 function Dashboard() {
-  const [refreshedAt, setRefreshedAt] = useState<Date>(() => new Date());
   const [signals, setSignals] = useState<Signal[]>([]);
   const [flips, setFlips] = useState<ReturnType<typeof generateFlips>>([]);
   const [picked, setPicked] = useState<Signal | null>(null);
@@ -227,7 +226,6 @@ function Dashboard() {
   useEffect(() => {
     loadDashboardData().then((d) => {
       setSnapshots(d ?? null);
-      setRefreshedAt(new Date());
     });
     loadDashboardOverview().then((o) => setOverview(o));
     loadCitizenSignals().then((s) => setCitizenSignals(s ?? []));
