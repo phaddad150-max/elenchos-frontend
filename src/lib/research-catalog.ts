@@ -123,7 +123,7 @@ const LEBANON: ResearchBrief = {
     "demography",
     "tech levers",
   ],
-  updatedAt: "2026-07-26",
+  updatedAt: "2026-07-30",
   researchQuestion:
     "Under what conditions, and over what time scales, can AI and US–Israeli technology meaningfully affect governance, economy, and attitudes in post-collapse Lebanon — and where do structural constraints (elite capture, proxy politics, demography, identity) bound those effects?",
   methodSummary:
@@ -153,20 +153,20 @@ const LEBANON: ResearchBrief = {
     {
       id: "C",
       label: "Synthesis / gaps",
-      status: "active",
-      note: "SYNTHESIS.md draft from S+O — human review",
+      status: "done",
+      note: "SYNTHESIS.md from S+O — locked for short brief",
     },
     {
       id: "D",
       label: "Thesis claims",
-      status: "active",
-      note: "T1–T6 drafted for human gate (not published)",
+      status: "done",
+      note: "T1–T6 human-gated 2026-07-30 (approve-all)",
     },
     {
       id: "E",
       label: "Scenarios",
-      status: "active",
-      note: "A/B/C evidence-tagged in SYNTHESIS.md",
+      status: "done",
+      note: "A/B/C evidence-tagged · in short PDF",
     },
   ],
   chapters: [
@@ -174,8 +174,8 @@ const LEBANON: ResearchBrief = {
       id: "abstract",
       number: "1",
       title: "Abstract",
-      status: "empty",
-      summary: "Written last — question, method, findings, claims, limits.",
+      status: "ready",
+      summary: "Short PDF front matter: question, free corpus, findings, claims, limits.",
     },
     {
       id: "intro",
@@ -249,15 +249,15 @@ const LEBANON: ResearchBrief = {
       id: "claims",
       number: "9",
       title: "Thesis claims",
-      status: "draft",
-      summary: "T1–T6 drafted for human gate in SYNTHESIS.md — not published.",
+      status: "ready",
+      summary: "T1–T6 human-gated 2026-07-30 · short PDF v1.",
     },
     {
       id: "scenarios",
       number: "10",
       title: "Conditional scenarios",
-      status: "draft",
-      summary: "A/B/C with evidence tags — SYNTHESIS.md.",
+      status: "ready",
+      summary: "A/B/C with evidence tags — SYNTHESIS + PDF.",
     },
     {
       id: "greece",
@@ -289,7 +289,7 @@ const LEBANON: ResearchBrief = {
         "Digital/AI tools alone unlikely to dismantle wasta without elite/enforcement change (S+O).",
       confidence: "medium",
       falsifier: "Measurable patronage drop via digital enforcement without elite turnover.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "t2",
@@ -298,7 +298,7 @@ const LEBANON: ResearchBrief = {
         "IMF/WB reform+aid paths bounded by banking + infrastructure; fast narratives ignoring floors unsupported.",
       confidence: "medium",
       falsifier: "Rapid recovery with frozen banking + intermittent power.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "t3",
@@ -306,7 +306,7 @@ const LEBANON: ResearchBrief = {
       statement: "AI admin faces hard ceiling under electricity + parallel-state constraints.",
       confidence: "medium",
       falsifier: "Reliable national e-gov under current power/security setup.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "t4",
@@ -315,7 +315,7 @@ const LEBANON: ResearchBrief = {
         "Insufficient pilot evidence that AI/US–Israeli tech rapidly shifts mass attitudes (D missing).",
       confidence: "insufficient",
       falsifier: "Longitudinal D + surveys show rapid tech-only attitude shifts.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "t5",
@@ -323,7 +323,7 @@ const LEBANON: ResearchBrief = {
       statement: "External tech recovery plausible under B/C scenarios, not continuity capture (A).",
       confidence: "medium",
       falsifier: "Dual-use boom under full proxy veto + frozen deposits.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "t6",
@@ -332,7 +332,7 @@ const LEBANON: ResearchBrief = {
         "Incomplete monopoly of force binds reform depth; O sovereignty language alone does not remove it.",
       confidence: "medium",
       falsifier: "Deep reform while parallel arms remain decisive.",
-      status: "draft",
+      status: "ready",
     },
   ],
   scenarios: [
@@ -412,14 +412,14 @@ const LEBANON: ResearchBrief = {
     {
       id: "claims",
       label: "Thesis claims",
-      done: false,
-      detail: "NEXT — human gate only after synthesis chapters from evidence",
+      done: true,
+      detail: "T1–T6 human-gated 2026-07-30 (approve-all). T4 remains insufficient (no D).",
     },
     {
       id: "pdf",
       label: "PDF thesis brief",
-      done: false,
-      detail: "After draft content is ready",
+      done: true,
+      detail: "Short PDF v1 — public/reports/lebanon-ai-collapse-thesis-brief.pdf",
     },
   ],
   openQuestions: [
@@ -436,7 +436,7 @@ const LEBANON: ResearchBrief = {
       href: "/peace",
     },
   ],
-  pdfUrl: null,
+  pdfUrl: "/reports/lebanon-ai-collapse-thesis-brief.pdf",
   notATopicBanner:
     "Research thesis brief — separate from Topics. Human-gated · multi-source · not live Pass-1 scores.",
 };
