@@ -19,7 +19,6 @@ import {
   LineChart,
   Users,
   Sparkles,
-  RefreshCw,
   ArrowRight,
   Heart,
 } from "lucide-react";
@@ -44,11 +43,10 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TeaserLock } from "@/components/TeaserLock";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
-import { MiniSparkline } from "@/components/MiniSparkline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
+import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
 
 import {
   loadCuratedHighlights,
@@ -498,99 +496,103 @@ function Dashboard() {
               sourceUpdatedAt={overview?.generated_at ?? overview?.last_updated}
             />
           </div>
-          {/* Case-study spotlights — keep the product focused */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-2xl">
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              to="/topics"
+              className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/20 text-cyan px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
+            >
+              Browse topics
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+            <Link
+              to="/research"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 hover:bg-secondary/70 text-foreground px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[40px] touch-manipulation"
+            >
+              Research briefs
+            </Link>
             <Link
               to="/topics/$topicId"
               params={{ topicId: "commercial-space-race" }}
-              className="rounded-xl border border-cyan/30 bg-cyan/5 hover:bg-cyan/10 px-3.5 py-3 text-left transition-colors min-h-[72px] touch-manipulation"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 px-3.5 py-2 text-[12px] text-muted-foreground hover:text-foreground hover:border-cyan/35 transition-colors min-h-[40px] touch-manipulation"
             >
-              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan mb-1">
-                Topics case study
-              </p>
-              <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
-                Commercial Space Race
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                Citizen trust vs corporate &amp; official frames
-              </p>
-            </Link>
-            <Link
-              to="/research/preview/$slug"
-              params={{ slug: "lebanon-ai-collapse" }}
-              className="rounded-xl border border-border bg-secondary/30 hover:border-cyan/35 hover:bg-cyan/5 px-3.5 py-3 text-left transition-colors min-h-[72px] touch-manipulation"
-            >
-              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1">
-                Research case study
-              </p>
-              <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
-                Lebanon · AI after collapse
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                Multi-source thesis · human-gated claims
-              </p>
+              Case study: Space Race
             </Link>
           </div>
         </section>
 
-        {/* HERO: 5 KPI tiles — strictly from dashboard_overviews.kpis */}
-        <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
-
-        {/* CoreTopicsRow removed — topics are surfaced via the Latest Citizen Signals topic filter
-            chips below (real data from dashboard_overviews.intel_feed). */}
-
-        <motion.div
+        {/* Primary: real signals first (tap → modal with snapshot fallbacks) */}
+        <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-4"
+          className="glass rounded-2xl p-4 sm:p-5 overflow-hidden"
         >
-          <section className="glass rounded-2xl p-4 sm:p-5 xl:col-span-8 overflow-hidden">
-
-            <div className="flex flex-col gap-3 mb-3">
-              <Header
-                icon={<Radio className="w-4 h-4" />}
-                title="Citizen signals"
-                subtitle="Latest sample. Tap a row for detail."
-              />
-              <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll">
-                <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
-              </div>
+          <div className="flex flex-col gap-3 mb-3 sm:flex-row sm:items-end sm:justify-between">
+            <Header
+              icon={<Radio className="w-4 h-4" />}
+              title="Citizen signals"
+              subtitle="From the latest sample. Tap any row for the full briefing."
+            />
+            <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll sm:max-w-[55%]">
+              <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
             </div>
+          </div>
 
-            <TooltipProvider delayDuration={200}>
-              <CitizenSignalsFeed
-                onPick={setPickedCitizen}
-                signals={mergedFeedSignals}
-                groupFilter={topicFilter}
-                fallback={
-                  <div className="space-y-1.5">
-                    <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
-                    <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
-                    <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
-                  </div>
-                }
-                useFallback={false}
-              />
-            </TooltipProvider>
+          <TooltipProvider delayDuration={200}>
+            <CitizenSignalsFeed
+              onPick={setPickedCitizen}
+              signals={mergedFeedSignals}
+              groupFilter={topicFilter}
+              fallback={
+                <div className="space-y-1.5">
+                  <FeedGroup label="Critical" color="var(--rose-signal)" items={intelGroups.critical} pill="CRIT" onPick={setPicked} />
+                  <FeedGroup label="Elevated" color="var(--amber-signal)" items={intelGroups.elevated} pill="ELEV" onPick={setPicked} startIndex={intelGroups.critical.length} />
+                  <FeedGroup label="Monitor" color="var(--cyan)" items={intelGroups.monitor} pill="MON" onPick={setPicked} startIndex={intelGroups.critical.length + intelGroups.elevated.length} />
+                </div>
+              }
+              useFallback={
+                mergedFeedSignals.length === 0 &&
+                intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length > 0
+              }
+            />
+          </TooltipProvider>
 
-          </section>
+          {mergedFeedSignals.length === 0 &&
+            intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
+            !simMode && (
+              <p className="mt-4 text-[13px] text-muted-foreground leading-relaxed">
+                No citizen signal rows in this sample yet. Open{" "}
+                <Link to="/topics" className="text-cyan hover:underline">
+                  Topics
+                </Link>{" "}
+                for full briefings, or check back after the next workflow run.
+              </p>
+            )}
+        </motion.section>
 
+        {/* Secondary: snapshot metrics (no sparklines) + map + cross-topic text */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          <div className="xl:col-span-8 space-y-3">
+            <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground px-0.5">
+              Snapshot metrics
+            </p>
+            <DashboardKpiGrid overview={overview} snapshots={snapshots} trackerKpis={trackerKpis} />
+            <AiAnalysisSummary
+              snapshots={snapshots}
+              signals={mergedFeedSignals}
+              highlights={curatedHighlights}
+              overview={overview}
+            />
+          </div>
 
-
-          {/* Right rail — globe + 2 rotating region tiles */}
-          <div className="xl:col-span-4 space-y-4">
-
-            <section className="glass rounded-2xl p-3 sm:p-4 globe-panel relative overflow-hidden">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <div>
-                  <div className="text-sm font-display font-semibold">Global Sentiment Heatmap</div>
-                  <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
-                    <span className="sm:hidden">Tap a point for detail · {regionTiles.length} regions</span>
-                    <span className="hidden sm:inline">Hover a point for topic + score · {regionTiles.length} regions · {fmtNum(kpis.postsAnalyzed)} posts</span>
-                  </div>
+          <div className="xl:col-span-4">
+            <section className="glass rounded-2xl p-3 sm:p-4 globe-panel relative overflow-hidden h-full min-h-[280px]">
+              <div className="mb-1">
+                <div className="text-sm font-display font-semibold">Where signals map</div>
+                <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground mt-0.5">
+                  Geographic anchors for topics in the current sample
                 </div>
               </div>
-              <div className="h-[220px] sm:h-[320px] xl:h-[280px] -mx-1">
+              <div className="h-[220px] sm:h-[280px] xl:h-[260px] -mx-1">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -606,31 +608,17 @@ function Dashboard() {
               </div>
               {regionFilter && (
                 <button
+                  type="button"
                   onClick={() => setRegionFilter(null)}
-                  className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-cyan/15 text-cyan border border-cyan/40 hover:bg-cyan/25"
+                  className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-cyan/15 text-cyan border border-cyan/40 hover:bg-cyan/25 min-h-[36px]"
                 >
                   <MapPin className="w-3 h-3 inline mr-1" />
                   {regionFilter} · clear
                 </button>
               )}
             </section>
-
-            
           </div>
-        </motion.div>
-
-        {/* AI Analysis Summary — single panel, full width (removed duplicate Key Observations panel) */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <AiAnalysisSummary
-            snapshots={snapshots}
-            signals={mergedFeedSignals}
-            highlights={curatedHighlights}
-            overview={overview}
-          />
-        </motion.div>
+        </div>
 
       </main>
 
@@ -639,12 +627,37 @@ function Dashboard() {
       <SignalModal signal={picked} onClose={() => setPicked(null)} />
       <CitizenSignalModal
         signal={pickedCitizen}
-        snapshot={pickedCitizen && snapshots ? snapshots[pickedCitizen.topic] ?? null : null}
+        snapshot={
+          pickedCitizen && snapshots
+            ? resolveSnapshotForTopic(snapshots, pickedCitizen.topic)
+            : null
+        }
         onClose={() => setPickedCitizen(null)}
       />
       <TopicRequestModal open={topicOpen} onClose={() => setTopicOpen(false)} />
     </div>
   );
+}
+
+/** Match feed topic name to topic_snapshots keys (append-only history; read-only). */
+function resolveSnapshotForTopic(
+  snapshots: Record<string, TopicSnapshot>,
+  topic: string,
+): TopicSnapshot | null {
+  if (snapshots[topic]) return snapshots[topic]!;
+  const canonical = normalizeTopicKey(topic);
+  if (canonical && snapshots[canonical]) return snapshots[canonical]!;
+  for (const [k, v] of Object.entries(LIVE_TOPIC_KEYS)) {
+    if (v.rootKey === topic || v.rootKey === canonical || v.headerLabel === topic) {
+      if (snapshots[v.rootKey]) return snapshots[v.rootKey]!;
+      void k;
+    }
+  }
+  const lower = topic.toLowerCase();
+  for (const [k, v] of Object.entries(snapshots)) {
+    if (k.toLowerCase() === lower) return v;
+  }
+  return null;
 }
 
 // === Subcomponents ===
@@ -1282,27 +1295,23 @@ function AiAnalysisSummary({
   const findings = fallback.findings;
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const k = overview?.kpis;
-  const usingFallback = !overview?.grok_ai_summary?.trim() && !!fallback.summary;
-
   return (
     <section className="glass rounded-2xl p-4 sm:p-5 border-l-2 border-l-cyan">
       <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
         <Header
           icon={<Brain className="w-4 h-4" />}
-          title="AI Analysis Summary"
-          subtitle="Cross-topic synthesis across live citizen signals"
+          title="Cross-topic snapshot"
+          subtitle="Built from the same Supabase sample as the signals above"
         />
         <div className="flex items-center gap-2 flex-wrap">
           {lastUpdated && (
-            <span className="px-2 py-1 rounded bg-secondary/60 border border-border text-muted-foreground text-[11px] font-mono inline-flex items-center gap-1">
-              <RefreshCw className="w-3 h-3" />
-              Updated <span className="text-foreground/90" suppressHydrationWarning>{timeAgo(lastUpdated)}</span>
+            <span className="px-2 py-1 rounded bg-secondary/60 border border-border text-muted-foreground text-[11px] font-mono">
+              Sample{" "}
+              <span className="text-foreground/90" suppressHydrationWarning>
+                {timeAgo(lastUpdated)}
+              </span>
             </span>
           )}
-          <span className="px-2 py-1 rounded bg-cyan/15 text-cyan border border-cyan/40 text-[11px] font-mono inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
-            {usingFallback ? "Synthesized · live data" : "AI · cross-topic"}
-          </span>
         </div>
       </div>
 
@@ -1312,7 +1321,8 @@ function AiAnalysisSummary({
         </p>
       ) : (
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Awaiting the next AI analysis cycle… the cross-topic synthesis will appear here as soon as the backend workflow publishes a fresh summary.
+          No cross-topic summary in this sample yet. Topic pages still carry full briefings when data
+          exists.
         </p>
       )}
 
@@ -1941,27 +1951,6 @@ function DashboardKpiGrid({
   };
 
 
-  const [deltas, setDeltas] = useState<Record<string, number>>({});
-  const [history, setHistory] = useState<Record<string, number[]>>({});
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const prev = readKpiHistory();
-    const out: Record<string, number> = {};
-    const values: Record<string, number> = {};
-    for (const t of tiles) {
-      if (typeof t.value !== "number" || Number.isNaN(t.value)) continue;
-      values[t.label] = t.value;
-      const series = prev[t.label] ?? [];
-      const last = series[series.length - 1];
-      if (typeof last === "number" && last !== t.value) {
-        out[t.label] = t.value - last;
-      }
-    }
-    setDeltas(out);
-    setHistory(appendKpiHistory(values));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(tiles.map((t) => t.value))]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -1971,56 +1960,24 @@ function DashboardKpiGrid({
       {tiles.map((t, i) => {
         const brand = "var(--cyan)";
         const Icon = t.icon;
-        const delta = deltas[t.label];
-        const hasDelta = typeof delta === "number" && delta !== 0;
-        const up = hasDelta && delta > 0;
-        const deltaColor = up ? "var(--emerald-signal)" : "var(--rose-signal)";
-        const deltaLabel =
-          hasDelta
-            ? t.format === "percent"
-              ? `${up ? "+" : ""}${Math.round(delta)}pt`
-              : `${up ? "+" : ""}${fmtNum(Math.abs(delta)) === "0" ? delta : (up ? "" : "-") + fmtNum(Math.abs(delta))}`
-            : null;
         const display = fmt(t.value, t.format);
         return (
           <motion.div
             key={t.label}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
+            transition={{ delay: i * 0.04 }}
             className="glass rounded-2xl p-3 sm:p-4 relative overflow-hidden min-w-0"
             style={{ borderColor: `${brand}33` }}
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -inset-px rounded-2xl opacity-60"
-              style={{ background: `radial-gradient(220px circle at 50% 0%, ${brand}1a, transparent 65%)` }}
-            />
-            <div className="relative flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between mb-1.5">
-              <span className="inline-flex items-start gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] text-muted-foreground font-mono leading-tight min-w-0">
-                <Icon className="w-3 h-3 mt-0.5 shrink-0" />
-                <span className="break-words">{t.label}</span>
-              </span>
-              <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
-                {(history[t.label]?.length ?? 0) >= 2 && (
-                  <MiniSparkline values={history[t.label]!} color={brand} />
-                )}
-                {hasDelta && display && (
-                  <span
-                    title={`Change since last refresh: ${deltaLabel}`}
-                    className="inline-flex items-center gap-0.5 text-[10px] font-mono tabular-nums"
-                    style={{ color: deltaColor }}
-                  >
-                    {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    {deltaLabel}
-                  </span>
-                )}
-              </div>
-            </div>
+            <span className="relative inline-flex items-start gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-mono leading-tight min-w-0 mb-2">
+              <Icon className="w-3 h-3 mt-0.5 shrink-0" />
+              <span className="break-words">{t.label}</span>
+            </span>
             {display ? (
               <div
                 className="relative text-2xl sm:text-3xl md:text-4xl font-display font-semibold tabular-nums leading-none"
-                style={{ color: brand, textShadow: `0 0 18px ${brand}55` }}
+                style={{ color: brand }}
               >
                 {display}
                 {t.format === "percent" && (
@@ -2029,7 +1986,7 @@ function DashboardKpiGrid({
               </div>
             ) : (
               <div className="relative text-[11px] sm:text-xs font-mono text-muted-foreground leading-snug pt-1">
-                Data not available yet
+                Not in this sample
               </div>
             )}
           </motion.div>

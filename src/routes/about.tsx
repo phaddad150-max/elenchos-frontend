@@ -159,14 +159,13 @@ function Hero() {
           >
             <span className="block">
               Ancient Greek for cross-examination. We seek truth and defend ordinary people through
-              citizen journalism and freedom of speech. Human-managed, AI-assisted (xAI / SpaceXAI
-              models only).
+              citizen journalism and freedom of speech. The product is AI-assisted (xAI / SpaceXAI
+              only) and run by a person.
             </span>
             <span className="block">
               elenchos.live structures public discourse on X like a digital focus group per topic:
               directional samples, not national polls. We surface the gap between citizen voices and
-              official or media frames, with method, limits, and sample size shown. Built so people
-              who cannot run a research lab still get honest big-picture analysis free.
+              official or media frames, with method, limits, and sample size shown.
             </span>
           </motion.p>
         </div>
@@ -563,35 +562,38 @@ function WhyX() {
             <Brain className="w-4 h-4" />
           </div>
           <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">
-            AI, under a human
+            How AI is used
           </h2>
         </div>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
-          Public posts from the <span className="text-cyan font-semibold">X API</span> are filtered,
-          structured, and reasoned over with{" "}
-          <span className="text-cyan font-semibold">xAI models (Grok / SpaceXAI stack)</span> only.
-          No other AI vendors in the analysis loop. Scores and claims still pass through a human
-          before they stand as the public record.
+          The whole of elenchos.live is AI-assisted with{" "}
+          <span className="text-cyan font-semibold">xAI / SpaceXAI models only</span>: coding and
+          product development, fetching and filtering public posts, analysis, and reasoning. We do
+          not use other AI vendors for those steps. Social content and explainers around the project
+          use the same family of tools.
         </p>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
-          elenchos.live is run and managed by a human: an ordinary person with experience in
-          communications, research, data analysis, digital ecosystems, APIs, and AI tools. This
-          dashboard is not operated by an autonomous agent or bot. AI assistance (xAI / SpaceXAI
-          models) is used for coding, development, fetching, filtering, analysis, and reasoning under
-          that human&apos;s direction. Every publish decision stays with that person.
+          Public discussion is sampled from the <span className="text-cyan font-semibold">X API</span>,
+          structured into scores and narratives, and stored as historical rows for later comparison
+          (week, month, quarter). Nothing here is a national poll: samples are directional, with
+          size and limits shown.
         </p>
         <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
-          The goal is a freemium research tool ordinary citizens, researchers, and truth-seekers can
-          actually use, free analysis for people who cannot build their own stack, while large firms
-          still charge for similar narrative work. We are early and imperfect. The public good is
-          the point.
+          A person runs and owns the site: communications, research, data analysis, digital
+          ecosystems, APIs, and tools. It is not an autonomous agent or bot. AI is a tool under that
+          person&apos;s direction; publish choices stay human.
+        </p>
+        <p className="mt-3 text-[14.5px] text-foreground/90 leading-relaxed">
+          Aim: a freemium research surface ordinary citizens, researchers, and truth-seekers can use
+          without building their own stack, while many large firms still sell similar narrative work
+          at a fee. Early and imperfect. Public good first.
         </p>
         <ul className="mt-4 space-y-2">
           {[
-            "Fetch: public X samples via the X API",
-            "Filter and structure: quality gates under human rules",
-            "Analyze and reason: xAI models only, human-gated outputs",
-            "Build the product: same model family as coding assistant, human owner",
+            "Sample: public posts via the X API",
+            "Process: filter, score, and reason with xAI / SpaceXAI models",
+            "Store: append-only history for later trend analysis",
+            "Ship: same model family assists development; a person owns the product",
           ].map((line) => (
             <li
               key={line}
