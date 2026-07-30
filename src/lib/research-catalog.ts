@@ -380,6 +380,13 @@ const LEBANON: ResearchBrief = {
         "Done — OpenAlex S (~191) + official/seeds O/W (12 usable: live HTML, Wayback, or curated excerpts). No X used.",
     },
     {
+      id: "gdelt_run",
+      label: "Optional: GDELT media (M)",
+      done: false,
+      detail:
+        "Free one-shot — mode=media-gdelt · class M media frames only · ≥5s/req · not citizen D.",
+    },
+    {
       id: "x_run",
       label: "Optional: thin X sample",
       done: false,
