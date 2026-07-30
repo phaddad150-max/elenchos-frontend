@@ -969,7 +969,8 @@ export async function loadTopicSnapshot(
   }
   window.__topicSnapshotPromises ??= {};
   const promiseKey = `${canonical}::${force ? "1" : "0"}`;
-  if (!force && window.__topicSnapshotPromises[promiseKey]) {
+  // Record index is T (not T|undefined) under default TS — use `in` for inflight dedupe.
+  if (!force && promiseKey in window.__topicSnapshotPromises) {
     return window.__topicSnapshotPromises[promiseKey]!;
   }
   window.__topicSnapshotPromises[promiseKey] = (async () => {
