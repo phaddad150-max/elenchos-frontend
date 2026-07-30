@@ -412,6 +412,11 @@
     0 0 0 1px color-mix(in oklab, var(--foreground) 4%, transparent),
     0 14px 36px -22px oklch(0 0 0 / 0.4);
 }
+.topics-hero-banner img {
+  /* Avoid harsh sticker edges; parent clips to rounded-2xl */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 18%, black 100%);
+}
 .light .topics-hero-banner {
   background: oklch(0.995 0.003 240);
   border-color: oklch(0.68 0.06 210 / 0.5);

@@ -172,18 +172,10 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-5 sm:space-y-6"
       >
-        {/* Compact unified banner: copy + art, short height, full-width subhead */}
-        <header className="topics-hero-banner relative overflow-hidden rounded-2xl border border-cyan/30 bg-[color-mix(in_oklab,var(--card)_90%,var(--cyan)_5%)]">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-40"
-            style={{
-              background:
-                "radial-gradient(ellipse 50% 90% at 100% 50%, color-mix(in oklab, var(--cyan) 20%, transparent), transparent 68%)",
-            }}
-          />
-          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(140px,28%)] lg:grid-cols-[minmax(0,1fr)_minmax(180px,26%)] items-center min-h-0">
-            <div className="relative z-[1] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0">
+        {/* Unified banner: copy left + wide headbanner art right (cropped, edge-blended) */}
+        <header className="topics-hero-banner relative overflow-hidden rounded-2xl border border-cyan/30 bg-[color-mix(in_oklab,var(--card)_92%,var(--cyan)_4%)]">
+          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(200px,38%)] lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,36%)] items-stretch min-h-0">
+            <div className="relative z-[2] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0">
               <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan w-fit">
                 <span className="w-1 h-3.5 bg-cyan rounded-sm" />
                 Topics
@@ -209,18 +201,23 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               </button>
             </div>
 
-            <div className="relative z-0 hidden md:block h-[112px] lg:h-[128px] select-none pointer-events-none">
+            {/* Wide art: cover-crop into slot, inherits banner corner radius via parent overflow */}
+            <div
+              className="relative z-[1] hidden md:block min-h-[118px] lg:min-h-[132px] select-none pointer-events-none overflow-hidden"
+              aria-hidden
+            >
               <img
-                src="/brand/elenchos-image-1.png"
+                src="/brand/headbanner.jpg"
                 alt=""
-                className="absolute inset-0 w-full h-full object-contain object-right-bottom lg:object-center scale-[1.05]"
+                className="absolute inset-0 w-full h-full object-cover object-[72%_center] lg:object-[70%_center]"
                 loading="eager"
                 decoding="async"
               />
+              {/* Seamless merge into copy — not a floating collage frame */}
               <div
-                aria-hidden
-                className="absolute inset-y-0 left-0 w-[48%] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_94%,var(--cyan)_5%)] via-[color-mix(in_oklab,var(--card)_50%,transparent)] to-transparent"
+                className="absolute inset-y-0 left-0 w-[55%] max-w-[12rem] bg-gradient-to-r from-[color-mix(in_oklab,var(--card)_96%,var(--cyan)_4%)] from-0% via-[color-mix(in_oklab,var(--card)_55%,transparent)] via-45% to-transparent"
               />
+              <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-cyan/15 to-transparent" />
             </div>
           </div>
         </header>
