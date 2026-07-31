@@ -521,8 +521,8 @@ function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-start min-w-0"
         >
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start">
-            <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 pb-3 border-b border-border/80 shrink-0">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start h-auto">
+            <div className="flex flex-col gap-2 sm:gap-2.5 mb-2.5 pb-2.5 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Citizen signals"
@@ -533,7 +533,7 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               <TooltipProvider delayDuration={200}>
                 <CitizenSignalsFeed
                   onPick={setPickedCitizen}
@@ -556,7 +556,7 @@ function Dashboard() {
               {mergedFeedSignals.length === 0 &&
                 intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
                 !simMode && (
-                  <p className="mt-4 text-[13px] text-muted-foreground leading-relaxed">
+                  <p className="mt-3 text-[13px] text-muted-foreground leading-relaxed">
                     No citizen signal rows in this sample yet. Open{" "}
                     <Link to="/topics" className="text-cyan hover:underline">
                       Topics
@@ -1047,7 +1047,7 @@ function CitizenSignalsFeed({
 
   if (useFallback || items.length === 0) {
     return (
-      <div className="h-[min(28rem,52vh)] overflow-y-auto custom-scroll pr-1 space-y-3">
+      <div className="max-h-[min(24rem,48vh)] overflow-y-auto custom-scroll pr-1 space-y-3">
         {useFallback ? (
           fallback
         ) : signals.length === 0 ? (
@@ -1067,17 +1067,17 @@ function CitizenSignalsFeed({
   const moreCount = Math.max(0, items.length - COLLAPSED);
 
   return (
-    <div className="flex flex-col min-w-0">
+    <div className="flex flex-col min-w-0 gap-1">
       {/*
-        Fixed viewport when collapsed (6 rows) — opacity-only window swap (mode=wait)
-        so enter/exit never double the list height or shove the AI panel down.
-        Expanded: same max height, internal scroll for the full pool.
+        Collapsed: height = content of 6 rows only (no dead air under last row).
+        mode=wait + uniform row min-height keeps flips from shoving panels below.
+        Expanded: scroll inside a cap; button stays flush under the viewport.
       */}
       <div
         className={
           expanded
-            ? "h-[min(28rem,52vh)] overflow-y-auto custom-scroll pr-0.5"
-            : "h-[28rem] sm:h-[29rem] overflow-hidden"
+            ? "max-h-[min(24rem,48vh)] overflow-y-auto custom-scroll pr-0.5"
+            : "overflow-hidden"
         }
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -1087,7 +1087,7 @@ function CitizenSignalsFeed({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.28, ease: "easeInOut" }}
-            className="space-y-1.5"
+            className="flex flex-col gap-1.5"
           >
             {visible.map((s, i) => (
               <CitizenSignalRow key={s.id} signal={s} index={i + 1} onPick={onPick} />
@@ -1099,7 +1099,7 @@ function CitizenSignalsFeed({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full mt-1.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[40px] touch-manipulation"
+          className="w-full shrink-0 inline-flex items-center justify-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-1.5 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[36px] touch-manipulation"
         >
           {expanded ? (
             <>
@@ -1165,9 +1165,9 @@ function CitizenSignalRow({
       transition={{ duration: 0.25, ease: "easeOut" }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="group w-full max-w-full text-left px-2 sm:px-2.5 py-2 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden"
+      className="group w-full max-w-full text-left px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden min-h-[3.25rem] sm:min-h-[3.4rem]"
     >
-      <div className="flex items-center gap-3 w-full min-w-0">
+      <div className="flex items-center gap-2.5 sm:gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
         {String(index).padStart(2, "0")}
       </span>
@@ -1182,7 +1182,7 @@ function CitizenSignalRow({
           </span>
         </span>
         {/* Full fitted line — no line-clamp ellipsis ("...") */}
-        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground break-words">
+        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground break-words line-clamp-2 sm:line-clamp-1">
           {headline || signal.topic}
         </span>
       </span>
