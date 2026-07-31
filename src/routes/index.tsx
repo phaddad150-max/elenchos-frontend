@@ -242,7 +242,8 @@ function Dashboard() {
     });
     loadDashboardOverview().then((o) => setOverview(o));
     loadCitizenSignals().then((s) => setCitizenSignals(s ?? []));
-    loadCuratedHighlights(6).then(setCuratedHighlights);
+    // Load all live curated highlights (not a hard 6) so the feed can rotate every topic.
+    loadCuratedHighlights(40).then(setCuratedHighlights);
     fetchLatestTrackers().then((rows) => {
       const byType = new Map(rows.map((r) => [r.tracker_type, r]));
       const leaderRow = byType.get("global_leader_trust");
@@ -1021,27 +1022,32 @@ function CitizenSignalsFeed({
     return out;
   }, [signals, groupFilter]);
 
-  /** Collapsed: 4 rows. Height is local to this panel — not coupled to the globe. */
-  const COLLAPSED = 4;
+  /** Collapsed window: 6 rows. Fixed height so flips never push panels below. */
+  const COLLAPSED = 6;
 
-  // Live rotation — every 7s shift the queue so the panel feels alive.
-  // We only rotate WITHIN the current items array; no data is invented.
+  // Live rotation — advance by one row every 8s so the full pool cycles through.
+  // All live signals participate; only the visible window is capped at COLLAPSED.
   const [rotation, setRotation] = useState(0);
   useEffect(() => {
     if (expanded) return;
-    const id = setInterval(() => setRotation((r) => r + 1), 7000);
+    if (items.length <= COLLAPSED) return;
+    const id = setInterval(() => setRotation((r) => r + 1), 8000);
     return () => clearInterval(id);
   }, [expanded, items.length]);
 
-  const rotated = useMemo(() => {
+  const windowRows = useMemo(() => {
     if (items.length <= COLLAPSED) return items;
     const offset = rotation % items.length;
-    return [...items.slice(offset), ...items.slice(0, offset)];
+    const out: typeof items = [];
+    for (let i = 0; i < COLLAPSED; i++) {
+      out.push(items[(offset + i) % items.length]!);
+    }
+    return out;
   }, [items, rotation]);
 
   if (useFallback || items.length === 0) {
     return (
-      <div className="max-h-[320px] overflow-y-auto custom-scroll pr-1 space-y-3">
+      <div className="h-[min(28rem,52vh)] overflow-y-auto custom-scroll pr-1 space-y-3">
         {useFallback ? (
           fallback
         ) : signals.length === 0 ? (
@@ -1057,26 +1063,55 @@ function CitizenSignalsFeed({
     );
   }
 
-  const visible = expanded ? items : rotated.slice(0, COLLAPSED);
-  const hidden = Math.max(0, items.length - COLLAPSED);
+  const visible = expanded ? items : windowRows;
+  const moreCount = Math.max(0, items.length - COLLAPSED);
 
   return (
-    <div className="space-y-1.5">
-      {/* No layout/popLayout — those reflow siblings and used to bounce the globe */}
-      <div className="space-y-1.5">
-        <AnimatePresence initial={false}>
-          {visible.map((s, i) => (
-            <CitizenSignalRow key={s.id} signal={s} index={i + 1} onPick={onPick} />
-          ))}
+    <div className="flex flex-col min-w-0">
+      {/*
+        Fixed viewport when collapsed (6 rows) — opacity-only window swap (mode=wait)
+        so enter/exit never double the list height or shove the AI panel down.
+        Expanded: same max height, internal scroll for the full pool.
+      */}
+      <div
+        className={
+          expanded
+            ? "h-[min(28rem,52vh)] overflow-y-auto custom-scroll pr-0.5"
+            : "h-[28rem] sm:h-[29rem] overflow-hidden"
+        }
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={expanded ? "expanded" : `rot-${rotation}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28, ease: "easeInOut" }}
+            className="space-y-1.5"
+          >
+            {visible.map((s, i) => (
+              <CitizenSignalRow key={s.id} signal={s} index={i + 1} onPick={onPick} />
+            ))}
+          </motion.div>
         </AnimatePresence>
       </div>
-      {(hidden > 0 || expanded) && (
+      {(moreCount > 0 || expanded) && (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full mt-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[40px] touch-manipulation"
+          className="w-full mt-1.5 inline-flex items-center justify-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[40px] touch-manipulation"
         >
-          {expanded ? "Show less" : "More signals"}
+          {expanded ? (
+            <>
+              Show less
+              <ChevronDown className="w-3.5 h-3.5 rotate-180" aria-hidden />
+            </>
+          ) : (
+            <>
+              More signals
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden />
+            </>
+          )}
         </button>
       )}
     </div>
@@ -1130,7 +1165,7 @@ function CitizenSignalRow({
       transition={{ duration: 0.25, ease: "easeOut" }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="group w-full max-w-full text-left px-2.5 sm:px-3 py-2.5 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation min-w-0 overflow-hidden"
+      className="group w-full max-w-full text-left px-2 sm:px-2.5 py-2 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden"
     >
       <div className="flex items-center gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
@@ -2171,21 +2206,21 @@ function KpiHeroTile({
         whileTap={{ scale: 0.99 }}
         onClick={onToggle}
         aria-expanded={expanded}
-        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-1 px-2.5 py-2.5 sm:px-3 sm:py-3 min-h-[8.75rem] touch-manipulation"
+        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-0.5 px-2 py-2 sm:px-2.5 sm:py-2.5 min-h-[8.3rem] touch-manipulation"
       >
         <span className="dash-kpi-glow" aria-hidden />
         <span
-          className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 transition-colors"
+          className="shrink-0 w-6.5 h-6.5 sm:w-7.5 sm:h-7.5 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 transition-colors"
           aria-hidden
         >
-          <tile.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan data-pulse" strokeWidth={2.2} />
+          <tile.icon className="w-3.5 h-3.5 sm:w-[0.95rem] sm:h-[0.95rem] text-cyan data-pulse" strokeWidth={2.2} />
         </span>
-        <span className="dash-kpi-label text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground leading-tight line-clamp-2 min-h-[2rem] w-full flex items-center justify-center text-center px-0.5">
+        <span className="dash-kpi-label text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-[0.13em] text-muted-foreground leading-tight line-clamp-2 min-h-[1.9rem] w-full flex items-center justify-center text-center px-0.5">
           {tile.label}
         </span>
         {has ? (
           <div
-            className={`dash-kpi-value text-[1.4rem] sm:text-[1.5rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.6rem] flex items-center justify-center ${
+            className={`dash-kpi-value text-[1.33rem] sm:text-[1.42rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.5rem] flex items-center justify-center ${
               flash ? "ticker-flash" : ""
             }`}
             style={{ textShadow: "0 0 14px var(--color-cyan-glow)" }}
