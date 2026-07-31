@@ -57,8 +57,8 @@ export function Globe3D({ signals, onPick }: Props) {
       controls.enableZoom = true;
       controls.enablePan = false;
       if (typeof g.pointOfView === "function") {
-        // Slightly zoomed out so full sphere sits inside the panel box
-        g.pointOfView({ lat: 18, lng: -38, altitude: 2.35 }, 900);
+        // ~25% larger sphere: camera distance 3.35 → 2.68 globe-radii from center
+        g.pointOfView({ lat: 18, lng: -38, altitude: 1.68 }, 900);
       }
       clearInterval(id);
     }, 120);
@@ -200,9 +200,6 @@ export function Globe3D({ signals, onPick }: Props) {
       ) : (
         <GlobeFallback />
       )}
-      <div className="absolute bottom-3 left-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono pointer-events-none z-10">
-        live signal mesh · auto-rotate
-      </div>
     </div>
   );
 }

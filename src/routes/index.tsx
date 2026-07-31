@@ -563,7 +563,7 @@ function Dashboard() {
 
             {/* Stable globe stage height — not tied to signals panel reflow */}
             <div className="flex flex-col gap-2">
-              <div className="relative h-[280px] sm:h-[320px] xl:h-[360px] w-full rounded-xl border border-border/70 overflow-hidden globe-stage">
+              <div className="relative h-[350px] sm:h-[400px] xl:h-[450px] w-full rounded-xl border border-border/70 overflow-hidden globe-stage">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
