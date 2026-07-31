@@ -50,26 +50,46 @@ export const LIVE_OUTPUT_EXCLUSIONS = new Set<string>([
 /**
  * True when a topic may appear in dashboard KPIs, signals, narratives, insights.
  * Archived / cold / retired topics return false (data kept append-only in Supabase).
+ * GOLDEN G7: archived topics never feed live sample totals or citizen signal rows.
  */
 export function isLiveOutputTopic(raw: string | null | undefined): boolean {
   if (!raw?.trim()) return false;
-  const canonical = normalizeTopicKey(raw) ?? raw.trim();
-  if (LIVE_OUTPUT_EXCLUSIONS.has(canonical)) return false;
-  if (LIVE_OUTPUT_EXCLUSIONS.has(raw.trim())) return false;
-  // Only known non-excluded canonical keys that are not archive-only
-  if (canonical === "fifa-world-cup-2026") return false;
-  if (/maritime ai industry/i.test(canonical)) return false;
-  // Allow only if in the live product set (CANONICAL minus exclusions)
-  if (!CANONICAL_TOPIC_SET.has(canonical) && !CANONICAL_TOPIC_SET.has(raw.trim())) {
-    // Try alias path
-    if (!normalizeTopicKey(raw)) return false;
-  }
-  const key = normalizeTopicKey(raw);
-  if (!key) return false;
+  const trimmed = raw.trim();
+  // Hard archive patterns (slug, title, messy overview JSON variants)
+  if (/\bfifa\b/i.test(trimmed)) return false;
+  if (/world\s*cup\s*2026/i.test(trimmed)) return false;
+  if (/maritime\s*ai/i.test(trimmed)) return false;
+  if (LIVE_OUTPUT_EXCLUSIONS.has(trimmed)) return false;
+
+  const key = normalizeTopicKey(trimmed) ?? trimmed;
   if (LIVE_OUTPUT_EXCLUSIONS.has(key)) return false;
   if (key === "fifa-world-cup-2026") return false;
-  if (/maritime ai industry/i.test(key)) return false;
+  if (/\bfifa\b/i.test(key) || /maritime\s*ai/i.test(key)) return false;
+
+  // Live product set only (CANONICAL minus exclusions)
+  if (!CANONICAL_TOPIC_SET.has(key) && !CANONICAL_TOPIC_SET.has(trimmed)) {
+    if (!normalizeTopicKey(trimmed)) return false;
+  }
+  const resolved = normalizeTopicKey(trimmed);
+  if (!resolved) return false;
+  if (LIVE_OUTPUT_EXCLUSIONS.has(resolved)) return false;
+  if (resolved === "fifa-world-cup-2026") return false;
+  if (/\bfifa\b/i.test(resolved) || /maritime\s*ai/i.test(resolved)) return false;
   return true;
+}
+
+/** Pick the dashboard overview the live UI should show.
+ *  Prefer newest row; if it has no AI summary (e.g. zero-cost refresh), use the
+ *  newest prior row that still has grok_ai_summary so a blank run cannot blank the page.
+ */
+export function pickLiveDashboardOverview(
+  rows: DashboardOverview[] | null | undefined,
+): DashboardOverview | null {
+  if (!rows?.length) return null;
+  const latest = rows[0];
+  if (latest.grok_ai_summary?.trim()) return latest;
+  const withSummary = rows.find((r) => !!r.grok_ai_summary?.trim());
+  return withSummary ?? latest;
 }
 
 /** Legacy / truncated DB topic strings → canonical TOPIC_CONFIG keys (keep in sync with backend). */
@@ -931,14 +951,20 @@ export async function loadDashboardOverview(force = false): Promise<DashboardOve
 
   window.__dashboardOverviewPromise = (async () => {
     try {
+      // Fetch a short history so a blank zero-cost refresh can fall back to the
+      // last overview that still has the AI cross-topic summary (append-only restore).
       const res = await supabaseFetch(
-        "dashboard_overviews?select=*&order=generated_at.desc&limit=1",
+        "dashboard_overviews?select=*&order=generated_at.desc&limit=5",
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as DashboardOverview[];
-      const row = rows?.[0] ?? null;
+      const row = pickLiveDashboardOverview(rows);
       window.dashboardOverview = row;
-      console.log("✅ Loaded dashboard_overviews", row?.id);
+      console.log(
+        "✅ Loaded dashboard_overviews",
+        row?.id,
+        row?.id !== rows?.[0]?.id ? `(fallback from ${rows?.[0]?.id})` : "",
+      );
       return row;
     } catch (e) {
       console.error("Supabase dashboard_overviews fetch failed", e);

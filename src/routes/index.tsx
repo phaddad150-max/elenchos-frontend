@@ -363,14 +363,21 @@ function Dashboard() {
 
   const kpis = useMemo(() => {
     const coreTopics = CANONICAL_TOPICS.length;
-    // Topics with at least one citizen signal — real "active" count.
+    // Live topics only (G7 — archived excluded from sample counts).
+    const liveCitizens = citizenSignals.filter((s) => isLiveOutputTopic(s.topic));
     const activeTopicSet = new Set<string>();
-    citizenSignals.forEach((s) => s.topic && activeTopicSet.add(s.topic));
+    liveCitizens.forEach((s) => s.topic && activeTopicSet.add(s.topic));
     const activeTopics = activeTopicSet.size || coreTopics;
 
-    // Posts: prefer overview, fall back to sum of citizen_signals.sample_size.
-    const citizenPosts = citizenSignals.reduce((sum, s) => sum + (s.sample_size ?? 0), 0);
-    const postsAnalyzed = overview?.total_posts_analyzed ?? citizenPosts;
+    // Prefer live-only KPI from overview when present; else sum live citizen samples.
+    const citizenPosts = liveCitizens.reduce((sum, s) => sum + (s.sample_size ?? 0), 0);
+    const overviewPosts =
+      overview?.kpis?.total_posts_analyzed ?? overview?.total_posts_analyzed ?? null;
+    // Until next backend rebuild, overview may still include archive — prefer live sum when higher-quality filter applies
+    const postsAnalyzed =
+      typeof overviewPosts === "number" && overviewPosts > 0
+        ? overviewPosts
+        : citizenPosts;
 
     if (isLive && overview) {
       const regions = new Set(effectiveSignals.map((s) => s.region)).size || activeTopics;
@@ -386,7 +393,7 @@ function Dashboard() {
     const regions = new Set(effectiveSignals.map((s) => s.region)).size || activeTopics;
     const highAlert = effectiveSignals.filter(
       (s) => s.intensity === "high" || s.intensity === "critical"
-    ).length || citizenSignals.filter((s) => (s.sentiment_score ?? 100) < 50).length;
+    ).length || liveCitizens.filter((s) => (s.sentiment_score ?? 100) < 50).length;
     const avgVelocity =
       effectiveSignals.reduce((s, x) => s + x.velocity, 0) / Math.max(effectiveSignals.length, 1);
     return { postsAnalyzed, topics: activeTopics, regions, highAlert, avgVelocity, precision: 94.2 };
@@ -395,46 +402,53 @@ function Dashboard() {
   // Citizen signals: prefer the inline `citizen_signals` array on the
   // freshest dashboard_overviews row. Fall back to the citizen_signals
   // table when the overview row doesn't include it (older rows).
+  // G7: always drop archived topics (FIFA, Maritime AI, …) even if overview JSON still has them.
   const feedSignals = useMemo<FeedCitizenSignal[]>(() => {
     const inline = overview?.citizen_signals;
     if (Array.isArray(inline) && inline.length > 0) {
-      return inline.map((s, i) => {
-        const base: CitizenSignal = {
-          id: i + 1,
-          topic: s.topic ?? "Unknown topic",
-          signal_type: "overall",
-          sentiment_score: s.sentiment_score ?? null,
-          sentiment_label: s.sentiment_label ?? null,
-          trend: s.trend ?? null,
-          headline: s.headline ?? null,
-          summary: s.summary ?? s.excerpt ?? null,
-          excerpt: s.excerpt ?? null,
-          source: null,
-          sample_size: s.sample_size ?? null,
-          last_updated: s.last_updated ?? null,
-          created_at: s.last_updated ?? null,
-        };
-        // Pass divergence through (kept off the typed shape but consumed
-        // by the feed for sorting and the side column).
-        return {
-          ...base,
-          ...(typeof s.divergence_score === "number" ? { divergence_score: s.divergence_score } : {}),
-          ...(typeof s.narrative_divergence === "number" ? { narrative_divergence: s.narrative_divergence } : {}),
-          ...(s.divergence_label ? { divergence_label: s.divergence_label } : {}),
-        } as FeedCitizenSignal;
-      });
+      return inline
+        .filter((s) => isLiveOutputTopic(s.topic))
+        .map((s, i) => {
+          const base: CitizenSignal = {
+            id: i + 1,
+            topic: s.topic ?? "Unknown topic",
+            signal_type: "overall",
+            sentiment_score: s.sentiment_score ?? null,
+            sentiment_label: s.sentiment_label ?? null,
+            trend: s.trend ?? null,
+            headline: s.headline ?? null,
+            summary: s.summary ?? s.excerpt ?? null,
+            excerpt: s.excerpt ?? null,
+            source: null,
+            sample_size: s.sample_size ?? null,
+            last_updated: s.last_updated ?? null,
+            created_at: s.last_updated ?? null,
+          };
+          return {
+            ...base,
+            ...(typeof s.divergence_score === "number" ? { divergence_score: s.divergence_score } : {}),
+            ...(typeof s.narrative_divergence === "number" ? { narrative_divergence: s.narrative_divergence } : {}),
+            ...(s.divergence_label ? { divergence_label: s.divergence_label } : {}),
+          } as FeedCitizenSignal;
+        });
     }
-    return citizenSignals as FeedCitizenSignal[];
+    return (citizenSignals as FeedCitizenSignal[]).filter((s) => isLiveOutputTopic(s.topic));
   }, [overview, citizenSignals]);
 
   const mergedFeedSignals = useMemo<FeedCitizenSignal[]>(() => {
     const curatedTopics = new Set(
-      curatedHighlights.map((h) => h.topic).filter((t): t is string => !!t),
+      curatedHighlights
+        .map((h) => h.topic)
+        .filter((t): t is string => !!t && isLiveOutputTopic(t)),
     );
-    const fromCurated = curatedHighlights.map((h, i) =>
-      curatedHighlightToFeedSignal(h, h.topic ? snapshots?.[h.topic] ?? null : null, i),
+    const fromCurated = curatedHighlights
+      .filter((h) => isLiveOutputTopic(h.topic))
+      .map((h, i) =>
+        curatedHighlightToFeedSignal(h, h.topic ? snapshots?.[h.topic] ?? null : null, i),
+      );
+    const fromCitizen = feedSignals.filter(
+      (s) => isLiveOutputTopic(s.topic) && !curatedTopics.has(s.topic),
     );
-    const fromCitizen = feedSignals.filter((s) => !curatedTopics.has(s.topic));
     return [...fromCurated, ...fromCitizen];
   }, [curatedHighlights, feedSignals, snapshots]);
 
@@ -685,13 +699,13 @@ function timeAgo(iso?: string | null): string {
   return `${d}d ago`;
 }
 
-// Trim a raw signal blurb into a single scannable line, without altering
-// meaning — strip repetitive lead-ins ("Posts reveal", "Posts highlight",
-// "Based on N posts…"), cut at the first sentence boundary, then hard-cap
-// length. Never invents copy; only shortens what Supabase returns.
+// Rephrase raw signal blurb into a full scannable line that fits the row.
+// Never invents meaning; strips lead-ins; first sentence; word-cap; **no "..."**.
 function shortenSignal(text: string): string {
   if (!text) return "";
   let t = text.trim();
+  // Strip trailing ellipsis / mid-cut artifacts from older backend rows
+  t = t.replace(/\s*\.{2,}\s*$/g, "").replace(/\s*…\s*$/g, "").trim();
   // Strip repetitive lead-ins so signals don't all start with the same words.
   t = t.replace(/^\s*based on\s+\d+\s+posts?\.?\s*(analysis\s+limited\.?)?\s*/i, "").trim();
   t = t.replace(
@@ -701,11 +715,44 @@ function shortenSignal(text: string): string {
   // Cut at first sentence boundary to keep only the lead sentence.
   const firstStop = t.search(/[.!?](\s|$)/);
   if (firstStop > 20) t = t.slice(0, firstStop).trim();
-  // Cap at 13 words — no ellipsis, clean cut.
+  // Cap at 15 words — clean cut at word boundary, never append "..."
   const words = t.split(/\s+/).filter(Boolean);
-  if (words.length > 13) t = words.slice(0, 13).join(" ").replace(/[,;:\-–—]+$/, "").trim();
+  if (words.length > 15) t = words.slice(0, 15).join(" ").replace(/[,;:\-–—]+$/, "").trim();
+  t = t.replace(/\s*\.{2,}\s*$/g, "").replace(/\s*…\s*$/g, "").trim();
   if (t) t = t.charAt(0).toUpperCase() + t.slice(1);
   return t;
+}
+
+/** Row severity for scan layer — same intensity idea as globe, collapsed to 3 bands. */
+function signalSeverity(
+  score: number | null,
+  divergence: number | null,
+): { key: "critical" | "high" | "monitor"; label: string; color: string; tint: string } {
+  const s = typeof score === "number" ? score : 50;
+  const intensityScore = Math.min(1, Math.abs(s - 50) / 50 + 0.35);
+  const hotDiv = typeof divergence === "number" && divergence >= 60;
+  if (intensityScore >= 0.85 || s < 25 || hotDiv) {
+    return {
+      key: "critical",
+      label: "Critical",
+      color: "var(--rose-signal)",
+      tint: "color-mix(in srgb, var(--rose-signal) 16%, transparent)",
+    };
+  }
+  if (intensityScore >= 0.55 || s < 45) {
+    return {
+      key: "high",
+      label: "High",
+      color: "var(--amber-signal)",
+      tint: "color-mix(in srgb, var(--amber-signal) 16%, transparent)",
+    };
+  }
+  return {
+    key: "monitor",
+    label: "Monitor",
+    color: "var(--cyan)",
+    tint: "color-mix(in srgb, var(--cyan) 14%, transparent)",
+  };
 }
 
 function sentimentScoreFromSnapshot(snapshot?: TopicSnapshot | null): number | null {
@@ -1050,42 +1097,32 @@ function CitizenSignalRow({
   index: number;
   onPick: (s: FeedCitizenSignal) => void;
 }) {
-  const tone = sentimentTone(signal.sentiment_score, signal.sentiment_label);
   const divergence =
     typeof signal.divergence_score === "number"
       ? signal.divergence_score
       : typeof signal.narrative_divergence === "number"
         ? signal.narrative_divergence
         : null;
-  const divColor =
-    divergence === null
-      ? "var(--muted-foreground)"
-      : divergence >= 60
-        ? "var(--rose-signal)"
-        : divergence >= 35
-          ? "var(--amber-signal)"
-          : "var(--emerald-signal)";
   const rawHeadline = cleanHeadline((signal.headline ?? signal.summary ?? signal.topic ?? "").trim());
   const headline = shortenSignal(rawHeadline) || signal.topic || "Citizen signal";
   const score = typeof signal.sentiment_score === "number" ? Math.round(signal.sentiment_score) : null;
-  const barPct = score !== null ? Math.max(4, Math.min(100, score)) : 50;
+  const severity = signalSeverity(score, divergence);
   const trend = (signal.trend ?? "").toLowerCase();
   const delta = signal.sentiment_delta;
-  const isCurated = signal.signal_type === "curated";
   const trendUp =
     typeof delta === "number" ? delta > 0 : /(rising|improving|up|positive|progress)/.test(trend);
   const trendDown =
     typeof delta === "number" ? delta < 0 : /(declining|falling|down|negative|worsening|regress)/.test(trend);
-  const hasWindow = isCurated || typeof delta === "number" || !!signal.comparison_window;
+  const hasWindow = typeof delta === "number" || !!signal.comparison_window;
   const windowLabel = (signal.comparison_window ?? "").toLowerCase() === "mom" ? "MoM" : "WoW";
   const trendTitle =
     typeof delta === "number"
       ? `${delta > 0 ? "Progressing" : delta < 0 ? "Regressing" : "Stable"} · ${windowLabel} ${delta > 0 ? "+" : ""}${delta}`
       : signal.trend ?? "Stable";
   const tooltipDetail = [
+    `${severity.label} level`,
     signal.sample_size != null ? `Sample: ${signal.sample_size.toLocaleString()} posts` : null,
     signal.last_updated ? `Updated ${timeAgo(signal.last_updated)}` : null,
-    divergence !== null ? `Narrative divergence: ${Math.round(divergence)}` : null,
     signal.summary?.trim() || signal.excerpt?.trim() || null,
   ]
     .filter(Boolean)
@@ -1111,85 +1148,39 @@ function CitizenSignalRow({
         <span className="flex items-center gap-1.5 mb-0.5">
           <span
             className="w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: tone.color }}
+            style={{ background: severity.color }}
           />
           <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80 truncate">
             {signal.topic}
-            {isCurated && (
-              <span className="ml-1.5 text-[9px] text-muted-foreground normal-case tracking-normal">
-                · curated
-              </span>
-            )}
           </span>
         </span>
-        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground line-clamp-2 sm:line-clamp-1">
+        {/* Full fitted line — no line-clamp ellipsis ("...") */}
+        <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground break-words">
           {headline || signal.topic}
         </span>
       </span>
-      <span
-        className="sm:hidden text-[11px] font-mono tabular-nums px-2 py-1 rounded shrink-0 font-semibold"
-        style={{ background: tone.tint, color: tone.color }}
-      >
-        {score ?? "—"}
-      </span>
       </div>
-      {/* Mobile metrics row */}
-      <div className="md:hidden flex items-center gap-2 pl-8 w-full">
-        <span className="relative flex-1 h-1.5 rounded-full bg-border overflow-hidden">
-          <span className="block h-full rounded-full" style={{ width: `${barPct}%`, background: tone.color }} />
-        </span>
-        {divergence !== null && (
-          <span
-            className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border shrink-0"
-            style={{ color: divColor, borderColor: `${divColor}55`, background: `${divColor}14` }}
-          >
-            Δ{divergence !== null ? Math.round(divergence) : "—"}
-          </span>
-        )}
-        <span className={`shrink-0 ${trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"}`}>
-          {trendUp ? <ArrowUpRight className="w-3.5 h-3.5" /> : trendDown ? <ArrowDownRight className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-        </span>
-      </div>
-      {/* Desktop sentiment bar + score + divergence + trend */}
-      <span className="hidden md:flex items-center gap-2 w-[280px] shrink-0">
-        <span className="relative flex-1 h-2 rounded-full bg-border overflow-hidden">
-          <motion.span
-            initial={{ width: 0 }}
-            animate={{ width: `${barPct}%` }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="block h-full rounded-full"
-            style={{ background: tone.color, boxShadow: `0 0 10px ${tone.color}99` }}
-          />
-          <span
-            aria-hidden
-            className="shimmer pointer-events-none absolute inset-0 opacity-50 group-hover:opacity-90 transition-opacity"
-            style={{
-              background: `linear-gradient(90deg, transparent 0%, ${tone.color}66 50%, transparent 100%)`,
-              mixBlendMode: "screen",
-            }}
-          />
-        </span>
-
-        {score !== null && (
-          <span className="text-[12px] font-mono tabular-nums w-7 text-right font-semibold" style={{ color: tone.color }}>
-            {score}
-          </span>
-        )}
+      {/* Severity + trend only (scores live in the detail modal) */}
+      <span className="flex items-center justify-end gap-2 sm:gap-2.5 pl-8 sm:pl-0 w-full sm:w-auto shrink-0">
         <span
-          title={divergence !== null ? `Narrative divergence: ${Math.round(divergence)}` : "Narrative divergence unavailable"}
-          className="inline-flex flex-col items-end leading-tight tabular-nums px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold border"
-          style={{ color: divColor, borderColor: `${divColor}55`, background: `${divColor}14` }}
+          title={`${severity.label} intensity`}
+          className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.14em] font-semibold px-2 py-1 rounded-md border"
+          style={{
+            color: severity.color,
+            borderColor: `${severity.color}55`,
+            background: severity.tint,
+          }}
         >
-          <span className="text-[8.5px] uppercase tracking-wider opacity-80">Δ</span>
-          <span className="text-[11px]">{divergence !== null ? Math.round(divergence) : "—"}</span>
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: severity.color }} />
+          {severity.label}
         </span>
         <span
           title={trendTitle}
-          className={`inline-flex flex-col items-center justify-center min-w-[2.25rem] leading-none gap-0.5 ${
+          className={`inline-flex flex-col items-center justify-center min-w-[2rem] leading-none gap-0.5 ${
             trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"
           }`}
         >
-          {trendUp ? <ArrowUpRight className="w-3.5 h-3.5" /> : trendDown ? <ArrowDownRight className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+          {trendUp ? <ArrowUpRight className="w-4 h-4" /> : trendDown ? <ArrowDownRight className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           {hasWindow && (
             <span className="text-[8px] font-mono uppercase tracking-wider opacity-90">{windowLabel}</span>
           )}
