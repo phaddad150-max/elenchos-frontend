@@ -723,35 +723,32 @@ function shortenSignal(text: string): string {
   return t;
 }
 
-/** Row severity for scan layer — same intensity idea as globe, collapsed to 3 bands. */
-function signalSeverity(
+/**
+ * Row mood pill — driven only by live sentiment score/label via canonical
+ * score-colors bands (not Critical/High/Monitor intensity hacks).
+ * Compact label for the scan row; no numeric score shown here.
+ */
+function signalMoodPill(
   score: number | null,
-  divergence: number | null,
-): { key: "critical" | "high" | "monitor"; label: string; color: string; tint: string } {
-  const s = typeof score === "number" ? score : 50;
-  const intensityScore = Math.min(1, Math.abs(s - 50) / 50 + 0.35);
-  const hotDiv = typeof divergence === "number" && divergence >= 60;
-  if (intensityScore >= 0.85 || s < 25 || hotDiv) {
-    return {
-      key: "critical",
-      label: "Critical",
-      color: "var(--rose-signal)",
-      tint: "color-mix(in srgb, var(--rose-signal) 16%, transparent)",
-    };
-  }
-  if (intensityScore >= 0.55 || s < 45) {
-    return {
-      key: "high",
-      label: "High",
-      color: "var(--amber-signal)",
-      tint: "color-mix(in srgb, var(--amber-signal) 16%, transparent)",
-    };
-  }
+  label?: string | null,
+): { label: string; color: string; tint: string; band: string } {
+  const tone = sentimentTone(score, label);
+  const band = String(tone.band);
+  // Compact display labels — same grading, shorter for the row
+  const short: Record<string, string> = {
+    "Strongly Positive": "Strong +",
+    Positive: "Positive",
+    "Leaning Positive": "Lean +",
+    Mixed: "Mixed",
+    "Slightly Negative": "Slight −",
+    Negative: "Negative",
+    "Strongly Negative": "Strong −",
+  };
   return {
-    key: "monitor",
-    label: "Monitor",
-    color: "var(--cyan)",
-    tint: "color-mix(in srgb, var(--cyan) 14%, transparent)",
+    label: short[band] ?? band,
+    color: tone.color,
+    tint: tone.tint,
+    band,
   };
 }
 
@@ -1097,16 +1094,11 @@ function CitizenSignalRow({
   index: number;
   onPick: (s: FeedCitizenSignal) => void;
 }) {
-  const divergence =
-    typeof signal.divergence_score === "number"
-      ? signal.divergence_score
-      : typeof signal.narrative_divergence === "number"
-        ? signal.narrative_divergence
-        : null;
   const rawHeadline = cleanHeadline((signal.headline ?? signal.summary ?? signal.topic ?? "").trim());
   const headline = shortenSignal(rawHeadline) || signal.topic || "Citizen signal";
   const score = typeof signal.sentiment_score === "number" ? Math.round(signal.sentiment_score) : null;
-  const severity = signalSeverity(score, divergence);
+  // Mood from pipeline sentiment only — same bands as rest of product (score-colors).
+  const mood = signalMoodPill(score, signal.sentiment_label);
   const trend = (signal.trend ?? "").toLowerCase();
   const delta = signal.sentiment_delta;
   const trendUp =
@@ -1120,7 +1112,7 @@ function CitizenSignalRow({
       ? `${delta > 0 ? "Progressing" : delta < 0 ? "Regressing" : "Stable"} · ${windowLabel} ${delta > 0 ? "+" : ""}${delta}`
       : signal.trend ?? "Stable";
   const tooltipDetail = [
-    `${severity.label} level`,
+    mood.band,
     signal.sample_size != null ? `Sample: ${signal.sample_size.toLocaleString()} posts` : null,
     signal.last_updated ? `Updated ${timeAgo(signal.last_updated)}` : null,
     signal.summary?.trim() || signal.excerpt?.trim() || null,
@@ -1148,7 +1140,7 @@ function CitizenSignalRow({
         <span className="flex items-center gap-1.5 mb-0.5">
           <span
             className="w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: severity.color }}
+            style={{ background: mood.color }}
           />
           <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80 truncate">
             {signal.topic}
@@ -1160,19 +1152,19 @@ function CitizenSignalRow({
         </span>
       </span>
       </div>
-      {/* Severity + trend only (scores live in the detail modal) */}
+      {/* Mood (from sentiment) + trend — no numeric score on the row */}
       <span className="flex items-center justify-end gap-2 sm:gap-2.5 pl-8 sm:pl-0 w-full sm:w-auto shrink-0">
         <span
-          title={`${severity.label} intensity`}
-          className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.14em] font-semibold px-2 py-1 rounded-md border"
+          title={mood.band}
+          className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] font-semibold px-2 py-1 rounded-md border whitespace-nowrap"
           style={{
-            color: severity.color,
-            borderColor: `${severity.color}55`,
-            background: severity.tint,
+            color: mood.color,
+            borderColor: `${mood.color}55`,
+            background: mood.tint,
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: severity.color }} />
-          {severity.label}
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: mood.color }} />
+          {mood.label}
         </span>
         <span
           title={trendTitle}
