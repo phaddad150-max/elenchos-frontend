@@ -222,23 +222,24 @@ export function velocity(prev: number, curr: number): number {
 }
 
 export const SENTIMENT_COLOR: Record<Sentiment, string> = {
-  supportive: "oklch(0.78 0.17 160)",
-  critical: "oklch(0.82 0.17 75)",
+  supportive: "oklch(0.84 0.21 158)",
+  critical: "oklch(0.88 0.19 90)",
   neutral: "oklch(0.68 0.02 250)",
-  outraged: "oklch(0.68 0.24 20)",
+  outraged: "oklch(0.76 0.26 12)",
   hopeful: "oklch(0.82 0.16 200)",
 };
 
 export const INTENSITY_COLOR: Record<Intensity, string> = {
   low: "oklch(0.68 0.02 250)",
   medium: "oklch(0.82 0.16 200)",
-  high: "oklch(0.82 0.17 75)",
-  critical: "oklch(0.68 0.24 20)",
+  high: "oklch(0.88 0.19 90)",
+  critical: "oklch(0.76 0.26 12)",
 };
 
+/** Globe points — neon hex aligned with brand cyan / scoring palette */
 export const INTENSITY_GLOBE_COLOR: Record<Intensity, string> = {
   low: "#8b94a7",
   medium: "#00d5ff",
-  high: "#ffcc4d",
-  critical: "#ff4d5e",
+  high: "#ffd24a",
+  critical: "#ff4f6a",
 };

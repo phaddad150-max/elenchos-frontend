@@ -72,19 +72,25 @@
   --cyan: oklch(0.82 0.16 200);
   --cyan-glow: oklch(0.82 0.16 200 / 0.4);
   --magenta: oklch(0.78 0.15 200);
-  --amber-signal: oklch(0.82 0.17 75);
-  --emerald-signal: oklch(0.78 0.17 160);
-  --emerald-strong: oklch(0.72 0.19 150);
-  --emerald-mid: oklch(0.78 0.17 155);
-  /* Leaning-positive: readable on dark cards */
-  --emerald-lean: oklch(0.82 0.14 155);
-  --orange-signal: oklch(0.78 0.16 55);
-  --rose-signal: oklch(0.68 0.24 20);
-  --emerald-tint: oklch(0.72 0.17 155 / 0.16);
-  --emerald-lean-tint: oklch(0.82 0.14 155 / 0.14);
-  --amber-tint: oklch(0.82 0.17 75 / 0.14);
-  --orange-tint: oklch(0.78 0.16 55 / 0.14);
-  --rose-tint: oklch(0.68 0.24 20 / 0.14);
+  /*
+   * Scoring palette (dark) — neon / electric family matched to brand cyan.
+   * Same grade roles; higher chroma + brightness so greens/ambers/rose pop
+   * instead of matte traffic-light tones.
+   * Bands: strong green · mid green · lean green · amber · orange · rose
+   */
+  --amber-signal: oklch(0.88 0.19 90);
+  --emerald-signal: oklch(0.84 0.21 158);
+  --emerald-strong: oklch(0.88 0.24 148);
+  --emerald-mid: oklch(0.84 0.21 155);
+  /* Leaning-positive: mint→cyan edge (brand-adjacent), still clearly green */
+  --emerald-lean: oklch(0.82 0.17 172);
+  --orange-signal: oklch(0.82 0.2 48);
+  --rose-signal: oklch(0.76 0.26 12);
+  --emerald-tint: oklch(0.84 0.21 155 / 0.2);
+  --emerald-lean-tint: oklch(0.82 0.17 172 / 0.18);
+  --amber-tint: oklch(0.88 0.19 90 / 0.18);
+  --orange-tint: oklch(0.82 0.2 48 / 0.18);
+  --rose-tint: oklch(0.76 0.26 12 / 0.18);
 
   --surface-1: oklch(0.16 0.022 250 / 0.7);
   --surface-2: oklch(0.2 0.025 250 / 0.85);
@@ -100,8 +106,8 @@
 
   --gradient-cyan: linear-gradient(135deg, oklch(0.82 0.16 200), oklch(0.7 0.18 230));
   --gradient-magenta: linear-gradient(135deg, oklch(0.7 0.24 330), oklch(0.6 0.22 290));
-  --gradient-amber: linear-gradient(135deg, oklch(0.82 0.17 75), oklch(0.72 0.19 45));
-  --gradient-emerald: linear-gradient(135deg, oklch(0.78 0.17 160), oklch(0.65 0.18 190));
+  --gradient-amber: linear-gradient(135deg, oklch(0.88 0.19 90), oklch(0.78 0.2 48));
+  --gradient-emerald: linear-gradient(135deg, oklch(0.88 0.24 148), oklch(0.78 0.18 190));
 
   --shadow-glow-cyan: 0 0 40px oklch(0.82 0.16 200 / 0.35),
     0 0 80px oklch(0.82 0.16 200 / 0.15);
@@ -134,19 +140,22 @@
   --cyan: oklch(0.82 0.16 200);
   --cyan-glow: oklch(0.82 0.16 200 / 0.35);
   --magenta: oklch(0.78 0.15 200);
-  /* Scoring palette: same bands as dark, greens darkened for light-bg readability */
-  --amber-signal: oklch(0.72 0.16 75);
-  --emerald-signal: oklch(0.48 0.14 155);
-  --emerald-strong: oklch(0.42 0.15 150);
-  --emerald-mid: oklch(0.46 0.14 152);
-  --emerald-lean: oklch(0.44 0.12 155);
-  --orange-signal: oklch(0.62 0.15 50);
-  --rose-signal: oklch(0.55 0.2 20);
-  --emerald-tint: oklch(0.48 0.14 155 / 0.14);
-  --emerald-lean-tint: oklch(0.44 0.12 155 / 0.12);
-  --amber-tint: oklch(0.72 0.16 75 / 0.14);
-  --orange-tint: oklch(0.62 0.15 50 / 0.14);
-  --rose-tint: oklch(0.55 0.2 20 / 0.14);
+  /*
+   * Scoring palette (light) — same neon band roles as dark; higher chroma,
+   * mid lightness for contrast on white without matte forest/mud reds.
+   */
+  --amber-signal: oklch(0.68 0.18 88);
+  --emerald-signal: oklch(0.5 0.19 158);
+  --emerald-strong: oklch(0.48 0.2 148);
+  --emerald-mid: oklch(0.5 0.18 155);
+  --emerald-lean: oklch(0.48 0.16 170);
+  --orange-signal: oklch(0.58 0.19 48);
+  --rose-signal: oklch(0.56 0.24 12);
+  --emerald-tint: oklch(0.5 0.18 155 / 0.16);
+  --emerald-lean-tint: oklch(0.48 0.16 170 / 0.14);
+  --amber-tint: oklch(0.68 0.18 88 / 0.16);
+  --orange-tint: oklch(0.58 0.19 48 / 0.16);
+  --rose-tint: oklch(0.56 0.24 12 / 0.16);
 
   --surface-1: oklch(0.96 0.002 240 / 0.92);
   --surface-2: oklch(0.97 0.002 240 / 0.95);
@@ -746,11 +755,11 @@
 }
 .kpi-card:hover::before { opacity: 0.18; }
 
-.kpi-cyan { --accent-gradient: var(--gradient-cyan); border-top: 2px solid oklch(0.82 0.16 200); }
-.kpi-emerald { --accent-gradient: var(--gradient-emerald); border-top: 2px solid oklch(0.78 0.17 160); }
+.kpi-cyan { --accent-gradient: var(--gradient-cyan); border-top: 2px solid var(--cyan); }
+.kpi-emerald { --accent-gradient: var(--gradient-emerald); border-top: 2px solid var(--emerald-signal); }
 .kpi-magenta { --accent-gradient: var(--gradient-magenta); border-top: 2px solid oklch(0.7 0.24 330); }
-.kpi-amber { --accent-gradient: var(--gradient-amber); border-top: 2px solid oklch(0.82 0.17 75); }
-.kpi-rose { border-top: 2px solid oklch(0.68 0.24 20); --accent-gradient: linear-gradient(135deg, oklch(0.68 0.24 20), oklch(0.7 0.24 330)); }
+.kpi-amber { --accent-gradient: var(--gradient-amber); border-top: 2px solid var(--amber-signal); }
+.kpi-rose { border-top: 2px solid var(--rose-signal); --accent-gradient: linear-gradient(135deg, var(--rose-signal), oklch(0.72 0.24 330)); }
 .kpi-violet { border-top: 2px solid oklch(0.7 0.2 290); --accent-gradient: linear-gradient(135deg, oklch(0.7 0.2 290), oklch(0.82 0.16 200)); }
 
 /* === Animations === */

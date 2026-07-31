@@ -1,15 +1,17 @@
 /**
  * Canonical score → color bands for Elenchos UI.
- * Colors use CSS variables so light and dark themes stay legible.
+ * Colors use CSS variables (`--emerald-*`, `--amber-signal`, `--rose-signal`)
+ * tuned to the brand neon family (high chroma, cyan-adjacent greens).
+ * Band thresholds stay fixed — only token tones change in styles.css.
  *
  * Sentiment (higher = more positive citizen mood):
- *   81–100 Strongly Positive → strong green
+ *   81–100 Strongly Positive → strong green (neon mint)
  *   71–80  Positive            → mid green
- *   61–70  Leaning Positive    → lean green (not amber)
- *   51–60  Mixed               → amber
+ *   61–70  Leaning Positive    → lean green / cyan-edge (not amber)
+ *   51–60  Mixed               → amber (neon gold)
  *   41–50  Slightly Negative   → orange
  *   21–40  Negative            → rose
- *    0–20  Strongly Negative   → rose
+ *    0–20  Strongly Negative   → rose (hot coral)
  *
  * Divergence (higher = wider citizen vs official/media gap = more concern):
  *   60–100 Severe  → rose
