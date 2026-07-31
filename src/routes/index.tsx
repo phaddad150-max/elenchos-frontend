@@ -500,13 +500,13 @@ function Dashboard() {
           curatedCount={curatedHighlights.length}
         />
 
-        {/* Signals + heatmap — equal outer panel height; globe stays proportionate */}
+        {/* Signals + heatmap — side by side, independent heights (signal flips must not move globe) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-stretch min-w-0"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-start min-w-0"
         >
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col h-full max-w-full">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start">
             <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 pb-3 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
@@ -518,7 +518,7 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex flex-col min-w-0">
               <TooltipProvider delayDuration={200}>
                 <CitizenSignalsFeed
                   onPick={setPickedCitizen}
@@ -552,7 +552,7 @@ function Dashboard() {
             </div>
           </section>
 
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-4 relative overflow-hidden min-w-0 flex flex-col h-full">
+          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-4 relative overflow-hidden min-w-0 flex flex-col self-start w-full">
             <div className="mb-3 pb-3 border-b border-border/80 shrink-0">
               <Header
                 icon={<Globe2 className="w-4 h-4" />}
@@ -561,9 +561,9 @@ function Dashboard() {
               />
             </div>
 
-            {/* Globe fills remaining panel box (width + height), sphere fully visible */}
-            <div className="flex-1 min-h-0 flex flex-col gap-2">
-              <div className="relative flex-1 min-h-[200px] sm:min-h-[240px] w-full rounded-xl border border-border/70 overflow-hidden globe-stage">
+            {/* Stable globe stage height — not tied to signals panel reflow */}
+            <div className="flex flex-col gap-2">
+              <div className="relative h-[280px] sm:h-[320px] xl:h-[360px] w-full rounded-xl border border-border/70 overflow-hidden globe-stage">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -977,7 +977,7 @@ function CitizenSignalsFeed({
     return out;
   }, [signals, groupFilter]);
 
-  /** Collapsed: 4 rows so the panel height tracks the right-side heatmap. */
+  /** Collapsed: 4 rows. Height is local to this panel — not coupled to the globe. */
   const COLLAPSED = 4;
 
   // Live rotation — every 7s shift the queue so the panel feels alive.
@@ -1016,16 +1016,16 @@ function CitizenSignalsFeed({
   const visible = expanded ? items : rotated.slice(0, COLLAPSED);
   const hidden = Math.max(0, items.length - COLLAPSED);
 
-
   return (
     <div className="space-y-1.5">
-      <motion.div layout className="space-y-1.5">
-        <AnimatePresence initial={false} mode="popLayout">
+      {/* No layout/popLayout — those reflow siblings and used to bounce the globe */}
+      <div className="space-y-1.5">
+        <AnimatePresence initial={false}>
           {visible.map((s, i) => (
             <CitizenSignalRow key={s.id} signal={s} index={i + 1} onPick={onPick} />
           ))}
         </AnimatePresence>
-      </motion.div>
+      </div>
       {(hidden > 0 || expanded) && (
         <button
           type="button"
@@ -1095,11 +1095,10 @@ function CitizenSignalRow({
       <TooltipTrigger asChild>
     <motion.button
       type="button"
-      layout
-      initial={{ opacity: 0, y: -3 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 3 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
       className="group w-full max-w-full text-left px-2.5 sm:px-3 py-2.5 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 cursor-pointer touch-manipulation min-w-0 overflow-hidden"
