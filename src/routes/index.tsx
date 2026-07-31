@@ -561,9 +561,9 @@ function Dashboard() {
               />
             </div>
 
-            {/* Proportionate square globe — mobile-safe max size */}
-            <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2.5 py-1">
-              <div className="w-full max-w-[min(100%,280px)] sm:max-w-[min(100%,300px)] aspect-square max-h-[220px] sm:max-h-[260px] xl:max-h-[260px] rounded-xl border border-border/70 overflow-hidden globe-stage shrink-0 mx-auto">
+            {/* Globe fills remaining panel box (width + height), sphere fully visible */}
+            <div className="flex-1 min-h-0 flex flex-col gap-2">
+              <div className="relative flex-1 min-h-[200px] sm:min-h-[240px] w-full rounded-xl border border-border/70 overflow-hidden globe-stage">
                 <Globe3D
                   signals={effectiveSignals}
                   onPick={(s) => {
@@ -1032,7 +1032,7 @@ function CitizenSignalsFeed({
           onClick={() => setExpanded((v) => !v)}
           className="w-full mt-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[40px] touch-manipulation"
         >
-          {expanded ? "Show less" : `Show ${hidden} more topic${hidden === 1 ? "" : "s"}`}
+          {expanded ? "Show less" : "More signals"}
         </button>
       )}
     </div>

@@ -636,10 +636,7 @@
     font-size: 1.25rem;
   }
   .dash-landing .globe-stage {
-    width: min(100%, 260px) !important;
-    max-height: 240px !important;
-    min-height: 200px;
-    margin-inline: auto;
+    min-height: 0;
   }
   .dash-panel {
     border-radius: 0.85rem;

@@ -33,7 +33,10 @@ export function Globe3D({ signals, onPick }: Props) {
       const node = wrapRef.current;
       if (!node) return;
       const r = node.getBoundingClientRect();
-      setSize({ w: Math.max(r.width, 320), h: Math.max(r.height, 280) });
+      // Use actual panel box — avoid forcing a large min that overflows the stage
+      const w = Math.max(Math.floor(r.width), 1);
+      const h = Math.max(Math.floor(r.height), 1);
+      setSize({ w, h });
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -54,7 +57,8 @@ export function Globe3D({ signals, onPick }: Props) {
       controls.enableZoom = true;
       controls.enablePan = false;
       if (typeof g.pointOfView === "function") {
-        g.pointOfView({ lat: 18, lng: -38, altitude: 1.9 }, 900);
+        // Slightly zoomed out so full sphere sits inside the panel box
+        g.pointOfView({ lat: 18, lng: -38, altitude: 2.35 }, 900);
       }
       clearInterval(id);
     }, 120);
@@ -119,7 +123,7 @@ export function Globe3D({ signals, onPick }: Props) {
   return (
     <div
       ref={wrapRef}
-      className={`relative w-full h-full min-h-[240px] overflow-hidden rounded-xl globe-stage${
+      className={`absolute inset-0 w-full h-full overflow-hidden rounded-xl globe-stage${
         isLight ? " globe-stage--light" : ""
       }`}
     >
