@@ -303,9 +303,26 @@ function TopicsFilterableGrid({
 }) {
   const [category, setCategory] = useState<"all" | TopicCategory>("all");
   const [wowTick, setWowTick] = useState(0);
+  const [dataReady, setDataReady] = useState(
+    () => typeof window !== "undefined" && Boolean(window.dashboardData),
+  );
 
   useEffect(() => {
-    loadWowSentimentTrends().then(() => setWowTick((n) => n + 1));
+    let cancelled = false;
+    // Ensure cards don't wait on a stuck prior promise; lean load is fast.
+    loadDashboardData()
+      .then(() => {
+        if (!cancelled) setDataReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) setDataReady(true);
+      });
+    loadWowSentimentTrends().then(() => {
+      if (!cancelled) setWowTick((n) => n + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -383,6 +400,7 @@ function TopicsFilterableGrid({
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
+  const showSkeleton = !simMode && !dataReady && typeof window !== "undefined" && !window.dashboardData;
 
   const renderTopicCard = (t: FeatureTopic, i: number, archived = false) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
@@ -439,7 +457,18 @@ function TopicsFilterableGrid({
         </span>
       </div>
 
-      {visibleCount === 0 && (
+      {showSkeleton && (
+        <div
+          className="rounded-xl border border-cyan/25 bg-cyan/[0.04] px-3.5 py-3 text-[12px] font-mono text-muted-foreground flex items-center gap-2"
+          role="status"
+          aria-live="polite"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" aria-hidden />
+          Loading topic samples…
+        </div>
+      )}
+
+      {visibleCount === 0 && !showSkeleton && (
         <div className="text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
           No topics match these filters.
         </div>

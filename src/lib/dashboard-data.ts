@@ -860,16 +860,32 @@ const supabaseHeaders = {
   Pragma: "no-cache",
 };
 
+/** List/card payload — excludes raw_analysis + question_analysis (≈70% of row weight). */
+const SNAPSHOT_LIST_COLUMNS =
+  "topic,last_updated,sample_size,fetched_post_count,overall_sentiment,divergence_score,narrative_summary,key_insights,top_3_key_stories,signals,segmented_sentiment,divergence_gap";
+/** History table includes month; latest_topic_snapshots view does not. */
+const SNAPSHOT_HIST_COLUMNS = `${SNAPSHOT_LIST_COLUMNS},month`;
+
+const FETCH_TIMEOUT_MS = 22_000;
+
 function supabaseFetch(pathAndQuery: string, init?: RequestInit): Promise<Response> {
   // Do NOT append arbitrary query params (e.g. _ts=...). PostgREST treats unknown
   // keys as column filters and returns 400, which blanked the entire dashboard.
   // Browser freshness comes from cache: "no-store" + Cache-Control headers only.
   const url = `${SUPABASE_URL}/rest/v1/${pathAndQuery}`;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+  const parentSignal = init?.signal;
+  if (parentSignal) {
+    if (parentSignal.aborted) ctrl.abort();
+    else parentSignal.addEventListener("abort", () => ctrl.abort(), { once: true });
+  }
   return fetch(url, {
     ...init,
+    signal: ctrl.signal,
     cache: "no-store",
     headers: { ...supabaseHeaders, ...(init?.headers as Record<string, string> | undefined) },
-  });
+  }).finally(() => clearTimeout(timer));
 }
 
 /**
@@ -901,22 +917,30 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
 
   window.__dashboardDataPromise = (async () => {
     try {
-      const [histRes, latestRes] = await Promise.all([
-        supabaseFetch("topic_snapshots?select=*&order=last_updated.desc&limit=500"),
-        supabaseFetch("latest_topic_snapshots?select=*"),
+      // Lean columns only — full select=* × 500 was ~1.2MB and stalled Topics cards.
+      // Detail pages still load full rows via loadTopicSnapshot(select=*).
+      const [latestRes, histRes] = await Promise.all([
+        supabaseFetch(`latest_topic_snapshots?select=${SNAPSHOT_LIST_COLUMNS}`),
+        supabaseFetch(
+          `topic_snapshots?select=${SNAPSHOT_HIST_COLUMNS}&order=last_updated.desc&limit=120`,
+        ),
       ]);
-      if (!histRes.ok) throw new Error("HTTP " + histRes.status);
-      const histRows = (await histRes.json()) as TopicSnapshot[];
-      const historical = pickBestSnapshots(histRows);
 
       let latestByTopic: Record<string, TopicSnapshot> = {};
       if (latestRes.ok) {
-        const latestRows = (await latestRes.json()) as TopicSnapshot[];
-        latestByTopic = pickBestSnapshots(latestRows);
+        latestByTopic = pickBestSnapshots((await latestRes.json()) as TopicSnapshot[]);
       } else {
         console.warn("latest_topic_snapshots fetch failed", latestRes.status);
       }
 
+      let historical: Record<string, TopicSnapshot> = {};
+      if (histRes.ok) {
+        historical = pickBestSnapshots((await histRes.json()) as TopicSnapshot[]);
+      } else if (!latestRes.ok) {
+        throw new Error("HTTP hist " + histRes.status);
+      }
+
+      // Prefer latest view when present; fill gaps / merge quality from lean history.
       const keys = new Set([...Object.keys(historical), ...Object.keys(latestByTopic)]);
       const byTopic: Record<string, TopicSnapshot> = {};
       for (const key of keys) {
@@ -925,12 +949,26 @@ export async function loadDashboardData(force = false): Promise<Record<string, T
         if (merged) byTopic[key] = merged;
       }
 
+      // If latest-only succeeded but hist failed, still ship what we have.
+      if (!Object.keys(byTopic).length && Object.keys(latestByTopic).length) {
+        for (const [key, row] of Object.entries(latestByTopic)) {
+          if (!isLiveOutputTopic(key)) continue;
+          byTopic[key] = row;
+        }
+      }
+
       window.dashboardData = byTopic;
       window.dashboardMeta = {};
-      console.log("✅ Loaded live topic snapshots (archived/cold excluded)", Object.keys(byTopic));
+      console.log(
+        "✅ Loaded live topic snapshots (lean list)",
+        Object.keys(byTopic).length,
+        "topics",
+      );
       return byTopic;
     } catch (e) {
-      console.error("Supabase latest_topic_snapshots fetch failed", e);
+      console.error("Supabase topic snapshots fetch failed", e);
+      // Drop stuck promise so a retry can recover after timeout/network blip.
+      window.__dashboardDataPromise = undefined;
       window.dashboardData = {};
       window.dashboardMeta = { fallback: true };
       return {};
