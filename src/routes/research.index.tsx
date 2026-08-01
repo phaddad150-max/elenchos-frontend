@@ -73,6 +73,28 @@ function ResearchIndexPage() {
           </div>
         </header>
 
+        {/* Flagship free-data hub */}
+        <Link
+          to="/research-migration"
+          className="group block rounded-2xl border border-rose-signal/40 bg-rose-signal/[0.06] hover:border-rose-signal/55 hover:bg-rose-signal/[0.1] transition-all px-3.5 sm:px-5 py-4 touch-manipulation min-h-[44px] mb-4"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 space-y-1">
+              <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-rose-signal">
+                National security brief · EU + UK Channel
+              </p>
+              <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground group-hover:text-rose-signal transition-colors">
+                Irregular migration intelligence
+              </h2>
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed">
+                10-second thesis · full picture under 10 minutes. Scale since 2011, corridors,
+                elite failure, speech double standard, reverse options. Free open data first.
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-rose-signal shrink-0 mt-1 opacity-80 group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
+
         {/* Dynamic brief grid */}
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2 px-0.5">

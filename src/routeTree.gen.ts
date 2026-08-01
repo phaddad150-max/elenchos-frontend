@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as LeadersRouteImport } from './routes/leaders'
 import { Route as PeaceRouteImport } from './routes/peace'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SponsorRouteImport } from './routes/sponsor'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
@@ -54,6 +55,11 @@ const PeaceRoute = PeaceRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchMigrationRoute = ResearchMigrationRouteImport.update({
+  id: '/research-migration',
+  path: '/research-migration',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
+  '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
+  '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
+  '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/leaders'
     | '/peace'
     | '/privacy'
+    | '/research-migration'
     | '/sitemap.xml'
     | '/sponsor'
     | '/admin/curation'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/leaders'
     | '/peace'
     | '/privacy'
+    | '/research-migration'
     | '/sitemap.xml'
     | '/sponsor'
     | '/admin/curation'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/leaders'
     | '/peace'
     | '/privacy'
+    | '/research-migration'
     | '/sitemap.xml'
     | '/sponsor'
     | '/admin/curation'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   LeadersRoute: typeof LeadersRoute
   PeaceRoute: typeof PeaceRoute
   PrivacyRoute: typeof PrivacyRoute
+  ResearchMigrationRoute: typeof ResearchMigrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SponsorRoute: typeof SponsorRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research-migration': {
+      id: '/research-migration'
+      path: '/research-migration'
+      fullPath: '/research-migration'
+      preLoaderRoute: typeof ResearchMigrationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -471,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeadersRoute: LeadersRoute,
   PeaceRoute: PeaceRoute,
   PrivacyRoute: PrivacyRoute,
+  ResearchMigrationRoute: ResearchMigrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SponsorRoute: SponsorRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
