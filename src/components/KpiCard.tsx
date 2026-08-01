@@ -65,7 +65,7 @@ export function KpiCard({
         setExpanded((v) => !v);
         onClick?.();
       }}
-      className={`kpi-card kpi-cyan glass rounded-2xl p-4 cursor-pointer group`}
+      className={`kpi-card kpi-cyan glass rounded-2xl p-3 sm:p-4 cursor-pointer group touch-manipulation min-h-[44px]`}
       whileTap={{ scale: 0.985 }}
     >
       <div className="flex items-center justify-between mb-2">

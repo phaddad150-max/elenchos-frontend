@@ -506,7 +506,7 @@ function Dashboard() {
       <div className="absolute inset-0 grid-bg opacity-12 pointer-events-none" />
 
       <SiteNav />
-      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-4 sm:py-7 space-y-4 sm:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
+      <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-3 sm:py-6 md:py-7 space-y-3 sm:space-y-5 md:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
         {/* KPI hero — 6 equal tracking cards */}
         <DashboardKpiGrid
           overview={overview}
@@ -519,10 +519,10 @@ function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 md:gap-5 xl:items-start min-w-0"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-2.5 sm:gap-4 md:gap-5 xl:items-start min-w-0"
         >
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start h-auto">
-            <div className="flex flex-col gap-2 sm:gap-2.5 mb-2.5 pb-2.5 border-b border-border/80 shrink-0">
+          <section className="dash-panel p-2.5 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start h-auto">
+            <div className="flex flex-col gap-1.5 sm:gap-2.5 mb-2 sm:mb-2.5 pb-2 sm:pb-2.5 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Citizen signals"
@@ -567,8 +567,8 @@ function Dashboard() {
             </div>
           </section>
 
-          <section className="dash-panel p-3 sm:p-4 md:p-5 xl:col-span-4 relative overflow-hidden min-w-0 flex flex-col self-start w-full">
-            <div className="mb-3 pb-3 border-b border-border/80 shrink-0">
+          <section className="dash-panel p-2.5 sm:p-4 md:p-5 xl:col-span-4 relative overflow-hidden min-w-0 flex flex-col self-start w-full">
+            <div className="mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-border/80 shrink-0">
               <Header
                 icon={<Globe2 className="w-4 h-4" />}
                 title="Global sentiment heatmap"
@@ -598,7 +598,7 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={() => setRegionFilter(null)}
-                className="absolute top-3 right-3 text-[11px] font-mono px-2 py-1 rounded-full bg-card border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[36px]"
+                className="absolute top-3 right-3 text-[11px] font-mono px-2.5 py-2 sm:py-1 rounded-full bg-card border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[44px] sm:min-h-[36px] touch-manipulation"
               >
                 <MapPin className="w-3 h-3 inline mr-1" />
                 {regionFilter} · clear
@@ -929,7 +929,7 @@ function CitizenGroupFilter({
       <button
         type="button"
         onClick={() => onChange(null)}
-        className={`px-3 py-2 sm:px-2.5 sm:py-1 rounded-full uppercase tracking-wider border transition-colors min-h-[40px] sm:min-h-0 touch-manipulation ${
+        className={`chip-touch px-3 py-2 sm:px-2.5 sm:py-1 rounded-full uppercase tracking-wider border transition-colors min-h-[44px] sm:min-h-0 touch-manipulation ${
           value === null
             ? "bg-cyan text-primary-foreground border-cyan"
             : "bg-transparent border-border hover:border-cyan/40 text-muted-foreground hover:text-foreground"
@@ -944,7 +944,7 @@ function CitizenGroupFilter({
             type="button"
             key={g.key}
             onClick={() => onChange(active ? null : g.key)}
-            className="px-3 py-2 sm:px-2.5 sm:py-1 rounded-full uppercase tracking-wider border transition-colors min-h-[40px] sm:min-h-0 touch-manipulation"
+            className="chip-touch px-3 py-2 sm:px-2.5 sm:py-1 rounded-full uppercase tracking-wider border transition-colors min-h-[44px] sm:min-h-0 touch-manipulation"
             style={
               active
                 ? { background: g.color, color: "var(--background)", borderColor: g.color }
@@ -1099,7 +1099,7 @@ function CitizenSignalsFeed({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full shrink-0 inline-flex items-center justify-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-1.5 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[36px] touch-manipulation"
+          className="w-full shrink-0 inline-flex items-center justify-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 sm:py-1.5 rounded-lg border border-border hover:border-cyan/40 hover:text-cyan transition-colors text-muted-foreground min-h-[44px] sm:min-h-[36px] touch-manipulation"
         >
           {expanded ? (
             <>
@@ -1165,7 +1165,7 @@ function CitizenSignalRow({
       transition={{ duration: 0.25, ease: "easeOut" }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="group w-full max-w-full text-left px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden min-h-[3.25rem] sm:min-h-[3.4rem]"
+      className="group w-full max-w-full text-left px-2 sm:px-2.5 py-2 sm:py-2 rounded-xl bg-card/60 border border-border/90 hover:border-cyan/45 hover:bg-card active:bg-secondary/50 transition-colors flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden min-h-[44px] sm:min-h-[3.4rem]"
     >
       <div className="flex items-center gap-2.5 sm:gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
@@ -1317,7 +1317,7 @@ function KeyFindingsInteractive({ findings }: { findings: string[] }) {
   if (!findings.length) return null;
 
   return (
-    <div className="mt-5 sm:mt-6 space-y-3">
+    <div className="mt-3 sm:mt-5 md:mt-6 space-y-2 sm:space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan">
           Key findings
@@ -1327,7 +1327,7 @@ function KeyFindingsInteractive({ findings }: { findings: string[] }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         {findings.map((f, i) => {
           const t = findingTone(i);
           const on = active === i;
@@ -1342,7 +1342,7 @@ function KeyFindingsInteractive({ findings }: { findings: string[] }) {
               whileTap={{ scale: 0.99 }}
               onClick={() => setActive((cur) => (cur === i ? null : i))}
               aria-pressed={on}
-              className={`finding-card text-left rounded-xl p-3.5 sm:p-4 min-h-[6.5rem] flex flex-col gap-2.5 transition-colors touch-manipulation ${
+              className={`finding-card text-left rounded-xl p-2.5 sm:p-4 min-h-[44px] sm:min-h-[6.5rem] flex flex-col gap-1.5 sm:gap-2.5 transition-colors touch-manipulation ${
                 on ? "bg-cyan/10" : "bg-card/40 hover:bg-cyan/5"
               }`}
             >
@@ -1408,8 +1408,8 @@ function AiAnalysisSummary({
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const k = overview?.kpis;
   return (
-    <section className="dash-panel p-3.5 sm:p-5 border-l-[3px] border-l-cyan">
-      <div className="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-border/80 flex-wrap">
+    <section className="dash-panel p-2.5 sm:p-5 border-l-[3px] border-l-cyan">
+      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-border/80 flex-wrap">
         <Header
           icon={<Brain className="w-4 h-4" />}
           title="AI cross-topic analysis"
@@ -2206,7 +2206,7 @@ function KpiHeroTile({
         whileTap={{ scale: 0.99 }}
         onClick={onToggle}
         aria-expanded={expanded}
-        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-0.5 px-2 py-2 sm:px-2.5 sm:py-2.5 min-h-[8.3rem] touch-manipulation"
+        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-0.5 px-1.5 py-1.5 sm:px-2.5 sm:py-2.5 min-h-[6.5rem] sm:min-h-[8.3rem] touch-manipulation"
       >
         <span className="dash-kpi-glow" aria-hidden />
         <span
@@ -2584,7 +2584,7 @@ function DashboardKpiGrid({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch min-w-0"
+      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch min-w-0 max-sm:gap-1.5"
     >
       {tiles.map((t, i) => (
         <KpiHeroTile

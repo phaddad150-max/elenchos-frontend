@@ -625,35 +625,63 @@
 }
 @media (max-width: 639px) {
   .dash-landing main {
-    padding-left: 0.65rem;
-    padding-right: 0.65rem;
-    padding-top: 0.85rem;
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
+    padding-top: 0.65rem;
+    /* Tighter stack between KPI / signals / AI — less vertical sprawl */
+    gap: 0.75rem;
+  }
+  .dash-landing main.space-y-4 > :not([hidden]) ~ :not([hidden]),
+  .dash-landing main.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.75rem;
   }
   .dash-kpi-hero {
-    min-height: 7.35rem;
+    min-height: 6.5rem;
   }
   .dash-kpi-hero > button {
-    min-height: 7.35rem !important;
-    padding: 0.45rem 0.35rem !important;
-    gap: 0.2rem !important;
+    min-height: 6.5rem !important;
+    padding: 0.4rem 0.3rem !important;
+    gap: 0.15rem !important;
   }
   .dash-kpi-hero .dash-kpi-label {
-    font-size: 8px;
-    letter-spacing: 0.1em;
-    min-height: 1.65rem;
+    font-size: 7.5px;
+    letter-spacing: 0.08em;
+    min-height: 1.4rem;
+    line-height: 1.15;
   }
   .dash-kpi-hero .dash-kpi-value {
-    font-size: 1.19rem;
+    font-size: 1.15rem;
+    min-height: 1.35rem !important;
   }
   .dash-landing .globe-stage {
     min-height: 0;
   }
   .dash-panel {
-    border-radius: 0.85rem;
+    border-radius: 0.75rem;
+    padding: 0.7rem !important;
   }
   .finding-card {
-    min-height: 0;
-    padding: 0.85rem;
+    min-height: 0 !important;
+    padding: 0.7rem 0.75rem !important;
+    gap: 0.45rem !important;
+  }
+  /* Topic grid cards — shorter face, still full-width tap */
+  .topic-card-shell {
+    min-height: 200px !important;
+    padding: 0.65rem !important;
+  }
+  /* ≥44px interactive controls on phones */
+  .tap-target,
+  button.touch-manipulation,
+  a.touch-manipulation,
+  [role="button"].touch-manipulation {
+    min-height: 44px;
+  }
+  /* Chip / filter rows stay tappable without looking huge */
+  .chip-touch {
+    min-height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
   /* Topics: allow subhead wrap; avoid horizontal bleed */
   .topics-hero-banner h1 {
@@ -668,7 +696,10 @@
 }
 @media (min-width: 640px) and (max-width: 1023px) {
   .dash-kpi-hero {
-    min-height: 7.85rem;
+    min-height: 7.25rem;
+  }
+  .dash-kpi-hero > button {
+    min-height: 7.25rem !important;
   }
 }
 @media (min-width: 1280px) {

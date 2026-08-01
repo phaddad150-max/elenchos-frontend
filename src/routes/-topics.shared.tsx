@@ -417,7 +417,7 @@ function TopicsFilterableGrid({
                 role="tab"
                 aria-selected={category === c}
                 onClick={() => setCategory(c)}
-                className={`px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-full tracking-wide transition-colors whitespace-nowrap min-h-[40px] sm:min-h-0 ${
+                className={`chip-touch px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-full tracking-wide transition-colors whitespace-nowrap min-h-[44px] sm:min-h-0 touch-manipulation ${
                   category === c
                     ? "bg-cyan/15 text-cyan border border-cyan/40"
                     : "text-muted-foreground hover:text-foreground"
@@ -543,7 +543,7 @@ const CARD_CTA =
   "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.12em] font-semibold text-[11.5px] md:text-[12px] min-h-[40px] md:min-h-[36px]";
 
 const TOPIC_CARD_SHELL =
-  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] md:min-h-[210px] md:h-[210px]";
+  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[200px] sm:min-h-[220px] md:min-h-[210px] md:h-[210px]";
 
 function TopicCardCadence({
   cadence,
