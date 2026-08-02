@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { ResearchModeBanner } from "@/components/research/ResearchModeBanner";
 import { ResearchSourceLegend } from "@/components/research/ResearchSourceLegend";
 import {
   getResearchBrief,
@@ -103,18 +102,13 @@ function ResearchPreviewBriefPage() {
         </div>
 
         <div className="space-y-4 mb-6">
-          <ResearchModeBanner message={brief.notATopicBanner} />
-
           <header className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex rounded-full border border-cyan/30 bg-cyan/10 text-cyan px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
                 {researchStatusLabel(brief.status)}
               </span>
-              <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
-                Human-reviewed
-              </span>
               <span className="inline-flex rounded-full border border-border bg-secondary/40 text-muted-foreground px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
-                Corpus frozen · non-recurring
+                Deep-dive · not live Topics
               </span>
               <span className="text-[10.5px] font-mono text-muted-foreground">
                 {brief.region} · Updated {brief.updatedAt}
@@ -124,6 +118,9 @@ function ResearchPreviewBriefPage() {
               {brief.title}
             </h1>
             <p className="text-sm text-muted-foreground max-w-3xl">{brief.subtitle}</p>
+            <p className="text-[12px] text-muted-foreground max-w-3xl leading-relaxed border border-border/70 rounded-lg bg-card/30 px-3 py-2">
+              {brief.methodSummary}
+            </p>
           </header>
         </div>
 
@@ -227,51 +224,38 @@ function ResearchPreviewBriefPage() {
                 suggests” over prophecy.
               </p>
               <ul className="grid gap-2 sm:grid-cols-1">
-                {brief.claimSlots.map((c) => {
-                  const ready = c.status === "ready" && c.statement;
-                  return (
+                {brief.claimSlots
+                  .filter((c) => c.status === "ready" && c.statement)
+                  .map((c) => (
                     <li
                       key={c.id}
-                      className={`rounded-lg border px-3 py-3 ${
-                        ready
-                          ? "border-border/80 bg-background/35"
-                          : "border-dashed border-border bg-background/20"
-                      }`}
+                      className="rounded-lg border px-3 py-3 border-border/80 bg-background/35"
                     >
                       <div className="flex flex-wrap items-center gap-2 mb-1.5">
                         <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
                           {c.id.toUpperCase()}
                         </span>
                         <span className="text-[12px] font-medium text-foreground/90">{c.domain}</span>
-                        {ready ? (
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-300/90">
-                            {claimConfidenceLabel(c.confidence)}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <Lock className="w-3 h-3" /> empty
-                          </span>
-                        )}
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-300/90">
+                          {claimConfidenceLabel(c.confidence)}
+                        </span>
                       </div>
-                      {ready ? (
-                        <>
-                          <p className="text-[13px] text-foreground/90 leading-relaxed">{c.statement}</p>
-                          {c.falsifier && (
-                            <p className="text-[11.5px] text-muted-foreground mt-1.5 leading-snug">
-                              <span className="text-foreground/60">Falsifier: </span>
-                              {c.falsifier}
-                            </p>
-                          )}
-                        </>
-                      ) : (
-                        <p className="text-[11.5px] text-muted-foreground italic">
-                          Awaiting evidence
+                      <p className="text-[13px] text-foreground/90 leading-relaxed">{c.statement}</p>
+                      {c.falsifier && (
+                        <p className="text-[11.5px] text-muted-foreground mt-1.5 leading-snug">
+                          <span className="text-foreground/60">Falsifier: </span>
+                          {c.falsifier}
                         </p>
                       )}
                     </li>
-                  );
-                })}
+                  ))}
               </ul>
+              {brief.claimSlots.some((c) => !(c.status === "ready" && c.statement)) && (
+                <p className="text-[11px] font-mono text-muted-foreground">
+                  {brief.claimSlots.filter((c) => !(c.status === "ready" && c.statement)).length}{" "}
+                  claim slot(s) still awaiting evidence — not shown as empty boxes.
+                </p>
+              )}
             </section>
 
             <section id="scenarios" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
@@ -401,38 +385,19 @@ function ResearchPreviewBriefPage() {
             </section>
 
             <section id="method" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">
-              <h2 className="text-sm font-display font-semibold">Method (short)</h2>
-              <p className="text-[13.5px] text-muted-foreground leading-relaxed">
-                {brief.methodSummary}
-              </p>
+              <h2 className="text-sm font-display font-semibold">Progress</h2>
               <ul className="space-y-1.5">
-                {brief.approach.map((a) => (
-                  <li
-                    key={a}
-                    className="text-[13px] text-foreground/85 leading-snug flex gap-2"
-                  >
-                    <span className="text-cyan shrink-0">·</span>
-                    <span>{a}</span>
+                {brief.phases.map((p) => (
+                  <li key={p.id} className="flex gap-2.5 items-start text-[12.5px]">
+                    <span className="mt-0.5 shrink-0">{phaseIcon(p.status)}</span>
+                    <span>
+                      <span className="font-mono text-cyan text-[11px]"> {p.id} </span>
+                      <span className="font-medium text-foreground/90">{p.label}</span>
+                      <span className="text-muted-foreground"> — {p.note}</span>
+                    </span>
                   </li>
                 ))}
               </ul>
-              <div className="pt-1">
-                <h3 className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
-                  Phases
-                </h3>
-                <ul className="space-y-1.5">
-                  {brief.phases.map((p) => (
-                    <li key={p.id} className="flex gap-2.5 items-start text-[12.5px]">
-                      <span className="mt-0.5 shrink-0">{phaseIcon(p.status)}</span>
-                      <span>
-                        <span className="font-mono text-cyan text-[11px]"> {p.id} </span>
-                        <span className="font-medium text-foreground/90">{p.label}</span>
-                        <span className="text-muted-foreground"> — {p.note}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </section>
 
             <section id="open" className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3">

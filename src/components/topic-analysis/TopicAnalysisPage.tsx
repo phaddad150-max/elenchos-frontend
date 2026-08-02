@@ -607,6 +607,37 @@ export function TopicAnalysisPage({
         )}
       </div>
 
+      {/* Desk CTA — run your own analysis */}
+      <section className="rounded-xl border border-cyan/35 bg-cyan/[0.06] p-4 sm:p-5 space-y-3">
+        <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">
+          Want this style on your topic?
+        </p>
+        <p className="text-[13px] sm:text-[14px] text-foreground/90 leading-relaxed">
+          This page is a live Topics analysis (public discourse on X). Use the Research Desk to
+          commission the same style for a topic you choose — fixed low price, unique link + PDF.
+        </p>
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+          <Link
+            to="/research/commission"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[13px] font-medium touch-manipulation"
+          >
+            Commission topic analysis · $10
+          </Link>
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-border text-muted-foreground hover:text-cyan text-[13px] touch-manipulation"
+          >
+            Back to homepage
+          </Link>
+          <Link
+            to="/research"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-border text-muted-foreground hover:text-cyan text-[13px] touch-manipulation"
+          >
+            Research Desk
+          </Link>
+        </div>
+      </section>
+
       {/* Insight detail: mobile bottom sheet · desktop centered modal */}
       {pickedCard && (
         <DetailOverlay onClose={() => setPickedCard(null)}>

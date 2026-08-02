@@ -48,7 +48,7 @@ export const Route = createFileRoute("/research-migration")({
       {
         name: "description",
         content:
-          "Since 2011: ~1.8M peak detections, frontline EU states, open vs resist policy, speech double standards. 10 seconds to thesis — under 10 minutes full. Free open data.",
+          "Since 2011: peak detections, frontline EU states, open vs resist policy, public discourse. 10 seconds to thesis — under 10 minutes. Free open data. Research package — not legal advice.",
       },
       {
         property: "og:title",
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/research-migration")({
       {
         property: "og:description",
         content:
-          "Since 2011 · 2015 peak ~1.8M · 2023 ~380k · 2025 ~178k. Frontline GR/IT/ES/UK. Open vs resist. Shareable national security brief.",
+          "Since 2011 · 2015 peak ~1.8M · 2023 ~380k · 2025 ~178k. Frontline GR/IT/ES/UK. Open vs resist. Crisis analysis package.",
       },
       { property: "og:url", content: "https://elenchos.live/research-migration" },
     ],
@@ -114,7 +114,7 @@ function MigrationIntelligencePage() {
             <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 text-rose-signal">
                 <ShieldAlert className="w-3.5 h-3.5" aria-hidden />
-                Research · national security brief
+                Research · real-time analysis on crisis
               </span>
               <span className="text-border">·</span>
               <span>EU + UK Channel</span>

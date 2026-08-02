@@ -1,70 +1,96 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, Lock, Loader2 } from "lucide-react";
-import {
-  ELENCHOS_CONTACT_CTA,
-  buildContactMailto,
-} from "@/lib/contact";
+import { buildContactMailto, ELENCHOS_CONTACT_CTA } from "@/lib/contact";
 
-export type CommissionStyle = "topic-analysis" | "thesis";
+export type CommissionStyle = "topic-analysis" | "deep-no-x" | "deep-with-x";
 
-const TIERS = [
+const PACKAGES: {
+  id: CommissionStyle;
+  title: string;
+  price: string;
+  priceUsd: number;
+  blurb: string;
+  delivers: string;
+}[] = [
   {
-    id: "lite",
-    label: "Lite structured brief",
-    price: "€79",
-    blurb: "Scoped question, core sources, 4–6 claims, limits box. ~1 week target after payment.",
+    id: "topic-analysis",
+    title: "Topic analysis (public discourse)",
+    price: "$10",
+    priceUsd: 10,
+    blurb: "Socratic-style questions + analysis of public discourse around your topic (Topics method).",
+    delivers: "Sentiment-style scoring, key themes, citizen vs official/media frames where sample allows.",
   },
   {
-    id: "full",
-    label: "Full thesis-style pack",
-    price: "€199",
-    blurb: "Chapters, multi-source spine, claim table, scenarios, source appendix. Human-reviewed.",
+    id: "deep-no-x",
+    title: "Deep dive · multi-source (no X)",
+    price: "$10",
+    priceUsd: 10,
+    blurb: "Thesis-like structure: open web, official, media, scholarly where free. No X sample.",
+    delivers: "Chapters outline, evidence map, claims with confidence/falsifiers when evidence holds.",
   },
-] as const;
+  {
+    id: "deep-with-x",
+    title: "Deep dive · multi-source + X",
+    price: "$20",
+    priceUsd: 20,
+    blurb: "Same deep dive plus a capped public-discourse sample on X for street frames.",
+    delivers: "Everything in deep dive + discourse section with sample size and limits.",
+  },
+];
 
 /**
- * Free-style commission UX — privacy-first.
- * Payment processor checkout ships next; v1 captures structured intent + optional one-time email for delivery.
- * Does not store card data; does not require account.
+ * On-demand commission — privacy-first, low fixed prices.
+ * Payment processor checkout ships next; v1 captures structured order intent.
  */
 export function CommissionBriefForm() {
-  const [style, setStyle] = useState<CommissionStyle>("thesis");
-  const [tier, setTier] = useState<(typeof TIERS)[number]["id"]>("lite");
+  const [pkg, setPkg] = useState<CommissionStyle>("topic-analysis");
   const [topic, setTopic] = useState("");
-  const [region, setRegion] = useState("");
-  const [goal, setGoal] = useState("");
+  const [questions, setQuestions] = useState("");
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const tierMeta = useMemo(() => TIERS.find((t) => t.id === tier) ?? TIERS[0], [tier]);
+  const meta = useMemo(() => PACKAGES.find((p) => p.id === pkg)!, [pkg]);
+  const needQuestions = pkg === "topic-analysis";
 
   const body = useMemo(() => {
     return [
-      "Elenchos Research Desk — commission request (no account)",
-      `Style: ${style === "topic-analysis" ? "Topics / public discourse analysis" : "Thesis-style multi-source brief"}`,
-      `Tier: ${tierMeta.label} (${tierMeta.price})`,
+      "Elenchos Research Desk — on-demand order",
+      `Package: ${meta.title} (${meta.price})`,
       `Topic: ${topic.trim()}`,
-      region.trim() ? `Region / scope: ${region.trim()}` : null,
-      goal.trim() ? `Goal: ${goal.trim()}` : null,
-      email.trim() ? `Delivery email (optional, one-time): ${email.trim()}` : "Delivery: no email — contact via reply channel",
-      "Privacy: user asked for no long-term identity storage; payment via processor when live.",
+      needQuestions && questions.trim()
+        ? `Socratic / analysis questions:\n${questions.trim()}`
+        : needQuestions
+          ? "Questions: (user may refine after confirm)"
+          : null,
+      email.trim() ? `Delivery email: ${email.trim()}` : "Delivery: unique link (no email)",
+      "Disclaimer accepted: research tool as-is; not legal/medical/investment advice; no private data scraping.",
     ]
       .filter(Boolean)
       .join("\n");
-  }, [style, tierMeta, topic, region, goal, email]);
+  }, [meta, topic, questions, email, needQuestions]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
     if (!topic.trim() || topic.trim().length < 8) {
-      setErr("Add a clear topic (at least a short sentence).");
+      setErr("Describe your topic in at least a short sentence.");
       return;
     }
+    if (needQuestions && questions.trim().length > 0) {
+      const lines = questions
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      if (lines.length > 9) {
+        setErr("Please keep to at most 9 questions (one per line).");
+        return;
+      }
+    }
     if (!consent) {
-      setErr("Confirm the privacy & method notice to continue.");
+      setErr("Please confirm the notice below.");
       return;
     }
     setBusy(true);
@@ -75,7 +101,7 @@ export function CommissionBriefForm() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            source: "research-desk-commission",
+            source: "research-commission",
             email: delivery,
             message: body,
             name: "",
@@ -85,21 +111,21 @@ export function CommissionBriefForm() {
         if (!res.ok) {
           window.location.href = buildContactMailto({
             message: body,
-            source: "research-desk-commission",
+            source: "research-commission",
             fromEmail: delivery,
           });
         }
       } else {
         window.location.href = buildContactMailto({
           message: body,
-          source: "research-desk-commission",
+          source: "research-commission",
         });
       }
       setDone(true);
     } catch {
       window.location.href = buildContactMailto({
         message: body,
-        source: "research-desk-commission",
+        source: "research-commission",
         fromEmail: email.trim() || undefined,
       });
       setDone(true);
@@ -112,12 +138,12 @@ export function CommissionBriefForm() {
     return (
       <div className="rounded-xl border border-cyan/40 bg-cyan/10 px-4 py-5 space-y-2">
         <p className="inline-flex items-center gap-2 text-cyan font-display font-semibold text-[15px]">
-          <Check className="w-4 h-4" /> Request received
+          <Check className="w-4 h-4" /> Order request sent
         </p>
         <p className="text-[13px] text-foreground/90 leading-relaxed">
-          We will confirm scope and payment link (card via Stripe Checkout; crypto option as available).
-          No card details are ever stored on Elenchos servers. If email was provided, it is used only
-          to deliver this order — not a marketing list.
+          Next: we confirm scope and send a <strong>one-time payment link</strong> ({meta.price}).
+          After payment you receive a <strong>unique report link</strong> and PDF when ready. No
+          account. No card numbers stored on Elenchos.
         </p>
         <p className="text-[12px] font-mono text-muted-foreground">{ELENCHOS_CONTACT_CTA}</p>
       </div>
@@ -125,48 +151,35 @@ export function CommissionBriefForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5">
       <div>
         <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
-          1 · Report style
+          1 · Package
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <StylePick
-            active={style === "topic-analysis"}
-            title="Topics analysis style"
-            desc="Public discourse (X) vs official & media frames — same DNA as live Topics."
-            onClick={() => setStyle("topic-analysis")}
-          />
-          <StylePick
-            active={style === "thesis"}
-            title="Thesis-like brief"
-            desc="Multi-source chapters, claims with confidence & falsifiers — academic/analyst depth."
-            onClick={() => setStyle("thesis")}
-          />
-        </div>
-      </div>
-
-      <div>
-        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
-          2 · Depth / fee (one-time)
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {TIERS.map((t) => (
+        <div className="space-y-2">
+          {PACKAGES.map((p) => (
             <button
-              key={t.id}
+              key={p.id}
               type="button"
-              onClick={() => setTier(t.id)}
-              className={`text-left rounded-xl border px-3 py-3 min-h-[44px] touch-manipulation transition-colors ${
-                tier === t.id
+              onClick={() => setPkg(p.id)}
+              className={`w-full text-left rounded-xl border px-3.5 py-3 min-h-[44px] touch-manipulation transition-colors ${
+                pkg === p.id
                   ? "border-cyan/50 bg-cyan/12"
                   : "border-border bg-card/40 hover:border-cyan/30"
               }`}
             >
-              <p className="text-[13px] font-display font-semibold text-foreground">
-                {t.label}{" "}
-                <span className="text-cyan font-mono text-[12px]">{t.price}</span>
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="text-[13px] sm:text-[14px] font-display font-semibold text-foreground">
+                  {p.title}
+                </p>
+                <span className="text-cyan font-mono text-[14px] font-semibold shrink-0">
+                  {p.price}
+                </span>
+              </div>
+              <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{p.blurb}</p>
+              <p className="text-[11px] text-foreground/80 mt-1.5 leading-snug">
+                Delivers: {p.delivers}
               </p>
-              <p className="text-[11.5px] text-muted-foreground mt-1 leading-snug">{t.blurb}</p>
             </button>
           ))}
         </div>
@@ -174,38 +187,46 @@ export function CommissionBriefForm() {
 
       <div className="space-y-2">
         <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-          3 · Your topic
+          2 · Topic
         </p>
-        <label className="block">
-          <span className="sr-only">Research topic</span>
+        <textarea
+          required
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          rows={3}
+          placeholder="e.g. Public discourse on housing and migration in Spain, 2024–2026"
+          className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[88px] focus:outline-none focus:border-cyan/50"
+        />
+      </div>
+
+      {needQuestions && (
+        <div className="space-y-2">
+          <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+            3 · Your questions (up to 9, optional)
+          </p>
+          <p className="text-[12px] text-muted-foreground leading-snug">
+            One question per line. If empty, we apply a standard Socratic pack for public discourse
+            analysis.
+          </p>
           <textarea
-            required
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            rows={3}
-            placeholder="e.g. ‘EU–Morocco return agreements: claimed vs documented returns 2015–2025’"
-            className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] text-foreground placeholder:text-muted-foreground/70 min-h-[88px] focus:outline-none focus:border-cyan/50"
+            value={questions}
+            onChange={(e) => setQuestions(e.target.value)}
+            rows={6}
+            placeholder={"1. …\n2. …\n3. …"}
+            className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] font-mono min-h-[120px] focus:outline-none focus:border-cyan/50"
           />
-        </label>
-        <input
-          type="text"
-          value={region}
-          onChange={(e) => setRegion(e.target.value)}
-          placeholder="Region / geography (optional)"
-          className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
-        />
-        <input
-          type="text"
-          value={goal}
-          onChange={(e) => setGoal(e.target.value)}
-          placeholder="What decision or question should this brief answer? (optional)"
-          className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
-        />
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+          {needQuestions ? "4" : "3"} · Delivery email (optional)
+        </p>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email for delivery only (optional — not required to browse the desk)"
+          placeholder="Only for this order — not a newsletter"
           className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
           autoComplete="email"
         />
@@ -220,9 +241,9 @@ export function CommissionBriefForm() {
         />
         <span>
           <Lock className="w-3.5 h-3.5 text-cyan inline mr-1 align-[-2px]" aria-hidden />
-          I understand: no account required; optional email is only for this delivery; card/crypto
-          details are handled by the payment processor (not stored on Elenchos); reports are
-          research not legal/investment advice; human review before published delivery.
+          I understand this is a research tool provided as-is: not legal, medical, or investment
+          advice; not for covert surveillance; findings depend on available public sources;
+          payment is one-time ({meta.price}); unique link + PDF when ready; no account required.
         </span>
       </label>
 
@@ -231,7 +252,7 @@ export function CommissionBriefForm() {
       <button
         type="submit"
         disabled={busy}
-        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-3 rounded-full bg-cyan/20 border border-cyan/50 text-cyan font-display font-semibold text-[14px] hover:bg-cyan/30 touch-manipulation disabled:opacity-50"
+        className="w-full inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-3 rounded-full bg-cyan/20 border border-cyan/50 text-cyan font-display font-semibold text-[14px] hover:bg-cyan/30 touch-manipulation disabled:opacity-50"
       >
         {busy ? (
           <>
@@ -239,40 +260,11 @@ export function CommissionBriefForm() {
           </>
         ) : (
           <>
-            Request commission · {tierMeta.price}
+            Request order · {meta.price}
             <ArrowRight className="w-4 h-4" />
           </>
         )}
       </button>
-      <p className="text-[11px] font-mono text-muted-foreground">
-        Checkout link is confirmed after scope review. Crypto and cards accepted via processor when
-        payment step is enabled for your order.
-      </p>
     </form>
-  );
-}
-
-function StylePick({
-  active,
-  title,
-  desc,
-  onClick,
-}: {
-  active: boolean;
-  title: string;
-  desc: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`text-left rounded-xl border px-3 py-3 min-h-[44px] touch-manipulation transition-colors ${
-        active ? "border-cyan/50 bg-cyan/12" : "border-border bg-card/40 hover:border-cyan/30"
-      }`}
-    >
-      <p className="text-[13px] font-display font-semibold text-foreground">{title}</p>
-      <p className="text-[11.5px] text-muted-foreground mt-1 leading-snug">{desc}</p>
-    </button>
   );
 }

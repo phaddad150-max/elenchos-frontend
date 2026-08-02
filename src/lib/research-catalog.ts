@@ -96,9 +96,9 @@ export const SOURCE_CLASS_LEGEND: ResearchBrief["sourceClasses"] = [
   },
 ];
 
-/** North-star copy for Research Desk (public freestyle desk — not Topics live scores) */
+/** North-star copy for Research Desk landing */
 export const RESEARCH_NORTH_STAR =
-  "Open multi-source research desk for citizens and serious readers: thesis-style case studies, national security briefs, and indexes — evidence, gaps, and limits you can check. Not live Topics scores.";
+  "A clear desk for three jobs: live public-discourse analysis (Topics), deep-dive case studies, or an on-demand report on your topic. Evidence and limits you can check — not vibes.";
 
 export const RESEARCH_HUMAN_FIRST =
   "Machines may collect and draft. A human analyst reviews the source plan and every claim before publish. No auto-published claims.";

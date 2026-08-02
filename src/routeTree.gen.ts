@@ -20,6 +20,8 @@ import { Route as SponsorRouteImport } from './routes/sponsor'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ResearchIndexRouteImport } from './routes/research.index'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
+import { Route as ResearchLibraryRouteImport } from './routes/research.library'
 import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
@@ -85,6 +87,16 @@ const ResearchIndexRoute = ResearchIndexRouteImport.update({
 const ResearchSlugRoute = ResearchSlugRouteImport.update({
   id: '/research/$slug',
   path: '/research/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchCommissionRoute = ResearchCommissionRouteImport.update({
+  id: '/research/commission',
+  path: '/research/commission',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
+  id: '/research/library',
+  path: '/research/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
@@ -154,6 +166,8 @@ export interface FileRoutesByFullPath {
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
+  '/research/commission': typeof ResearchCommissionRoute
+  '/research/library': typeof ResearchLibraryRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
@@ -178,6 +192,8 @@ export interface FileRoutesByTo {
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
+  '/research/commission': typeof ResearchCommissionRoute
+  '/research/library': typeof ResearchLibraryRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
@@ -203,6 +219,8 @@ export interface FileRoutesById {
   '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
+  '/research/commission': typeof ResearchCommissionRoute
+  '/research/library': typeof ResearchLibraryRoute
   '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
@@ -229,6 +247,8 @@ export interface FileRouteTypes {
     | '/sponsor'
     | '/admin/curation'
     | '/research/$slug'
+    | '/research/commission'
+    | '/research/library'
     | '/sponsor/success'
     | '/topics/$topicId'
     | '/trackers/football'
@@ -253,6 +273,8 @@ export interface FileRouteTypes {
     | '/sponsor'
     | '/admin/curation'
     | '/research/$slug'
+    | '/research/commission'
+    | '/research/library'
     | '/sponsor/success'
     | '/topics/$topicId'
     | '/trackers/football'
@@ -277,6 +299,8 @@ export interface FileRouteTypes {
     | '/sponsor'
     | '/admin/curation'
     | '/research/$slug'
+    | '/research/commission'
+    | '/research/library'
     | '/sponsor/success'
     | '/topics/$topicId'
     | '/trackers/football'
@@ -302,6 +326,8 @@ export interface RootRouteChildren {
   SponsorRoute: typeof SponsorRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
+  ResearchCommissionRoute: typeof ResearchCommissionRoute
+  ResearchLibraryRoute: typeof ResearchLibraryRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
@@ -392,6 +418,20 @@ declare module '@tanstack/react-router' {
       path: '/research/$slug'
       fullPath: '/research/$slug'
       preLoaderRoute: typeof ResearchSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/commission': {
+      id: '/research/commission'
+      path: '/research/commission'
+      fullPath: '/research/commission'
+      preLoaderRoute: typeof ResearchCommissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/library': {
+      id: '/research/library'
+      path: '/research/library'
+      fullPath: '/research/library'
+      preLoaderRoute: typeof ResearchLibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sponsor/success': {
@@ -496,6 +536,8 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorRoute: SponsorRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
   ResearchSlugRoute: ResearchSlugRoute,
+  ResearchCommissionRoute: ResearchCommissionRoute,
+  ResearchLibraryRoute: ResearchLibraryRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,

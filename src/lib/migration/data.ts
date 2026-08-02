@@ -566,7 +566,7 @@ export const CHAPTERS: { id: string; n: string; title: string; seconds: string; 
   { id: "scale", n: "01", title: "Scale since 2011", seconds: "~75s", blurb: "How big, how long, detections ≠ persons." },
   { id: "corridors", n: "02", title: "Corridors & frontline", seconds: "~75s", blurb: "Entry systems + most-affected states." },
   { id: "stance", n: "03", title: "Open vs resist", seconds: "~75s", blurb: "Policy archetypes, not moral scorecards." },
-  { id: "damage", n: "04", title: "Security & damage", seconds: "~75s", blurb: "National-security scale, not a slogan." },
+  { id: "damage", n: "04", title: "Risks & social gravity", seconds: "~75s", blurb: "Capacity, cohesion, and elite failure — not slogans." },
   { id: "discourse", n: "05", title: "Discourse & labels", seconds: "~90s", blurb: "Citizen themes, ‘racist’ frames, funding trails." },
   { id: "actors", n: "06", title: "Who shapes flows", seconds: "~75s", blurb: "Turkey to EU institutions — roles, not memes." },
   { id: "reverse", n: "07", title: "If nothing changes", seconds: "~75s", blurb: "Scenarios + reverse policies citizens asked for." },
