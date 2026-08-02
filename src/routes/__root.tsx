@@ -83,34 +83,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Elenchos · Socratic clarity on public discourse & Research Desk" },
+      { title: "Elenchos · Public Discourse Lens x Research Desk" },
       {
         name: "description",
         content:
-          "Elenchos (ἔλεγχος): Socratic clarity on public discourse and a Research Desk to go deeper. Topics analysis on X, case studies, on-demand reports. Privacy-first.",
+          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Topics analysis on X, case studies, on-demand reports, Enterprise. Privacy-first.",
       },
       { name: "author", content: "Elenchos" },
       { property: "og:site_name", content: "Elenchos" },
       {
         property: "og:title",
-        content: "Elenchos · Socratic clarity on public discourse & Research Desk",
+        content: "Elenchos · Public Discourse Lens x Research Desk",
       },
       {
         property: "og:description",
         content:
-          "Citizen voices vs official frames. Live Topics, crisis packages, thesis-style case studies, and on-demand research from $10.",
+          "Citizen voices vs official frames. Live Topics, crisis packages, thesis-style case studies, on-demand research from $10, Enterprise contact.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@elenchospulse" },
       {
         name: "twitter:title",
-        content: "Elenchos · Socratic clarity on public discourse & Research Desk",
+        content: "Elenchos · Public Discourse Lens x Research Desk",
       },
       {
         name: "twitter:description",
         content:
-          "Citizen voices vs official frames. Topics analysis, Research Desk, privacy-first on-demand reports.",
+          "Public Discourse Lens x Research Desk. Topics analysis, case studies, privacy-first on-demand reports.",
       },
       { property: "og:image", content: "https://elenchos.live/elenchos-og.webp" },
       { name: "twitter:image", content: "https://elenchos.live/elenchos-og.webp" },
@@ -139,7 +139,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               name: "Elenchos",
               url: "https://elenchos.live",
               description:
-                "Socratic clarity on public discourse and a Research Desk to go deeper. Citizen sentiment, narrative gaps, case studies, and on-demand reports.",
+                "Public Discourse Lens x Research Desk. Citizen sentiment, narrative gaps, case studies, and on-demand reports.",
             },
           ],
         }),

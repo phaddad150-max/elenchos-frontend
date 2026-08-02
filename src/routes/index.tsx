@@ -84,16 +84,16 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "Elenchos · Socratic clarity on public discourse & Research Desk",
+        title: "Elenchos · Public Discourse Lens x Research Desk",
       },
       {
         name: "description",
         content:
-          "Elenchos: Socratic analysis of public discourse on X vs official frames. Live Topics, Dashboard signals, and a privacy-first Research Desk for deep dives and on-demand reports.",
+          "Elenchos: Public Discourse Lens x Research Desk. Live Topics on X vs official frames, Dashboard signals, deep dives and on-demand reports. Privacy-first.",
       },
       {
         property: "og:title",
-        content: "Socratic clarity on public discourse — and a Research Desk to go deeper · Elenchos",
+        content: "Public Discourse Lens x Research Desk · Elenchos",
       },
       {
         property: "og:description",

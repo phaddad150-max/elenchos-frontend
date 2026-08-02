@@ -20,13 +20,13 @@ export { ELENCHOS_TAGLINE };
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Elenchos · Public discourse & Research Desk" },
+      { title: "About Elenchos · Public Discourse Lens x Research Desk" },
       {
         name: "description",
         content:
-          "Elenchos (ἔλεγχος) applies the Socratic method to public discourse on X and offers a privacy-first Research Desk for case studies and on-demand reports. Safe place to check and generate research.",
+          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Socratic method on public discourse on X, case studies, on-demand reports. Safe place to check and generate research.",
       },
-      { property: "og:title", content: "About Elenchos · Public discourse & Research Desk" },
+      { property: "og:title", content: "About Elenchos · Public Discourse Lens x Research Desk" },
       {
         property: "og:description",
         content:
