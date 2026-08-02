@@ -139,7 +139,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               name: "Elenchos",
               url: "https://elenchos.live",
               description:
-                "Real-time citizen sentiment and narrative divergence across global topics, leaders, and countries.",
+                "Socratic clarity on public discourse and a Research Desk to go deeper. Citizen sentiment, narrative gaps, case studies, and on-demand reports.",
             },
           ],
         }),

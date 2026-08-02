@@ -186,6 +186,20 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               <p className="page-hero-sub w-full max-w-none whitespace-normal lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
                 Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
               </p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                <Link
+                  to="/research"
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-medium touch-manipulation"
+                >
+                  Research Desk
+                </Link>
+                <Link
+                  to="/research/commission"
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-border text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
+                >
+                  Commission · $10
+                </Link>
+              </div>
               <button
                 type="button"
                 onClick={() => onOpen("commercial-space-race")}
@@ -1030,7 +1044,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           <ContentSourceBadge source={contentSource} />
           {contentSource === "static" && (
             <span className="text-[10px] font-mono text-muted-foreground normal-case tracking-normal">
-              Simulated editorial data, not live Supabase analysis
+              Editorial preview sample — not a live public discourse run
             </span>
           )}
           {isArchivedTopicId(topic.id) && (
@@ -1132,7 +1146,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           <section className="space-y-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
-                <Sparkles className="w-3 h-3" /> Actionable Intelligence
+                <Sparkles className="w-3 h-3" /> Key signals
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <ContentSourceBadge source="static" compact />
@@ -1190,7 +1204,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
 
       {/* Feedback */}
       <section className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 rounded-2xl border border-border bg-secondary/30">
-        <span className="text-sm text-muted-foreground">Was this intelligence brief useful?</span>
+        <span className="text-sm text-muted-foreground">Was this briefing useful?</span>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFeedback("up")}
@@ -1821,7 +1835,7 @@ function HeroDivergenceCard({ data }: { data: AbrahamData }) {
 
   const hasData = score !== null;
   const color = hasData ? divergenceColor(score!) : "var(--muted-foreground)";
-  const band = hasData ? (label ?? divergenceBand(score!)) : "Awaiting backend data";
+  const band = hasData ? (label ?? divergenceBand(score!)) : "No score yet";
 
   return (
     <div className="rounded-xl border bg-background/40 backdrop-blur p-4 sm:p-5 relative overflow-hidden flex flex-col gap-3 sm:gap-4 min-h-[200px] sm:min-h-[240px]" style={{ borderColor: `${color}55` }}>
@@ -1866,8 +1880,8 @@ function HeroDivergenceCard({ data }: { data: AbrahamData }) {
         {summary
           ? summary
           : hasData
-            ? "Summary will appear here when the backend publishes a narrative-divergence note for this topic."
-            : "This metric appears as soon as the backend workflow publishes a narrative-divergence score for this topic."}
+            ? "A short note on this gap will appear when the next analysis sample includes one."
+            : "This metric appears when a narrative-divergence score is available for this topic."}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { FEATURE_TOPICS } from "@/lib/feature-topics";
+import { listResearchBriefs } from "@/lib/research-catalog";
 
 const BASE_URL = "https://elenchos.live";
 
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
+        const researchBriefs = listResearchBriefs();
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "daily", priority: "1.0" },
           { path: "/topics", changefreq: "daily", priority: "0.9" },
@@ -22,8 +24,17 @@ export const Route = createFileRoute("/sitemap.xml")({
             changefreq: "daily" as const,
             priority: "0.8",
           })),
-          { path: "/about", changefreq: "monthly", priority: "0.6" },
-          { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+          { path: "/research", changefreq: "weekly", priority: "0.9" },
+          { path: "/research/library", changefreq: "weekly", priority: "0.85" },
+          { path: "/research/commission", changefreq: "weekly", priority: "0.85" },
+          { path: "/research-migration", changefreq: "weekly", priority: "0.8" },
+          ...researchBriefs.map((b) => ({
+            path: `/research/preview/${b.slug}`,
+            changefreq: "weekly" as const,
+            priority: "0.75",
+          })),
+          { path: "/about", changefreq: "monthly", priority: "0.65" },
+          { path: "/privacy", changefreq: "yearly", priority: "0.4" },
         ];
 
 

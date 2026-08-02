@@ -5,7 +5,7 @@ import { ThemePreferenceTabs } from "@/components/ThemePreferenceTabs";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import type { ReactNode } from "react";
-
+import { ELENCHOS_NAV_LINE } from "@/lib/brand";
 
 function XLogo({ className }: { className?: string }) {
   return (
@@ -47,8 +47,8 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
                 <span className="text-xl md:text-2xl font-display font-semibold tracking-tight text-glow-cyan truncate">
                   Elenchos
                 </span>
-                <span className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground mt-1">
-                  Public intelligence for citizens
+                <span className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground mt-1">
+                  {ELENCHOS_NAV_LINE}
                 </span>
               </div>
             </div>

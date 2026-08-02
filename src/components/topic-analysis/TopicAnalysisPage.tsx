@@ -113,7 +113,7 @@ function useTopicBundle(rootKey: string) {
       .catch((e) => {
         if (cancelled) return;
         console.error("Topic bundle load failed", e);
-        setLoadError("Could not load intelligence briefing.");
+        setLoadError("Could not load topic briefing.");
       })
       .finally(() => {
         if (!cancelled) {
@@ -197,7 +197,7 @@ export function TopicAnalysisPage({
   if (!ready) {
     return (
       <section className="glass rounded-2xl p-8 border border-cyan/20 text-sm font-mono text-muted-foreground text-center">
-        Loading intelligence briefing…
+        Loading topic briefing…
       </section>
     );
   }
@@ -254,7 +254,7 @@ export function TopicAnalysisPage({
         <div className="glass rounded-xl border border-cyan/30 p-4 space-y-4">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
-            <div className="font-display font-semibold text-xl tracking-tight">Topic Intelligence Brief</div>
+            <div className="font-display font-semibold text-xl tracking-tight">Topic briefing</div>
           </div>
           <DataFreshnessBar sourceUpdatedAt={data.last_updated ?? curated?.generated_at} />
           <div className="grid grid-cols-3 divide-x divide-border/60 border-y border-border/60 py-3">
@@ -289,7 +289,7 @@ export function TopicAnalysisPage({
         <div className="glass rounded-xl border border-cyan/30 p-3 sm:p-4 flex flex-wrap items-center gap-3 sm:gap-5">
           <div className="min-w-0 flex-1">
             <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-cyan">{headerLabel}</div>
-            <div className="font-display font-semibold text-lg sm:text-xl truncate">Topic Intelligence Brief</div>
+            <div className="font-display font-semibold text-lg sm:text-xl truncate">Topic briefing</div>
           </div>
           <DataFreshnessBar
             sourceUpdatedAt={data.last_updated ?? curated?.generated_at}
@@ -504,7 +504,7 @@ export function TopicAnalysisPage({
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyChart label="History populates after multiple snapshot runs" />
+              <EmptyChart label="History appears after more than one sample" />
             )}
           </ChartPanel>
           <ChartPanel title="Question heatmap">

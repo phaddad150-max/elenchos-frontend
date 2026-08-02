@@ -12,10 +12,10 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
+import { ELENCHOS_TAGLINE } from "@/lib/brand";
 
-/** Site tagline — Socratic + discourse + Research Desk */
-export const ELENCHOS_TAGLINE =
-  "Socratic clarity on public discourse — and a Research Desk to go deeper.";
+/** @deprecated import from `@/lib/brand` */
+export { ELENCHOS_TAGLINE };
 
 export const Route = createFileRoute("/about")({
   head: () => ({

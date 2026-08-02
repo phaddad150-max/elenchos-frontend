@@ -566,7 +566,7 @@ function Dashboard() {
                     <Link to="/topics" className="text-cyan hover:underline">
                       Topics
                     </Link>{" "}
-                    for full briefings, or check back after the next workflow run.
+                    for full briefings, or check back after the next sample.
                   </p>
                 )}
             </div>
@@ -2429,7 +2429,7 @@ function DashboardKpiGrid({
       : {
           label: "Case studies coming soon",
           comingSoon: true,
-          note: "Dedicated research briefs are in the pipeline. Check back as the library grows.",
+          note: "Dedicated research briefs are still being added. Check back as the library grows.",
         };
 
   const windowSample = currentWindowSampleSize(snapshots, overview);
@@ -2462,13 +2462,13 @@ function DashboardKpiGrid({
       value: topicsMonitored,
       icon: Layers,
       format: "number",
-      liveNote: "Active topic monitors on this desk (archived excluded).",
+      liveNote: "Active topics on the desk (archived topics excluded).",
       liveFacts: [
-        `Active monitors: ${activeTopicCount}`,
+        `Active topics: ${activeTopicCount}`,
         `Archived (history only): ${Object.keys(LIVE_TOPIC_KEYS).filter((id) => isArchivedTopicId(id)).length}`,
         typeof k.core_topics_refreshed === "number"
-          ? `Core refreshed this pass: ${k.core_topics_refreshed}`
-          : "Core refresh count not in this overview yet.",
+          ? `Core topics refreshed in latest sample: ${k.core_topics_refreshed}`
+          : "Core refresh count not in this sample yet.",
       ],
       links: [
         { label: "Open topics", href: "/topics" },
@@ -2497,14 +2497,14 @@ function DashboardKpiGrid({
       value: countriesMonitored,
       icon: MapPinned,
       format: "number",
-      liveNote: "Countries in peace / region tracker tables.",
+      liveNote: "Countries in peace and region trackers.",
       liveFacts: [
         trackerKpis?.countriesMonitored
           ? `Peace tracker countries: ${trackerKpis.countriesMonitored}`
-          : "Peace country count not loaded.",
+          : "Peace country count not loaded yet.",
         typeof k.regions_monitored === "number"
-          ? `Overview regions: ${k.regions_monitored}`
-          : "Region KPI not set on this overview.",
+          ? `Regions in latest sample: ${k.regions_monitored}`
+          : "Region count not in this sample yet.",
       ],
       links: [
         { label: "Open peace tracker", href: "/trackers/peace" },
@@ -2533,13 +2533,15 @@ function DashboardKpiGrid({
       icon: Activity,
       format:
         totalSampleAnalyzed != null && totalSampleAnalyzed >= 1000 ? "compact" : "number",
-      liveNote: "Cumulative sample volume across pipeline runs.",
+      liveNote: "Posts counted across samples loaded on this desk.",
       liveFacts: [
-        `This run window: ${windowSample > 0 ? windowSample.toLocaleString() : "—"}`,
+        `Latest sample window: ${windowSample > 0 ? windowSample.toLocaleString() : "—"}`,
         typeof k.signals_generated === "number"
-          ? `Signals (overview): ${k.signals_generated}`
-          : "Signals count not on this overview.",
-        runId ? `Run: ${runId}` : "No overview run timestamp yet.",
+          ? `Signals in latest sample: ${k.signals_generated}`
+          : "Signal count not in this sample yet.",
+        runId
+          ? `Sample stamped: ${new Date(runId).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
+          : "No sample timestamp yet.",
       ],
       links: [
         { label: "Sampling method", href: "/about" },

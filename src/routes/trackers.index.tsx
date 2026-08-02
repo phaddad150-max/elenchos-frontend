@@ -418,7 +418,7 @@ function LeaderOverviewCard({
           </div>
         ) : (
           <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border bg-background/30 text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground inline-flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 animate-pulse" /> Awaiting backend sync
+            <Radio className="w-3.5 h-3.5 animate-pulse" /> Waiting for tracker data
           </div>
         )}
 
@@ -524,7 +524,7 @@ function PeaceOverviewCard({
           </div>
         ) : (
           <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border bg-background/30 text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground inline-flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 animate-pulse" /> Awaiting backend sync
+            <Radio className="w-3.5 h-3.5 animate-pulse" /> Waiting for tracker data
           </div>
         )}
 
@@ -1032,7 +1032,7 @@ function LeaderboardDetail({ row }: { row?: TrackerRow }) {
         <div className="px-4 py-6 rounded-xl border border-dashed border-border bg-background/30 text-center">
           <Radio className="w-4 h-4 animate-pulse text-cyan mx-auto mb-2" />
           <p className="text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-            Awaiting backend sync — no leaders ingested yet.
+            No leaders in this sample yet.
           </p>
         </div>
       ) : (
@@ -1351,7 +1351,7 @@ function PeaceDetail({ row }: { row?: TrackerRow }) {
         <div className="px-4 py-6 rounded-xl border border-dashed border-border bg-background/30 text-center">
           <Radio className="w-4 h-4 animate-pulse text-cyan mx-auto mb-2" />
           <p className="text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-            Awaiting backend sync — no countries ingested yet.
+            No countries in this sample yet.
           </p>
         </div>
       ) : (

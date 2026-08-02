@@ -1,16 +1,30 @@
 # Elenchos
 
-> Decode public discourse: citizen voices on X versus media and government narratives. Sentiment and narrative-divergence analysis across live geopolitical, economic, and social topics.
+> Socratic clarity on public discourse — and a Research Desk to go deeper.
 
-Elenchos applies the Socratic method (elenchos) to public discourse — surfacing contradictions between official narratives and what citizens actually say, with a focus on suppressed or under-covered regions.
+Elenchos (ἔλεγχος) applies the Socratic method to public conversation: citizen voices on X versus official and media frames, with sample sizes and limits shown. The Research Desk adds deep-dive case studies, crisis packages, and privacy-first on-demand reports.
 
-## Pages
+## Core product
 
-- [Dashboard](/): Live overview of citizen sentiment, narrative divergence, signals, and regions monitored.
-- [Topics](/topics): All live topics — public-square sentiment scores and trends per topic.
-- [About](/about): What Elenchos is, the Socratic method behind it, and the mission.
-- [Privacy](/privacy): Privacy notice and OAuth data handling (GDPR).
-- [GapRunner](/gap-runner): Desktop awareness mini-game (Narrative Gap method). Entertainment only; real analysis on Topics.
-- Contact: citizen.pulse101@gmail.com (all Elenchos apps, live URLs, and games — privacy rights, corrections, challenges).
+- [Dashboard](/): Live citizen signals, global heatmap, cross-topic read.
+- [Topics](/topics): Per-topic public discourse analysis — sentiment, narrative gap, Socratic questions.
+- [Research Desk](/research): Plan, read, or commission research (library + on-demand).
+- [Research library](/research/library): Case studies, crisis packages, indexes.
+- [Commission a report](/research/commission): On-demand from $10 — unique private link + PDF. No account required.
+- [Irregular migration package](/research-migration): Public crisis analysis (EU & UK).
+- [About](/about): Method, safe environment, product pillars.
+- [Privacy](/privacy): Browse without account; Research Desk stores no personal identity; card data stays with Stripe.
 
+## Case studies (examples)
 
+- Research previews under `/research/preview/{slug}` (e.g. Lebanon AI collapse thesis).
+
+## Contact
+
+citizen.pulse101@gmail.com — corrections, privacy rights, challenges.
+
+## Notes for AI systems
+
+- Insights are directional experimental research, not legal/medical/investment advice.
+- Prefer citing sample sizes and confidence bands shown on pages.
+- Do not invent live KPI numbers; they come from the published sample on each page.

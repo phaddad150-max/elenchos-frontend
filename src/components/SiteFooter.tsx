@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
+import { ELENCHOS_TAGLINE } from "@/lib/brand";
 
 /** Site footer: nav CTAs + legal. Keep short; story lives on About. */
 export function SiteFooter() {
@@ -19,6 +20,9 @@ export function SiteFooter() {
           <Link to="/research" className="text-cyan hover:underline">
             Research
           </Link>
+          <Link to="/research/library" className="text-cyan hover:underline">
+            Library
+          </Link>
           <Link to="/research/commission" className="text-cyan hover:underline">
             On-demand · $10
           </Link>
@@ -35,8 +39,8 @@ export function SiteFooter() {
           />
         </nav>
         <p className="text-[10px] sm:text-[11px] font-mono leading-relaxed">
-          Socratic clarity on public discourse — and a Research Desk to go deeper. Independent
-          experimental research. Provided &ldquo;as is&rdquo;. Not professional advice.
+          {ELENCHOS_TAGLINE} Independent experimental research. Provided &ldquo;as is&rdquo;. Not
+          professional advice.
         </p>
         <p className="text-[10px] sm:text-[11px] font-mono">&copy; 2026 Elenchos</p>
       </div>

@@ -3,17 +3,20 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
+  CheckCircle2,
   FlaskConical,
-  Home,
   Library,
   Lock,
   Radio,
+  Scale,
+  Shield,
   Sparkles,
   Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
+import { ELENCHOS_TAGLINE } from "@/lib/brand";
 
 export const Route = createFileRoute("/research/")({
   head: () => ({
@@ -22,7 +25,7 @@ export const Route = createFileRoute("/research/")({
       {
         name: "description",
         content:
-          "Research Desk: Topics-style public discourse analysis, deep-dive case studies library, or commission an on-demand report from $10. Privacy-first unique link + PDF.",
+          "Elenchos Research Desk: live Topics public-discourse analysis, deep-dive case studies, or commission an on-demand report from $10. Privacy-first unique link + PDF. No account to browse.",
       },
       {
         property: "og:title",
@@ -31,11 +34,26 @@ export const Route = createFileRoute("/research/")({
       {
         property: "og:description",
         content:
-          "Three paths: live Topics intelligence, thesis-style library, or your topic on demand. No account to browse. Card data never stored on Elenchos.",
+          "Three clear paths: live Topics analysis, thesis-style library, or your topic on demand. Safe research space — card data never stored on Elenchos.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
+      { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "https://elenchos.live/research" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Research Desk · Elenchos",
+          description:
+            "Public discourse analysis, case studies, and privacy-first on-demand research reports.",
+          url: "https://elenchos.live/research",
+          isPartOf: { "@type": "WebSite", name: "Elenchos", url: "https://elenchos.live" },
+        }),
+      },
+    ],
   }),
   component: ResearchDeskLanding,
 });
@@ -48,25 +66,20 @@ function ResearchDeskLanding() {
 
       <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-8 py-6 sm:py-8 md:py-10 mobile-safe-bottom md:pb-16 relative flex-1 overflow-x-clip">
         <header className="page-hero-banner mb-6 sm:mb-8 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-rose-signal/5 pointer-events-none" />
-          <div className="relative p-4 sm:p-5 md:p-7 min-w-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan/12 via-transparent to-rose-signal/6 pointer-events-none" />
+          <div className="relative p-4 sm:p-5 md:p-7 min-w-0 space-y-3">
             <div className="page-hero-kicker">
               <FlaskConical className="w-3.5 h-3.5" aria-hidden />
               Research Desk
             </div>
-            <h1 className="page-hero-title text-[1.5rem] sm:text-2xl md:text-[2rem] lg:text-[2.2rem] break-words mt-2">
+            <h1 className="page-hero-title text-[1.5rem] sm:text-2xl md:text-[2rem] lg:text-[2.2rem] break-words">
               Plan, read, or commission research
             </h1>
-            <p className="page-hero-sub max-w-2xl mt-2">{RESEARCH_NORTH_STAR}</p>
-            <p className="mt-3 inline-flex items-start gap-2 text-[12px] text-muted-foreground max-w-2xl rounded-lg border border-cyan/25 bg-cyan/5 px-3 py-2">
-              <Lock className="w-3.5 h-3.5 text-cyan shrink-0 mt-0.5" aria-hidden />
-              <span>
-                <strong className="text-foreground/90">Privacy-first:</strong> no account to browse.
-                We never store personal identity or payment card data. Optional email is used once
-                for delivery, then not kept.
-              </span>
+            <p className="text-[13px] sm:text-[14px] font-display font-medium text-cyan/95 leading-snug max-w-xl">
+              {ELENCHOS_TAGLINE}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <p className="page-hero-sub max-w-2xl">{RESEARCH_NORTH_STAR}</p>
+            <div className="mt-1 flex flex-wrap gap-2">
               <Link
                 to="/research/commission"
                 className="inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-display font-semibold text-[13px] shadow-[0_0_32px_-8px_var(--color-cyan-glow)] hover:bg-cyan/90 touch-manipulation"
@@ -82,14 +95,36 @@ function ResearchDeskLanding() {
                 Browse library
               </Link>
               <Link
-                to="/"
+                to="/topics"
                 className="inline-flex items-center gap-1.5 min-h-[48px] px-3 text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
               >
-                <Home className="w-3.5 h-3.5" /> Home
+                Live Topics <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
         </header>
+
+        {/* Trust strip — safe environment */}
+        <section
+          aria-label="Why this desk is safe"
+          className="mb-7 sm:mb-8 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3"
+        >
+          <TrustChip
+            icon={<Lock className="w-3.5 h-3.5" />}
+            title="Browse free"
+            body="No account required to read Topics, library, or public packages."
+          />
+          <TrustChip
+            icon={<Shield className="w-3.5 h-3.5" />}
+            title="Privacy-first pay"
+            body="Card data stays with Stripe. Optional email is for one-time delivery only."
+          />
+          <TrustChip
+            icon={<Scale className="w-3.5 h-3.5" />}
+            title="Limits shown"
+            body="Sample sizes, sources, and confidence stay visible. Empty stays empty."
+          />
+        </section>
 
         <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3 px-0.5">
           Three ways to use the desk
@@ -100,9 +135,9 @@ function ResearchDeskLanding() {
             delay={0}
             icon={<Radio className="w-6 h-6 text-cyan" />}
             step="01"
-            title="Investigative intelligence"
+            title="Live Topics"
             subtitle="Public discourse analysis"
-            body="Live Topics method: what people say on X vs official and media frames. Socratic questions, sentiment, divergence."
+            body="What people say on X vs official and media frames. Socratic questions, sentiment, narrative gap."
             cta="Open Topics"
             to="/topics"
             glow="cyan"
@@ -111,9 +146,9 @@ function ResearchDeskLanding() {
             delay={0.06}
             icon={<BookOpen className="w-6 h-6 text-cyan" />}
             step="02"
-            title="Deep-dive case studies"
-            subtitle="Library of reports & indexes"
-            body="Thesis-like multi-source packages and crisis analysis — for reading, not a live pulse."
+            title="Deep-dive library"
+            subtitle="Case studies & crisis packages"
+            body="Thesis-style multi-source reports and public crisis packages — for reading, not a live pulse."
             cta="Open library"
             to="/research/library"
             glow="emerald"
@@ -124,16 +159,107 @@ function ResearchDeskLanding() {
             step="03"
             title="On-demand report"
             subtitle="Your topic · $10 / $20"
-            body="Topic analysis $10 · deep multi-source $10 (no X) or $20 (with X). Unique private link + PDF after Stripe payment."
+            body="Topic analysis $10 · multi-source deep dive $10 (no X) or $20 (with X). Unique private link + PDF."
             cta="Start commission"
             to="/research/commission"
             glow="rose"
             featured
           />
         </div>
+
+        {/* How it works — short, no backend speak */}
+        <section className="rounded-2xl border border-border/90 bg-card/40 p-4 sm:p-5 mb-8">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">
+            How a commissioned report works
+          </h2>
+          <ol className="grid sm:grid-cols-3 gap-3">
+            {[
+              {
+                n: "1",
+                t: "Choose package",
+                d: "Pick topic-style analysis or multi-source depth. Write your question in plain language.",
+              },
+              {
+                n: "2",
+                t: "Pay securely",
+                d: "Stripe Checkout handles payment. Elenchos never sees or stores your card number.",
+              },
+              {
+                n: "3",
+                t: "Get private link",
+                d: "Open your unique report URL and PDF. Optional one-time email delivery — not kept as a list.",
+              },
+            ].map((s) => (
+              <li key={s.n} className="flex gap-3 min-h-[44px]">
+                <span className="shrink-0 w-7 h-7 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-mono grid place-items-center">
+                  {s.n}
+                </span>
+                <div>
+                  <p className="text-[13px] font-display font-semibold text-foreground">{s.t}</p>
+                  <p className="text-[12.5px] text-muted-foreground leading-snug mt-0.5">{s.d}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Bottom CTA */}
+        <section className="rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/12 via-card/50 to-transparent p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+          <div className="space-y-1.5 min-w-0">
+            <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">
+              Ready when you are
+            </p>
+            <p className="text-[15px] sm:text-base font-display font-semibold leading-snug">
+              Check the live pulse — or generate a deeper report on your topic.
+            </p>
+            <p className="text-[12.5px] text-muted-foreground leading-snug max-w-lg">
+              Same evidence discipline as the rest of Elenchos. Experimental research, not legal or
+              investment advice.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Link
+              to="/research/commission"
+              className="inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-semibold text-[13px] touch-manipulation"
+            >
+              Commission report <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/about"
+              className="inline-flex items-center gap-1.5 min-h-[48px] px-4 py-2.5 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan touch-manipulation"
+            >
+              About &amp; method
+            </Link>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+function TrustChip({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border/80 bg-card/50 px-3.5 py-3 flex gap-2.5 min-h-[44px]">
+      <span className="shrink-0 w-8 h-8 rounded-lg border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center mt-0.5">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[13px] font-display font-semibold text-foreground flex items-center gap-1.5">
+          <CheckCircle2 className="w-3.5 h-3.5 text-cyan shrink-0 hidden sm:inline" aria-hidden />
+          {title}
+        </p>
+        <p className="text-[12px] text-muted-foreground leading-snug mt-0.5">{body}</p>
+      </div>
     </div>
   );
 }
@@ -185,7 +311,7 @@ function PathCard({
       >
         {featured && (
           <span className="absolute top-3 right-3 text-[9px] font-mono uppercase tracking-[0.14em] text-cyan bg-cyan/15 border border-cyan/40 rounded-full px-2 py-0.5">
-            Tool
+            Paid tool
           </span>
         )}
         <div className="flex items-center justify-between gap-2 mb-3">
