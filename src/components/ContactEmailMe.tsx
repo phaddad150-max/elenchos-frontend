@@ -113,13 +113,17 @@ export function ContactEmailMe({
 
       if (res.ok && data.ok) {
         setStatus("ok");
-        setStatusText("Message sent. We’ll get back to you when we can.");
-        setMessage("");
+        setStatusText(
+          /enterprise/i.test(source)
+            ? "Enterprise inquiry sent. We’ll reply to your email as soon as we can."
+            : "Message sent. We’ll get back to you when we can.",
+        );
+        setMessage(defaultMessage);
         return;
       }
 
-      // Server asks client to use mail app
-      if (data.fallbackMailto || res.status === 503) {
+      // Last resort: open mail app pre-filled to citizen.pulse101@gmail.com
+      if (data.fallbackMailto || res.status === 503 || !res.ok) {
         const href = buildContactMailto({
           name: name.trim(),
           fromEmail: email.trim(),
@@ -128,7 +132,9 @@ export function ContactEmailMe({
         });
         window.location.href = href;
         setStatus("ok");
-        setStatusText("Opening your email app… If nothing opens, try again or message us on X.");
+        setStatusText(
+          "Opening your email app to finish send… If nothing opens, message us on X @elenchospulse.",
+        );
         return;
       }
 
@@ -143,7 +149,7 @@ export function ContactEmailMe({
       });
       window.location.href = href;
       setStatus("ok");
-      setStatusText("Opening your email app as a fallback…");
+      setStatusText("Opening your email app to finish send…");
     } finally {
       setBusy(false);
     }

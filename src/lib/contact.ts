@@ -24,10 +24,16 @@ export function buildContactMailto(opts: {
   message: string;
   source?: string;
 }): string {
+  const isEnterprise = opts.source ? /enterprise/i.test(opts.source) : false;
   const subject = encodeURIComponent(
-    opts.source ? `Elenchos · ${opts.source}` : "Elenchos contact",
+    isEnterprise
+      ? `Elenchos ENTERPRISE · ${opts.source}`
+      : opts.source
+        ? `Elenchos · ${opts.source}`
+        : "Elenchos contact",
   );
   const lines = [
+    isEnterprise ? "=== ENTERPRISE INQUIRY ===" : null,
     opts.message.trim(),
     "",
     "---",

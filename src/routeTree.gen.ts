@@ -33,6 +33,8 @@ import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
 import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
+import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
+import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
 import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
 import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
@@ -159,6 +161,16 @@ const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
   path: '/api/research/finalize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiResearchShareRoute = ApiResearchShareRouteImport.update({
+  id: '/api/research/share',
+  path: '/api/research/share',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchSharedRoute = ApiResearchSharedRouteImport.update({
+  id: '/api/research/shared',
+  path: '/api/research/shared',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
   id: '/api/research/webhook',
   path: '/api/research/webhook',
@@ -210,6 +222,8 @@ export interface FileRoutesByFullPath {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
   '/api/research/finalize': typeof ApiResearchFinalizeRoute
+  '/api/research/share': typeof ApiResearchShareRoute
+  '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
@@ -241,6 +255,8 @@ export interface FileRoutesByTo {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
   '/api/research/finalize': typeof ApiResearchFinalizeRoute
+  '/api/research/share': typeof ApiResearchShareRoute
+  '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
@@ -273,6 +289,8 @@ export interface FileRoutesById {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
   '/api/research/finalize': typeof ApiResearchFinalizeRoute
+  '/api/research/share': typeof ApiResearchShareRoute
+  '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
@@ -306,6 +324,8 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/research/checkout'
     | '/api/research/finalize'
+    | '/api/research/share'
+    | '/api/research/shared'
     | '/api/research/webhook'
     | '/research/preview/$slug'
     | '/research/report/$token'
@@ -337,6 +357,8 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/research/checkout'
     | '/api/research/finalize'
+    | '/api/research/share'
+    | '/api/research/shared'
     | '/api/research/webhook'
     | '/research/preview/$slug'
     | '/research/report/$token'
@@ -368,6 +390,8 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/research/checkout'
     | '/api/research/finalize'
+    | '/api/research/share'
+    | '/api/research/shared'
     | '/api/research/webhook'
     | '/research/preview/$slug'
     | '/research/report/$token'
@@ -399,6 +423,8 @@ export interface RootRouteChildren {
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiResearchCheckoutRoute: typeof ApiResearchCheckoutRoute
   ApiResearchFinalizeRoute: typeof ApiResearchFinalizeRoute
+  ApiResearchShareRoute: typeof ApiResearchShareRoute
+  ApiResearchSharedRoute: typeof ApiResearchSharedRoute
   ApiResearchWebhookRoute: typeof ApiResearchWebhookRoute
   ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
   ResearchReportTokenRoute: typeof ResearchReportTokenRoute
@@ -576,6 +602,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiResearchFinalizeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/research/share': {
+      id: '/api/research/share'
+      path: '/api/research/share'
+      fullPath: '/api/research/share'
+      preLoaderRoute: typeof ApiResearchShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/shared': {
+      id: '/api/research/shared'
+      path: '/api/research/shared'
+      fullPath: '/api/research/shared'
+      preLoaderRoute: typeof ApiResearchSharedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/research/webhook': {
       id: '/api/research/webhook'
       path: '/api/research/webhook'
@@ -649,6 +689,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiResearchCheckoutRoute: ApiResearchCheckoutRoute,
   ApiResearchFinalizeRoute: ApiResearchFinalizeRoute,
+  ApiResearchShareRoute: ApiResearchShareRoute,
+  ApiResearchSharedRoute: ApiResearchSharedRoute,
   ApiResearchWebhookRoute: ApiResearchWebhookRoute,
   ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
   ResearchReportTokenRoute: ResearchReportTokenRoute,

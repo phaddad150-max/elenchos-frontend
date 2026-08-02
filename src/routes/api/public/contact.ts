@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { ELENCHOS_CONTACT_EMAIL } from "@/lib/contact";
 
 const BodySchema = z.object({
   name: z.string().trim().max(120).optional().default(""),
@@ -35,6 +36,8 @@ function clientIp(request: Request): string {
   );
 }
 
+const INBOX = ELENCHOS_CONTACT_EMAIL;
+
 async function sendViaResend(opts: {
   to: string;
   from: string;
@@ -62,6 +65,45 @@ async function sendViaResend(opts: {
     return { ok: false, status: res.status, detail };
   }
   return { ok: true, status: res.status };
+}
+
+/**
+ * Free FormSubmit AJAX → Gmail. Works without RESEND_API_KEY.
+ * First real send may need a one-time activation click in the inbox.
+ */
+async function sendViaFormSubmit(opts: {
+  name: string;
+  email: string;
+  subject: string;
+  text: string;
+}): Promise<{ ok: boolean; detail?: string }> {
+  try {
+    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(INBOX)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        name: opts.name || "Elenchos visitor",
+        email: opts.email,
+        _replyto: opts.email,
+        _subject: opts.subject,
+        message: opts.text,
+        _template: "table",
+        _captcha: "false",
+      }),
+    });
+    if (!res.ok) {
+      const detail = (await res.text().catch(() => "")).slice(0, 200);
+      return { ok: false, detail };
+    }
+    const data = (await res.json().catch(() => ({}))) as { success?: string | boolean };
+    if (data.success === false) return { ok: false, detail: "formsubmit rejected" };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : "formsubmit error" };
+  }
 }
 
 export const Route = createFileRoute("/api/public/contact")({
@@ -95,15 +137,19 @@ export const Route = createFileRoute("/api/public/contact")({
           }
 
           const to =
-            process.env.CONTACT_TO_EMAIL?.trim() || "citizen.pulse101@gmail.com";
+            process.env.CONTACT_TO_EMAIL?.trim() || INBOX;
           const from =
             process.env.CONTACT_FROM_EMAIL?.trim() ||
             "Elenchos Contact <onboarding@resend.dev>";
           const apiKey = process.env.RESEND_API_KEY?.trim();
 
           const { name, email, message, source } = parsed.data;
-          const subject = `[Elenchos] ${source} · ${email}`;
+          const isEnterprise = /enterprise/i.test(source);
+          const subject = isEnterprise
+            ? `[Elenchos ENTERPRISE] ${source} · ${email}`
+            : `[Elenchos] ${source} · ${email}`;
           const text = [
+            isEnterprise ? "=== ENTERPRISE INQUIRY ===" : null,
             message,
             "",
             "---",
@@ -111,49 +157,53 @@ export const Route = createFileRoute("/api/public/contact")({
             `Reply-to: ${email}`,
             `Source: ${source}`,
             `IP: ${ip}`,
+            `Inbox: ${to}`,
           ]
             .filter(Boolean)
             .join("\n");
 
-          if (!apiKey) {
-            // Client will open mailto — do not expose inbox in error text
-            console.info("[contact] RESEND_API_KEY missing — client mailto fallback", {
-              source,
-              hasEmail: Boolean(email),
+          // 1) Resend when configured
+          if (apiKey) {
+            const sent = await sendViaResend({
+              to,
+              from,
+              replyTo: email,
+              subject,
+              text,
+              apiKey,
             });
-            return new Response(
-              JSON.stringify({
-                error: "Form delivery not configured yet.",
-                fallbackMailto: true,
-              }),
-              { status: 503, headers: { "content-type": "application/json" } },
-            );
+            if (sent.ok) {
+              return new Response(
+                JSON.stringify({ ok: true, channel: "resend" }),
+                { status: 200, headers: { "content-type": "application/json" } },
+              );
+            }
+            console.error("[contact] Resend failed — trying FormSubmit", sent.status, sent.detail);
           }
 
-          const sent = await sendViaResend({
-            to,
-            from,
-            replyTo: email,
+          // 2) FormSubmit → citizen.pulse101@gmail.com (no API key)
+          const fs = await sendViaFormSubmit({
+            name: name || "Elenchos visitor",
+            email,
             subject,
             text,
-            apiKey,
           });
-
-          if (!sent.ok) {
-            console.error("[contact] Resend failed", sent.status, sent.detail);
+          if (fs.ok) {
             return new Response(
-              JSON.stringify({
-                error: "Delivery failed. Please try again shortly.",
-                fallbackMailto: true,
-              }),
-              { status: 502, headers: { "content-type": "application/json" } },
+              JSON.stringify({ ok: true, channel: "formsubmit" }),
+              { status: 200, headers: { "content-type": "application/json" } },
             );
           }
+          console.error("[contact] FormSubmit failed", fs.detail);
 
-          return new Response(JSON.stringify({ ok: true }), {
-            status: 200,
-            headers: { "content-type": "application/json" },
-          });
+          // 3) Client opens mailto as last resort
+          return new Response(
+            JSON.stringify({
+              error: "Could not deliver via server. Opening your mail app.",
+              fallbackMailto: true,
+            }),
+            { status: 503, headers: { "content-type": "application/json" } },
+          );
         } catch (e) {
           console.error("contact route error", e);
           return new Response(JSON.stringify({ error: "Server error", fallbackMailto: true }), {

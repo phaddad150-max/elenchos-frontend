@@ -82,61 +82,69 @@ function ResearchPreviewBriefPage() {
   );
 
   return (
-    <div className="min-h-screen relative flex flex-col">
+    <div className="min-h-screen relative flex flex-col page-shell research-brief-shell overflow-x-clip">
       <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 md:py-8 mobile-safe-bottom md:pb-12 relative flex-1">
-        <div className="mb-4 flex flex-wrap items-center gap-3">
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-5 md:py-8 mobile-safe-bottom md:pb-12 relative flex-1 overflow-x-clip">
+        <div className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
           <Link
-            to="/research/preview"
-            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-cyan transition-colors"
+            to="/research/library"
+            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-cyan transition-colors min-h-[40px] touch-manipulation shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Preview library
+            Library
           </Link>
-          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-amber-400/90 border border-amber-500/30 rounded-full px-2 py-0.5">
-            Preview · not public
+          <Link
+            to="/research"
+            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-cyan transition-colors min-h-[40px] touch-manipulation shrink-0"
+          >
+            Research Desk
+          </Link>
+          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-amber-400/90 border border-amber-500/30 rounded-full px-2 py-0.5 shrink-0">
+            Case study
           </span>
         </div>
 
-        <div className="space-y-4 mb-6">
-          <header className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex rounded-full border border-cyan/30 bg-cyan/10 text-cyan px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
+        <div className="space-y-4 mb-6 min-w-0">
+          <header className="space-y-3 min-w-0 rounded-2xl border border-border/80 bg-card/40 p-3.5 sm:p-5 overflow-hidden">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <span className="inline-flex rounded-full border border-cyan/30 bg-cyan/10 text-cyan px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.1em]">
                 {researchStatusLabel(brief.status)}
               </span>
-              <span className="inline-flex rounded-full border border-border bg-secondary/40 text-muted-foreground px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em]">
+              <span className="inline-flex rounded-full border border-border bg-secondary/40 text-muted-foreground px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.1em]">
                 Deep-dive · not live Topics
               </span>
-              <span className="text-[10.5px] font-mono text-muted-foreground">
+              <span className="text-[10.5px] font-mono text-muted-foreground break-words">
                 {brief.region} · Updated {brief.updatedAt}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-[1.65rem] font-display font-semibold tracking-tight leading-snug max-w-4xl">
+            <h1 className="text-[1.15rem] sm:text-2xl md:text-[1.65rem] font-display font-semibold tracking-tight leading-snug max-w-4xl break-words [overflow-wrap:anywhere]">
               {brief.title}
             </h1>
-            <p className="text-sm text-muted-foreground max-w-3xl">{brief.subtitle}</p>
-            <p className="text-[12px] text-muted-foreground max-w-3xl leading-relaxed border border-border/70 rounded-lg bg-card/30 px-3 py-2">
+            <p className="text-sm text-muted-foreground max-w-3xl break-words [overflow-wrap:anywhere] leading-relaxed">
+              {brief.subtitle}
+            </p>
+            <p className="text-[12px] text-muted-foreground max-w-3xl leading-relaxed border border-border/70 rounded-lg bg-card/30 px-3 py-2 break-words [overflow-wrap:anywhere]">
               {brief.methodSummary}
             </p>
           </header>
         </div>
 
-        {/* Sticky question */}
+        {/* Research question — static on mobile (no sticky clip), sticky on md+ */}
         <section
           id="question"
-          className="sticky top-[4.5rem] z-20 mb-6 rounded-xl border border-cyan/25 bg-background/95 backdrop-blur-md px-4 py-3 shadow-lg shadow-black/20"
+          className="md:sticky md:top-[4.5rem] z-20 mb-6 rounded-xl border border-cyan/25 bg-background/95 backdrop-blur-md px-3 sm:px-4 py-3 shadow-lg shadow-black/20 min-w-0 overflow-hidden"
         >
-          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan mb-1.5">
+          <p className="text-[10px] font-mono uppercase tracking-[0.14em] sm:tracking-[0.18em] text-cyan mb-1.5">
             Research question
           </p>
-          <p className="text-[13px] sm:text-[14px] text-foreground/95 leading-relaxed">
+          <p className="text-[13px] sm:text-[14px] text-foreground/95 leading-relaxed break-words [overflow-wrap:anywhere]">
             {brief.researchQuestion}
           </p>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)_240px] gap-5 lg:gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)_240px] gap-5 lg:gap-6 items-start min-w-0">
           {/* Spine — findings first */}
           <nav
             aria-label="Research spine"
@@ -171,10 +179,10 @@ function ResearchPreviewBriefPage() {
           </nav>
 
           {/* Main — thesis first, instructions last */}
-          <div className="space-y-5 order-1 lg:order-2 min-w-0">
+          <div className="space-y-5 order-1 lg:order-2 min-w-0 break-words [overflow-wrap:anywhere]">
             <section
               id="strength"
-              className="rounded-2xl border border-border bg-card/40 p-4 md:p-5 space-y-3"
+              className="rounded-2xl border border-border bg-card/40 p-3.5 sm:p-4 md:p-5 space-y-3 overflow-hidden min-w-0"
             >
               <h2 className="text-sm font-display font-semibold">What this brief can and cannot say</h2>
               <div className="grid gap-2 sm:grid-cols-2">

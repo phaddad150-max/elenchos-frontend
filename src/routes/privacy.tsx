@@ -133,7 +133,10 @@ function PrivacyPage() {
             </ul>
             <p>
               Your unique report URL is private to people who have the link. Treat it like a secret
-              document link.
+              document link. You may optionally choose{" "}
+              <strong className="text-foreground/85">Share on Elenchos library</strong> so the
+              report (topic text + body only) appears under Community reports — you can turn this
+              off any time with the same link. No email or payment data is published.
             </p>
           </Section>
 

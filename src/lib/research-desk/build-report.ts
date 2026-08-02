@@ -11,6 +11,9 @@ export type DeskReport = {
   disclaimer: string;
   sections: { heading: string; body: string[] }[];
   status: "ready" | "draft";
+  /** Opt-in: listed in public Research library for others to read */
+  sharedPublic?: boolean;
+  sharedAt?: string;
 };
 
 /** Structured report template — no personal data; content only. */
