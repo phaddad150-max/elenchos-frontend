@@ -414,6 +414,141 @@ export const ADVOCACY_FUNDING_LANE: {
     "If grant trails show no material link to policy outcomes in a given country-year, drop the causal claim for that cell.",
 };
 
+/** Interactive map nodes — schematic; figures are qualitative or order-of-magnitude public signals */
+export type EntryPoint = {
+  id: string;
+  name: string;
+  shortLabel: string;
+  corridor: string;
+  role: string;
+  risk: "critical" | "high" | "elevated";
+  /** SVG coordinates on 400×280 map */
+  x: number;
+  y: number;
+  svgPath: string;
+  entriesNote: string;
+  returnsNote: string;
+  honesty: string;
+  destinations?: string[];
+};
+
+export const ENTRY_POINTS: EntryPoint[] = [
+  {
+    id: "aegean",
+    name: "Aegean islands / Eastern Med",
+    shortLabel: "Aegean",
+    corridor: "Eastern Mediterranean",
+    role: "Sea crossing TR → GR islands; historic 2015 peak corridor; still active at lower volume.",
+    risk: "critical",
+    x: 275,
+    y: 145,
+    svgPath: "M310 140 Q290 150 275 145",
+    entriesNote: "Major share of 2015 peak; multi-year Frontex Eastern Med detections",
+    returnsNote: "EU–Turkey statement era returns/readmissions — incomplete vs politics of the deal",
+    honesty: "Deal rhetoric often exceeds transparent, sustained return statistics at scale.",
+    destinations: ["Greece", "Secondary Schengen (DE, FR, …)"],
+  },
+  {
+    id: "central-med",
+    name: "Central Mediterranean",
+    shortLabel: "C. Med",
+    corridor: "Central Mediterranean",
+    role: "Sea Libya/Tunisia → Italy/Malta; high fatality risk; smuggling + NGO–state legal interface.",
+    risk: "critical",
+    x: 200,
+    y: 175,
+    svgPath: "M190 220 Q195 195 200 175",
+    entriesNote: "Recurring high detections on Central Med in post-2014 series",
+    returnsNote: "Libya/Tunisia return narratives contested; volume often opaque vs landings news",
+    honesty: "Daily landing headlines dominate; comparable multi-year return ledgers are thinner in public briefing.",
+    destinations: ["Italy", "Malta", "Secondary north"],
+  },
+  {
+    id: "canary",
+    name: "Canary / Atlantic",
+    shortLabel: "Canary",
+    corridor: "Western Africa / Atlantic",
+    role: "Atlantic boat route to Spanish Canaries; deadly when active.",
+    risk: "high",
+    x: 70,
+    y: 200,
+    svgPath: "M90 235 Q70 220 70 200",
+    entriesNote: "Spike years visible in Spanish/Canary public stats",
+    returnsNote: "West Africa return cooperation — episodic; not a steady public time series in EU press packs",
+    honesty: "Spike coverage ≠ continuous published return counts.",
+    destinations: ["Spain (Canary)", "Mainland ES"],
+  },
+  {
+    id: "western-med",
+    name: "Western Med / Gibraltar approaches",
+    shortLabel: "W. Med",
+    corridor: "Western Mediterranean",
+    role: "Morocco → Spain land/sea; Ceuta/Melilla pressure points.",
+    risk: "high",
+    x: 115,
+    y: 175,
+    svgPath: "M130 210 Q120 190 115 175",
+    entriesNote: "Persistent Western Med detections; Spain–Morocco cycle",
+    returnsNote: "Officials often cite Morocco cooperation and returns — public granular multi-year return series rarely match the slogan intensity",
+    honesty:
+      "‘Returned to Morocco’ is a frequent political line. Demand: year-by-year return figures next to year-by-year illegal crossings for the same corridor.",
+    destinations: ["Spain", "Secondary FR/EU"],
+  },
+  {
+    id: "balkans",
+    name: "Western Balkans land",
+    shortLabel: "Balkans",
+    corridor: "Western Balkans",
+    role: "Land secondary movement after first entry; pressure on Schengen internals.",
+    risk: "high",
+    x: 245,
+    y: 115,
+    svgPath: "M270 145 Q255 130 245 115",
+    entriesNote: "Strong secondary-route signal in several post-2015 years",
+    returnsNote: "Dublin/transfers and national returns — fragmented across states",
+    honesty: "Secondary routes make ‘entry = destination’ false; stats must separate first entry vs stay.",
+    destinations: ["DE", "FR", "AT", "other Schengen"],
+  },
+  {
+    id: "channel",
+    name: "English Channel small boats",
+    shortLabel: "Channel",
+    corridor: "Channel",
+    role: "France → UK small boats; criminal facilitation; high political salience.",
+    risk: "critical",
+    x: 105,
+    y: 70,
+    svgPath: "M120 95 Q110 80 105 70",
+    entriesNote: "UK Home Office small-boat series (public quarterly)",
+    returnsNote: "Returns/removals lag boat arrivals in public debate; external processing attempts legally contested",
+    honesty: "Arrivals are daily news; returns are slower, legal-bound, and less transparent as a single EU-style series.",
+    destinations: ["United Kingdom"],
+  },
+  {
+    id: "evros",
+    name: "Evros / land TR–GR",
+    shortLabel: "Evros",
+    corridor: "Eastern land",
+    role: "Land border fence & pushback allegations vs deterrence claims — dual narratives.",
+    risk: "high",
+    x: 285,
+    y: 125,
+    svgPath: "M305 135 Q295 130 285 125",
+    entriesNote: "Land detections lower than 2015 sea peak but still strategic",
+    returnsNote: "Pushback vs legal return — contested; independent counts incomplete",
+    honesty: "Both ‘secure border’ and ‘rights abuse’ claims need primary evidence; neither replaces Frontex series.",
+    destinations: ["Greece", "Secondary EU"],
+  },
+];
+
+export const RETURNS_HONESTY = {
+  title: "Crossings vs returns — the missing ledger",
+  body: "Political communication often pairs daily illegal crossings with confident lines about returns (e.g. to Morocco or other partners). Open research finds a persistent gap: arrival and detection figures are relatively public (Frontex FRAN/JORA, national landing stats), while multi-year, corridor-matched return/readmission ledgers are incomplete, delayed, or buried in fragmented national reports. This page refuses slogan returns without numbers.",
+  ask: "For each corridor: detections (or landings) by year since 2011 · returns/readmissions by year to named partner · legal basis · source URL.",
+  moroccoNote:
+    "Spain–Morocco cooperation is real and episodic. Treat ‘returned to Morocco’ as a claim that must show annual counts beside Western Med / Canary entry pressure — not a press-conference substitute.",
+};
+
 export const X_THREAD_DRAFT: string[] = [
   "1/ Illegal entry at EU scale was normalised. Speech against it was often policed. Citizens paid. Full brief (10 sec → under 10 min): https://elenchos.live/research-migration",
   "2/ Since 2011 (Syria war era) → 2015 peak ~1.8M detections → 2023 ~380k → 2025 ~178k (Frontex). Lower crossings ≠ trust restored. Corridors, elites, reverse options inside.",

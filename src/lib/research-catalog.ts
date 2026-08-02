@@ -431,11 +431,289 @@ const LEBANON: ResearchBrief = {
     "Research brief (separate from Topics). Multi-source · human-reviewed before publish · not live topic scores.",
 };
 
-const BRIEFS: ResearchBrief[] = [LEBANON];
+const AVIATION: ResearchBrief = {
+  slug: "aviation-race-digital-ai",
+  title:
+    "Aviation After Disruption: Airlines, Manufacturers, Innovation Race, and Readiness for Digital & AI Economies",
+  subtitle:
+    "Who is winning the commercial aviation race after COVID — safety, connectivity (incl. Starlink-class satcom), payments (incl. crypto), and AI readiness",
+  status: "draft",
+  region: "Global",
+  themes: [
+    "airlines",
+    "OEM manufacturers",
+    "Starlink / satcom",
+    "crypto payments",
+    "safety",
+    "AI readiness",
+    "post-COVID recovery",
+  ],
+  updatedAt: "2026-08-02",
+  researchQuestion:
+    "After COVID-era disruption and recovery, which airlines and manufacturers lead on safety, network strategy, cabin/connectivity innovation (including satellite internet), payment innovation (including crypto), and structural readiness for digital/AI operations — and who is lagging?",
+  methodSummary:
+    "Thesis-style multi-source brief: industry data and official filings (O), trade/media frames (M), scholarly/ops literature (S), public product announcements (W). Claims require confidence + falsifier. Not investment advice. Not a Topics X pulse.",
+  approach: [
+    "Spine: OEM order books, airline financial/ops KPIs, safety public ratings (with method limits), connectivity rollout maps",
+    "Innovation lanes: satcom (Starlink Aviation / competitors), payments (crypto acceptors), AI ops (maintenance, pricing, crew)",
+    "Winners/losers framed as multi-criteria index — not a single stock tip",
+    "Human review before publish; free-first collect; empty when thin",
+  ],
+  sourceClasses: SOURCE_CLASS_LEGEND,
+  phases: [
+    {
+      id: "A",
+      label: "Method & corpus",
+      status: "active",
+      note: "Outline locked; free web/official spine next",
+    },
+    {
+      id: "B",
+      label: "Empirical layers",
+      status: "active",
+      note: "OEM · network carriers · GCC long-haul · LCC · satcom · payments",
+    },
+    {
+      id: "C",
+      label: "Synthesis / gaps",
+      status: "locked",
+      note: "After corpus freeze",
+    },
+    {
+      id: "D",
+      label: "Claims",
+      status: "locked",
+      note: "Human-gated claims on winners/laggards",
+    },
+    {
+      id: "E",
+      label: "Scenarios",
+      status: "locked",
+      note: "Fuel shocks · supply chain · regulation · AI adoption paths",
+    },
+  ],
+  chapters: [
+    {
+      id: "scope",
+      number: "1",
+      title: "Scope & method",
+      status: "draft",
+      summary:
+        "Commercial passenger aviation focus: OEMs (Airbus/Boeing/others), full-service vs LCC, Gulf/Asia long-haul, North Atlantic, satcom and payments as innovation proxies.",
+      bullets: [
+        "Not general aviation / military platforms as primary",
+        "Safety scores: public indices with known biases stated",
+        "Crypto/satcom: product announcements ≠ fleet-wide rollout",
+      ],
+    },
+    {
+      id: "covid",
+      number: "2",
+      title: "Shock & recovery (COVID → now)",
+      status: "outline",
+      summary:
+        "Demand collapse, government support, capacity discipline, cargo pivot, then traffic recovery and labor/aircraft bottlenecks.",
+    },
+    {
+      id: "oem",
+      number: "3",
+      title: "Manufacturers: competition & risks",
+      status: "outline",
+      summary:
+        "Airbus vs Boeing delivery credibility, certification risk, supply chain, China/COMAC wildcard, aftermarket economics.",
+    },
+    {
+      id: "airlines",
+      number: "4",
+      title: "Airlines: networks, margins, strategy",
+      status: "outline",
+      summary:
+        "Gulf hubs, Asian majors, US majors, European network vs LCC. Who rebuilt networks faster; who over-expanded.",
+    },
+    {
+      id: "innovation",
+      number: "5",
+      title: "Innovation race: satcom, cabin, payments, AI",
+      status: "draft",
+      summary:
+        "Starlink Aviation and rival satcom; Emirates and peers on connectivity and payments (incl. crypto where announced); AI for ops vs marketing claims.",
+      bullets: [
+        "Map which carriers announced Starlink-class or high-throughput satcom and status (trial / partial / fleet)",
+        "Emirates crypto payment acceptance: scope (routes, currencies, partner) and limits",
+        "AI: predictive maintenance, dynamic pricing, crew rostering — evidence vs press release",
+      ],
+    },
+    {
+      id: "index",
+      number: "6",
+      title: "Readiness index: safety · digital · AI",
+      status: "outline",
+      summary:
+        "Transparent multi-criteria scorecard (safety public metrics, balance sheet resilience, connectivity, digital product, AI ops signals). Winners/laggards with falsifiers.",
+    },
+    {
+      id: "scenarios",
+      number: "7",
+      title: "Risks, threats, opportunities",
+      status: "outline",
+      summary:
+        "Fuel & geopolitics, certification/safety events, climate policy, labor, OEM delays, digital moats.",
+    },
+  ],
+  claimSlots: [
+    {
+      id: "av-t1",
+      domain: "OEM race",
+      statement: null,
+      confidence: null,
+      falsifier: "If Boeing delivery reliability and certification confidence reverse Airbus share trends without subsidy distortion.",
+      status: "empty",
+    },
+    {
+      id: "av-t2",
+      domain: "Gulf long-haul",
+      statement: null,
+      confidence: null,
+      falsifier: "If Gulf hubs lose transfer share to secondary Asian hubs on identical long-haul O&D.",
+      status: "empty",
+    },
+    {
+      id: "av-t3",
+      domain: "Connectivity",
+      statement:
+        "Satellite high-throughput internet (incl. Starlink Aviation class) is becoming a competitive cabin differentiator; rollout remains uneven by airline and aircraft.",
+      confidence: "medium",
+      falsifier: "If major carriers abandon satcom pilots for cost without passenger yield response.",
+      status: "draft",
+    },
+    {
+      id: "av-t4",
+      domain: "Payments",
+      statement:
+        "Select premium carriers (e.g. Emirates announcements on crypto payment rails) test alternative payment acceptance; this is not yet industry standard.",
+      confidence: "medium",
+      falsifier: "If crypto checkout is withdrawn or limited to PR corridors with negligible volume.",
+      status: "draft",
+    },
+    {
+      id: "av-t5",
+      domain: "AI readiness",
+      statement: null,
+      confidence: null,
+      falsifier: "If AI ops pilots show no measurable dispatch reliability or cost delta after 24 months.",
+      status: "empty",
+    },
+  ],
+  scenarios: [
+    {
+      id: "av-a",
+      name: "OEM dual oligopoly holds",
+      politics: "Certification politics and industrial policy favor continuity.",
+      techMayAccelerate: "Composite/production digital twins cut delays slowly.",
+      unlikelyFast: "COMAC displacing Western OEM on Western airline fleets inside 5 years.",
+    },
+    {
+      id: "av-b",
+      name: "Connectivity arms race",
+      politics: "Passenger expectations force fleet retrofits.",
+      techMayAccelerate: "Starlink-class and competitors race on latency/cost.",
+      unlikelyFast: "Universal free high-speed IFC without yield or premium packaging.",
+    },
+    {
+      id: "av-c",
+      name: "AI ops winners",
+      politics: "Labor rules shape how fast AI rostering/maintenance scale.",
+      techMayAccelerate: "Predictive maintenance cuts AOGs for early adopters.",
+      unlikelyFast: "Fully autonomous commercial passenger flight this decade.",
+    },
+  ],
+  corpusChecks: [
+    {
+      id: "oem-filings",
+      label: "OEM delivery & backlog public series",
+      done: false,
+      detail: "Airbus/Boeing monthly/annual + competitor notes",
+    },
+    {
+      id: "satcom-map",
+      label: "Satcom / Starlink Aviation carrier list",
+      done: false,
+      detail: "Announced vs installed — airline press + vendor",
+    },
+    {
+      id: "payments",
+      label: "Crypto / alternative payments announcements",
+      done: false,
+      detail: "Emirates and peers — primary sources only",
+    },
+    {
+      id: "safety",
+      label: "Public safety ratings method note",
+      done: false,
+      detail: "State biases and coverage limits explicitly",
+    },
+  ],
+  openQuestions: [
+    "Which airlines have fleet-wide vs trial Starlink-class connectivity, and on which frames?",
+    "What is the measured passenger yield from satcom / crypto payment experiments?",
+    "How should an AI-readiness index weight ops vs marketing claims?",
+    "Post-COVID: who kept capacity discipline vs who is structurally over-levered?",
+  ],
+  elenchosRefs: [],
+  pdfUrl: null,
+  notATopicBanner:
+    "Thesis-style Research Desk brief (separate from Topics). Multi-source · human-gated claims · not live X scores · not investment advice.",
+};
+
+const BRIEFS: ResearchBrief[] = [LEBANON, AVIATION];
 
 export function listResearchBriefs(): ResearchBrief[] {
   return BRIEFS;
 }
+
+export type ResearchStyleId = "intel" | "thesis" | "freestyle";
+
+export const RESEARCH_STYLES: {
+  id: ResearchStyleId;
+  title: string;
+  short: string;
+  forWhom: string;
+  method: string;
+  cta: string;
+  href?: string;
+  hash?: string;
+}[] = [
+  {
+    id: "intel",
+    title: "Investigative intelligence",
+    short: "Public discourse vs official & media frames",
+    forWhom: "Citizens, journalists, operators who need the live pulse",
+    method:
+      "X-grounded Topics analysis: citizen sample, sentiment, narrative divergence, human-curated insights. Contrasts ordinary speech with official and media messaging.",
+    cta: "Open Topics analysis",
+    href: "/topics",
+  },
+  {
+    id: "thesis",
+    title: "Thesis-style brief",
+    short: "Academic / research depth with claims & falsifiers",
+    forWhom: "Researchers, analysts, serious readers",
+    method:
+      "Multi-source corpus (scholarly, official, media, optional discourse). Structured chapters, confidence-rated claims, scenarios, explicit limits. Human review before publish.",
+    cta: "Browse case studies",
+    hash: "desk-thesis",
+  },
+  {
+    id: "freestyle",
+    title: "Free-style · on demand",
+    short: "Run the same method on your topic",
+    forWhom: "Anyone who wants a structured report on a topic they choose",
+    method:
+      "You pick topic + report style (Topics analysis or thesis-like). One-time fee. Privacy-first checkout. Same evidence discipline — not a vibes chatbot.",
+    cta: "Commission a brief",
+    hash: "desk-commission",
+  },
+];
 
 export function getResearchBrief(slug: string): ResearchBrief | undefined {
   return BRIEFS.find((b) => b.slug === slug);

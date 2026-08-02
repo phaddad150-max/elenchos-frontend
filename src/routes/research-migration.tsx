@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { CorridorMap } from "@/components/migration/CorridorMap";
 import {
   ACTORS,
   ADVOCACY_FUNDING_LANE,
@@ -32,6 +33,7 @@ import {
   ORIGINS_NOTE,
   POLICY_STANCE,
   REMEDIES,
+  RETURNS_HONESTY,
   SCENARIOS,
   TIMELINE,
   X_THREAD_DRAFT,
@@ -362,6 +364,28 @@ function MigrationIntelligencePage() {
               ))}
             </div>
             <p className="mt-3 text-[12px] text-muted-foreground leading-relaxed">{ORIGINS_NOTE}</p>
+
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan mt-5 mb-2">
+              Interactive corridors · sea & land → destinations
+            </h3>
+            <p className="text-[12.5px] text-muted-foreground leading-snug mb-3">
+              Tap an entry node used by smuggling networks. Compare entry pressure signals with what
+              is publicly known about returns — including the Morocco return slogan gap.
+            </p>
+            <CorridorMap />
+
+            <div className="mt-4 rounded-xl border border-amber-signal/40 bg-amber-signal/10 p-3 sm:p-3.5 space-y-2">
+              <p className="text-[12px] font-mono uppercase tracking-[0.12em] text-amber-signal">
+                {RETURNS_HONESTY.title}
+              </p>
+              <p className="text-[13px] text-foreground/90 leading-snug">{RETURNS_HONESTY.body}</p>
+              <p className="text-[12px] text-muted-foreground leading-snug">
+                <strong className="text-foreground/90">Demand:</strong> {RETURNS_HONESTY.ask}
+              </p>
+              <p className="text-[12px] text-muted-foreground leading-snug">
+                {RETURNS_HONESTY.moroccoNote}
+              </p>
+            </div>
           </Chapter>
 
           {/* CH 03 Open vs resist */}
