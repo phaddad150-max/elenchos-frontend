@@ -1,76 +1,26 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Check, Lock, Loader2 } from "lucide-react";
-import { buildContactMailto, ELENCHOS_CONTACT_CTA } from "@/lib/contact";
+import { ArrowRight, Loader2, Lock } from "lucide-react";
+import { DESK_PACKAGES, type DeskPackageId } from "@/lib/research-desk/packages";
 
-export type CommissionStyle = "topic-analysis" | "deep-no-x" | "deep-with-x";
-
-const PACKAGES: {
-  id: CommissionStyle;
-  title: string;
-  price: string;
-  priceUsd: number;
-  blurb: string;
-  delivers: string;
-}[] = [
-  {
-    id: "topic-analysis",
-    title: "Topic analysis (public discourse)",
-    price: "$10",
-    priceUsd: 10,
-    blurb: "Socratic-style questions + analysis of public discourse around your topic (Topics method).",
-    delivers: "Sentiment-style scoring, key themes, citizen vs official/media frames where sample allows.",
-  },
-  {
-    id: "deep-no-x",
-    title: "Deep dive · multi-source (no X)",
-    price: "$10",
-    priceUsd: 10,
-    blurb: "Thesis-like structure: open web, official, media, scholarly where free. No X sample.",
-    delivers: "Chapters outline, evidence map, claims with confidence/falsifiers when evidence holds.",
-  },
-  {
-    id: "deep-with-x",
-    title: "Deep dive · multi-source + X",
-    price: "$20",
-    priceUsd: 20,
-    blurb: "Same deep dive plus a capped public-discourse sample on X for street frames.",
-    delivers: "Everything in deep dive + discourse section with sample size and limits.",
-  },
-];
+const ORDER: DeskPackageId[] = ["topic-analysis", "deep-no-x", "deep-with-x"];
 
 /**
- * On-demand commission — privacy-first, low fixed prices.
- * Payment processor checkout ships next; v1 captures structured order intent.
+ * On-demand commission → Stripe Checkout → unique report URL + PDF.
+ * Optional email goes to Stripe only (delivery); never stored on Elenchos.
  */
 export function CommissionBriefForm() {
-  const [pkg, setPkg] = useState<CommissionStyle>("topic-analysis");
+  const [pkg, setPkg] = useState<DeskPackageId>("topic-analysis");
   const [topic, setTopic] = useState("");
   const [questions, setQuestions] = useState("");
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const meta = useMemo(() => PACKAGES.find((p) => p.id === pkg)!, [pkg]);
+  const meta = DESK_PACKAGES[pkg];
   const needQuestions = pkg === "topic-analysis";
 
-  const body = useMemo(() => {
-    return [
-      "Elenchos Research Desk — on-demand order",
-      `Package: ${meta.title} (${meta.price})`,
-      `Topic: ${topic.trim()}`,
-      needQuestions && questions.trim()
-        ? `Socratic / analysis questions:\n${questions.trim()}`
-        : needQuestions
-          ? "Questions: (user may refine after confirm)"
-          : null,
-      email.trim() ? `Delivery email: ${email.trim()}` : "Delivery: unique link (no email)",
-      "Disclaimer accepted: research tool as-is; not legal/medical/investment advice; no private data scraping.",
-    ]
-      .filter(Boolean)
-      .join("\n");
-  }, [meta, topic, questions, email, needQuestions]);
+  const packages = useMemo(() => ORDER.map((id) => DESK_PACKAGES[id]), []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -79,7 +29,7 @@ export function CommissionBriefForm() {
       setErr("Describe your topic in at least a short sentence.");
       return;
     }
-    if (needQuestions && questions.trim().length > 0) {
+    if (needQuestions && questions.trim()) {
       const lines = questions
         .split("\n")
         .map((l) => l.trim())
@@ -93,61 +43,28 @@ export function CommissionBriefForm() {
       setErr("Please confirm the notice below.");
       return;
     }
+
     setBusy(true);
     try {
-      const delivery = email.trim();
-      if (delivery) {
-        const res = await fetch("/api/public/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            source: "research-commission",
-            email: delivery,
-            message: body,
-            name: "",
-            website: "",
-          }),
-        });
-        if (!res.ok) {
-          window.location.href = buildContactMailto({
-            message: body,
-            source: "research-commission",
-            fromEmail: delivery,
-          });
-        }
-      } else {
-        window.location.href = buildContactMailto({
-          message: body,
-          source: "research-commission",
-        });
-      }
-      setDone(true);
-    } catch {
-      window.location.href = buildContactMailto({
-        message: body,
-        source: "research-commission",
-        fromEmail: email.trim() || undefined,
+      const res = await fetch("/api/research/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packageId: pkg,
+          topic: topic.trim(),
+          questions: questions.trim(),
+          email: email.trim() || undefined,
+        }),
       });
-      setDone(true);
-    } finally {
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Checkout unavailable");
+      }
+      window.location.href = data.url;
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Checkout failed");
       setBusy(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className="rounded-xl border border-cyan/40 bg-cyan/10 px-4 py-5 space-y-2">
-        <p className="inline-flex items-center gap-2 text-cyan font-display font-semibold text-[15px]">
-          <Check className="w-4 h-4" /> Order request sent
-        </p>
-        <p className="text-[13px] text-foreground/90 leading-relaxed">
-          Next: we confirm scope and send a <strong>one-time payment link</strong> ({meta.price}).
-          After payment you receive a <strong>unique report link</strong> and PDF when ready. No
-          account. No card numbers stored on Elenchos.
-        </p>
-        <p className="text-[12px] font-mono text-muted-foreground">{ELENCHOS_CONTACT_CTA}</p>
-      </div>
-    );
   }
 
   return (
@@ -157,29 +74,25 @@ export function CommissionBriefForm() {
           1 · Package
         </p>
         <div className="space-y-2">
-          {PACKAGES.map((p) => (
+          {packages.map((p) => (
             <button
               key={p.id}
               type="button"
               onClick={() => setPkg(p.id)}
-              className={`w-full text-left rounded-xl border px-3.5 py-3 min-h-[44px] touch-manipulation transition-colors ${
+              className={`w-full text-left rounded-xl border px-3.5 py-3.5 min-h-[48px] touch-manipulation transition-all ${
                 pkg === p.id
-                  ? "border-cyan/50 bg-cyan/12"
-                  : "border-border bg-card/40 hover:border-cyan/30"
+                  ? "border-cyan/60 bg-cyan/15 shadow-[0_0_24px_-12px_var(--color-cyan-glow)] scale-[1.01]"
+                  : "border-border bg-card/50 hover:border-cyan/35"
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[13px] sm:text-[14px] font-display font-semibold text-foreground">
-                  {p.title}
-                </p>
-                <span className="text-cyan font-mono text-[14px] font-semibold shrink-0">
-                  {p.price}
+                <p className="text-[14px] font-display font-semibold text-foreground">{p.title}</p>
+                <span className="text-cyan font-mono text-[16px] font-semibold shrink-0">
+                  ${p.priceUsd}
                 </span>
               </div>
               <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{p.blurb}</p>
-              <p className="text-[11px] text-foreground/80 mt-1.5 leading-snug">
-                Delivers: {p.delivers}
-              </p>
+              <p className="text-[11px] text-foreground/80 mt-1.5 leading-snug">You get: {p.delivers}</p>
             </button>
           ))}
         </div>
@@ -194,7 +107,7 @@ export function CommissionBriefForm() {
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           rows={3}
-          placeholder="e.g. Public discourse on housing and migration in Spain, 2024–2026"
+          placeholder="e.g. Public discourse on housing and irregular migration in Spain, 2024–2026"
           className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[88px] focus:outline-none focus:border-cyan/50"
         />
       </div>
@@ -205,28 +118,27 @@ export function CommissionBriefForm() {
             3 · Your questions (up to 9, optional)
           </p>
           <p className="text-[12px] text-muted-foreground leading-snug">
-            One question per line. If empty, we apply a standard Socratic pack for public discourse
-            analysis.
+            One per line. If empty, we apply a standard Socratic pack for discourse analysis.
           </p>
           <textarea
             value={questions}
             onChange={(e) => setQuestions(e.target.value)}
-            rows={6}
+            rows={5}
             placeholder={"1. …\n2. …\n3. …"}
-            className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] font-mono min-h-[120px] focus:outline-none focus:border-cyan/50"
+            className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] font-mono min-h-[110px] focus:outline-none focus:border-cyan/50"
           />
         </div>
       )}
 
       <div className="space-y-2">
         <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-          {needQuestions ? "4" : "3"} · Delivery email (optional)
+          {needQuestions ? "4" : "3"} · Email for link (optional)
         </p>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Only for this order — not a newsletter"
+          placeholder="One-time delivery only — deleted after send, never stored"
           className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
           autoComplete="email"
         />
@@ -241,9 +153,9 @@ export function CommissionBriefForm() {
         />
         <span>
           <Lock className="w-3.5 h-3.5 text-cyan inline mr-1 align-[-2px]" aria-hidden />
-          I understand this is a research tool provided as-is: not legal, medical, or investment
-          advice; not for covert surveillance; findings depend on available public sources;
-          payment is one-time ({meta.price}); unique link + PDF when ready; no account required.
+          Research tool as-is — not legal/medical/investment advice. One-time ${meta.priceUsd}. Unique
+          link + PDF after pay. No account. No personal data stored on Elenchos (email only used once
+          by the mail provider if provided).
         </span>
       </label>
 
@@ -252,19 +164,22 @@ export function CommissionBriefForm() {
       <button
         type="submit"
         disabled={busy}
-        className="w-full inline-flex items-center justify-center gap-2 min-h-[48px] px-5 py-3 rounded-full bg-cyan/20 border border-cyan/50 text-cyan font-display font-semibold text-[14px] hover:bg-cyan/30 touch-manipulation disabled:opacity-50"
+        className="w-full inline-flex items-center justify-center gap-2 min-h-[52px] px-5 py-3 rounded-full bg-cyan text-background font-display font-semibold text-[15px] hover:bg-cyan/90 touch-manipulation disabled:opacity-50 shadow-[0_0_28px_-8px_var(--color-cyan-glow)]"
       >
         {busy ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" /> Sending…
+            <Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…
           </>
         ) : (
           <>
-            Request order · {meta.price}
+            Pay ${meta.priceUsd} · get unique report link
             <ArrowRight className="w-4 h-4" />
           </>
         )}
       </button>
+      <p className="text-[11px] font-mono text-muted-foreground text-center">
+        Card via Stripe Checkout · crypto if enabled on your Stripe account
+      </p>
     </form>
   );
 }

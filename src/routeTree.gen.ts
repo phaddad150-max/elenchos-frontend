@@ -31,8 +31,13 @@ import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
+import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
+import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
+import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
 import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
+import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
+import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -144,6 +149,21 @@ const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   path: '/api/public/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiResearchCheckoutRoute = ApiResearchCheckoutRouteImport.update({
+  id: '/api/research/checkout',
+  path: '/api/research/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
+  id: '/api/research/finalize',
+  path: '/api/research/finalize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
+  id: '/api/research/webhook',
+  path: '/api/research/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
   id: '/research/preview/',
   path: '/research/preview/',
@@ -152,6 +172,16 @@ const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
 const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
   id: '/research/preview/$slug',
   path: '/research/preview/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
+  id: '/research/report/$token',
+  path: '/research/report/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchReportTokenRoute = ApiResearchReportTokenRouteImport.update({
+  id: '/api/research/report/$token',
+  path: '/api/research/report/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -178,8 +208,13 @@ export interface FileRoutesByFullPath {
   '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/research/checkout': typeof ApiResearchCheckoutRoute
+  '/api/research/finalize': typeof ApiResearchFinalizeRoute
+  '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
+  '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -204,8 +239,13 @@ export interface FileRoutesByTo {
   '/topics': typeof TopicsIndexRoute
   '/trackers': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/research/checkout': typeof ApiResearchCheckoutRoute
+  '/api/research/finalize': typeof ApiResearchFinalizeRoute
+  '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
+  '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview': typeof ResearchPreviewIndexRoute
+  '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -231,8 +271,13 @@ export interface FileRoutesById {
   '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/research/checkout': typeof ApiResearchCheckoutRoute
+  '/api/research/finalize': typeof ApiResearchFinalizeRoute
+  '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
+  '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -259,8 +304,13 @@ export interface FileRouteTypes {
     | '/topics/'
     | '/trackers/'
     | '/api/public/contact'
+    | '/api/research/checkout'
+    | '/api/research/finalize'
+    | '/api/research/webhook'
     | '/research/preview/$slug'
+    | '/research/report/$token'
     | '/research/preview/'
+    | '/api/research/report/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -285,8 +335,13 @@ export interface FileRouteTypes {
     | '/topics'
     | '/trackers'
     | '/api/public/contact'
+    | '/api/research/checkout'
+    | '/api/research/finalize'
+    | '/api/research/webhook'
     | '/research/preview/$slug'
+    | '/research/report/$token'
     | '/research/preview'
+    | '/api/research/report/$token'
   id:
     | '__root__'
     | '/'
@@ -311,8 +366,13 @@ export interface FileRouteTypes {
     | '/topics/'
     | '/trackers/'
     | '/api/public/contact'
+    | '/api/research/checkout'
+    | '/api/research/finalize'
+    | '/api/research/webhook'
     | '/research/preview/$slug'
+    | '/research/report/$token'
     | '/research/preview/'
+    | '/api/research/report/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -337,8 +397,13 @@ export interface RootRouteChildren {
   TopicsIndexRoute: typeof TopicsIndexRoute
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
+  ApiResearchCheckoutRoute: typeof ApiResearchCheckoutRoute
+  ApiResearchFinalizeRoute: typeof ApiResearchFinalizeRoute
+  ApiResearchWebhookRoute: typeof ApiResearchWebhookRoute
   ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
+  ResearchReportTokenRoute: typeof ResearchReportTokenRoute
   ResearchPreviewIndexRoute: typeof ResearchPreviewIndexRoute
+  ApiResearchReportTokenRoute: typeof ApiResearchReportTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -497,6 +562,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/research/checkout': {
+      id: '/api/research/checkout'
+      path: '/api/research/checkout'
+      fullPath: '/api/research/checkout'
+      preLoaderRoute: typeof ApiResearchCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/finalize': {
+      id: '/api/research/finalize'
+      path: '/api/research/finalize'
+      fullPath: '/api/research/finalize'
+      preLoaderRoute: typeof ApiResearchFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/webhook': {
+      id: '/api/research/webhook'
+      path: '/api/research/webhook'
+      fullPath: '/api/research/webhook'
+      preLoaderRoute: typeof ApiResearchWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/preview/': {
       id: '/research/preview/'
       path: '/research/preview'
@@ -509,6 +595,20 @@ declare module '@tanstack/react-router' {
       path: '/research/preview/$slug'
       fullPath: '/research/preview/$slug'
       preLoaderRoute: typeof ResearchPreviewSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/report/$token': {
+      id: '/research/report/$token'
+      path: '/research/report/$token'
+      fullPath: '/research/report/$token'
+      preLoaderRoute: typeof ResearchReportTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/report/$token': {
+      id: '/api/research/report/$token'
+      path: '/api/research/report/$token'
+      fullPath: '/api/research/report/$token'
+      preLoaderRoute: typeof ApiResearchReportTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -547,8 +647,13 @@ const rootRouteChildren: RootRouteChildren = {
   TopicsIndexRoute: TopicsIndexRoute,
   TrackersIndexRoute: TrackersIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
+  ApiResearchCheckoutRoute: ApiResearchCheckoutRoute,
+  ApiResearchFinalizeRoute: ApiResearchFinalizeRoute,
+  ApiResearchWebhookRoute: ApiResearchWebhookRoute,
   ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
+  ResearchReportTokenRoute: ResearchReportTokenRoute,
   ResearchPreviewIndexRoute: ResearchPreviewIndexRoute,
+  ApiResearchReportTokenRoute: ApiResearchReportTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

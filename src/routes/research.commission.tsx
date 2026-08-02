@@ -79,8 +79,9 @@ function CommissionPage() {
           <Shield className="w-3.5 h-3.5 text-cyan shrink-0 mt-0.5" aria-hidden />
           <p>
             <strong className="text-foreground/85">Safe research space:</strong> we do not sell
-            dossiers on researchers. Payment details never touch our servers. Optional email is only
-            for this delivery. Research is experimental and provided as-is.
+            dossiers on researchers. Card data stays with Stripe. Optional email is used once to
+            send your unique link, then not kept by Elenchos. Research is experimental and provided
+            as-is.
           </p>
         </div>
 

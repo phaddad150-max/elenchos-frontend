@@ -66,9 +66,9 @@ function ResearchLibraryPage() {
           </p>
           <LibCard
             to="/research-migration"
-            kicker="EU + UK Channel · since 2011"
+            kicker="Real-time analysis on crisis · EU + UK Channel"
             title="Irregular migration — public package"
-            body="Scale, corridors map, open vs resist, discourse, returns honesty. Under 10 minutes."
+            body="Scale since 2011, interactive corridors, open vs resist, discourse, returns honesty. Under 10 minutes."
             accent="rose"
           />
         </section>
