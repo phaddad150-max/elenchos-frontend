@@ -87,21 +87,21 @@ function ResearchDeskLanding() {
             <div className="mt-1 flex flex-wrap gap-2">
               <Link
                 to="/research/commission"
-                className="inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-display font-semibold text-[13px] shadow-[0_0_32px_-8px_var(--color-cyan-glow)] hover:bg-cyan/90 touch-manipulation"
+                className="rd-btn-primary inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-display font-semibold text-[13px] shadow-[0_0_32px_-8px_var(--color-cyan-glow)] touch-manipulation"
               >
                 <Zap className="w-4 h-4" />
                 On-demand from $10
               </Link>
               <Link
                 to="/research/library"
-                className="inline-flex items-center gap-2 min-h-[48px] px-4 py-2.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
+                className="rd-btn-ghost inline-flex items-center gap-2 min-h-[48px] px-4 py-2.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
               >
                 <Library className="w-4 h-4" />
                 Browse library
               </Link>
               <Link
                 to="/topics"
-                className="inline-flex items-center gap-1.5 min-h-[48px] px-3 text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
+                className="rd-btn-ghost inline-flex items-center gap-1.5 min-h-[48px] px-3 rounded-full border border-transparent text-[12px] text-muted-foreground touch-manipulation"
               >
                 Live Topics <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -109,7 +109,7 @@ function ResearchDeskLanding() {
           </div>
         </header>
 
-        {/* Trust strip — safe environment */}
+        {/* Trust strip */}
         <section
           aria-label="Why this desk is safe"
           className="mb-7 sm:mb-8 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3"
@@ -118,16 +118,19 @@ function ResearchDeskLanding() {
             icon={<Lock className="w-3.5 h-3.5" />}
             title="Browse free"
             body="No account required to read Topics, library, or public briefings."
+            delay={0}
           />
           <TrustChip
             icon={<Shield className="w-3.5 h-3.5" />}
             title="Privacy-first pay"
             body="Card data stays with Stripe. Optional email is for one-time delivery only."
+            delay={0.05}
           />
           <TrustChip
             icon={<Scale className="w-3.5 h-3.5" />}
             title="Limits shown"
             body="Sample sizes, sources, and confidence stay visible. Empty stays empty."
+            delay={0.1}
           />
         </section>
 
@@ -173,12 +176,12 @@ function ResearchDeskLanding() {
           <EnterprisePathCard delay={0.15} />
         </div>
 
-        {/* How it works — short, no backend speak */}
+        {/* How it works */}
         <section className="rounded-2xl border border-border/90 bg-card/40 p-4 sm:p-5 mb-8">
           <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">
             How a commissioned report works
           </h2>
-          <ol className="grid sm:grid-cols-3 gap-3">
+          <ol className="grid sm:grid-cols-3 gap-2.5 sm:gap-3">
             {[
               {
                 n: "1",
@@ -196,7 +199,10 @@ function ResearchDeskLanding() {
                 d: "Open your unique report URL and PDF. Optional one-time email delivery — not kept as a list.",
               },
             ].map((s) => (
-              <li key={s.n} className="flex gap-3 min-h-[44px]">
+              <li
+                key={s.n}
+                className="rd-step flex gap-3 min-h-[44px] rounded-xl border border-transparent px-2.5 py-2.5"
+              >
                 <span className="shrink-0 w-7 h-7 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-mono grid place-items-center">
                   {s.n}
                 </span>
@@ -210,7 +216,7 @@ function ResearchDeskLanding() {
         </section>
 
         {/* Bottom CTA */}
-        <section className="rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/12 via-card/50 to-transparent p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+        <section className="rd-cta-panel rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/12 via-card/50 to-transparent p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
           <div className="space-y-1.5 min-w-0">
             <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">
               Ready when you are
@@ -226,7 +232,7 @@ function ResearchDeskLanding() {
           <div className="flex flex-wrap gap-2 shrink-0">
             <Link
               to="/research/commission"
-              className="inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-semibold text-[13px] touch-manipulation"
+              className="rd-btn-primary inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-semibold text-[13px] touch-manipulation"
             >
               Commission report <ArrowRight className="w-4 h-4" />
             </Link>
@@ -236,14 +242,14 @@ function ResearchDeskLanding() {
               defaultMessage={ENTERPRISE_DEFAULT_MESSAGE}
               dialogTitle="Enterprise inquiry"
               dialogDescription="Tell us about personalized dashboards, custom topics, team access, or ongoing research. No self-serve checkout — we reply by email."
-              className="border-amber-signal/40 bg-amber-signal/10 text-amber-signal hover:bg-amber-signal/20"
+              className="rd-btn-ghost border-amber-signal/40 bg-amber-signal/10 text-amber-signal hover:bg-amber-signal/20"
             >
               <Building2 className="w-3.5 h-3.5" aria-hidden />
               Enterprise · contact
             </ContactEmailMe>
             <Link
               to="/about"
-              className="inline-flex items-center gap-1.5 min-h-[48px] px-4 py-2.5 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan touch-manipulation"
+              className="rd-btn-ghost inline-flex items-center gap-1.5 min-h-[48px] px-4 py-2.5 rounded-full border border-border text-[13px] text-muted-foreground touch-manipulation"
             >
               About &amp; method
             </Link>
@@ -264,17 +270,17 @@ function EnterprisePathCard({ delay }: { delay: number }) {
       transition={{ delay, duration: 0.4 }}
       className="h-full"
     >
-      <div className="group relative flex flex-col h-full rounded-2xl border border-amber-signal/40 bg-gradient-to-b from-amber-signal/10 to-card/80 p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] hover:border-amber-signal/55 hover:shadow-[0_0_36px_-12px_var(--amber-signal)] transition-all">
-        <span className="absolute top-3 right-3 text-[9px] font-mono uppercase tracking-[0.14em] text-amber-signal bg-amber-signal/15 border border-amber-signal/40 rounded-full px-2 py-0.5">
+      <div className="rd-card rd-card-amber group relative flex flex-col h-full rounded-2xl border border-amber-signal/40 bg-gradient-to-b from-amber-signal/10 to-card/80 p-4 sm:p-5 min-h-[200px] sm:min-h-[220px]">
+        <span className="absolute top-3 right-3 z-[1] text-[9px] font-mono uppercase tracking-[0.14em] text-amber-signal bg-amber-signal/15 border border-amber-signal/40 rounded-full px-2 py-0.5">
           Contact
         </span>
         <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="w-11 h-11 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal">
+          <div className="rd-icon-lift w-11 h-11 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal">
             <Building2 className="w-6 h-6" />
           </div>
           <span className="text-[11px] font-mono text-muted-foreground tabular-nums">04</span>
         </div>
-        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug">
+        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug group-hover:text-amber-signal transition-colors">
           Enterprise
         </h2>
         <p className="text-[12px] text-amber-signal mt-0.5 font-medium">
@@ -304,24 +310,32 @@ function TrustChip({
   icon,
   title,
   body,
+  delay = 0,
 }: {
   icon: React.ReactNode;
   title: string;
   body: string;
+  delay?: number;
 }) {
   return (
-    <div className="rounded-xl border border-border/80 bg-card/50 px-3.5 py-3 flex gap-2.5 min-h-[44px]">
-      <span className="shrink-0 w-8 h-8 rounded-lg border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center mt-0.5">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-[13px] font-display font-semibold text-foreground flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-cyan shrink-0 hidden sm:inline" aria-hidden />
-          {title}
-        </p>
-        <p className="text-[12px] text-muted-foreground leading-snug mt-0.5">{body}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+    >
+      <div className="rd-chip rounded-xl border border-border/80 bg-card/50 px-3.5 py-3 flex gap-2.5 min-h-[44px]">
+        <span className="rd-icon-lift shrink-0 w-8 h-8 rounded-lg border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center mt-0.5">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <p className="text-[13px] font-display font-semibold text-foreground flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-cyan shrink-0 hidden sm:inline" aria-hidden />
+            {title}
+          </p>
+          <p className="text-[12px] text-muted-foreground leading-snug mt-0.5">{body}</p>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -348,12 +362,8 @@ function PathCard({
   featured?: boolean;
   glow: "cyan" | "emerald" | "rose";
 }) {
-  const ring =
-    glow === "rose"
-      ? "hover:border-rose-signal/50 hover:shadow-[0_0_40px_-12px_var(--rose-signal)]"
-      : glow === "emerald"
-        ? "hover:border-emerald-signal/45 hover:shadow-[0_0_36px_-12px_var(--emerald-signal)]"
-        : "hover:border-cyan/50 hover:shadow-[0_0_40px_-12px_var(--color-cyan-glow)]";
+  const glowClass =
+    glow === "rose" ? "rd-card-rose" : glow === "emerald" ? "rd-card-emerald" : "rd-card-cyan";
 
   return (
     <motion.div
@@ -364,31 +374,31 @@ function PathCard({
     >
       <Link
         to={to}
-        className={`group relative flex flex-col h-full rounded-2xl border bg-card/60 backdrop-blur-sm p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] touch-manipulation transition-all ${ring} ${
+        className={`rd-card ${glowClass} group relative flex flex-col h-full rounded-2xl border bg-card/60 backdrop-blur-sm p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] touch-manipulation ${
           featured
             ? "border-cyan/55 bg-gradient-to-b from-cyan/15 to-card/80 ring-1 ring-cyan/30"
             : "border-border/90"
         }`}
       >
         {featured && (
-          <span className="absolute top-3 right-3 text-[9px] font-mono uppercase tracking-[0.14em] text-cyan bg-cyan/15 border border-cyan/40 rounded-full px-2 py-0.5">
+          <span className="absolute top-3 right-3 z-[1] text-[9px] font-mono uppercase tracking-[0.14em] text-cyan bg-cyan/15 border border-cyan/40 rounded-full px-2 py-0.5">
             Paid tool
           </span>
         )}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="w-11 h-11 rounded-xl border border-cyan/35 bg-cyan/10 grid place-items-center">
+          <div className="rd-icon-lift w-11 h-11 rounded-xl border border-cyan/35 bg-cyan/10 grid place-items-center">
             {icon}
           </div>
           <span className="text-[11px] font-mono text-muted-foreground tabular-nums">{step}</span>
         </div>
-        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground group-hover:text-cyan leading-snug">
+        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground group-hover:text-cyan leading-snug transition-colors">
           {title}
         </h2>
         <p className="text-[12px] text-cyan mt-0.5 font-medium">{subtitle}</p>
         <p className="text-[13px] text-muted-foreground leading-relaxed mt-2.5 flex-1">{body}</p>
         <span className="inline-flex items-center gap-1.5 text-[13px] text-cyan font-semibold mt-4">
           {cta}
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
         </span>
       </Link>
     </motion.div>
