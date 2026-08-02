@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
+  Building2,
   CheckCircle2,
   FlaskConical,
   Library,
@@ -15,8 +16,12 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
+
+const ENTERPRISE_DEFAULT_MESSAGE =
+  "Hi — I'm interested in Enterprise for Elenchos: personalized dashboards, custom topics, and team research. Here's what we need:\n\n";
 
 export const Route = createFileRoute("/research/")({
   head: () => ({
@@ -25,7 +30,7 @@ export const Route = createFileRoute("/research/")({
       {
         name: "description",
         content:
-          "Elenchos Research Desk: live Topics public-discourse analysis, deep-dive case studies, or commission an on-demand report from $10. Privacy-first unique link + PDF. No account to browse.",
+          "Elenchos Research Desk: live Topics analysis, case studies, on-demand reports from $10, or Enterprise (personalized dashboards) via contact — no self-serve checkout for enterprise.",
       },
       {
         property: "og:title",
@@ -34,7 +39,7 @@ export const Route = createFileRoute("/research/")({
       {
         property: "og:description",
         content:
-          "Three clear paths: live Topics analysis, thesis-style library, or your topic on demand. Safe research space — card data never stored on Elenchos.",
+          "Topics analysis, library, on-demand reports, or Enterprise personalization. Safe research space — card data never stored on Elenchos.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
       { property: "og:type", content: "website" },
@@ -127,10 +132,10 @@ function ResearchDeskLanding() {
         </section>
 
         <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3 px-0.5">
-          Three ways to use the desk
+          Ways to use the desk
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           <PathCard
             delay={0}
             icon={<Radio className="w-6 h-6 text-cyan" />}
@@ -143,7 +148,7 @@ function ResearchDeskLanding() {
             glow="cyan"
           />
           <PathCard
-            delay={0.06}
+            delay={0.05}
             icon={<BookOpen className="w-6 h-6 text-cyan" />}
             step="02"
             title="Deep-dive library"
@@ -154,7 +159,7 @@ function ResearchDeskLanding() {
             glow="emerald"
           />
           <PathCard
-            delay={0.12}
+            delay={0.1}
             icon={<Sparkles className="w-6 h-6 text-cyan" />}
             step="03"
             title="On-demand report"
@@ -165,6 +170,7 @@ function ResearchDeskLanding() {
             glow="rose"
             featured
           />
+          <EnterprisePathCard delay={0.15} />
         </div>
 
         {/* How it works — short, no backend speak */}
@@ -224,6 +230,17 @@ function ResearchDeskLanding() {
             >
               Commission report <ArrowRight className="w-4 h-4" />
             </Link>
+            <ContactEmailMe
+              source="research-enterprise"
+              variant="button"
+              defaultMessage={ENTERPRISE_DEFAULT_MESSAGE}
+              dialogTitle="Enterprise inquiry"
+              dialogDescription="Tell us about personalized dashboards, custom topics, team access, or ongoing research. No self-serve checkout — we reply by email."
+              className="border-amber-signal/40 bg-amber-signal/10 text-amber-signal hover:bg-amber-signal/20"
+            >
+              <Building2 className="w-3.5 h-3.5" aria-hidden />
+              Enterprise · contact
+            </ContactEmailMe>
             <Link
               to="/about"
               className="inline-flex items-center gap-1.5 min-h-[48px] px-4 py-2.5 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan touch-manipulation"
@@ -236,6 +253,50 @@ function ResearchDeskLanding() {
 
       <SiteFooter />
     </div>
+  );
+}
+
+function EnterprisePathCard({ delay }: { delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4 }}
+      className="h-full"
+    >
+      <div className="group relative flex flex-col h-full rounded-2xl border border-amber-signal/40 bg-gradient-to-b from-amber-signal/10 to-card/80 p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] hover:border-amber-signal/55 hover:shadow-[0_0_36px_-12px_var(--amber-signal)] transition-all">
+        <span className="absolute top-3 right-3 text-[9px] font-mono uppercase tracking-[0.14em] text-amber-signal bg-amber-signal/15 border border-amber-signal/40 rounded-full px-2 py-0.5">
+          Contact
+        </span>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="w-11 h-11 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal">
+            <Building2 className="w-6 h-6" />
+          </div>
+          <span className="text-[11px] font-mono text-muted-foreground tabular-nums">04</span>
+        </div>
+        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug">
+          Enterprise
+        </h2>
+        <p className="text-[12px] text-amber-signal mt-0.5 font-medium">
+          Personalized dashboards &amp; more
+        </p>
+        <p className="text-[13px] text-muted-foreground leading-relaxed mt-2.5 flex-1">
+          Custom topics, branded or private dashboards, team workflows, and deeper ongoing research.
+          Not self-serve checkout — we scope it with you.
+        </p>
+        <ContactEmailMe
+          source="research-enterprise"
+          variant="button"
+          defaultMessage={ENTERPRISE_DEFAULT_MESSAGE}
+          dialogTitle="Enterprise inquiry"
+          dialogDescription="Describe your org, desired dashboards or topics, and timeline. No payment here — we reply and quote if it is a fit."
+          className="mt-4 w-full justify-center border-amber-signal/45 bg-amber-signal/15 text-amber-signal hover:bg-amber-signal/25 font-semibold text-[13px]"
+        >
+          Email me about Enterprise
+          <ArrowRight className="w-4 h-4" />
+        </ContactEmailMe>
+      </div>
+    </motion.div>
   );
 }
 

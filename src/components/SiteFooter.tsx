@@ -26,6 +26,16 @@ export function SiteFooter() {
           <Link to="/research/commission" className="text-cyan hover:underline">
             On-demand · $10
           </Link>
+          <ContactEmailMe
+            source="footer-enterprise"
+            variant="inline"
+            className="text-[11px] sm:text-[12px] font-mono text-cyan"
+            defaultMessage="Hi — I'm interested in Enterprise: personalized dashboards and custom research.\n\n"
+            dialogTitle="Enterprise inquiry"
+            dialogDescription="Personalized dashboards, custom topics, team research. Contact only — no self-serve checkout."
+          >
+            Enterprise
+          </ContactEmailMe>
           <Link to="/about" className="hover:text-cyan hover:underline">
             About
           </Link>

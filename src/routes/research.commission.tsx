@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, FlaskConical, Shield } from "lucide-react";
+import { ArrowLeft, Building2, FlaskConical, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { CommissionBriefForm } from "@/components/research/CommissionBriefForm";
+
+const ENTERPRISE_DEFAULT_MESSAGE =
+  "Hi — I'm interested in Enterprise for Elenchos: personalized dashboards, custom topics, and team research. Here's what we need:\n\n";
 
 export const Route = createFileRoute("/research/commission")({
   head: () => ({
@@ -11,7 +15,7 @@ export const Route = createFileRoute("/research/commission")({
       {
         name: "description",
         content:
-          "Commission an on-demand Elenchos report: public discourse topic analysis $10, multi-source deep dive $10 without X or $20 with X. Unique private link + PDF. No account. Not legal advice.",
+          "Commission an on-demand Elenchos report from $10, or inquire about Enterprise personalized dashboards via contact (not self-serve checkout). Unique private link + PDF for paid packs.",
       },
       {
         property: "og:title",
@@ -20,7 +24,7 @@ export const Route = createFileRoute("/research/commission")({
       {
         property: "og:description",
         content:
-          "Same method as the desk. Stripe checkout. Unique report URL. Optional email delivery not stored.",
+          "Fixed-price on-demand reports via Stripe. Enterprise personalization is contact-only — no checkout.",
       },
       { property: "og:url", content: "https://elenchos.live/research/commission" },
     ],
@@ -95,6 +99,44 @@ function CommissionPage() {
         </div>
 
         <CommissionBriefForm />
+
+        {/* Enterprise — contact only, never Stripe checkout */}
+        <section className="mt-8 rounded-2xl border border-amber-signal/35 bg-gradient-to-br from-amber-signal/[0.08] to-card/40 p-4 sm:p-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal shrink-0">
+              <Building2 className="w-5 h-5" aria-hidden />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-amber-signal">
+                Enterprise · not checkout
+              </p>
+              <h2 className="text-[16px] font-display font-semibold leading-snug">
+                Personalized dashboards &amp; custom research
+              </h2>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
+                Need a private or branded dashboard, custom topic set, team access, or ongoing
+                research beyond a single report? Enterprise is scoped by conversation — no
+                self-serve payment on this page.
+              </p>
+              <ul className="text-[12.5px] text-foreground/85 space-y-1 pt-1 leading-snug">
+                <li>· Personalized dashboards and monitors</li>
+                <li>· Custom topics and briefing cadence</li>
+                <li>· Deeper multi-source / multi-region packages</li>
+              </ul>
+            </div>
+          </div>
+          <ContactEmailMe
+            source="research-enterprise"
+            variant="button"
+            defaultMessage={ENTERPRISE_DEFAULT_MESSAGE}
+            dialogTitle="Enterprise inquiry"
+            dialogDescription="Describe dashboards, topics, team size, and timeline. We will reply by email — no card checkout for Enterprise."
+            className="w-full sm:w-auto justify-center border-amber-signal/45 bg-amber-signal/15 text-amber-signal hover:bg-amber-signal/25 font-semibold"
+          >
+            <Building2 className="w-3.5 h-3.5" aria-hidden />
+            Email me about Enterprise
+          </ContactEmailMe>
+        </section>
       </main>
 
       <SiteFooter />

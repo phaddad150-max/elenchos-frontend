@@ -15,7 +15,7 @@ import {
   buildContactMailto,
 } from "@/lib/contact";
 
-type Variant = "link" | "button" | "inline";
+type Variant = "link" | "button" | "inline" | "unstyled";
 
 interface Props {
   /** Context for subject line / analytics */
@@ -23,6 +23,10 @@ interface Props {
   variant?: Variant;
   className?: string;
   children?: React.ReactNode;
+  /** Prefill message when dialog opens */
+  defaultMessage?: string;
+  dialogTitle?: string;
+  dialogDescription?: string;
 }
 
 /**
@@ -35,11 +39,14 @@ export function ContactEmailMe({
   variant = "link",
   className = "",
   children,
+  defaultMessage = "",
+  dialogTitle = "Email me",
+  dialogDescription = "Corrections, privacy rights, challenges, or a short note. We read every message. This is a small independent project.",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(defaultMessage);
   const [honeypot, setHoneypot] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<"idle" | "ok" | "err">("idle");
@@ -48,7 +55,7 @@ export function ContactEmailMe({
   const reset = () => {
     setName("");
     setEmail("");
-    setMessage("");
+    setMessage(defaultMessage);
     setHoneypot("");
     setStatus("idle");
     setStatusText("");
@@ -56,10 +63,12 @@ export function ContactEmailMe({
 
   const triggerClass =
     variant === "button"
-      ? `inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 px-3.5 py-2 text-[12px] font-medium transition-colors ${className}`
+      ? `inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 px-3.5 py-2 text-[12px] font-medium transition-colors min-h-[44px] touch-manipulation ${className}`
       : variant === "inline"
         ? `text-cyan hover:underline font-medium ${className}`
-        : `text-cyan hover:underline ${className}`;
+        : variant === "unstyled"
+          ? className
+          : `text-cyan hover:underline ${className}`;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -160,10 +169,9 @@ export function ContactEmailMe({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md border-border bg-card text-card-foreground">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg">Email me</DialogTitle>
+          <DialogTitle className="font-display text-lg">{dialogTitle}</DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm leading-relaxed">
-            Corrections, privacy rights, challenges, or a short note. We read every
-            message. This is a small independent project.
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
 

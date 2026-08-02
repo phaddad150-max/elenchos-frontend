@@ -115,7 +115,7 @@ function AboutPage() {
               to="/research"
               icon={<FlaskConical className="w-4 h-4" />}
               title="Research Desk"
-              body="Deep-dive case studies, crisis packages, and on-demand reports from $10."
+              body="Deep-dive case studies, on-demand reports from $10, and Enterprise (personalized dashboards — contact us)."
             />
           </div>
         </section>
