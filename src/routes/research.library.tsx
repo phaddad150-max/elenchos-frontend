@@ -7,20 +7,20 @@ import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog"
 export const Route = createFileRoute("/research/library")({
   head: () => ({
     meta: [
-      { title: "Research library · Case studies & crisis packages · Elenchos" },
+      { title: "Research library · Case studies & crisis briefings · Elenchos" },
       {
         name: "description",
         content:
-          "Browse Elenchos deep-dive case studies, real-time crisis packages (e.g. irregular migration), and indexes. Separate from live Topics analysis.",
+          "Browse Elenchos deep-dive case studies, real-time crisis briefings (e.g. irregular migration), and indexes. Separate from live Topics analysis.",
       },
       {
         property: "og:title",
-        content: "Research library · Case studies & crisis packages · Elenchos",
+        content: "Research library · Case studies & crisis briefings · Elenchos",
       },
       {
         property: "og:description",
         content:
-          "One shelf for thesis-style reports, crisis analysis packages, and leader/peace indexes.",
+          "One shelf for thesis-style reports, crisis briefings, and leader/peace indexes.",
       },
       { property: "og:url", content: "https://elenchos.live/research/library" },
     ],
@@ -52,7 +52,7 @@ function ResearchLibraryPage() {
               Library
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] mt-2">
-              Case studies, crisis packages &amp; indexes
+              Case studies, crisis briefings &amp; indexes
             </h1>
             <p className="page-hero-sub max-w-xl mt-2">
               Everything to read on the desk except live Topics analysis. Pick a card — no research
@@ -61,22 +61,22 @@ function ResearchLibraryPage() {
           </div>
         </header>
 
-        {/* Crisis packages */}
+        {/* Crisis briefings */}
         <section className="mb-8 space-y-2.5" aria-labelledby="lib-crisis">
           <h2
             id="lib-crisis"
             className="text-[11px] font-mono uppercase tracking-[0.16em] text-rose-signal px-0.5"
           >
-            Real-time analysis on crisis
+            Crisis briefings
           </h2>
           <p className="text-[12.5px] text-muted-foreground px-0.5 leading-snug mb-2">
-            Public packages on unfolding crises — e.g. irregular migration pressure on Spain and
+            Public briefings on unfolding crises — e.g. irregular migration pressure on Spain and
             spillover debate across the EU. Not legal advice.
           </p>
           <LibCard
             to="/research-migration"
-            kicker="Real-time analysis on crisis · EU + UK Channel"
-            title="Irregular migration — public package"
+            kicker="Crisis briefing · EU + UK Channel"
+            title="Irregular migration — public briefing"
             body="Scale since 2011, interactive corridors, open vs resist, discourse, returns honesty. Under 10 minutes."
             accent="rose"
           />

@@ -98,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Citizen voices vs official frames. Live Topics, crisis packages, thesis-style case studies, on-demand research from $10, Enterprise contact.",
+          "Citizen voices vs official frames. Live Topics, crisis briefings, thesis-style case studies, on-demand research from $10, Enterprise contact.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

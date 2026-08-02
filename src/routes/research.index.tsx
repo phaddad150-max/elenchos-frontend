@@ -117,7 +117,7 @@ function ResearchDeskLanding() {
           <TrustChip
             icon={<Lock className="w-3.5 h-3.5" />}
             title="Browse free"
-            body="No account required to read Topics, library, or public packages."
+            body="No account required to read Topics, library, or public briefings."
           />
           <TrustChip
             icon={<Shield className="w-3.5 h-3.5" />}
@@ -152,8 +152,8 @@ function ResearchDeskLanding() {
             icon={<BookOpen className="w-6 h-6 text-cyan" />}
             step="02"
             title="Deep-dive library"
-            subtitle="Case studies & crisis packages"
-            body="Thesis-style multi-source reports and public crisis packages — for reading, not a live pulse."
+            subtitle="Case studies & crisis briefings"
+            body="Thesis-style multi-source reports and public crisis briefings — for reading, not a live pulse."
             cta="Open library"
             to="/research/library"
             glow="emerald"

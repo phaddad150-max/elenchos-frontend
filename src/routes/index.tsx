@@ -98,7 +98,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Citizen voices vs official narratives. Topics analysis, crisis packages, thesis-style case studies, on-demand reports from $10.",
+          "Citizen voices vs official narratives. Topics analysis, crisis briefings, thesis-style case studies, on-demand reports from $10.",
       },
       { property: "og:url", content: "https://elenchos.live/" },
     ],

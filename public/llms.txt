@@ -2,16 +2,16 @@
 
 > Public Discourse Lens x Research Desk
 
-Elenchos (ἔλεγχος) applies the Socratic method to public conversation: citizen voices on X versus official and media frames, with sample sizes and limits shown. The Research Desk adds deep-dive case studies, crisis packages, and privacy-first on-demand reports.
+Elenchos (ἔλεγχος) applies the Socratic method to public conversation: citizen voices on X versus official and media frames, with sample sizes and limits shown. The Research Desk adds deep-dive case studies, crisis briefings, and privacy-first on-demand reports.
 
 ## Core product
 
 - [Dashboard](/): Live citizen signals, global heatmap, cross-topic read.
 - [Topics](/topics): Per-topic public discourse analysis — sentiment, narrative gap, Socratic questions.
 - [Research Desk](/research): Plan, read, or commission research (library + on-demand).
-- [Research library](/research/library): Case studies, crisis packages, indexes.
+- [Research library](/research/library): Case studies, crisis briefings, indexes.
 - [Commission a report](/research/commission): On-demand from $10 — unique private link + PDF. No account required.
-- [Irregular migration package](/research-migration): Public crisis analysis (EU & UK).
+- [Irregular migration briefing](/research-migration): Public crisis briefing (EU & UK).
 - [About](/about): Method, safe environment, product pillars.
 - [Privacy](/privacy): Browse without account; Research Desk stores no personal identity; card data stays with Stripe.
 
