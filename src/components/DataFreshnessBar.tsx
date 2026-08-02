@@ -43,7 +43,7 @@ export function DataFreshnessBar({
           type="button"
           onClick={() => void onRefresh()}
           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors min-h-[36px] touch-manipulation text-[10px] font-mono uppercase tracking-wider"
-          title="Reload this page's data from the database"
+          title="Reload this page's data"
         >
           Reload
         </button>

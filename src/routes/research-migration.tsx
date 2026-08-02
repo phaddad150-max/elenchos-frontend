@@ -43,12 +43,12 @@ export const Route = createFileRoute("/research-migration")({
   head: () => ({
     meta: [
       {
-        title: "Irregular Migration Intelligence · Since 2011 · EU & UK · Elenchos",
+        title: "Irregular migration analysis · Since 2011 · EU & UK · Elenchos Research",
       },
       {
         name: "description",
         content:
-          "Since 2011: peak detections, frontline EU states, open vs resist policy, public discourse. 10 seconds to thesis — under 10 minutes. Free open data. Research package — not legal advice.",
+          "Real-time crisis package: irregular migration since 2011 — Frontex-scale detections, EU frontline states, corridors map, open vs resist, public discourse. Under 10 minutes. Free open data. Not legal advice.",
       },
       {
         property: "og:title",
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/research-migration")({
       {
         property: "og:description",
         content:
-          "Since 2011 · 2015 peak ~1.8M · 2023 ~380k · 2025 ~178k. Frontline GR/IT/ES/UK. Open vs resist. Crisis analysis package.",
+          "Since 2011 · peak ~1.8M detections · frontline GR/IT/ES/UK Channel. Interactive corridors and returns honesty. Research Desk package.",
       },
       { property: "og:url", content: "https://elenchos.live/research-migration" },
     ],

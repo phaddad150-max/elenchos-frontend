@@ -7,11 +7,20 @@ import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog"
 export const Route = createFileRoute("/research/library")({
   head: () => ({
     meta: [
-      { title: "Research library · Elenchos" },
+      { title: "Research library · Case studies & crisis packages · Elenchos" },
       {
         name: "description",
         content:
-          "All Elenchos case studies, crisis packages, and indexes — one shelf. Easy to browse. Separate from live Topics analysis.",
+          "Browse Elenchos deep-dive case studies, real-time crisis packages (e.g. irregular migration), and indexes. Separate from live Topics analysis.",
+      },
+      {
+        property: "og:title",
+        content: "Research library · Case studies & crisis packages · Elenchos",
+      },
+      {
+        property: "og:description",
+        content:
+          "One shelf for thesis-style reports, crisis analysis packages, and leader/peace indexes.",
       },
       { property: "og:url", content: "https://elenchos.live/research/library" },
     ],

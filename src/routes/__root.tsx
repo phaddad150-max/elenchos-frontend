@@ -83,17 +83,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Elenchos — Public Discourse Analysis" },
-      { name: "description", content: "Elenchos (Ancient Greek ἔλεγχος) is a real-time intelligence dashboard for analyzing citizen sentiment and global discourse." },
+      { title: "Elenchos · Socratic clarity on public discourse & Research Desk" },
+      {
+        name: "description",
+        content:
+          "Elenchos (ἔλεγχος): Socratic clarity on public discourse and a Research Desk to go deeper. Topics analysis on X, case studies, on-demand reports. Privacy-first.",
+      },
       { name: "author", content: "Elenchos" },
       { property: "og:site_name", content: "Elenchos" },
-      { property: "og:title", content: "Elenchos — Public Discourse Analysis" },
-      { property: "og:description", content: "Real-time citizen sentiment and narrative divergence across global topics, leaders, and countries." },
+      {
+        property: "og:title",
+        content: "Elenchos · Socratic clarity on public discourse & Research Desk",
+      },
+      {
+        property: "og:description",
+        content:
+          "Citizen voices vs official frames. Live Topics, crisis packages, thesis-style case studies, and on-demand research from $10.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@elenchospulse" },
-      { name: "twitter:title", content: "Elenchos — Public Discourse Analysis" },
-      { name: "twitter:description", content: "Real-time citizen sentiment and narrative divergence across global topics, leaders, and countries." },
+      {
+        name: "twitter:title",
+        content: "Elenchos · Socratic clarity on public discourse & Research Desk",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Citizen voices vs official frames. Topics analysis, Research Desk, privacy-first on-demand reports.",
+      },
       { property: "og:image", content: "https://elenchos.live/elenchos-og.webp" },
       { name: "twitter:image", content: "https://elenchos.live/elenchos-og.webp" },
     ],

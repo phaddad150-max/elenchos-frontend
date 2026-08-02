@@ -83,17 +83,22 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Elenchos · Real Citizen Voices vs Official Narratives" },
+      {
+        title: "Elenchos · Socratic clarity on public discourse & Research Desk",
+      },
       {
         name: "description",
         content:
-          "Citizen sentiment analysis and narrative gaps, powered by AI. Compare public opinion on X against official statements across global topics, leader trust rankings and the Middle East peace tracker.",
+          "Elenchos: Socratic analysis of public discourse on X vs official frames. Live Topics, Dashboard signals, and a privacy-first Research Desk for deep dives and on-demand reports.",
       },
-      { property: "og:title", content: "Real Citizen Voices vs Official Narratives · Elenchos" },
+      {
+        property: "og:title",
+        content: "Socratic clarity on public discourse — and a Research Desk to go deeper · Elenchos",
+      },
       {
         property: "og:description",
         content:
-          "Public discourse samples on X: citizen sentiment, narrative gaps, and trackers for ordinary citizens.",
+          "Citizen voices vs official narratives. Topics analysis, crisis packages, thesis-style case studies, on-demand reports from $10.",
       },
       { property: "og:url", content: "https://elenchos.live/" },
     ],
@@ -341,7 +346,7 @@ function Dashboard() {
         velocity: 0,
         headline: (it.headline ?? it.summary ?? it.topic ?? "Citizen signal").slice(0, 140),
         excerpt: it.excerpt ?? it.summary ?? "",
-        source: "Citizen signal · Supabase",
+        source: "Citizen signal",
         timestamp: it.last_updated ? new Date(it.last_updated).getTime() : Date.now(),
       });
     });
@@ -798,7 +803,7 @@ function curatedHighlightToFeedSignal(
     headline: shortLine,
     summary: h.hero_summary ?? h.hero_headline ?? null,
     excerpt: h.evolution_note ?? null,
-    source: "Curated · Pass 2",
+    source: "Curated insight",
     sample_size: snapshot?.sample_size ?? null,
     last_updated: h.generated_at ?? snapshot?.last_updated ?? null,
     created_at: h.generated_at ?? null,
@@ -1878,7 +1883,7 @@ function CitizenActionBrief({
         <Header
           icon={<Compass className="w-4 h-4" />}
           title="Key Observations & Implications"
-          subtitle="Plain-language read of the freshest backend analysis"
+          subtitle="Plain-language read of the latest cross-topic sample"
         />
         <span className="px-2 py-1 rounded bg-cyan/15 text-cyan border border-cyan/40 text-[11px] font-mono inline-flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" />
@@ -1887,7 +1892,7 @@ function CitizenActionBrief({
       </div>
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Pulling the latest observations from the backend…
+          Loading the latest cross-topic observations…
         </p>
       ) : (
         <div className="space-y-2">
@@ -2286,14 +2291,22 @@ function KpiHeroTile({
             className="dash-kpi-popover absolute left-0 right-0 top-[calc(100%-2px)] z-30 px-2.5 pb-2.5 pt-1.5 sm:px-3"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="dash-kpi-popover-panel rounded-lg p-2.5 space-y-2">
-              <p className="text-[11px] text-foreground/85 leading-snug">{tile.liveNote}</p>
+            <div className="dash-kpi-popover-panel rounded-lg p-3 space-y-2 min-h-[4.5rem]">
+              <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
+                {tile.label}
+              </p>
+              <p className="text-[12px] sm:text-[11px] text-foreground/90 leading-snug">
+                {tile.liveNote?.trim() ||
+                  (has
+                    ? `Current value: ${typeof tile.value === "number" ? tile.value.toLocaleString() : tile.value}${tile.format === "percent" ? "%" : tile.unit ? ` ${tile.unit}` : ""}.`
+                    : "No value for this metric in the current sample yet.")}
+              </p>
               {tile.liveFacts && tile.liveFacts.length > 0 && (
                 <ul className="space-y-1">
                   {tile.liveFacts.map((line, i) => (
                     <li
                       key={i}
-                      className="text-[10.5px] font-mono text-muted-foreground leading-snug flex gap-1.5"
+                      className="text-[11px] sm:text-[10.5px] font-mono text-muted-foreground leading-snug flex gap-1.5"
                     >
                       <span className="text-cyan shrink-0">›</span>
                       <span>{line}</span>
@@ -2303,7 +2316,7 @@ function KpiHeroTile({
               )}
               {history.length > 1 && (
                 <p className="text-[10px] font-mono text-muted-foreground/90">
-                  Tracked: {history.slice(-5).join(" → ")}
+                  Recent: {history.slice(-5).join(" → ")}
                 </p>
               )}
               {(tile.links?.length || tile.cta) && (
@@ -2312,7 +2325,7 @@ function KpiHeroTile({
                     <Link
                       key={lnk.href + lnk.label}
                       to={lnk.href}
-                      className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan hover:text-cyan/80 transition-colors"
+                      className="inline-flex items-center gap-1 text-[12px] sm:text-[11px] font-mono text-cyan hover:text-cyan/80 transition-colors min-h-[36px] sm:min-h-0"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {lnk.label}
@@ -2336,7 +2349,7 @@ function KpiHeroTile({
                           to={tile.cta.href}
                           className={
                             tile.cta.emphasis === "primary"
-                              ? "inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[32px]"
+                              ? "inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[36px]"
                               : "inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors"
                           }
                         >
@@ -2540,7 +2553,7 @@ function DashboardKpiGrid({
       icon: ShieldCheck,
       format: "percent",
       liveNote:
-        "Estimated accuracy of data on this page (fetch · clean · reason · report). Engineering band for SpaceXAI/Grok — not a lab-measured model score.",
+        "Estimated confidence for analysis on this page (sample coverage and consistency). Not a laboratory accuracy score.",
       liveFacts: accuracy.liveFacts,
       links: [
         { label: "How AI is used (xAI / SpaceXAI)", href: "/about" },

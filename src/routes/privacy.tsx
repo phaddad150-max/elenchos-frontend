@@ -1,29 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  ShieldCheck,
+  Database,
+  Cookie,
+  UserX,
+  CreditCard,
+  FlaskConical,
+  Globe2,
+} from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { ShieldCheck, Mail, Database, Cookie, Globe2, UserX } from "lucide-react";
 import { ELENCHOS_CONTACT_EMAIL, ELENCHOS_CONTACT_MAILTO } from "@/lib/contact";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Notice. Elenchos" },
+      { title: "Privacy Notice · Elenchos" },
       {
         name: "description",
         content:
-          "How Elenchos collects, stores, and protects your data. GDPR-aligned privacy notice for EU citizens.",
+          "Elenchos privacy notice: browse without an account. On-demand Research Desk reports store no personal identity. Card data stays with Stripe. GDPR-aligned.",
       },
-      { property: "og:title", content: "Privacy Notice. Elenchos" },
+      { property: "og:title", content: "Privacy Notice · Elenchos" },
       {
         property: "og:description",
         content:
-          "How Elenchos collects, stores, and protects your data. GDPR-aligned privacy notice for EU citizens.",
+          "No personal dossiers. Optional one-time email for report delivery is not stored by Elenchos. Public discourse analysis uses aggregated public posts.",
       },
       { property: "og:url", content: "https://elenchos.live/privacy" },
     ],
     links: [{ rel: "canonical", href: "https://elenchos.live/privacy" }],
   }),
-
   component: PrivacyPage,
 });
 
@@ -51,140 +58,131 @@ function Section({
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background page-shell">
+      <div className="absolute inset-0 grid-bg pointer-events-none opacity-40" />
       <SiteNav />
-      <main className="flex-1 max-w-3xl mx-auto px-4 md:px-6 py-10 md:py-14 w-full">
-        <header className="mb-8">
-          <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-cyan mb-2">
-            Privacy & Data Protection
-          </p>
-          <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight">
-            Privacy Notice
-          </h1>
-          <p className="text-xs text-muted-foreground mt-3">
-            Version 1 · Last updated {new Date().getFullYear()}
+      <main className="flex-1 max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12 w-full relative mobile-safe-bottom">
+        <header className="page-hero-banner mb-6 p-4 sm:p-5">
+          <p className="page-hero-kicker">Privacy &amp; data protection</p>
+          <h1 className="page-hero-title text-2xl md:text-3xl mt-2">Privacy Notice</h1>
+          <p className="page-hero-sub mt-2 text-[13px]">
+            Version 2 · Updated for Research Desk on-demand reports · {new Date().getFullYear()}
           </p>
         </header>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <Section icon={ShieldCheck} title="Who we are">
             <p>
-              Elenchos is a citizen-journalism intelligence dashboard. This notice
-              explains what personal data we collect when you create an account
-              and how we use it. It is aligned with the EU General Data Protection
-              Regulation (GDPR).
+              Elenchos (elenchos.live) is an experimental public-discourse and research product.
+              We help people check citizen conversation vs official frames, and commission
+              structured research reports.
             </p>
             <p>
-              For questions, corrections, challenges, or to exercise your rights, contact the
-              controller at{" "}
+              Contact:{" "}
               <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline break-all">
                 {ELENCHOS_CONTACT_EMAIL}
               </a>
-              . You can also use <strong>Email me</strong> on the site (opens a short message form).
+              {" · "}
+              <Link to="/about" className="text-cyan hover:underline">
+                About
+              </Link>
+              {" · "}
+              <Link to="/research" className="text-cyan hover:underline">
+                Research Desk
+              </Link>
             </p>
           </Section>
 
-          <Section icon={Database} title="What we collect">
-            <p className="mb-2">
-              <strong>Public discourse analysis (product core):</strong> we process
-              publicly available posts retrieved via the X API for topic analysis.
-              That material is used to produce aggregated scores, narrative-gap
-              summaries, and research logs. It is not a private-message scrape and
-              is not sold as individual profiles.
+          <Section icon={Globe2} title="Browsing without an account">
+            <p>
+              You can use the Dashboard, Topics, Research library, and public reports{" "}
+              <strong className="text-foreground/90">without creating an account</strong>. We do not
+              require sign-in to read.
+            </p>
+            <p>
+              We do not run advertising cookies or sell personal profiles. Hosting and security logs
+              (e.g. IP at the edge) may exist at the infrastructure layer like any website; we do not
+              build marketing dossiers from them.
+            </p>
+          </Section>
+
+          <Section icon={FlaskConical} title="Research Desk · on-demand reports">
+            <p>
+              When you commission a report, we process{" "}
+              <strong className="text-foreground/90">topic text and package choice</strong> — not
+              your identity as a product.
             </p>
             <ul className="list-disc pl-5 space-y-1">
               <li>
-                <strong>Authentication identifier:</strong> the OAuth subject ID
-                returned by Google or X when you sign in. We never see or store
-                your password. Authentication happens entirely on the
-                provider&apos;s side.
+                <strong className="text-foreground/85">Stored:</strong> report token, package type,
+                topic/questions text, report content, payment session id, timestamps.
               </li>
               <li>
-                <strong>Profile metadata:</strong> the email address, display
-                name, and avatar URL released to us by your chosen identity
-                provider (Google).
+                <strong className="text-foreground/85">Not stored by Elenchos:</strong> card numbers,
+                crypto wallet secrets, name fields for commission orders, long-term email lists.
               </li>
               <li>
-                <strong>Consent records:</strong> timestamp and version of the
-                privacy notice you accepted, plus your browser user-agent.
+                <strong className="text-foreground/85">Optional email:</strong> if you provide one,
+                it is used only to send your unique report link (via our email provider), then not
+                kept in the report database.
               </li>
               <li>
-                <strong>Session cookie:</strong> a strictly necessary cookie that
-                keeps you signed in.
+                <strong className="text-foreground/85">Payment:</strong> handled by Stripe (or
+                similar). Their privacy policy applies to payment data.
               </li>
             </ul>
             <p>
-              We do <strong>not</strong> collect passwords, run email/password
-              accounts, use advertising cookies, third-party analytics, or
-              behavioural tracking. We do not sell your data. Processors supporting
-              the service typically include hosting/database (e.g. Vercel, Supabase),
-              X API, and xAI for analysis, all over TLS.
+              Your unique report URL is private to people who have the link. Treat it like a secret
+              document link.
             </p>
           </Section>
 
-          <Section icon={Globe2} title="Where your data is stored">
+          <Section icon={Database} title="Public discourse analysis (Topics / Dashboard)">
             <p>
-              Your account and consent records are stored in Supabase
-              (PostgreSQL) on EU-region infrastructure.
-              Authentication tokens are exchanged over TLS and stored encrypted
-              at rest.
+              For topic analysis we process <strong className="text-foreground/90">publicly available</strong>{" "}
+              posts retrieved via platform APIs. We produce aggregates (scores, themes, paraphrased
+              summaries). We do not sell individual user profiles scraped from private messages.
             </p>
             <p>
-              Lawful basis: <em>contract</em> (Art. 6(1)(b) GDPR) to provide the
-              dashboard you signed up for, and <em>consent</em> (Art. 6(1)(a))
-              for the cookie banner choice you made.
+              Sample sizes and method limits are shown so insights stay directional, not “census”
+              claims.
+            </p>
+          </Section>
+
+          <Section icon={CreditCard} title="Payments">
+            <p>
+              One-time fees for on-demand research are processed by Stripe Checkout. Elenchos never
+              receives or stores full card data (PCI stays with the processor). Crypto is available
+              only if enabled on the Stripe account.
             </p>
           </Section>
 
           <Section icon={Cookie} title="Cookies">
             <p>
-              We use one strictly-necessary session cookie to keep you signed in.
-              No tracking, advertising, or analytics cookies are set. You can
-              clear cookies at any time via your browser settings. You will be
-              signed out.
+              Theme preference and similar strictly useful local settings may be stored in your
+              browser. We do not use advertising or third-party analytics cookies for tracking. You
+              can clear site data in your browser at any time.
             </p>
           </Section>
 
           <Section icon={UserX} title="Your rights (GDPR)">
             <ul className="list-disc pl-5 space-y-1">
-              <li>Right to access (Art. 15): request a copy of your data.</li>
-              <li>Right to rectification (Art. 16): correct inaccurate data.</li>
-              <li>Right to erasure (Art. 17): request account deletion.</li>
-              <li>Right to restrict / object to processing (Art. 18 & 21).</li>
-              <li>Right to data portability (Art. 20).</li>
-              <li>
-                Right to lodge a complaint with your national supervisory
-                authority.
-              </li>
+              <li>Access, rectification, erasure, restriction, and portability where personal data exists.</li>
+              <li>Object to processing based on legitimate interests where applicable.</li>
+              <li>Lodge a complaint with your supervisory authority.</li>
             </ul>
             <p>
-              To exercise any right, email the controller at{" "}
-              <a href={ELENCHOS_CONTACT_MAILTO} className="text-cyan hover:underline break-all">
-                {ELENCHOS_CONTACT_EMAIL}
-              </a>{" "}
-              (this address is published here for GDPR transparency). We respond within 30 days.
+              For Research Desk orders without an account, the main artifact we hold is the{" "}
+              <strong className="text-foreground/85">report token and content</strong>. Contact us
+              with that token if you need deletion of a paid report record.
             </p>
           </Section>
 
-          <Section icon={Mail} title="Communication">
-            <p>
-              Because authentication is delegated to Google and X, we do not
-              send confirmation or password-reset emails. We only contact you
-              for essential service or security notices using the email
-              released by your identity provider. No marketing emails are sent
-              without separate, explicit opt-in, and you can unsubscribe at
-              any time from any non-essential message.
-            </p>
-          </Section>
-        </div>
-
-        <div className="mt-10 text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[11px] font-mono uppercase tracking-[0.18em] hover:bg-cyan/20"
-          >
-            Back to dashboard
-          </Link>
+          <p className="text-[12px] text-muted-foreground leading-relaxed px-1">
+            Lawful bases typically include contract (delivering a paid report) and legitimate
+            interests (operating a public research site) with minimization as design goal. This
+            notice is not legal advice.
+          </p>
         </div>
       </main>
       <SiteFooter />

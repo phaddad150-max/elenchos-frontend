@@ -25,22 +25,21 @@ export const Route = createFileRoute("/research/preview/$slug")({
   head: ({ params }) => {
     const brief = getResearchBrief(params.slug);
     const title = brief
-      ? `${brief.title.slice(0, 60)}${brief.title.length > 60 ? "…" : ""} — Research preview · Elenchos`
-      : "Research preview. Elenchos";
+      ? `${brief.title.slice(0, 55)}${brief.title.length > 55 ? "…" : ""} · Case study · Elenchos`
+      : "Research case study · Elenchos";
     const description =
       brief?.subtitle ??
-      "Internal preview of research brief. not public launch.";
+      "Deep-dive multi-source case study from the Elenchos Research Desk.";
     const url = `https://elenchos.live/research/preview/${params.slug}`;
     return {
       meta: [
         { title },
-        { name: "description", content: description },
-        { name: "robots", content: "noindex, nofollow" },
+        { name: "description", content: description.slice(0, 160) },
         { property: "og:title", content: title },
-        { property: "og:description", content: description },
+        { property: "og:description", content: description.slice(0, 200) },
         { property: "og:url", content: url },
       ],
-      links: [{ rel: "canonical", href: "https://elenchos.live/research" }],
+      links: [{ rel: "canonical", href: url }],
     };
   },
   component: ResearchPreviewBriefPage,

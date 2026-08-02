@@ -7,11 +7,20 @@ import { CommissionBriefForm } from "@/components/research/CommissionBriefForm";
 export const Route = createFileRoute("/research/commission")({
   head: () => ({
     meta: [
-      { title: "Commission a report · Research Desk · Elenchos" },
+      { title: "Commission a report · $10 / $20 · Research Desk · Elenchos" },
       {
         name: "description",
         content:
-          "On-demand Elenchos report: topic analysis $10, multi-source deep dive $10 (no X) or $20 (with X). Unique link + PDF. Privacy-first. Research tool — not legal advice.",
+          "Commission an on-demand Elenchos report: public discourse topic analysis $10, multi-source deep dive $10 without X or $20 with X. Unique private link + PDF. No account. Not legal advice.",
+      },
+      {
+        property: "og:title",
+        content: "Commission a report · $10 / $20 · Elenchos Research Desk",
+      },
+      {
+        property: "og:description",
+        content:
+          "Same method as the desk. Stripe checkout. Unique report URL. Optional email delivery not stored.",
       },
       { property: "og:url", content: "https://elenchos.live/research/commission" },
     ],

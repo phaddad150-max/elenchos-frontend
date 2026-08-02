@@ -604,23 +604,28 @@
   position: relative;
 }
 
-/* Landing mobile / tablet: responsive after heavy KPI + panel redesign */
+/* Landing mobile / tablet: KPI expand must not clip (same content as desktop) */
 @media (max-width: 1279px) {
-  /* Popover becomes in-flow so it is not clipped and fits the card width */
   .dash-kpi-hero {
-    overflow: hidden;
+    overflow: visible;
+  }
+  .dash-kpi-hero-open {
+    overflow: visible !important;
+    z-index: 50;
   }
   .dash-kpi-popover {
     position: relative !important;
     top: auto !important;
     left: auto !important;
     right: auto !important;
-    max-height: min(48vh, 320px);
+    max-height: none;
+    overflow: visible;
+    padding: 0.35rem 0.35rem 0.5rem;
+  }
+  .dash-kpi-popover-panel {
+    max-height: min(50vh, 280px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    padding-bottom: 0.65rem;
   }
 }
 @media (max-width: 639px) {

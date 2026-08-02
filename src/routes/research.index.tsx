@@ -18,13 +18,21 @@ import { RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
 export const Route = createFileRoute("/research/")({
   head: () => ({
     meta: [
-      { title: "Research Desk · Elenchos" },
+      { title: "Research Desk · Public discourse & on-demand reports · Elenchos" },
       {
         name: "description",
         content:
-          "Research Desk: public discourse analysis, deep-dive library, or on-demand report from $10. Privacy-first. Unique link + PDF.",
+          "Research Desk: Topics-style public discourse analysis, deep-dive case studies library, or commission an on-demand report from $10. Privacy-first unique link + PDF.",
       },
-      { property: "og:title", content: "Research Desk · Elenchos" },
+      {
+        property: "og:title",
+        content: "Research Desk · Socratic depth beyond the live pulse · Elenchos",
+      },
+      {
+        property: "og:description",
+        content:
+          "Three paths: live Topics intelligence, thesis-style library, or your topic on demand. No account to browse. Card data never stored on Elenchos.",
+      },
       { property: "og:url", content: "https://elenchos.live/research" },
     ],
     links: [{ rel: "canonical", href: "https://elenchos.live/research" }],

@@ -22,17 +22,17 @@ export const Route = createFileRoute("/topics/")({
   },
   head: () => ({
     meta: [
-      { title: "Topics · Elenchos" },
+      { title: "Topics · Public discourse analysis · Elenchos" },
       {
         name: "description",
         content:
-          "Explore what ordinary citizens are saying about major global issues. Real public conversations, analyzed with care and transparency.",
+          "Topics: Socratic public discourse analysis on X. Citizen sentiment and narrative gaps vs official and media frames. Sample sizes shown. Commission the same style from Research Desk.",
       },
-      { property: "og:title", content: "Topics · Elenchos" },
+      { property: "og:title", content: "Topics · Public discourse analysis · Elenchos" },
       {
         property: "og:description",
         content:
-          "Citizen sentiment and narrative gaps from public X samples. Directional insights for ordinary people.",
+          "Open a topic for citizen vs official frames and scores. Then run the same method on your own topic from Research Desk.",
       },
       { property: "og:url", content: "https://elenchos.live/topics" },
     ],
@@ -43,9 +43,9 @@ export const Route = createFileRoute("/topics/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Topics · Public Square Sentiment · Elenchos",
+          name: "Topics · Public discourse analysis · Elenchos",
           description:
-            "Citizen sentiment and narrative gaps from public X samples. Directional insights for ordinary people.",
+            "Socratic public discourse analysis: citizen sentiment and narrative gaps from public X samples.",
           url: "https://elenchos.live/topics",
         }),
       },
