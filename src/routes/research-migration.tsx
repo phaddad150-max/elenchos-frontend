@@ -5,10 +5,12 @@ import {
   ArrowRight,
   BookOpen,
   ChevronDown,
+  Copy,
   FlaskConical,
   Home,
   MapPin,
   MessageSquareWarning,
+  Share2,
   ShieldAlert,
   Timer,
 } from "lucide-react";
@@ -16,38 +18,44 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
   ACTORS,
+  ADVOCACY_FUNDING_LANE,
   CHAPTERS,
   CORRIDORS,
+  DISCOURSE_THEMES,
   EU_IBC_SERIES,
+  FRONTLINE_STATES,
   HOOK_HEADLINE,
   HOOK_KPIS,
   HOOK_SUB,
+  LABELING_PATTERN,
   MIGRATION_SOURCES,
   ORIGINS_NOTE,
+  POLICY_STANCE,
   REMEDIES,
   SCENARIOS,
   TIMELINE,
+  X_THREAD_DRAFT,
 } from "@/lib/migration/data";
 
 export const Route = createFileRoute("/research-migration")({
   head: () => ({
     meta: [
       {
-        title: "Irregular Migration Intelligence · EU & UK Channel · Elenchos",
+        title: "Irregular Migration Intelligence · Since 2011 · EU & UK · Elenchos",
       },
       {
         name: "description",
         content:
-          "Scale since 2011, corridors, elite failure, free-speech double standards, and reverse options. Free open data first. For ordinary people — under 10 minutes.",
+          "Since 2011: ~1.8M peak detections, frontline EU states, open vs resist policy, speech double standards. 10 seconds to thesis — under 10 minutes full. Free open data.",
       },
       {
         property: "og:title",
-        content: "Irregular Migration Intelligence · Elenchos",
+        content: "Illegal entry normalised. Speech against it policed. · Elenchos",
       },
       {
         property: "og:description",
         content:
-          "Illegal entry at scale, institutional failure, and what happens if hard reverse never comes. EU + UK Channel.",
+          "Since 2011 · 2015 peak ~1.8M · 2023 ~380k · 2025 ~178k. Frontline GR/IT/ES/UK. Open vs resist. Shareable national security brief.",
       },
       { property: "og:url", content: "https://elenchos.live/research-migration" },
     ],
@@ -65,6 +73,7 @@ const toneColor: Record<string, string> = {
 
 function MigrationIntelligencePage() {
   const [active, setActive] = useState(CHAPTERS[0]!.id);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const nodes = CHAPTERS.map((c) => document.getElementById(`ch-${c.id}`)).filter(
@@ -123,11 +132,14 @@ function MigrationIntelligencePage() {
               {HOOK_SUB}
             </p>
 
+            {/* Since 2011 is first in HOOK_KPIS */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-              {HOOK_KPIS.map((k) => (
+              {HOOK_KPIS.map((k, i) => (
                 <div
                   key={k.label}
-                  className="rounded-xl border border-border/90 bg-card/70 px-2.5 py-2.5 sm:px-3 sm:py-3 min-h-[88px] flex flex-col justify-between"
+                  className={`rounded-xl border border-border/90 bg-card/70 px-2.5 py-2.5 sm:px-3 sm:py-3 min-h-[88px] flex flex-col justify-between ${
+                    i === 0 ? "col-span-2 lg:col-span-1 ring-1 ring-emerald-signal/35" : ""
+                  }`}
                   style={{ borderTopColor: toneColor[k.tone], borderTopWidth: 2 }}
                 >
                   <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground leading-tight">
@@ -144,6 +156,34 @@ function MigrationIntelligencePage() {
                   </span>
                 </div>
               ))}
+            </div>
+
+            {/* Threat strip — 10s secondary signals */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="rounded-xl border border-rose-signal/35 bg-rose-signal/10 px-3 py-2.5">
+                <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-rose-signal mb-1">
+                  Frontline pressure
+                </p>
+                <p className="text-[12.5px] text-foreground/95 leading-snug font-medium">
+                  GR · IT · ES · UK Channel first — then secondary Schengen load.
+                </p>
+              </div>
+              <div className="rounded-xl border border-amber-signal/40 bg-amber-signal/10 px-3 py-2.5">
+                <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-amber-signal mb-1">
+                  Open vs resist
+                </p>
+                <p className="text-[12.5px] text-foreground/95 leading-snug font-medium">
+                  Some eras magnetised intake; others built barriers and fought courts. Policy, not vibes.
+                </p>
+              </div>
+              <div className="rounded-xl border border-cyan/40 bg-cyan/10 px-3 py-2.5">
+                <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan mb-1">
+                  Speech cost
+                </p>
+                <p className="text-[12.5px] text-foreground/95 leading-snug font-medium">
+                  Illegal entry softened in language; enforcement speech often framed as “racist.”
+                </p>
+              </div>
             </div>
 
             <div className="rounded-xl border border-amber-signal/40 bg-amber-signal/10 px-3 py-2.5 sm:px-4 sm:py-3 flex gap-2.5 items-start">
@@ -175,7 +215,7 @@ function MigrationIntelligencePage() {
                 to="/research"
                 className="inline-flex items-center gap-1 text-cyan hover:underline min-h-[36px]"
               >
-                <FlaskConical className="w-3.5 h-3.5" /> Research
+                <FlaskConical className="w-3.5 h-3.5" /> Research desk
               </Link>
               <Link
                 to="/"
@@ -278,13 +318,31 @@ function MigrationIntelligencePage() {
             </p>
           </Chapter>
 
-          {/* CH 02 Corridors */}
+          {/* CH 02 Corridors + frontline states */}
           <Chapter id="corridors" meta={CHAPTERS[1]!}>
             <p className="text-[14px] sm:text-[15px] text-foreground/90 leading-relaxed mb-4">
-              Pressure is not abstract — it hits <strong>specific entry systems</strong>.
-              Smugglers re-route when one door closes. Secondary movement inside Schengen is part
-              of the same system.
+              Pressure is not abstract — it hits <strong>specific entry systems</strong> and{" "}
+              <strong>first-line states</strong>. Smugglers re-route when one door closes.
+              Secondary movement inside Schengen is part of the same system.
             </p>
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+              Frontline / high-pressure governments
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mb-4">
+              {FRONTLINE_STATES.map((s) => (
+                <div
+                  key={s.code}
+                  className="rounded-lg border border-border/90 bg-card/50 px-2.5 py-2 min-h-[72px]"
+                >
+                  <div className="flex items-center justify-between gap-1 mb-0.5">
+                    <span className="text-[13px] font-display font-semibold text-cyan">{s.code}</span>
+                    <RiskPill risk={s.pressure} />
+                  </div>
+                  <p className="text-[11px] font-medium text-foreground/90">{s.name}</p>
+                  <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{s.role}</p>
+                </div>
+              ))}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
               {CORRIDORS.map((c) => (
                 <div
@@ -306,8 +364,48 @@ function MigrationIntelligencePage() {
             <p className="mt-3 text-[12px] text-muted-foreground leading-relaxed">{ORIGINS_NOTE}</p>
           </Chapter>
 
-          {/* CH 03 Damage */}
-          <Chapter id="damage" meta={CHAPTERS[2]!}>
+          {/* CH 03 Open vs resist */}
+          <Chapter id="stance" meta={CHAPTERS[2]!}>
+            <p className="text-[14px] sm:text-[15px] text-foreground/90 leading-relaxed mb-4">
+              Governments did not all do the same thing. Some eras <strong>magnetised</strong>{" "}
+              intake; others <strong>pushed back</strong> with fences, external processing, or
+              naval rules — and were often hit with moral labels first. This is a policy map, not a
+              purity scorecard.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-2.5">
+              {POLICY_STANCE.map((col) => (
+                <div
+                  key={col.stance}
+                  className={`rounded-xl border p-3 space-y-2 ${
+                    col.stance === "resist"
+                      ? "border-emerald-signal/40 bg-emerald-signal/5"
+                      : col.stance === "open"
+                        ? "border-rose-signal/40 bg-rose-signal/5"
+                        : "border-amber-signal/40 bg-amber-signal/5"
+                  }`}
+                >
+                  <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-foreground/90 font-semibold">
+                    {col.title}
+                  </p>
+                  <ul className="space-y-2">
+                    {col.examples.map((ex) => (
+                      <li key={ex.place} className="text-[12px] leading-snug">
+                        <span className="font-medium text-cyan">{ex.place}</span>
+                        <span className="text-muted-foreground"> — {ex.note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[11px] font-mono text-muted-foreground">
+              Falsifier: if a “resist” government delivered sustained high removals + low
+              absconding without rights theater, mark results — not slogans — as success.
+            </p>
+          </Chapter>
+
+          {/* CH 04 Damage */}
+          <Chapter id="damage" meta={CHAPTERS[3]!}>
             <p className="text-[14px] sm:text-[15px] text-foreground/90 leading-relaxed mb-3">
               For ordinary people this is not “diversity charts.” It is whether the state still
               controls the border, removes failed claimants, and protects speech about crime and
@@ -338,73 +436,84 @@ function MigrationIntelligencePage() {
                   differently; both need the same numbers.
                 </span>
               </li>
+              <li className="flex gap-2">
+                <span className="text-rose-signal shrink-0">›</span>
+                <span>
+                  <strong>Elite failure:</strong> politicians campaign control, deliver process;
+                  media softens illegal entry; NGOs/litigation can save lives and still shape route
+                  incentives; courts block removals without replacement capacity.
+                </span>
+              </li>
             </ul>
           </Chapter>
 
-          {/* CH 04 Elites */}
-          <Chapter id="elites" meta={CHAPTERS[3]!}>
-            <p className="text-[14px] sm:text-[15px] text-foreground/90 leading-relaxed mb-4">
-              Damage is not only “migrants.” It is <strong>incentives of people with power</strong>{" "}
-              who treated enforcement as optional and dissent as the scandal.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {[
-                {
-                  t: "Politicians",
-                  d: "Campaign on control; deliver process. Non-removal becomes permanent residency by default.",
-                },
-                {
-                  t: "Media",
-                  d: "Language softens illegal entry; hardens labels on critics. Scale of crime and cost often buried.",
-                },
-                {
-                  t: "NGOs",
-                  d: "Rescue and legal aid can be legitimate — and can also entrench route incentives. Funding trails matter.",
-                },
-                {
-                  t: "Lawyers & courts",
-                  d: "Rights doctrines that block removals at scale without replacement capacity = open invitation.",
-                },
-              ].map((x) => (
+          {/* CH 05 Discourse, labels, funding */}
+          <Chapter id="discourse" meta={CHAPTERS[4]!}>
+            <div className="rounded-xl border border-rose-signal/35 bg-rose-signal/10 p-3 sm:p-4 mb-4">
+              <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground leading-snug">
+                {LABELING_PATTERN.claim}
+              </p>
+            </div>
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+              Public discourse themes (citizen language)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 mb-4">
+              {DISCOURSE_THEMES.map((d) => (
                 <div
-                  key={x.t}
-                  className="rounded-xl border border-border bg-secondary/20 px-3 py-2.5"
+                  key={d.theme}
+                  className="rounded-lg border border-border bg-card/40 px-3 py-2"
                 >
-                  <p className="text-[12px] font-mono uppercase tracking-[0.12em] text-cyan mb-1">
-                    {x.t}
-                  </p>
-                  <p className="text-[13px] text-foreground/90 leading-snug">{x.d}</p>
+                  <p className="text-[13px] font-medium text-cyan">{d.theme}</p>
+                  <p className="text-[12px] text-muted-foreground leading-snug">{d.note}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-[12px] text-muted-foreground">
-              Ideological capture (far-left open-border doctrine; Islamist political influence)
-              belongs in evidence-gated sub-panels — not slogans. Thin evidence → say so.
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+              Label pattern · examples
+            </h3>
+            <ul className="space-y-1.5 mb-3 text-[13px] text-foreground/90">
+              {LABELING_PATTERN.examples.map((ex) => (
+                <li key={ex} className="flex gap-2">
+                  <span className="text-amber-signal shrink-0">›</span>
+                  <span className="leading-snug">{ex}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] font-mono text-muted-foreground mb-4 leading-relaxed">
+              Falsifier: {LABELING_PATTERN.falsifier}
             </p>
-          </Chapter>
-
-          {/* CH 05 Speech */}
-          <Chapter id="speech" meta={CHAPTERS[4]!}>
-            <div className="rounded-xl border border-rose-signal/35 bg-rose-signal/10 p-3 sm:p-4 mb-4">
-              <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground leading-snug">
-                Illegal crossing was de-moralised. Peaceful speech against the policy was often
-                re-moralised as “hate.” That is reverse civilisation.
+            <div className="rounded-xl border border-border bg-secondary/20 p-3 sm:p-3.5 space-y-2">
+              <p className="text-[12px] font-mono uppercase tracking-[0.12em] text-cyan">
+                {ADVOCACY_FUNDING_LANE.title}
+              </p>
+              <p className="text-[13px] text-foreground/90 leading-snug">{ADVOCACY_FUNDING_LANE.body}</p>
+              <ul className="space-y-1">
+                {ADVOCACY_FUNDING_LANE.method.map((m) => (
+                  <li key={m} className="text-[12px] text-muted-foreground leading-snug flex gap-2">
+                    <span className="text-cyan shrink-0">›</span>
+                    {m}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] font-mono text-muted-foreground">
+                Falsifier: {ADVOCACY_FUNDING_LANE.falsifier}
               </p>
             </div>
-            <p className="text-[13px] sm:text-[14px] text-foreground/90 leading-relaxed mb-3">
-              Across EU states, unauthorised entry is a criminal or administrative offence by
-              statute — yet political practice frequently treats it as a paperwork issue. At the
-              same time, speech laws and institutional pressure chill debate on crime, culture, and
-              borders. Document cases by jurisdiction (next data pass); the pattern is already
-              visible to citizens.
-            </p>
-            <div className="flex gap-2 items-start rounded-lg border border-border bg-card/40 px-3 py-2.5">
+            <div className="flex gap-2 items-start rounded-lg border border-border bg-card/40 px-3 py-2.5 mt-3">
               <MessageSquareWarning className="w-4 h-4 text-cyan shrink-0 mt-0.5" aria-hidden />
               <p className="text-[12.5px] text-muted-foreground leading-snug">
-                <strong className="text-foreground/90">Platform free speech (short):</strong> X
-                after ownership change reopened room for enforcement and crime video that legacy
-                channels often buried. Receipts module expands in the next pass — thesis here is
-                structural, not personality cult.
+                <strong className="text-foreground/90">X / free speech (short):</strong> after
+                platform ownership change, enforcement and crime footage that legacy channels often
+                buried re-entered mass feeds. Full receipts pass next — structure first, not
+                personality cult. Live pulse:{" "}
+                <Link
+                  to="/topics/$topicId"
+                  params={{ topicId: "eu-migration-green-divisions" }}
+                  className="text-cyan hover:underline"
+                >
+                  EU migration topic
+                </Link>
+                .
               </p>
             </div>
           </Chapter>
@@ -494,6 +603,57 @@ function MigrationIntelligencePage() {
               ))}
             </div>
           </Chapter>
+
+          {/* Share for @elenchospulse */}
+          <section
+            className="rounded-xl border border-cyan/40 bg-cyan/[0.07] p-3 sm:p-4 space-y-3"
+            aria-labelledby="share-h"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2
+                id="share-h"
+                className="text-[11px] font-mono uppercase tracking-[0.18em] text-cyan inline-flex items-center gap-2"
+              >
+                <Share2 className="w-3.5 h-3.5" aria-hidden />
+                Share pack · @elenchospulse
+              </h2>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 min-h-[44px] sm:min-h-[36px] px-3 py-2 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[12px] font-mono touch-manipulation hover:bg-cyan/25"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(X_THREAD_DRAFT.join("\n\n"));
+                    setCopied(true);
+                    window.setTimeout(() => setCopied(false), 2000);
+                  } catch {
+                    setCopied(false);
+                  }
+                }}
+              >
+                <Copy className="w-3.5 h-3.5" aria-hidden />
+                {copied ? "Copied" : "Copy 3-post thread"}
+              </button>
+            </div>
+            <ol className="space-y-2">
+              {X_THREAD_DRAFT.map((line, i) => (
+                <li
+                  key={i}
+                  className="text-[12.5px] sm:text-[13px] text-foreground/90 leading-relaxed border border-border/70 rounded-lg bg-card/40 px-3 py-2"
+                >
+                  {line}
+                </li>
+              ))}
+            </ol>
+            <p className="text-[11px] text-muted-foreground">
+              Pin:{" "}
+              <a
+                href="https://elenchos.live/research-migration"
+                className="text-cyan hover:underline break-all"
+              >
+                https://elenchos.live/research-migration
+              </a>
+            </p>
+          </section>
 
           {/* Timeline */}
           <section className="space-y-3" aria-labelledby="timeline-h">

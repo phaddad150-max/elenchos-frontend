@@ -11,8 +11,8 @@ const TABS = [
   },
   {
     to: "/research",
-    label: "Research",
-    match: (p: string) => p === "/research" || p.startsWith("/research/"),
+    label: "Desk",
+    match: (p: string) => p === "/research" || p.startsWith("/research/") || p === "/research-migration",
     icon: FlaskConical,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },

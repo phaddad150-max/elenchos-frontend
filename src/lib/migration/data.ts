@@ -272,13 +272,19 @@ export const REMEDIES: { ask: string; feasibility: string; note: string }[] = [
   },
 ];
 
-/** 10-second hook — four numbers ordinary people remember */
+/** 10-second hook — era first, then scale (ordinary people remember the arc) */
 export const HOOK_KPIS: {
   label: string;
   value: string;
   sub: string;
   tone: "rose" | "amber" | "cyan" | "emerald";
 }[] = [
+  {
+    label: "Since",
+    value: "2011",
+    sub: "Syrian war era → continuous political crisis",
+    tone: "emerald",
+  },
   {
     label: "2015 peak detections",
     value: "~1.8M",
@@ -297,12 +303,121 @@ export const HOOK_KPIS: {
     sub: "Down sharply — problem not “over”",
     tone: "cyan",
   },
+];
+
+/** Frontline pressure — schematic, route-linked (not a full league table) */
+export const FRONTLINE_STATES: {
+  code: string;
+  name: string;
+  role: string;
+  pressure: "critical" | "high" | "elevated";
+}[] = [
+  { code: "GR", name: "Greece", role: "Eastern Med islands / land — first EU door after Turkey", pressure: "critical" },
+  { code: "IT", name: "Italy", role: "Central Med landings — high volume + fatality risk", pressure: "critical" },
+  { code: "ES", name: "Spain", role: "Western Med + Canary Atlantic path", pressure: "high" },
+  { code: "UK", name: "United Kingdom", role: "Channel small boats — political flashpoint", pressure: "critical" },
+  { code: "CY", name: "Cyprus", role: "Eastern Med pressure relative to size", pressure: "high" },
+  { code: "MT", name: "Malta", role: "Central Med SAR / disembarkation stress", pressure: "elevated" },
+  { code: "BG", name: "Bulgaria", role: "Land external border + secondary routes", pressure: "elevated" },
+  { code: "FR", name: "France", role: "Channel staging + secondary movements", pressure: "high" },
+];
+
+/** Policy archetypes — dated examples, not moral scorecards */
+export const POLICY_STANCE: {
+  stance: "resist" | "open" | "mixed";
+  title: string;
+  examples: { place: string; note: string }[];
+}[] = [
   {
-    label: "Since",
-    value: "2011",
-    sub: "Syrian war era → continuous political crisis",
-    tone: "emerald",
+    stance: "resist",
+    title: "Harder external control / national pushback",
+    examples: [
+      { place: "Hungary / parts of CEE", note: "Border barrier politics; refusal of relocation quotas as sovereignty frame." },
+      { place: "Poland (selected eras)", note: "Eastern land border crisis response; security-first messaging." },
+      { place: "Italy (selected eras)", note: "Naval/NGO rules + Albania-type external processing attempts — contested in courts." },
+      { place: "Greece (selected ops)", note: "Evros fence / pushback allegations vs deterrence — both claimed; document both rails." },
+      { place: "UK", note: "Small-boat criminal focus + external processing attempts (legal veto points)." },
+    ],
   },
+  {
+    stance: "open",
+    title: "Magnet / soft-enforcement eras",
+    examples: [
+      { place: "Germany 2015–16", note: "High intake moment that defined European politics; later partial tightening." },
+      { place: "Sweden (pre-tightening eras)", note: "High per-capita asylum reputation; later policy reverse under pressure." },
+      { place: "EU institutional baseline", note: "Legal limits on removal + Dublin stress often produce de facto stays." },
+      { place: "Selected NGO–route interfaces", note: "Rescue and litigation can be life-saving and still change route incentives — research both." },
+    ],
+  },
+  {
+    stance: "mixed",
+    title: "Swing / dual track",
+    examples: [
+      { place: "France", note: "Tough rhetoric + Channel reality; speech and public-order cases in parallel." },
+      { place: "Spain", note: "Canary spikes vs Morocco cooperation cycles." },
+      { place: "Netherlands / Denmark (eras)", note: "From open reputations toward stricter national packages." },
+    ],
+  },
+];
+
+/** Public discourse themes (citizen language) — X sample depth next when authorized */
+export const DISCOURSE_THEMES: { theme: string; note: string }[] = [
+  { theme: "Housing & wages", note: "Inflows blamed for rent and low-skill wage pressure in hotspots." },
+  { theme: "Crime & two-tier policing", note: "Citizens claim unequal enforcement; needs case-level evidence, not slogans." },
+  { theme: "Boats as daily news", note: "Channel / Med landings as proof the state lost control." },
+  { theme: "Elite hypocrisy", note: "Private security for elites vs open streets for everyone else." },
+  { theme: "Speech chill", note: "Fear of job loss or prosecution for describing illegal entry as crime." },
+  { theme: "Cultural cohesion", note: "Parallel societies, no-go claims, school/hospital load — local first." },
+];
+
+/**
+ * Labeling pattern: enforcement → “racist / far-right” frames.
+ * Evidence = discourse pattern + examples to deepen; not a conspiracy dossier.
+ */
+export const LABELING_PATTERN: {
+  claim: string;
+  examples: string[];
+  falsifier: string;
+} = {
+  claim:
+    "Governments and parties that prioritise border enforcement are routinely framed as racist or far-right by segments of media, NGOs, and international bodies — while illegal entry is softened in language.",
+  examples: [
+    "CEE barrier policies covered as xenophobia first, capacity/security second.",
+    "Italian or Greek deterrence ops described as ‘far right’ even under centrist coalitions.",
+    "UK small-boat policy fights moralised as cruelty; gang profits under-emphasised.",
+    "Citizens using ‘illegal’ face etiquette policing while unauthorised entry is ‘irregular migration’.",
+  ],
+  falsifier:
+    "If major outlets consistently lead with smuggling economics, removal rates, and citizen security metrics alongside rights language, the ‘one-way moral frame’ claim weakens.",
+};
+
+/**
+ * Advocacy / funding research lane — public trails only.
+ * Open Society and similar: document public grants/missions; do not invent control networks.
+ */
+export const ADVOCACY_FUNDING_LANE: {
+  title: string;
+  body: string;
+  method: string[];
+  falsifier: string;
+} = {
+  title: "Funding & advocacy networks (open trails)",
+  body:
+    "Migration litigation, reception, and narrative work is a funded sector. Some foundations (including Open Society network entities and other large philanthropies) publish grants supporting rights, litigation, and media ecosystems. That is researchable. It is not proof of total control of Europe — it is a map of incentives.",
+  method: [
+    "Start from public grant databases and foundation annual reports.",
+    "Map org → grant purpose → country/theme (asylum, detention, speech).",
+    "Separate humanitarian rescue from strategic litigation that blocks removals.",
+    "Never substitute funder maps for Frontex detection numbers.",
+  ],
+  falsifier:
+    "If grant trails show no material link to policy outcomes in a given country-year, drop the causal claim for that cell.",
+};
+
+export const X_THREAD_DRAFT: string[] = [
+  "1/ Illegal entry at EU scale was normalised. Speech against it was often policed. Citizens paid. Full brief (10 sec → under 10 min): https://elenchos.live/research-migration",
+  "2/ Since 2011 (Syria war era) → 2015 peak ~1.8M detections → 2023 ~380k → 2025 ~178k (Frontex). Lower crossings ≠ trust restored. Corridors, elites, reverse options inside.",
+  "3/ Frontline pressure: GR · IT · ES · UK Channel. Open vs resist is policy reality — not a vibe. Enforcement states get ‘racist’ frames while illegal entry gets soft language. Evidence rails, not slogans. — @elenchospulse",
 ];
 
 export const HOOK_HEADLINE =
@@ -313,11 +428,11 @@ export const HOOK_SUB =
 
 /** Chapters designed for <10 min total (~1–1.5 min each) */
 export const CHAPTERS: { id: string; n: string; title: string; seconds: string; blurb: string }[] = [
-  { id: "scale", n: "01", title: "Scale since 2011", seconds: "~90s", blurb: "How big, how long, detections ≠ persons." },
-  { id: "corridors", n: "02", title: "Corridors & entry", seconds: "~75s", blurb: "Where pressure hits Europe and the Channel." },
-  { id: "damage", n: "03", title: "Security & damage", seconds: "~90s", blurb: "Why this is national-security scale, not a slogan." },
-  { id: "elites", n: "04", title: "Elite failure", seconds: "~90s", blurb: "Politicians, media, NGOs, courts — incentives." },
-  { id: "speech", n: "05", title: "Crime vs speech", seconds: "~75s", blurb: "Illegal crossing softened; dissent hardened." },
-  { id: "actors", n: "06", title: "Who shapes flows", seconds: "~90s", blurb: "Turkey to EU institutions — roles, not memes." },
-  { id: "reverse", n: "07", title: "If nothing changes · reverse", seconds: "~90s", blurb: "Scenarios + what citizens have asked for." },
+  { id: "scale", n: "01", title: "Scale since 2011", seconds: "~75s", blurb: "How big, how long, detections ≠ persons." },
+  { id: "corridors", n: "02", title: "Corridors & frontline", seconds: "~75s", blurb: "Entry systems + most-affected states." },
+  { id: "stance", n: "03", title: "Open vs resist", seconds: "~75s", blurb: "Policy archetypes, not moral scorecards." },
+  { id: "damage", n: "04", title: "Security & damage", seconds: "~75s", blurb: "National-security scale, not a slogan." },
+  { id: "discourse", n: "05", title: "Discourse & labels", seconds: "~90s", blurb: "Citizen themes, ‘racist’ frames, funding trails." },
+  { id: "actors", n: "06", title: "Who shapes flows", seconds: "~75s", blurb: "Turkey to EU institutions — roles, not memes." },
+  { id: "reverse", n: "07", title: "If nothing changes", seconds: "~75s", blurb: "Scenarios + reverse policies citizens asked for." },
 ];
