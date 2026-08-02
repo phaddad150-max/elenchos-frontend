@@ -49,12 +49,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 import { LIVE_TOPIC_KEYS, activeLiveTopicCount, isArchivedTopicId } from "@/lib/topic-catalog";
 import { listResearchBriefs } from "@/lib/research-catalog";
-import {
-  accumulateTotalSampleAnalyzed,
-  appendKpiHistory,
-  peekTotalSampleAnalyzed,
-  readKpiHistory,
-} from "@/lib/kpi-history";
+import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
 import { useCountUp } from "@/hooks/use-count-up";
 
 import {
@@ -369,21 +364,19 @@ function Dashboard() {
 
   const kpis = useMemo(() => {
     const coreTopics = CANONICAL_TOPICS.length;
-    // Live topics only (G7 — archived excluded from sample counts).
+    // Live topics only (archived excluded from sample counts).
     const liveCitizens = citizenSignals.filter((s) => isLiveOutputTopic(s.topic));
     const activeTopicSet = new Set<string>();
     liveCitizens.forEach((s) => s.topic && activeTopicSet.add(s.topic));
     const activeTopics = activeTopicSet.size || coreTopics;
 
-    // Prefer live-only KPI from overview when present; else sum live citizen samples.
-    const citizenPosts = liveCitizens.reduce((sum, s) => sum + (s.sample_size ?? 0), 0);
-    const overviewPosts =
-      overview?.kpis?.total_posts_analyzed ?? overview?.total_posts_analyzed ?? null;
-    // Until next backend rebuild, overview may still include archive — prefer live sum when higher-quality filter applies
+    // Same posts-analyzed number as KPI hero (mobile + desktop).
     const postsAnalyzed =
-      typeof overviewPosts === "number" && overviewPosts > 0
-        ? overviewPosts
-        : citizenPosts;
+      resolvePostsAnalyzed({
+        overview,
+        snapshots,
+        citizenSignals,
+      }) ?? 0;
 
     if (isLive && overview) {
       const regions = new Set(effectiveSignals.map((s) => s.region)).size || activeTopics;
@@ -403,7 +396,7 @@ function Dashboard() {
     const avgVelocity =
       effectiveSignals.reduce((s, x) => s + x.velocity, 0) / Math.max(effectiveSignals.length, 1);
     return { postsAnalyzed, topics: activeTopics, regions, highAlert, avgVelocity, precision: 94.2 };
-  }, [effectiveSignals, isLive, overview, citizenSignals]);
+  }, [effectiveSignals, isLive, overview, citizenSignals, snapshots]);
 
   // Citizen signals: prefer the inline `citizen_signals` array on the
   // freshest dashboard_overviews row. Fall back to the citizen_signals
@@ -512,12 +505,14 @@ function Dashboard() {
 
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-3 sm:py-6 md:py-7 space-y-3 sm:space-y-5 md:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
-        {/* KPI hero — 6 equal tracking cards */}
+        {/* KPI hero — one grid for all viewports; same data mobile + desktop */}
         <DashboardKpiGrid
           overview={overview}
           snapshots={snapshots}
+          citizenSignals={citizenSignals}
           trackerKpis={trackerKpis}
           curatedCount={curatedHighlights.length}
+          postsAnalyzed={kpis.postsAnalyzed}
         />
 
         {/* Signals + heatmap — side by side, independent heights (signal flips must not move globe) */}
@@ -2116,14 +2111,34 @@ function computePipelineConfidence(args: {
   return { composite, fetching, cleaning, reasoning, reporting, liveFacts };
 }
 
-/** Current-window sample size from snapshots + overview KPI (not cumulative). */
-function currentWindowSampleSize(
-  snapshots: Record<string, TopicSnapshot> | null,
-  overview: DashboardOverview | null,
-): number {
+/**
+ * Canonical "posts / sample analyzed" for dashboard + KPI hero.
+ * Same function everywhere so mobile and desktop never diverge.
+ * No localStorage — device-independent, server/sample-derived only.
+ *
+ * Priority:
+ * 1) overview.kpis.total_posts_analyzed (or overview.total_posts_analyzed)
+ * 2) sum of live topic snapshot samples
+ * 3) sum of live citizen_signal sample_size rows
+ */
+function resolvePostsAnalyzed(args: {
+  overview: DashboardOverview | null;
+  snapshots: Record<string, TopicSnapshot> | null;
+  citizenSignals?: CitizenSignal[] | FeedCitizenSignal[] | null;
+}): number | undefined {
+  const { overview, snapshots, citizenSignals } = args;
+  const k = overview?.kpis;
+  const fromOverview =
+    typeof k?.total_posts_analyzed === "number" && k.total_posts_analyzed > 0
+      ? Math.round(k.total_posts_analyzed)
+      : typeof overview?.total_posts_analyzed === "number" && overview.total_posts_analyzed > 0
+        ? Math.round(overview.total_posts_analyzed)
+        : 0;
+
   let fromSnaps = 0;
   if (snapshots) {
-    for (const s of Object.values(snapshots)) {
+    for (const [key, s] of Object.entries(snapshots)) {
+      if (!isLiveOutputTopic(key) && !isLiveOutputTopic(s.topic)) continue;
       const n =
         typeof s.fetched_post_count === "number" && s.fetched_post_count > 0
           ? s.fetched_post_count
@@ -2133,15 +2148,78 @@ function currentWindowSampleSize(
       fromSnaps += n;
     }
   }
+  fromSnaps = Math.round(fromSnaps);
+
+  let fromCitizens = 0;
+  if (citizenSignals?.length) {
+    for (const s of citizenSignals) {
+      if (!isLiveOutputTopic(s.topic)) continue;
+      const n =
+        typeof (s as CitizenSignal).sample_size === "number"
+          ? (s as CitizenSignal).sample_size!
+          : 0;
+      fromCitizens += n;
+    }
+  }
+  fromCitizens = Math.round(fromCitizens);
+
+  // Prefer overview when present; else best available live sample sum.
+  const n =
+    fromOverview > 0
+      ? fromOverview
+      : fromSnaps > 0
+        ? fromSnaps
+        : fromCitizens > 0
+          ? fromCitizens
+          : 0;
+  return n > 0 ? n : undefined;
+}
+
+/** Breakdown for KPI expand panel only (not alternate face values). */
+function postsAnalyzedBreakdown(args: {
+  overview: DashboardOverview | null;
+  snapshots: Record<string, TopicSnapshot> | null;
+  citizenSignals?: CitizenSignal[] | FeedCitizenSignal[] | null;
+}): string[] {
+  const { overview, snapshots, citizenSignals } = args;
   const k = overview?.kpis;
   const fromOverview =
     typeof k?.total_posts_analyzed === "number"
       ? k.total_posts_analyzed
       : typeof overview?.total_posts_analyzed === "number"
         ? overview.total_posts_analyzed
-        : 0;
-  // Prefer the larger signal for “this run” — avoid double-counting same posts
-  return Math.max(fromSnaps, fromOverview);
+        : null;
+  let fromSnaps = 0;
+  if (snapshots) {
+    for (const [key, s] of Object.entries(snapshots)) {
+      if (!isLiveOutputTopic(key) && !isLiveOutputTopic(s.topic)) continue;
+      const n =
+        typeof s.fetched_post_count === "number" && s.fetched_post_count > 0
+          ? s.fetched_post_count
+          : typeof s.sample_size === "number"
+            ? s.sample_size
+            : 0;
+      fromSnaps += n;
+    }
+  }
+  let fromCitizens = 0;
+  if (citizenSignals?.length) {
+    for (const s of citizenSignals) {
+      if (!isLiveOutputTopic(s.topic)) continue;
+      fromCitizens +=
+        typeof (s as CitizenSignal).sample_size === "number"
+          ? (s as CitizenSignal).sample_size!
+          : 0;
+    }
+  }
+  return [
+    fromOverview != null
+      ? `Overview sample total: ${Math.round(fromOverview).toLocaleString()}`
+      : "Overview sample total: not in this sample.",
+    `Live topic snapshots sum: ${Math.round(fromSnaps).toLocaleString()}`,
+    `Live citizen-signal samples: ${Math.round(fromCitizens).toLocaleString()}`,
+    "Face value uses one rule: overview first, else snapshots, else citizen rows.",
+  ];
 }
 
 function KpiHeroTile({
@@ -2220,7 +2298,7 @@ function KpiHeroTile({
         >
           <tile.icon className="w-3.5 h-3.5 sm:w-[0.95rem] sm:h-[0.95rem] text-cyan data-pulse" strokeWidth={2.2} />
         </span>
-        <span className="dash-kpi-label text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-[0.13em] text-muted-foreground leading-tight line-clamp-2 min-h-[1.9rem] w-full flex items-center justify-center text-center px-0.5">
+        <span className="dash-kpi-label text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-[0.1em] sm:tracking-[0.13em] text-muted-foreground leading-tight line-clamp-2 min-h-[1.9rem] w-full flex items-center justify-center text-center px-0.5 break-words">
           {tile.label}
         </span>
         {has ? (
@@ -2295,6 +2373,18 @@ function KpiHeroTile({
               <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
                 {tile.label}
               </p>
+              {has && (
+                <p className="text-[18px] sm:text-[16px] font-display font-semibold tabular-nums text-cyan leading-none">
+                  {tile.format === "percent"
+                    ? `${Math.round(numericValue!)}%`
+                    : Math.round(numericValue!).toLocaleString()}
+                  {tile.unit && tile.format !== "percent" ? (
+                    <span className="text-[11px] font-mono text-muted-foreground ml-1">
+                      {tile.unit}
+                    </span>
+                  ) : null}
+                </p>
+              )}
               <p className="text-[12px] sm:text-[11px] text-foreground/90 leading-snug">
                 {tile.liveNote?.trim() ||
                   (has
@@ -2372,13 +2462,18 @@ function KpiHeroTile({
 function DashboardKpiGrid({
   overview,
   snapshots,
+  citizenSignals,
   trackerKpis,
   curatedCount = 0,
+  postsAnalyzed: postsAnalyzedProp,
 }: {
   overview: DashboardOverview | null;
   snapshots: Record<string, TopicSnapshot> | null;
+  citizenSignals?: CitizenSignal[] | FeedCitizenSignal[] | null;
   trackerKpis?: { leadersRanked?: number; countriesMonitored?: number };
   curatedCount?: number;
+  /** Pass parent-resolved value so face KPI always matches globe/header posts count. */
+  postsAnalyzed?: number;
 }) {
   const k = overview?.kpis ?? {};
   // Product surface: active monitors only (exclude archived). Matches Topics page active count.
@@ -2432,21 +2527,25 @@ function DashboardKpiGrid({
           note: "Dedicated research briefs are still being added. Check back as the library grows.",
         };
 
-  const windowSample = currentWindowSampleSize(snapshots, overview);
-  const runId = overview?.generated_at ?? overview?.last_updated ?? null;
-  // Cumulative across distinct pipeline runs (client-tracked); grows when a new run lands.
-  const [totalSampleAnalyzed, setTotalSampleAnalyzed] = useState<number | undefined>(() => {
-    if (windowSample > 0) return windowSample;
-    return peekTotalSampleAnalyzed();
-  });
-  useEffect(() => {
-    if (windowSample <= 0 && !runId) {
-      const peeked = peekTotalSampleAnalyzed();
-      if (typeof peeked === "number") setTotalSampleAnalyzed(peeked);
-      return;
+  // Single sample total — same on mobile and desktop (no per-device localStorage).
+  const sampleAnalyzed = useMemo(() => {
+    if (typeof postsAnalyzedProp === "number" && postsAnalyzedProp > 0) {
+      return Math.round(postsAnalyzedProp);
     }
-    setTotalSampleAnalyzed(accumulateTotalSampleAnalyzed(runId, windowSample));
-  }, [runId, windowSample]);
+    return resolvePostsAnalyzed({ overview, snapshots, citizenSignals });
+  }, [postsAnalyzedProp, overview, snapshots, citizenSignals]);
+
+  const sampleFacts = useMemo(
+    () =>
+      postsAnalyzedBreakdown({
+        overview,
+        snapshots,
+        citizenSignals,
+      }),
+    [overview, snapshots, citizenSignals],
+  );
+
+  const runId = overview?.generated_at ?? overview?.last_updated ?? null;
 
   const accuracy = computePipelineConfidence({
     snapshots,
@@ -2528,14 +2627,14 @@ function DashboardKpiGrid({
     },
     {
       id: "sample",
-      label: "Total sample analyzed",
-      value: totalSampleAnalyzed,
+      label: "Posts analyzed",
+      value: sampleAnalyzed,
       icon: Activity,
-      format:
-        totalSampleAnalyzed != null && totalSampleAnalyzed >= 1000 ? "compact" : "number",
-      liveNote: "Posts counted across samples loaded on this desk.",
+      format: sampleAnalyzed != null && sampleAnalyzed >= 1000 ? "compact" : "number",
+      liveNote:
+        "Current published sample total — same number on mobile and desktop (not a device-local cumulative).",
       liveFacts: [
-        `Latest sample window: ${windowSample > 0 ? windowSample.toLocaleString() : "—"}`,
+        ...sampleFacts,
         typeof k.signals_generated === "number"
           ? `Signals in latest sample: ${k.signals_generated}`
           : "Signal count not in this sample yet.",
@@ -2577,7 +2676,7 @@ function DashboardKpiGrid({
     leadersRanked,
     countriesMonitored,
     caseStudiesTotal,
-    totalSampleAnalyzed,
+    sampleAnalyzed,
     accuracy.composite,
   ]);
 
@@ -2600,6 +2699,7 @@ function DashboardKpiGrid({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch min-w-0 max-sm:gap-1.5"
+      data-kpi-source="shared-desktop-mobile"
     >
       {tiles.map((t, i) => (
         <KpiHeroTile
