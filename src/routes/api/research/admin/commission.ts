@@ -90,11 +90,15 @@ export const Route = createFileRoute("/api/research/admin/commission")({
             });
 
             const report = buildUaeFintechReport(token);
+            const sharedAt = new Date().toISOString();
+            // List under Topics → Archived as commissioned (same card grid)
             await appendCommissionEvent(token, {
               status: "ready",
-              report,
+              report: { ...report, sharedPublic: true, sharedAt },
               errorMessage: null,
               stripeSessionId: `goodwill-seed-${token.slice(0, 12)}`,
+              sharedPublic: true,
+              sharedAt,
             });
 
             const reportUrl = `${origin}/research/report/${token}`;

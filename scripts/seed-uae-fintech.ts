@@ -66,6 +66,13 @@ await insert({
   error_message: null,
 });
 
+// shared_public: true → appears under Topics → Archived (Commissioned cards)
+const sharedAt = t1;
+const readyReport = {
+  ...report,
+  sharedPublic: true,
+  sharedAt,
+};
 await insert({
   id: randomUUID(),
   token,
@@ -73,10 +80,10 @@ await insert({
   package_id: "topic-analysis",
   topic: UAE_FINTECH_TOPIC,
   questions: questionsText,
-  report,
+  report: readyReport,
   created_at: t1,
-  shared_public: false,
-  shared_at: null,
+  shared_public: true,
+  shared_at: sharedAt,
   status: "ready",
   error_message: null,
 });

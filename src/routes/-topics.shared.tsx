@@ -160,37 +160,20 @@ function TopicsShell({ children }: { children: ReactNode }) {
   );
 }
 
-type SharedCommissionCard = {
+/** Shared / archived commissioned topic-analysis cards (from Research Desk). */
+type CommissionedArchiveCard = {
   token: string;
   title: string;
   topic: string;
   packageId: string;
   sharedAt: string | null;
+  sentimentScore?: number | null;
+  divergenceScore?: number | null;
 };
 
 /** Topics index: /topics */
 export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
   const [simMode] = useSimMode();
-  const [commissioned, setCommissioned] = useState<SharedCommissionCard[]>([]);
-  const [commissionedReady, setCommissionedReady] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/research/shared?kind=topic")
-      .then((r) => r.json())
-      .then((data: { items?: SharedCommissionCard[] }) => {
-        if (!cancelled) setCommissioned(Array.isArray(data.items) ? data.items : []);
-      })
-      .catch(() => {
-        if (!cancelled) setCommissioned([]);
-      })
-      .finally(() => {
-        if (!cancelled) setCommissionedReady(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   return (
     <TopicsShell>
@@ -260,58 +243,6 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
 
         <h2 className="sr-only">All topics</h2>
         <TopicsFilterableGrid simMode={simMode} onOpen={onOpen} />
-
-        {/* Opt-in shared topic-analysis commissions */}
-        <section
-          aria-labelledby="topics-commissioned"
-          className="rounded-2xl border border-cyan/25 bg-cyan/[0.04] p-4 sm:p-5 space-y-3"
-        >
-          <div>
-            <h2
-              id="topics-commissioned"
-              className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan"
-            >
-              Topics commissioned
-            </h2>
-            <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug max-w-2xl">
-              Independent on-demand topic analyses shared by commissioners — not live desk monitors
-              and not Elenchos editorial briefs.
-            </p>
-          </div>
-          {!commissionedReady && (
-            <p className="text-[12px] font-mono text-muted-foreground">Loading…</p>
-          )}
-          {commissionedReady && commissioned.length === 0 && (
-            <p className="text-[13px] text-muted-foreground leading-relaxed">
-              No shared commissioned topics yet. After you commission a topic analysis, open your
-              unique report link and choose{" "}
-              <strong className="text-foreground/85">Share on Elenchos</strong>.
-            </p>
-          )}
-          {commissioned.length > 0 && (
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {commissioned.map((c) => (
-                <li key={c.token}>
-                  <Link
-                    to="/research/report/$token"
-                    params={{ token: c.token }}
-                    className="block rounded-xl border border-border/90 bg-card/50 hover:border-cyan/45 px-3.5 py-3.5 min-h-[44px] touch-manipulation transition-colors"
-                  >
-                    <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
-                      Independently commissioned
-                    </p>
-                    <p className="text-[14px] font-display font-semibold mt-1 leading-snug break-words line-clamp-2">
-                      {c.title}
-                    </p>
-                    <p className="text-[12px] text-muted-foreground mt-1 line-clamp-2 break-words">
-                      {c.topic}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
       </motion.section>
     </TopicsShell>
   );
@@ -400,6 +331,7 @@ function TopicsFilterableGrid({
   const [dataReady, setDataReady] = useState(
     () => typeof window !== "undefined" && Boolean(window.dashboardData),
   );
+  const [commissioned, setCommissioned] = useState<CommissionedArchiveCard[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -414,6 +346,15 @@ function TopicsFilterableGrid({
     loadWowSentimentTrends().then(() => {
       if (!cancelled) setWowTick((n) => n + 1);
     });
+    // Topic-analysis commissions listed under Archived (same card grid, not a new banner)
+    fetch("/api/research/shared?kind=topic")
+      .then((r) => r.json())
+      .then((data: { items?: CommissionedArchiveCard[] }) => {
+        if (!cancelled) setCommissioned(Array.isArray(data.items) ? data.items : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCommissioned([]);
+      });
     return () => {
       cancelled = true;
     };
@@ -490,11 +431,13 @@ function TopicsFilterableGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, simMode, wowTick]);
 
-  const visibleCount = activeTopics.length + archivedTopics.length;
+  const visibleCount =
+    activeTopics.length + archivedTopics.length + commissioned.length;
   const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
   const topicGridClass =
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
   const showSkeleton = !simMode && !dataReady && typeof window !== "undefined" && !window.dashboardData;
+  const showArchivedBlock = archivedTopics.length > 0 || commissioned.length > 0;
 
   const renderTopicCard = (t: FeatureTopic, i: number, archived = false) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
@@ -542,10 +485,12 @@ function TopicsFilterableGrid({
         </div>
         <span className="text-[12px] sm:text-[13px] font-display font-medium text-muted-foreground sm:ml-auto shrink-0 tabular-nums">
           <span className="text-cyan">{activeTopics.length}</span> active
-          {archivedTopics.length > 0 && (
+          {showArchivedBlock && (
             <>
               <span className="text-border mx-1.5">·</span>
-              <span>{archivedTopics.length} archived</span>
+              <span>
+                {archivedTopics.length + commissioned.length} archived
+              </span>
             </>
           )}
         </span>
@@ -591,7 +536,7 @@ function TopicsFilterableGrid({
         </section>
       )}
 
-      {archivedTopics.length > 0 && (
+      {showArchivedBlock && (
         <section
           className="space-y-3 pt-5 mt-1 border-t border-dashed border-border/90"
           aria-labelledby="topics-archived-heading"
@@ -608,18 +553,21 @@ function TopicsFilterableGrid({
               Archived topics
             </h2>
             <span className="text-[10px] font-mono text-muted-foreground tracking-[0.08em] tabular-nums">
-              {archivedTopics.length}
+              {archivedTopics.length + commissioned.length}
             </span>
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
-              · Historical only · not live monitors
+              · Historical + commissioned · not live monitors
             </span>
           </div>
           <p className="text-[11px] sm:text-[12px] text-muted-foreground leading-relaxed max-w-2xl">
-            Read-only history. These topics stay available for review but are not part of the active
+            Read-only history and independently commissioned topic analyses. Not part of the active
             monitoring desk.
           </p>
           <div className={`${topicGridClass} opacity-90`}>
             {archivedTopics.map((t, i) => renderTopicCard(t, i, true))}
+            {commissioned.map((c, i) => (
+              <CommissionedTopicCard key={c.token} item={c} delay={i * 0.03} />
+            ))}
           </div>
         </section>
       )}
@@ -671,21 +619,81 @@ const TOPIC_CARD_SHELL =
 function TopicCardCadence({
   cadence,
 }: {
-  cadence: "realtime" | "weekly" | "monthly" | "archived";
+  cadence: "realtime" | "weekly" | "monthly" | "archived" | "commissioned";
 }) {
   return (
     <span
       className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full ${CARD_LABEL} ${
         cadence === "realtime"
           ? "text-cyan bg-cyan/10 border border-cyan/30"
-          : cadence === "archived"
-            ? "text-muted-foreground bg-secondary/40 border border-border/60"
-            : "text-muted-foreground bg-background/50 border border-border/50"
+          : cadence === "commissioned"
+            ? "text-cyan bg-cyan/8 border border-cyan/25"
+            : cadence === "archived"
+              ? "text-muted-foreground bg-secondary/40 border border-border/60"
+              : "text-muted-foreground bg-background/50 border border-border/50"
       }`}
     >
       {cadence === "realtime" && <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" />}
-      <span>{cadenceLabel(cadence, true)}</span>
+      <span>
+        {cadence === "commissioned" ? "Commissioned" : cadenceLabel(cadence, true)}
+      </span>
     </span>
+  );
+}
+
+/** Same shell as TopicCard — opens commissioned report URL (not live snapshot). */
+function CommissionedTopicCard({
+  item,
+  delay = 0,
+}: {
+  item: CommissionedArchiveCard;
+  delay?: number;
+}) {
+  const sent =
+    typeof item.sentimentScore === "number" ? Math.round(item.sentimentScore) : undefined;
+  const div =
+    typeof item.divergenceScore === "number" ? Math.round(item.divergenceScore) : undefined;
+  const sentColor =
+    typeof sent === "number"
+      ? scoreColorsSentiment(sent)
+      : "var(--muted-foreground)";
+  const divColor =
+    typeof div === "number" ? scoreColorsDivergence(div) : "var(--muted-foreground)";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      className="h-full min-w-0"
+    >
+      <Link
+        to="/research/report/$token"
+        params={{ token: item.token }}
+        className={`${TOPIC_CARD_SHELL} no-underline text-inherit`}
+      >
+        <div className="flex flex-col items-center gap-1.5 shrink-0 w-full">
+          <TopicCardCadence cadence="commissioned" />
+          <h3 className={`${CARD_TITLE} line-clamp-2 px-0.5`}>{item.topic || item.title}</h3>
+        </div>
+        <div className="h-8 w-full shrink-0 flex items-center justify-center" aria-hidden>
+          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            Independent report
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-1 flex-1 min-h-0 content-center">
+          <TopicCardScore label="Sentiment" shortLabel="Sent." value={sent} color={sentColor} />
+          <TopicCardScore label="Divergence" shortLabel="Div." value={div} color={divColor} />
+        </div>
+        <div className="mt-auto pt-2 shrink-0 w-full">
+          <span
+            className={`${CARD_CTA} border border-cyan/40 bg-cyan/10 text-cyan group-hover:bg-cyan/15`}
+          >
+            Open report
+          </span>
+        </div>
+      </Link>
+    </motion.div>
   );
 }
 

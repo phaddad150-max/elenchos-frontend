@@ -1,0 +1,58 @@
+# Manual exception: seed a commissioned topic-analysis report (no Stripe).
+# Use for the failed first customer delivery / goodwill re-runs.
+#
+# Required GitHub repo secrets:
+#   SUPABASE_URL
+#   SUPABASE_SERVICE_ROLE_KEY
+#
+# Run: Actions → "Seed commissioned report" → Run workflow
+
+name: Seed commissioned report
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Seed id (currently only uae-fintech)"
+        required: true
+        default: "uae-fintech"
+        type: choice
+        options:
+          - uae-fintech
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    name: Seed ${{ inputs.seed }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Seed UAE Fintech topic analysis (append-only)
+        if: inputs.seed == 'uae-fintech'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/seed-uae-fintech.ts
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "### Commissioned report seeded" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Seed: \`${{ inputs.seed }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Listed under **Topics → Archived** as **Commissioned** (shared_public=true)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Report URL is printed in the job log (token is unique each run)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Page layout: \`/research/report/{token}\` (Topics-style briefing + PDF)" >> "$GITHUB_STEP_SUMMARY"

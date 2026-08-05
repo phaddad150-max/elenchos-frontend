@@ -18,6 +18,9 @@ export type SharedReportListItem = {
   packageId: string;
   createdAt: string;
   sharedAt: string | null;
+  /** Optional scores for Topics archive card face (same layout as live cards) */
+  sentimentScore?: number | null;
+  divergenceScore?: number | null;
 };
 
 export type CommissionRow = {
@@ -363,6 +366,8 @@ export async function listSharedReports(
       packageId: row.package_id,
       createdAt: row.created_at,
       sharedAt: row.shared_at,
+      sentimentScore: row.report.overallSentiment?.score ?? null,
+      divergenceScore: row.report.divergenceScore ?? null,
     });
   }
 
@@ -402,6 +407,8 @@ export async function listSharedReports(
             packageId: r.package_id,
             createdAt: r.created_at,
             sharedAt: r.shared_at ?? null,
+            sentimentScore: r.report?.overallSentiment?.score ?? null,
+            divergenceScore: r.report?.divergenceScore ?? null,
           });
         }
       }
