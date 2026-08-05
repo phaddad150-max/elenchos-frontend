@@ -32,6 +32,7 @@ import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
+import { Route as ApiResearchEmailRouteImport } from './routes/api/research/email'
 import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
 import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
 import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
@@ -156,6 +157,11 @@ const ApiResearchCheckoutRoute = ApiResearchCheckoutRouteImport.update({
   path: '/api/research/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiResearchEmailRoute = ApiResearchEmailRouteImport.update({
+  id: '/api/research/email',
+  path: '/api/research/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
   id: '/api/research/finalize',
   path: '/api/research/finalize',
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
+  '/api/research/email': typeof ApiResearchEmailRoute
   '/api/research/finalize': typeof ApiResearchFinalizeRoute
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/trackers': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
+  '/api/research/email': typeof ApiResearchEmailRoute
   '/api/research/finalize': typeof ApiResearchFinalizeRoute
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/trackers/': typeof TrackersIndexRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
+  '/api/research/email': typeof ApiResearchEmailRoute
   '/api/research/finalize': typeof ApiResearchFinalizeRoute
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/trackers/'
     | '/api/public/contact'
     | '/api/research/checkout'
+    | '/api/research/email'
     | '/api/research/finalize'
     | '/api/research/share'
     | '/api/research/shared'
@@ -356,6 +366,7 @@ export interface FileRouteTypes {
     | '/trackers'
     | '/api/public/contact'
     | '/api/research/checkout'
+    | '/api/research/email'
     | '/api/research/finalize'
     | '/api/research/share'
     | '/api/research/shared'
@@ -389,6 +400,7 @@ export interface FileRouteTypes {
     | '/trackers/'
     | '/api/public/contact'
     | '/api/research/checkout'
+    | '/api/research/email'
     | '/api/research/finalize'
     | '/api/research/share'
     | '/api/research/shared'
@@ -422,6 +434,7 @@ export interface RootRouteChildren {
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiResearchCheckoutRoute: typeof ApiResearchCheckoutRoute
+  ApiResearchEmailRoute: typeof ApiResearchEmailRoute
   ApiResearchFinalizeRoute: typeof ApiResearchFinalizeRoute
   ApiResearchShareRoute: typeof ApiResearchShareRoute
   ApiResearchSharedRoute: typeof ApiResearchSharedRoute
@@ -595,6 +608,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiResearchCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/research/email': {
+      id: '/api/research/email'
+      path: '/api/research/email'
+      fullPath: '/api/research/email'
+      preLoaderRoute: typeof ApiResearchEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/research/finalize': {
       id: '/api/research/finalize'
       path: '/api/research/finalize'
@@ -688,6 +708,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackersIndexRoute: TrackersIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiResearchCheckoutRoute: ApiResearchCheckoutRoute,
+  ApiResearchEmailRoute: ApiResearchEmailRoute,
   ApiResearchFinalizeRoute: ApiResearchFinalizeRoute,
   ApiResearchShareRoute: ApiResearchShareRoute,
   ApiResearchSharedRoute: ApiResearchSharedRoute,

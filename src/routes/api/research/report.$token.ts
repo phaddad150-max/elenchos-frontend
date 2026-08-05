@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getReportByToken } from "@/lib/research-desk/store.server";
+import { getCommission, getReportByToken } from "@/lib/research-desk/store.server";
 import { reportToPdfBytes, reportToPlainText } from "@/lib/research-desk/build-report";
 
 export const Route = createFileRoute("/api/research/report/$token")({
@@ -10,16 +10,47 @@ export const Route = createFileRoute("/api/research/report/$token")({
         if (!token || token.length < 8) {
           return Response.json({ error: "Not found" }, { status: 404 });
         }
-        const report = await getReportByToken(token);
-        if (!report) {
+
+        const commission = await getCommission(token);
+        const report = commission?.report ?? (await getReportByToken(token));
+        if (!report && !commission) {
           return Response.json({ error: "Not found" }, { status: 404 });
         }
 
         const url = new URL(request.url);
         const format = url.searchParams.get("format");
 
+        // Status-only for polling while generating
+        if (url.searchParams.get("meta") === "1") {
+          return Response.json({
+            token,
+            status: commission?.status ?? report?.generationStatus ?? "ready",
+            error: commission?.error_message ?? report?.generationError ?? null,
+            hasReport: Boolean(report),
+          });
+        }
+
+        if (!report) {
+          return Response.json(
+            {
+              error: "Report not ready",
+              status: commission?.status ?? "generating",
+            },
+            { status: 202 },
+          );
+        }
+
+        // Merge generation status onto report for the page
+        const payload = {
+          ...report,
+          generationStatus:
+            commission?.status ?? report.generationStatus ?? "ready",
+          generationError:
+            commission?.error_message ?? report.generationError ?? undefined,
+        };
+
         if (format === "pdf") {
-          const bytes = reportToPdfBytes(report);
+          const bytes = reportToPdfBytes(payload);
           const ab = bytes.buffer.slice(
             bytes.byteOffset,
             bytes.byteOffset + bytes.byteLength,
@@ -34,7 +65,7 @@ export const Route = createFileRoute("/api/research/report/$token")({
           });
         }
         if (format === "txt") {
-          return new Response(reportToPlainText(report), {
+          return new Response(reportToPlainText(payload), {
             status: 200,
             headers: {
               "Content-Type": "text/plain; charset=utf-8",
@@ -44,7 +75,7 @@ export const Route = createFileRoute("/api/research/report/$token")({
           });
         }
 
-        return Response.json(report, {
+        return Response.json(payload, {
           headers: { "Cache-Control": "private, no-store" },
         });
       },

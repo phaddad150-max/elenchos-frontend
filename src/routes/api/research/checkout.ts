@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { DESK_PACKAGES, isDeskPackageId } from "@/lib/research-desk/packages";
+import { createPendingCommission } from "@/lib/research-desk/store.server";
 
 const BodySchema = z.object({
   packageId: z.string(),
-  topic: z.string().trim().min(8).max(2000),
-  questions: z.string().trim().max(4000).optional().default(""),
+  topic: z.string().trim().min(8).max(8000),
+  questions: z.string().trim().max(16000).optional().default(""),
   /** Optional delivery email — passed to Stripe only, never stored by Elenchos */
   email: z.string().trim().email().max(200).optional().or(z.literal("")),
 });
@@ -48,23 +49,31 @@ export const Route = createFileRoute("/api/research/checkout")({
           const origin = siteOrigin(request);
           const token = crypto.randomUUID().replace(/-/g, "");
 
+          // CRITICAL: store full topic + questions BEFORE Stripe.
+          // Do NOT put long text in Stripe metadata (500 char cap truncates 9 questions).
+          await createPendingCommission({
+            token,
+            packageId,
+            topic: topic.trim(),
+            questions: (questions || "").trim(),
+          });
+
           const params = new URLSearchParams();
           params.set("mode", "payment");
-          params.set("success_url", `${origin}/research/report/${token}?session_id={CHECKOUT_SESSION_ID}`);
+          params.set(
+            "success_url",
+            `${origin}/research/report/${token}?session_id={CHECKOUT_SESSION_ID}`,
+          );
           params.set("cancel_url", `${origin}/research/commission?cancelled=1`);
           params.set("client_reference_id", token);
           params.set("metadata[token]", token);
           params.set("metadata[packageId]", packageId);
-          params.set("metadata[topic]", topic.slice(0, 450));
-          params.set("metadata[questions]", (questions || "").slice(0, 450));
+          // Short display crumbs only — full brief is in DB by token
+          params.set("metadata[topicHint]", topic.trim().slice(0, 80));
           params.set("payment_method_types[0]", "card");
-          // Crypto when enabled on the Stripe account
           params.set("payment_method_types[1]", "crypto");
           params.set("line_items[0][quantity]", "1");
-          params.set(
-            "line_items[0][price_data][currency]",
-            "usd",
-          );
+          params.set("line_items[0][price_data][currency]", "usd");
           params.set(
             "line_items[0][price_data][unit_amount]",
             String(pkg.priceUsd * 100),
@@ -75,7 +84,7 @@ export const Route = createFileRoute("/api/research/checkout")({
           );
           params.set(
             "line_items[0][price_data][product_data][description]",
-            `On-demand report (unique link + PDF). Topic stored without personal identity.`,
+            `On-demand briefing (unique link + PDF). Full brief stored by token — not in card metadata.`,
           );
           if (email) {
             params.set("customer_email", email);
@@ -95,7 +104,6 @@ export const Route = createFileRoute("/api/research/checkout")({
             error?: { message?: string };
           };
           if (!res.ok || !data.url) {
-            // Retry without crypto if account doesn't support it
             if (data.error?.message?.toLowerCase().includes("crypto")) {
               params.delete("payment_method_types[1]");
               const res2 = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -106,7 +114,11 @@ export const Route = createFileRoute("/api/research/checkout")({
                 },
                 body: params.toString(),
               });
-              const data2 = (await res2.json()) as { id?: string; url?: string; error?: { message?: string } };
+              const data2 = (await res2.json()) as {
+                id?: string;
+                url?: string;
+                error?: { message?: string };
+              };
               if (!res2.ok || !data2.url) {
                 console.error("[checkout] stripe error", data2.error?.message);
                 return Response.json(

@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { buildDeskReport } from "@/lib/research-desk/build-report";
+import { generateCommissionedReport } from "@/lib/research-desk/generate-report.server";
 import { isDeskPackageId } from "@/lib/research-desk/packages";
-import { getReportByToken, saveReport } from "@/lib/research-desk/store.server";
+import {
+  getCommission,
+  updateCommission,
+} from "@/lib/research-desk/store.server";
 import { sendReportLinkEmail } from "@/lib/research-desk/email.server";
 
 /**
- * Stripe webhook (optional if finalize is always called from success page).
- * Configure endpoint: https://elenchos.live/api/research/webhook
- * Events: checkout.session.completed
- *
- * Note: signature verification requires raw body; when STRIPE_WEBHOOK_SECRET is set we verify.
+ * Stripe webhook for checkout.session.completed.
+ * Configure: https://elenchos.live/api/research/webhook
  */
 export const Route = createFileRoute("/api/research/webhook")({
   server: {
@@ -28,12 +28,10 @@ export const Route = createFileRoute("/api/research/webhook")({
         };
 
         if (whSecret) {
-          // Lightweight check: Stripe-Signature present; full crypto verify recommended in production
           const sig = request.headers.get("stripe-signature");
           if (!sig) {
             return Response.json({ error: "missing signature" }, { status: 400 });
           }
-          // Use Stripe SDK verify if available
           try {
             const Stripe = (await import("stripe")).default;
             const stripe = new Stripe(secret);
@@ -66,25 +64,44 @@ export const Route = createFileRoute("/api/research/webhook")({
         }
 
         const meta = session.metadata || {};
-        const token = (meta.token || crypto.randomUUID().replace(/-/g, "")).slice(0, 64);
-        const packageId = meta.packageId || "topic-analysis";
-        if (!isDeskPackageId(packageId)) {
-          return Response.json({ received: true });
-        }
-        if (await getReportByToken(token)) {
-          return Response.json({ received: true, token });
+        const token = (meta.token || "").slice(0, 64);
+        if (!token) {
+          return Response.json({ received: true, warn: "no token" });
         }
 
-        const topic = (meta.topic || "Untitled").slice(0, 2000);
-        const questions = (meta.questions || "").slice(0, 4000);
-        const report = buildDeskReport({ token, packageId, topic, questionsRaw: questions });
-        await saveReport({
-          token,
+        const commission = await getCommission(token);
+        if (!commission) {
+          return Response.json({ received: true, warn: "no commission" });
+        }
+
+        if (
+          commission.status === "ready" &&
+          commission.report?.generatedBy === "ai"
+        ) {
+          return Response.json({ received: true, token, status: "already-ready" });
+        }
+
+        await updateCommission(token, {
           stripeSessionId: session.id,
+          status: "generating",
+        });
+
+        const packageId = isDeskPackageId(commission.package_id)
+          ? commission.package_id
+          : "topic-analysis";
+
+        const report = await generateCommissionedReport({
+          token,
           packageId,
-          topic,
-          questions,
-          report,
+          topic: commission.topic,
+          questionsRaw: commission.questions,
+        });
+
+        await updateCommission(token, {
+          stripeSessionId: session.id,
+          status: "ready",
+          report: { ...report, generationStatus: "ready" },
+          errorMessage: report.generationError ?? null,
         });
 
         const email = session.customer_details?.email || session.customer_email || "";
@@ -94,11 +111,11 @@ export const Route = createFileRoute("/api/research/webhook")({
           await sendReportLinkEmail({
             to: email,
             reportUrl: `${origin}/research/report/${token}`,
-            topic,
+            topic: commission.topic,
           });
         }
 
-        return Response.json({ received: true, token });
+        return Response.json({ received: true, token, status: "ready" });
       },
     },
   },

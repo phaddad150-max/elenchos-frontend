@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { buildDeskReport } from "@/lib/research-desk/build-report";
+import { generateCommissionedReport } from "@/lib/research-desk/generate-report.server";
 import { isDeskPackageId } from "@/lib/research-desk/packages";
-import { getReportByToken, getTokenBySession, saveReport } from "@/lib/research-desk/store.server";
+import {
+  getCommission,
+  getReportByToken,
+  getTokenBySession,
+  updateCommission,
+} from "@/lib/research-desk/store.server";
 import { sendReportLinkEmail } from "@/lib/research-desk/email.server";
 
 const BodySchema = z.object({
@@ -35,12 +40,15 @@ export const Route = createFileRoute("/api/research/finalize")({
           }
           const { sessionId, token: clientToken } = parsed.data;
 
-          // Already finalized?
           const existingToken = await getTokenBySession(sessionId);
           if (existingToken) {
             const report = await getReportByToken(existingToken);
-            if (report) {
-              return Response.json({ token: existingToken, reportUrl: `${siteOrigin(request)}/research/report/${existingToken}` });
+            if (report?.generationStatus === "ready" || report?.status === "ready") {
+              return Response.json({
+                token: existingToken,
+                reportUrl: `${siteOrigin(request)}/research/report/${existingToken}`,
+                status: "ready",
+              });
             }
           }
 
@@ -60,53 +68,97 @@ export const Route = createFileRoute("/api/research/finalize")({
             error?: { message?: string };
           };
           if (!res.ok) {
-            return Response.json({ error: session.error?.message || "Session not found" }, { status: 404 });
+            return Response.json(
+              { error: session.error?.message || "Session not found" },
+              { status: 404 },
+            );
           }
           if (session.payment_status !== "paid" && session.status !== "complete") {
             return Response.json({ error: "Payment not completed" }, { status: 402 });
           }
 
           const meta = session.metadata || {};
-          const token = (clientToken || meta.token || crypto.randomUUID().replace(/-/g, "")).slice(0, 64);
-          const packageId = meta.packageId || "topic-analysis";
-          if (!isDeskPackageId(packageId)) {
-            return Response.json({ error: "Invalid package on session" }, { status: 400 });
+          const token = (clientToken || meta.token || "").slice(0, 64);
+          if (!token) {
+            return Response.json({ error: "Missing report token" }, { status: 400 });
           }
-          const topic = (meta.topic || "Untitled research topic").slice(0, 2000);
-          const questions = (meta.questions || "").slice(0, 4000);
 
-          const already = await getReportByToken(token);
-          if (already) {
+          // Load FULL brief from pre-checkout store (not truncated Stripe metadata)
+          let commission = await getCommission(token);
+          if (!commission) {
+            // Legacy path: only metadata (may be truncated)
+            const packageId = meta.packageId || "topic-analysis";
+            if (!isDeskPackageId(packageId)) {
+              return Response.json({ error: "Invalid package on session" }, { status: 400 });
+            }
+            const { createPendingCommission } = await import(
+              "@/lib/research-desk/store.server"
+            );
+            await createPendingCommission({
+              token,
+              packageId,
+              topic: (meta.topic || meta.topicHint || "Untitled research topic").slice(0, 8000),
+              questions: (meta.questions || "").slice(0, 16000),
+            });
+            commission = await getCommission(token);
+          }
+          if (!commission) {
+            return Response.json({ error: "Commission not found" }, { status: 404 });
+          }
+
+          // Already fully generated
+          if (
+            commission.status === "ready" &&
+            commission.report?.generatedBy === "ai" &&
+            commission.report.questionAnalyses?.some(
+              (q) => q.answer && !q.answer.includes("pending"),
+            )
+          ) {
+            await updateCommission(token, { stripeSessionId: sessionId });
             return Response.json({
               token,
               reportUrl: `${siteOrigin(request)}/research/report/${token}`,
+              status: "ready",
             });
           }
 
-          const report = buildDeskReport({ token, packageId, topic, questionsRaw: questions });
-          await saveReport({
-            token,
+          await updateCommission(token, {
             stripeSessionId: sessionId,
-            packageId,
-            topic,
-            questions,
-            report,
+            status: "generating",
+            errorMessage: null,
           });
 
-          // Optional one-shot email from Stripe customer details — never stored
+          const packageId = isDeskPackageId(commission.package_id)
+            ? commission.package_id
+            : "topic-analysis";
+
+          const report = await generateCommissionedReport({
+            token,
+            packageId,
+            topic: commission.topic,
+            questionsRaw: commission.questions,
+          });
+
+          await updateCommission(token, {
+            stripeSessionId: sessionId,
+            status: "ready",
+            report: { ...report, generationStatus: "ready" },
+            errorMessage: report.generationError ?? null,
+          });
+
           const email =
             session.customer_details?.email?.trim() ||
             session.customer_email?.trim() ||
             "";
           if (email) {
             const reportUrl = `${siteOrigin(request)}/research/report/${token}`;
-            await sendReportLinkEmail({ to: email, reportUrl, topic });
-            // email variable ends here — not written to store
+            await sendReportLinkEmail({ to: email, reportUrl, topic: commission.topic });
           }
 
           return Response.json({
             token,
             reportUrl: `${siteOrigin(request)}/research/report/${token}`,
+            status: "ready",
           });
         } catch (e) {
           console.error("[finalize]", e);
