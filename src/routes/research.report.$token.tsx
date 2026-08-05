@@ -256,8 +256,13 @@ function ReportPage() {
                       Share on Elenchos?
                     </p>
                     <p className="text-[12px] text-muted-foreground leading-relaxed break-words">
-                      Optional. List this paid report in the public Research library. Topic + report
-                      body only — no email or payment data.
+                      Optional. Topic-analysis shares appear under{" "}
+                      <strong className="text-foreground/85">Topics → Topics commissioned</strong>.
+                      Deep-dive shares appear under{" "}
+                      <strong className="text-foreground/85">
+                        Library → Independently commissioned
+                      </strong>
+                      . Topic + report body only — no email or payment data.
                     </p>
                   </div>
                 </div>

@@ -5,7 +5,11 @@ import {
   getCommission,
   updateCommission,
 } from "@/lib/research-desk/store.server";
-import { sendReportLinkEmail } from "@/lib/research-desk/email.server";
+import {
+  notifyOpsReportReady,
+  sendReportLinkEmail,
+} from "@/lib/research-desk/email.server";
+import { parseQuestions } from "@/lib/research-desk/build-report";
 
 /**
  * Stripe webhook for checkout.session.completed.
@@ -97,6 +101,7 @@ export const Route = createFileRoute("/api/research/webhook")({
           questionsRaw: commission.questions,
         });
 
+        // Append-only ready row
         await updateCommission(token, {
           stripeSessionId: session.id,
           status: "ready",
@@ -104,13 +109,27 @@ export const Route = createFileRoute("/api/research/webhook")({
           errorMessage: report.generationError ?? null,
         });
 
+        const origin =
+          process.env.SITE_URL?.replace(/\/$/, "") || "https://elenchos.live";
+        const reportUrl = `${origin}/research/report/${token}`;
+        const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
+
+        await notifyOpsReportReady({
+          token,
+          topic: commission.topic,
+          packageId,
+          reportUrl,
+          pdfUrl,
+          questionCount: parseQuestions(commission.questions).length,
+          status: "ready",
+          generatedBy: report.generatedBy,
+        });
+
         const email = session.customer_details?.email || session.customer_email || "";
         if (email) {
-          const origin =
-            process.env.SITE_URL?.replace(/\/$/, "") || "https://elenchos.live";
           await sendReportLinkEmail({
             to: email,
-            reportUrl: `${origin}/research/report/${token}`,
+            reportUrl,
             topic: commission.topic,
           });
         }

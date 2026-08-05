@@ -1,15 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { listSharedReports } from "@/lib/research-desk/store.server";
+import {
+  listSharedReports,
+  type SharedKind,
+} from "@/lib/research-desk/store.server";
 
-/** Public list of opt-in shared Research Desk reports (no PII). */
+/** Public list of opt-in shared commissions (no PII). kind=topic|deep|all */
 export const Route = createFileRoute("/api/research/shared")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
         try {
-          const items = await listSharedReports(40);
+          const url = new URL(request.url);
+          const raw = (url.searchParams.get("kind") || "all").toLowerCase();
+          const kind: SharedKind =
+            raw === "topic" || raw === "deep" || raw === "all" ? raw : "all";
+          const items = await listSharedReports(40, kind);
           return Response.json(
-            { items },
+            { items, kind },
             {
               headers: {
                 "Cache-Control": "public, max-age=30, stale-while-revalidate=60",
@@ -18,7 +25,7 @@ export const Route = createFileRoute("/api/research/shared")({
           );
         } catch (e) {
           console.error("[research-shared-list]", e);
-          return Response.json({ items: [] }, { status: 200 });
+          return Response.json({ items: [], kind: "all" }, { status: 200 });
         }
       },
     },

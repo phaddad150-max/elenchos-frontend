@@ -1,7 +1,8 @@
 /**
- * Report store — NO personal data (no email, no name, no payment PAN).
- * Primary: Supabase service role table research_desk_reports
- * Fallback: process memory (single-instance / dev only)
+ * Append-only Research Desk store.
+ * GOLDEN RULE: never UPDATE/DELETE/UPSERT intelligence or commission rows.
+ * Every state change inserts a NEW row; readers take the latest by token + created_at.
+ * No personal identity fields (no email, name, PAN).
  */
 import {
   buildDeskReport,
@@ -20,6 +21,7 @@ export type SharedReportListItem = {
 };
 
 export type CommissionRow = {
+  id?: string;
   token: string;
   stripe_session_id: string | null;
   package_id: DeskPackageId;
@@ -33,7 +35,8 @@ export type CommissionRow = {
   error_message: string | null;
 };
 
-const mem = new Map<string, CommissionRow>();
+/** In-memory append log (dev / missing service role). Latest per token is last write. */
+const memLog: CommissionRow[] = [];
 const bySession = new Map<string, string>();
 
 function supabaseConfig() {
@@ -56,7 +59,75 @@ function withShareFlag(report: DeskReport, shared: boolean, sharedAt: string | n
   };
 }
 
-/** Create pending commission BEFORE Stripe — full topic + questions preserved. */
+function newId(): string {
+  return crypto.randomUUID();
+}
+
+/** INSERT-only. Never merge, never patch. */
+async function appendRow(row: CommissionRow): Promise<boolean> {
+  memLog.push(row);
+  if (row.stripe_session_id) {
+    bySession.set(row.stripe_session_id, row.token);
+  }
+
+  const { url, key } = supabaseConfig();
+  if (!key) {
+    console.warn("[research-desk] No SUPABASE_SERVICE_ROLE_KEY — append in memory only");
+    return true;
+  }
+
+  try {
+    const res = await fetch(`${url}/rest/v1/research_desk_reports`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        // NEVER Prefer: resolution=merge-duplicates — that overwrites
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        id: row.id ?? newId(),
+        token: row.token,
+        stripe_session_id: row.stripe_session_id,
+        package_id: row.package_id,
+        topic: row.topic.slice(0, 8000),
+        questions: row.questions.slice(0, 16000),
+        report: row.report,
+        created_at: row.created_at,
+        shared_public: row.shared_public,
+        shared_at: row.shared_at,
+        status: row.status,
+        error_message: row.error_message,
+      }),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      console.error("[research-desk] append insert failed", res.status, t.slice(0, 300));
+      return false;
+    }
+    console.info("[research-desk] append ok", {
+      token: row.token.slice(0, 8),
+      status: row.status,
+      topicLen: row.topic.length,
+      questionsLen: row.questions.length,
+      shared: row.shared_public,
+    });
+    return true;
+  } catch (e) {
+    console.error("[research-desk] append error", e);
+    return false;
+  }
+}
+
+function latestFromMem(token: string): CommissionRow | null {
+  for (let i = memLog.length - 1; i >= 0; i--) {
+    if (memLog[i]!.token === token) return memLog[i]!;
+  }
+  return null;
+}
+
+/** Create pending commission BEFORE Stripe — full topic + questions. INSERT only. */
 export async function createPendingCommission(input: {
   token: string;
   packageId: DeskPackageId;
@@ -71,7 +142,8 @@ export async function createPendingCommission(input: {
     questionsRaw: input.questions,
     generationStatus: "pending_payment",
   });
-  const row: CommissionRow = {
+  await appendRow({
+    id: newId(),
     token: input.token,
     stripe_session_id: null,
     package_id: input.packageId,
@@ -83,65 +155,29 @@ export async function createPendingCommission(input: {
     shared_at: null,
     status: "pending_payment",
     error_message: null,
-  };
-  mem.set(input.token, row);
-
-  const { url, key } = supabaseConfig();
-  if (!key) {
-    console.warn("[research-desk] No SUPABASE_SERVICE_ROLE_KEY — pending commission in memory only");
-    return;
-  }
-  try {
-    const res = await fetch(`${url}/rest/v1/research_desk_reports`, {
-      method: "POST",
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates,return=minimal",
-      },
-      body: JSON.stringify({
-        token: input.token,
-        stripe_session_id: null,
-        package_id: input.packageId,
-        topic: input.topic.slice(0, 8000),
-        questions: input.questions.slice(0, 16000),
-        report: placeholder,
-        created_at,
-        shared_public: false,
-        shared_at: null,
-        status: "pending_payment",
-        error_message: null,
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      console.error("[research-desk] pending save failed", res.status, t.slice(0, 300));
-    }
-  } catch (e) {
-    console.error("[research-desk] pending save error", e);
-  }
+  });
 }
 
 export async function getCommission(token: string): Promise<CommissionRow | null> {
-  const local = mem.get(token);
-  if (local) return local;
+  const local = latestFromMem(token);
 
   const { url, key } = supabaseConfig();
-  if (!key) return null;
+  if (!key) return local;
+
   try {
     const res = await fetch(
-      `${url}/rest/v1/research_desk_reports?token=eq.${encodeURIComponent(token)}&select=*&limit=1`,
+      `${url}/rest/v1/research_desk_reports?token=eq.${encodeURIComponent(token)}&select=*&order=created_at.desc&limit=1`,
       {
         headers: { apikey: key, Authorization: `Bearer ${key}` },
       },
     );
-    if (!res.ok) return null;
+    if (!res.ok) return local;
     const rows = (await res.json()) as CommissionRow[];
     const row = rows?.[0];
-    if (!row) return null;
-    // normalize
+    if (!row) return local;
+
     const normalized: CommissionRow = {
+      id: row.id,
       token: row.token,
       stripe_session_id: row.stripe_session_id ?? null,
       package_id: row.package_id as DeskPackageId,
@@ -154,13 +190,16 @@ export async function getCommission(token: string): Promise<CommissionRow | null
       status: (row.status as DeskReportStatus) || "ready",
       error_message: row.error_message ?? null,
     };
-    mem.set(token, normalized);
+    // Keep mem aligned for same-process reads (does not overwrite DB)
+    if (!local || local.created_at < normalized.created_at) {
+      memLog.push(normalized);
+    }
     if (normalized.stripe_session_id) {
       bySession.set(normalized.stripe_session_id, token);
     }
     return normalized;
   } catch {
-    return null;
+    return local;
   }
 }
 
@@ -176,7 +215,7 @@ export async function getTokenBySession(sessionId: string): Promise<string | nul
   if (!key) return null;
   try {
     const res = await fetch(
-      `${url}/rest/v1/research_desk_reports?stripe_session_id=eq.${encodeURIComponent(sessionId)}&select=token&limit=1`,
+      `${url}/rest/v1/research_desk_reports?stripe_session_id=eq.${encodeURIComponent(sessionId)}&select=token&order=created_at.desc&limit=1`,
       {
         headers: { apikey: key, Authorization: `Bearer ${key}` },
       },
@@ -191,7 +230,11 @@ export async function getTokenBySession(sessionId: string): Promise<string | nul
   }
 }
 
-export async function updateCommission(
+/**
+ * Append a new version of the commission (status / report / share).
+ * NEVER patches existing rows.
+ */
+export async function appendCommissionEvent(
   token: string,
   patch: Partial<{
     stripeSessionId: string | null;
@@ -205,71 +248,45 @@ export async function updateCommission(
   const existing = await getCommission(token);
   if (!existing) return false;
 
-  if (patch.stripeSessionId !== undefined) {
-    existing.stripe_session_id = patch.stripeSessionId;
-    if (patch.stripeSessionId) bySession.set(patch.stripeSessionId, token);
+  const created_at = new Date().toISOString();
+  const sharedPublic =
+    patch.sharedPublic !== undefined ? patch.sharedPublic : existing.shared_public;
+  const sharedAt =
+    patch.sharedAt !== undefined ? patch.sharedAt : existing.shared_at;
+  let report = patch.report !== undefined ? patch.report : existing.report;
+  if (report) {
+    report = withShareFlag(report, sharedPublic, sharedAt);
   }
-  if (patch.status !== undefined) existing.status = patch.status;
-  if (patch.errorMessage !== undefined) existing.error_message = patch.errorMessage;
-  if (patch.report !== undefined) {
-    existing.report = withShareFlag(
-      patch.report,
-      existing.shared_public,
-      existing.shared_at,
-    );
-  }
-  if (patch.sharedPublic !== undefined) {
-    existing.shared_public = patch.sharedPublic;
-    if (existing.report) {
-      existing.report = withShareFlag(
-        existing.report,
-        patch.sharedPublic,
-        patch.sharedAt ?? existing.shared_at,
-      );
-    }
-  }
-  if (patch.sharedAt !== undefined) existing.shared_at = patch.sharedAt;
 
-  mem.set(token, existing);
-
-  const { url, key } = supabaseConfig();
-  if (!key) return true;
-
-  const body: Record<string, unknown> = {};
-  if (patch.stripeSessionId !== undefined) body.stripe_session_id = patch.stripeSessionId;
-  if (patch.status !== undefined) body.status = patch.status;
-  if (patch.errorMessage !== undefined) body.error_message = patch.errorMessage;
-  if (patch.report !== undefined) body.report = existing.report;
-  if (patch.sharedPublic !== undefined) body.shared_public = patch.sharedPublic;
-  if (patch.sharedAt !== undefined) body.shared_at = patch.sharedAt;
-
-  try {
-    const res = await fetch(
-      `${url}/rest/v1/research_desk_reports?token=eq.${encodeURIComponent(token)}`,
-      {
-        method: "PATCH",
-        headers: {
-          apikey: key,
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-          Prefer: "return=minimal",
-        },
-        body: JSON.stringify(body),
-      },
-    );
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      console.error("[research-desk] update failed", res.status, t.slice(0, 200));
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error("[research-desk] update error", e);
-    return false;
-  }
+  return appendRow({
+    id: newId(),
+    token: existing.token,
+    stripe_session_id:
+      patch.stripeSessionId !== undefined
+        ? patch.stripeSessionId
+        : existing.stripe_session_id,
+    package_id: existing.package_id,
+    topic: existing.topic,
+    questions: existing.questions,
+    report,
+    created_at,
+    shared_public: sharedPublic,
+    shared_at: sharedAt,
+    status: patch.status !== undefined ? patch.status : existing.status,
+    error_message:
+      patch.errorMessage !== undefined ? patch.errorMessage : existing.error_message,
+  });
 }
 
-/** @deprecated use updateCommission after createPendingCommission */
+/** @deprecated name — append-only alias */
+export async function updateCommission(
+  token: string,
+  patch: Parameters<typeof appendCommissionEvent>[1],
+): Promise<boolean> {
+  return appendCommissionEvent(token, patch);
+}
+
+/** @deprecated prefer createPending + appendCommissionEvent */
 export async function saveReport(row: {
   token: string;
   stripeSessionId: string;
@@ -279,25 +296,19 @@ export async function saveReport(row: {
   report: DeskReport;
 }): Promise<void> {
   const existing = await getCommission(row.token);
-  if (existing) {
-    await updateCommission(row.token, {
-      stripeSessionId: row.stripeSessionId,
-      status: "ready",
-      report: row.report,
-      errorMessage: null,
+  if (!existing) {
+    await createPendingCommission({
+      token: row.token,
+      packageId: row.packageId as DeskPackageId,
+      topic: row.topic,
+      questions: row.questions,
     });
-    return;
   }
-  await createPendingCommission({
-    token: row.token,
-    packageId: row.packageId as DeskPackageId,
-    topic: row.topic,
-    questions: row.questions,
-  });
-  await updateCommission(row.token, {
+  await appendCommissionEvent(row.token, {
     stripeSessionId: row.stripeSessionId,
     status: "ready",
     report: row.report,
+    errorMessage: null,
   });
 }
 
@@ -309,23 +320,43 @@ export async function setReportShared(
   if (!existing) return { ok: false, error: "Report not found" };
   const sharedAt = share ? new Date().toISOString() : null;
   const next = withShareFlag(existing, share, sharedAt);
-  const ok = await updateCommission(token, {
+  // Append new row — never overwrite prior share state history
+  const ok = await appendCommissionEvent(token, {
     sharedPublic: share,
     sharedAt,
     report: next,
+    status: "ready",
   });
-  if (!ok) return { ok: false, error: "Could not update share setting" };
+  if (!ok) return { ok: false, error: "Could not append share event" };
   return { ok: true, report: next };
 }
 
-export async function listSharedReports(limit = 40): Promise<SharedReportListItem[]> {
-  const out: SharedReportListItem[] = [];
-  const seen = new Set<string>();
+export type SharedKind = "topic" | "deep" | "all";
 
-  for (const row of mem.values()) {
+function packageMatchesKind(packageId: string, kind: SharedKind): boolean {
+  if (kind === "all") return true;
+  if (kind === "topic") return packageId === "topic-analysis";
+  return packageId === "deep-no-x" || packageId === "deep-with-x";
+}
+
+/**
+ * Latest shared version per token (append-only history).
+ * kind=topic → topic-analysis only
+ * kind=deep → deep-no-x | deep-with-x
+ */
+export async function listSharedReports(
+  limit = 40,
+  kind: SharedKind = "all",
+): Promise<SharedReportListItem[]> {
+  const byToken = new Map<string, SharedReportListItem>();
+
+  // Memory: scan newest first
+  for (let i = memLog.length - 1; i >= 0; i--) {
+    const row = memLog[i]!;
     if (!row.shared_public || !row.report) continue;
-    seen.add(row.token);
-    out.push({
+    if (!packageMatchesKind(row.package_id, kind)) continue;
+    if (byToken.has(row.token)) continue;
+    byToken.set(row.token, {
       token: row.token,
       title: row.report.title,
       topic: row.topic,
@@ -338,8 +369,14 @@ export async function listSharedReports(limit = 40): Promise<SharedReportListIte
   const { url, key } = supabaseConfig();
   if (key) {
     try {
+      let filter = "shared_public=eq.true";
+      if (kind === "topic") {
+        filter += "&package_id=eq.topic-analysis";
+      } else if (kind === "deep") {
+        filter += "&package_id=in.(deep-no-x,deep-with-x)";
+      }
       const res = await fetch(
-        `${url}/rest/v1/research_desk_reports?shared_public=eq.true&select=token,topic,package_id,report,created_at,shared_at&order=shared_at.desc.nullslast&limit=${Math.min(limit, 100)}`,
+        `${url}/rest/v1/research_desk_reports?${filter}&select=token,topic,package_id,report,created_at,shared_at,shared_public&order=created_at.desc&limit=${Math.min(limit * 5, 200)}`,
         {
           headers: { apikey: key, Authorization: `Bearer ${key}` },
         },
@@ -352,10 +389,13 @@ export async function listSharedReports(limit = 40): Promise<SharedReportListIte
           report?: DeskReport;
           created_at: string;
           shared_at?: string | null;
+          shared_public?: boolean;
         }[];
         for (const r of rows) {
-          if (seen.has(r.token)) continue;
-          out.push({
+          if (!r.shared_public) continue;
+          if (!packageMatchesKind(r.package_id, kind)) continue;
+          if (byToken.has(r.token)) continue;
+          byToken.set(r.token, {
             token: r.token,
             title: r.report?.title ?? `Report · ${r.topic.slice(0, 60)}`,
             topic: r.topic,
@@ -370,6 +410,7 @@ export async function listSharedReports(limit = 40): Promise<SharedReportListIte
     }
   }
 
+  const out = Array.from(byToken.values());
   out.sort((a, b) => {
     const ta = a.sharedAt || a.createdAt;
     const tb = b.sharedAt || b.createdAt;

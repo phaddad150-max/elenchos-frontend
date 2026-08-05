@@ -8,7 +8,11 @@ import {
   getTokenBySession,
   updateCommission,
 } from "@/lib/research-desk/store.server";
-import { sendReportLinkEmail } from "@/lib/research-desk/email.server";
+import {
+  notifyOpsReportReady,
+  sendReportLinkEmail,
+} from "@/lib/research-desk/email.server";
+import { parseQuestions } from "@/lib/research-desk/build-report";
 
 const BodySchema = z.object({
   sessionId: z.string().min(8).max(200),
@@ -139,6 +143,7 @@ export const Route = createFileRoute("/api/research/finalize")({
             questionsRaw: commission.questions,
           });
 
+          // Append-only: new row for ready state (never overwrite pending row)
           await updateCommission(token, {
             stripeSessionId: sessionId,
             status: "ready",
@@ -146,18 +151,35 @@ export const Route = createFileRoute("/api/research/finalize")({
             errorMessage: report.generationError ?? null,
           });
 
+          const origin = siteOrigin(request);
+          const reportUrl = `${origin}/research/report/${token}`;
+          const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
+          const qCount = parseQuestions(commission.questions).length;
+
+          // Always notify Elenchos ops
+          await notifyOpsReportReady({
+            token,
+            topic: commission.topic,
+            packageId,
+            reportUrl,
+            pdfUrl,
+            questionCount: qCount,
+            status: "ready",
+            generatedBy: report.generatedBy,
+          });
+
+          // Optional: payer email from Stripe only (not stored)
           const email =
             session.customer_details?.email?.trim() ||
             session.customer_email?.trim() ||
             "";
           if (email) {
-            const reportUrl = `${siteOrigin(request)}/research/report/${token}`;
             await sendReportLinkEmail({ to: email, reportUrl, topic: commission.topic });
           }
 
           return Response.json({
             token,
-            reportUrl: `${siteOrigin(request)}/research/report/${token}`,
+            reportUrl,
             status: "ready",
           });
         } catch (e) {

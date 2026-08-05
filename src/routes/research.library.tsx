@@ -58,7 +58,8 @@ function ResearchLibraryPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/research/shared")
+    // Deep-dive packages only — topic-analysis shares live under Topics → Topics commissioned
+    fetch("/api/research/shared?kind=deep")
       .then((r) => r.json())
       .then((data: { items?: SharedItem[] }) => {
         if (!cancelled) setShared(Array.isArray(data.items) ? data.items : []);
@@ -144,7 +145,7 @@ function ResearchLibraryPage() {
           <div className="flex gap-1.5 overflow-x-auto pb-0.5 custom-scroll overscroll-x-contain">
             <JumpChip href="#lib-crisis" label="Crisis" tone="rose" />
             <JumpChip href="#lib-thesis" label="Case studies" tone="cyan" />
-            <JumpChip href="#lib-community" label="Community" tone="cyan" />
+            <JumpChip href="#lib-commissioned" label="Commissioned" tone="cyan" />
             <JumpChip href="#lib-idx" label="Indexes" tone="amber" />
             <JumpChip href="#lib-commission" label="Commission" tone="cyan" />
           </div>
@@ -195,22 +196,25 @@ function ResearchLibraryPage() {
           </div>
         </section>
 
-        {/* Community shared paid reports */}
-        <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-community">
+        {/* Independently commissioned deep-dive reports (opt-in share) */}
+        <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-commissioned">
           <SectionHead
-            id="lib-community"
+            id="lib-commissioned"
             tone="cyan"
-            title="Community reports"
-            sub="Paid on-demand reports that owners chose to share on Elenchos. Opt-in only."
+            title="Independently commissioned"
+            sub="Deep-dive reports commissioned by users and shared by them — not Elenchos editorial case studies. Topic-analysis shares appear under Topics → Topics commissioned."
             icon={<Share2 className="w-3.5 h-3.5" />}
           />
           {!sharedReady && (
-            <p className="text-[12px] font-mono text-muted-foreground px-0.5">Loading shared reports…</p>
+            <p className="text-[12px] font-mono text-muted-foreground px-0.5">
+              Loading commissioned reports…
+            </p>
           )}
           {sharedReady && shared.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-card/30 px-4 py-4 text-[13px] text-muted-foreground leading-relaxed">
-              No community reports yet. After you commission a report, open your unique link and choose{" "}
-              <strong className="text-foreground/85">Share on Elenchos library</strong>.
+              No independently commissioned deep-dive reports shared yet. After you commission a
+              multi-source report, open your unique link and choose{" "}
+              <strong className="text-foreground/85">Share on Elenchos</strong>.
             </div>
           )}
           <div className="space-y-2.5">
@@ -219,7 +223,7 @@ function ResearchLibraryPage() {
                 key={s.token}
                 to="/research/report/$token"
                 params={{ token: s.token }}
-                kicker={`Community · ${s.packageId}`}
+                kicker={`Independently commissioned · ${s.packageId}`}
                 title={s.title}
                 body={s.topic}
                 accent="cyan"

@@ -160,9 +160,37 @@ function TopicsShell({ children }: { children: ReactNode }) {
   );
 }
 
+type SharedCommissionCard = {
+  token: string;
+  title: string;
+  topic: string;
+  packageId: string;
+  sharedAt: string | null;
+};
+
 /** Topics index: /topics */
 export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
   const [simMode] = useSimMode();
+  const [commissioned, setCommissioned] = useState<SharedCommissionCard[]>([]);
+  const [commissionedReady, setCommissionedReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/research/shared?kind=topic")
+      .then((r) => r.json())
+      .then((data: { items?: SharedCommissionCard[] }) => {
+        if (!cancelled) setCommissioned(Array.isArray(data.items) ? data.items : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCommissioned([]);
+      })
+      .finally(() => {
+        if (!cancelled) setCommissionedReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <TopicsShell>
@@ -232,6 +260,58 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
 
         <h2 className="sr-only">All topics</h2>
         <TopicsFilterableGrid simMode={simMode} onOpen={onOpen} />
+
+        {/* Opt-in shared topic-analysis commissions */}
+        <section
+          aria-labelledby="topics-commissioned"
+          className="rounded-2xl border border-cyan/25 bg-cyan/[0.04] p-4 sm:p-5 space-y-3"
+        >
+          <div>
+            <h2
+              id="topics-commissioned"
+              className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan"
+            >
+              Topics commissioned
+            </h2>
+            <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug max-w-2xl">
+              Independent on-demand topic analyses shared by commissioners — not live desk monitors
+              and not Elenchos editorial briefs.
+            </p>
+          </div>
+          {!commissionedReady && (
+            <p className="text-[12px] font-mono text-muted-foreground">Loading…</p>
+          )}
+          {commissionedReady && commissioned.length === 0 && (
+            <p className="text-[13px] text-muted-foreground leading-relaxed">
+              No shared commissioned topics yet. After you commission a topic analysis, open your
+              unique report link and choose{" "}
+              <strong className="text-foreground/85">Share on Elenchos</strong>.
+            </p>
+          )}
+          {commissioned.length > 0 && (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {commissioned.map((c) => (
+                <li key={c.token}>
+                  <Link
+                    to="/research/report/$token"
+                    params={{ token: c.token }}
+                    className="block rounded-xl border border-border/90 bg-card/50 hover:border-cyan/45 px-3.5 py-3.5 min-h-[44px] touch-manipulation transition-colors"
+                  >
+                    <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
+                      Independently commissioned
+                    </p>
+                    <p className="text-[14px] font-display font-semibold mt-1 leading-snug break-words line-clamp-2">
+                      {c.title}
+                    </p>
+                    <p className="text-[12px] text-muted-foreground mt-1 line-clamp-2 break-words">
+                      {c.topic}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </motion.section>
     </TopicsShell>
   );
