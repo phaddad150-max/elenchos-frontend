@@ -40,6 +40,7 @@ import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/we
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
 import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
 import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
+import { Route as ApiResearchAdminCommissionRouteImport } from './routes/api/research/admin/commission'
 import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -197,6 +198,12 @@ const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
   path: '/research/report/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiResearchAdminCommissionRoute =
+  ApiResearchAdminCommissionRouteImport.update({
+    id: '/api/research/admin/commission',
+    path: '/api/research/admin/commission',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiResearchReportTokenRoute = ApiResearchReportTokenRouteImport.update({
   id: '/api/research/report/$token',
   path: '/api/research/report/$token',
@@ -235,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
   '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
 export interface FileRoutesByTo {
@@ -269,6 +277,7 @@ export interface FileRoutesByTo {
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview': typeof ResearchPreviewIndexRoute
+  '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
   '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
 export interface FileRoutesById {
@@ -304,6 +313,7 @@ export interface FileRoutesById {
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
   '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
 export interface FileRouteTypes {
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/preview/'
+    | '/api/research/admin/commission'
     | '/api/research/report/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/preview'
+    | '/api/research/admin/commission'
     | '/api/research/report/$token'
   id:
     | '__root__'
@@ -408,6 +420,7 @@ export interface FileRouteTypes {
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/preview/'
+    | '/api/research/admin/commission'
     | '/api/research/report/$token'
   fileRoutesById: FileRoutesById
 }
@@ -442,6 +455,7 @@ export interface RootRouteChildren {
   ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
   ResearchReportTokenRoute: typeof ResearchReportTokenRoute
   ResearchPreviewIndexRoute: typeof ResearchPreviewIndexRoute
+  ApiResearchAdminCommissionRoute: typeof ApiResearchAdminCommissionRoute
   ApiResearchReportTokenRoute: typeof ApiResearchReportTokenRoute
 }
 
@@ -664,6 +678,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchReportTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/research/admin/commission': {
+      id: '/api/research/admin/commission'
+      path: '/api/research/admin/commission'
+      fullPath: '/api/research/admin/commission'
+      preLoaderRoute: typeof ApiResearchAdminCommissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/research/report/$token': {
       id: '/api/research/report/$token'
       path: '/api/research/report/$token'
@@ -716,6 +737,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
   ResearchReportTokenRoute: ResearchReportTokenRoute,
   ResearchPreviewIndexRoute: ResearchPreviewIndexRoute,
+  ApiResearchAdminCommissionRoute: ApiResearchAdminCommissionRoute,
   ApiResearchReportTokenRoute: ApiResearchReportTokenRoute,
 }
 export const routeTree = rootRouteImport
