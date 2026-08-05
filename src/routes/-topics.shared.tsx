@@ -592,12 +592,19 @@ function TopicsFilterableGrid({
             Read-only history and independently commissioned topic analyses. Not part of the active
             monitoring desk.
           </p>
-          <div className={`${topicGridClass} opacity-90`}>
-            {archivedTopics.map((t, i) => renderTopicCard(t, i, true))}
-            {commissioned.map((c, i) => (
-              <CommissionedTopicCard key={c.token} item={c} delay={i * 0.03} />
-            ))}
-          </div>
+          {/* Commissioned first so they are not buried under historical cards */}
+          {commissioned.length > 0 && (
+            <div className={topicGridClass}>
+              {commissioned.map((c) => (
+                <CommissionedTopicCard key={c.token} item={c} />
+              ))}
+            </div>
+          )}
+          {archivedTopics.length > 0 && (
+            <div className={`${topicGridClass} opacity-90`}>
+              {archivedTopics.map((t, i) => renderTopicCard(t, i, true))}
+            </div>
+          )}
         </section>
       )}
     </div>
@@ -670,10 +677,11 @@ function TopicCardCadence({
   );
 }
 
-/** Same shell as TopicCard — opens commissioned report URL (not live snapshot). */
+/** Same shell as TopicCard — opens commissioned report URL (not live snapshot).
+ *  No framer initial opacity:0 — that left cards invisible when animation missed.
+ */
 function CommissionedTopicCard({
   item,
-  delay = 0,
 }: {
   item: CommissionedArchiveCard;
   delay?: number;
@@ -690,16 +698,12 @@ function CommissionedTopicCard({
     typeof div === "number" ? scoreColorsDivergence(div) : "var(--muted-foreground)";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      className="h-full min-w-0"
-    >
+    <div className="h-full min-w-0">
       <Link
         to="/research/report/$token"
         params={{ token: item.token }}
-        className={`${TOPIC_CARD_SHELL} no-underline text-inherit`}
+        className={`${TOPIC_CARD_SHELL} no-underline text-inherit opacity-100`}
+        style={{ opacity: 1 }}
       >
         <div className="flex flex-col items-center gap-1.5 shrink-0 w-full">
           <TopicCardCadence cadence="commissioned" />
@@ -722,7 +726,7 @@ function CommissionedTopicCard({
           </span>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 
