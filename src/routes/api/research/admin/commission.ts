@@ -13,6 +13,7 @@ import {
 import {
   buildUaeFintechReport,
   UAE_FINTECH_QUESTIONS,
+  UAE_FINTECH_REPORT_TOKEN,
   UAE_FINTECH_TOPIC,
 } from "@/lib/research-desk/seeds/uae-fintech-dominance";
 
@@ -76,36 +77,37 @@ export const Route = createFileRoute("/api/research/admin/commission")({
           const token = crypto.randomUUID().replace(/-/g, "");
           const origin = siteOrigin(request);
 
-          // ── Seed: UAE Fintech goodwill re-run ─────────────────────
+          // ── Seed: UAE Fintech goodwill re-run (fixed token) ───────
           if (parsed.data.seed === "uae-fintech") {
+            const seedToken = UAE_FINTECH_REPORT_TOKEN;
             const questionsText = UAE_FINTECH_QUESTIONS.map(
               (q, i) => `${i + 1}. ${q}`,
             ).join("\n");
 
             await createPendingCommission({
-              token,
+              token: seedToken,
               packageId: "topic-analysis",
               topic: UAE_FINTECH_TOPIC,
               questions: questionsText,
             });
 
-            const report = buildUaeFintechReport(token);
+            const report = buildUaeFintechReport(seedToken);
             const sharedAt = new Date().toISOString();
             // List under Topics → Archived as commissioned (same card grid)
-            await appendCommissionEvent(token, {
+            await appendCommissionEvent(seedToken, {
               status: "ready",
               report: { ...report, sharedPublic: true, sharedAt },
               errorMessage: null,
-              stripeSessionId: `goodwill-seed-${token.slice(0, 12)}`,
+              stripeSessionId: `goodwill-seed-${seedToken.slice(0, 12)}`,
               sharedPublic: true,
               sharedAt,
             });
 
-            const reportUrl = `${origin}/research/report/${token}`;
-            const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
+            const reportUrl = `${origin}/research/report/${seedToken}`;
+            const pdfUrl = `${origin}/api/research/report/${seedToken}?format=pdf`;
 
             await notifyOpsReportReady({
-              token,
+              token: seedToken,
               topic: UAE_FINTECH_TOPIC,
               packageId: "topic-analysis",
               reportUrl,
@@ -118,7 +120,7 @@ export const Route = createFileRoute("/api/research/admin/commission")({
             return Response.json({
               ok: true,
               seed: "uae-fintech",
-              token,
+              token: seedToken,
               topic: UAE_FINTECH_TOPIC,
               questionCount: UAE_FINTECH_QUESTIONS.length,
               reportUrl,

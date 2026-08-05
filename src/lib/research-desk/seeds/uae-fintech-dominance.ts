@@ -2,8 +2,14 @@
  * Goodwill re-run: first paid commission (Fintech UAE/MENA).
  * Full topic + 9 questions + structured Topics-style analysis.
  * Append-only insert only — never overwrites existing rows.
+ *
+ * FIXED TOKEN so the report is always reachable and listable under
+ * Topics → Archived even if Supabase seed/workflow has not run.
  */
 import type { DeskReport } from "../build-report";
+
+/** Stable public handle for this exception delivery (not a random UUID). */
+export const UAE_FINTECH_REPORT_TOKEN = "uae-fintech-dominance-mena-2026";
 
 export const UAE_FINTECH_TOPIC =
   "UAE Fintech Dominance in MENA: Trust, Policy and Leadership";

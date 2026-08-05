@@ -10,6 +10,7 @@ import { randomUUID } from "node:crypto";
 import {
   buildUaeFintechReport,
   UAE_FINTECH_QUESTIONS,
+  UAE_FINTECH_REPORT_TOKEN,
   UAE_FINTECH_TOPIC,
 } from "../src/lib/research-desk/seeds/uae-fintech-dominance";
 
@@ -27,7 +28,8 @@ if (!key) {
   process.exit(1);
 }
 
-const token = randomUUID().replace(/-/g, "");
+// Fixed token so Topics archive + customer URL stay stable
+const token = UAE_FINTECH_REPORT_TOKEN;
 const questionsText = UAE_FINTECH_QUESTIONS.map((q, i) => `${i + 1}. ${q}`).join("\n");
 const report = buildUaeFintechReport(token);
 const t0 = new Date().toISOString();

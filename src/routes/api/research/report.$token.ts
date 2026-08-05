@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getCommission, getReportByToken } from "@/lib/research-desk/store.server";
 import { reportToPdfBytes, reportToPlainText } from "@/lib/research-desk/build-report";
+import { getStaticCommissionedReport } from "@/lib/research-desk/seeds/catalog";
 
 export const Route = createFileRoute("/api/research/report/$token")({
   server: {
@@ -12,7 +13,11 @@ export const Route = createFileRoute("/api/research/report/$token")({
         }
 
         const commission = await getCommission(token);
-        const report = commission?.report ?? (await getReportByToken(token));
+        // Prefer DB, then static goodwill seeds (always available for customer delivery)
+        const report =
+          commission?.report ??
+          (await getReportByToken(token)) ??
+          getStaticCommissionedReport(token);
         if (!report && !commission) {
           return Response.json({ error: "Not found" }, { status: 404 });
         }

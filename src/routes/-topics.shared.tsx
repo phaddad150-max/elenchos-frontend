@@ -52,6 +52,7 @@ import {
   isArchivedTopicId,
   isNewTopicBadge,
 } from "@/lib/topic-catalog";
+import { STATIC_TOPIC_COMMISSIONED_ARCHIVE } from "@/lib/research-desk/seeds/catalog";
 import { TopicAnalysisPage } from "@/components/topic-analysis/TopicAnalysisPage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -331,7 +332,18 @@ function TopicsFilterableGrid({
   const [dataReady, setDataReady] = useState(
     () => typeof window !== "undefined" && Boolean(window.dashboardData),
   );
-  const [commissioned, setCommissioned] = useState<CommissionedArchiveCard[]>([]);
+  // Static catalog always present so Archived never depends only on API/seed
+  const [commissioned, setCommissioned] = useState<CommissionedArchiveCard[]>(() =>
+    STATIC_TOPIC_COMMISSIONED_ARCHIVE.map((s) => ({
+      token: s.token,
+      title: s.title,
+      topic: s.topic,
+      packageId: s.packageId,
+      sharedAt: s.sharedAt,
+      sentimentScore: s.sentimentScore,
+      divergenceScore: s.divergenceScore,
+    })),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -346,14 +358,31 @@ function TopicsFilterableGrid({
     loadWowSentimentTrends().then(() => {
       if (!cancelled) setWowTick((n) => n + 1);
     });
-    // Topic-analysis commissions listed under Archived (same card grid, not a new banner)
+    // Merge API shared topic commissions into static archive (dedupe by token)
     fetch("/api/research/shared?kind=topic")
       .then((r) => r.json())
       .then((data: { items?: CommissionedArchiveCard[] }) => {
-        if (!cancelled) setCommissioned(Array.isArray(data.items) ? data.items : []);
+        if (cancelled) return;
+        const fromApi = Array.isArray(data.items) ? data.items : [];
+        const byToken = new Map<string, CommissionedArchiveCard>();
+        for (const s of STATIC_TOPIC_COMMISSIONED_ARCHIVE) {
+          byToken.set(s.token, {
+            token: s.token,
+            title: s.title,
+            topic: s.topic,
+            packageId: s.packageId,
+            sharedAt: s.sharedAt,
+            sentimentScore: s.sentimentScore,
+            divergenceScore: s.divergenceScore,
+          });
+        }
+        for (const c of fromApi) {
+          byToken.set(c.token, c);
+        }
+        setCommissioned(Array.from(byToken.values()));
       })
       .catch(() => {
-        if (!cancelled) setCommissioned([]);
+        /* keep static catalog */
       });
     return () => {
       cancelled = true;
