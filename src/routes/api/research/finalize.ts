@@ -13,6 +13,10 @@ import {
   sendReportLinkEmail,
 } from "@/lib/research-desk/email.server";
 import { parseQuestions } from "@/lib/research-desk/build-report";
+import {
+  dispatchCommissionPipeline,
+  packageNeedsXPipeline,
+} from "@/lib/research-desk/dispatch-pipeline.server";
 
 const BodySchema = z.object({
   sessionId: z.string().min(8).max(200),
@@ -90,7 +94,6 @@ export const Route = createFileRoute("/api/research/finalize")({
           // Load FULL brief from pre-checkout store (not truncated Stripe metadata)
           let commission = await getCommission(token);
           if (!commission) {
-            // Legacy path: only metadata (may be truncated)
             const packageId = meta.packageId || "topic-analysis";
             if (!isDeskPackageId(packageId)) {
               return Response.json({ error: "Invalid package on session" }, { status: 400 });
@@ -110,10 +113,12 @@ export const Route = createFileRoute("/api/research/finalize")({
             return Response.json({ error: "Commission not found" }, { status: 404 });
           }
 
-          // Already fully generated
+          // Already fully generated with real analysis
           if (
             commission.status === "ready" &&
-            commission.report?.generatedBy === "ai" &&
+            commission.report &&
+            (commission.report.generatedBy === "ai" ||
+              commission.report.generatedBy === "hybrid") &&
             commission.report.questionAnalyses?.some(
               (q) => q.answer && !q.answer.includes("pending"),
             )
@@ -123,6 +128,15 @@ export const Route = createFileRoute("/api/research/finalize")({
               token,
               reportUrl: `${siteOrigin(request)}/research/report/${token}`,
               status: "ready",
+            });
+          }
+
+          // Pipeline still running (webhook dispatched backend)
+          if (commission.status === "generating") {
+            return Response.json({
+              token,
+              reportUrl: `${siteOrigin(request)}/research/report/${token}`,
+              status: "generating",
             });
           }
 
@@ -136,6 +150,42 @@ export const Route = createFileRoute("/api/research/finalize")({
             ? commission.package_id
             : "topic-analysis";
 
+          const origin = siteOrigin(request);
+          const reportUrl = `${origin}/research/report/${token}`;
+          const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
+          const qCount = parseQuestions(commission.questions).length;
+
+          // X packages: Topics pipeline via GitHub Actions
+          if (packageNeedsXPipeline(packageId)) {
+            const dispatched = await dispatchCommissionPipeline({
+              token,
+              topic: commission.topic,
+              questions: commission.questions,
+              packageId,
+            });
+
+            if (dispatched.ok && dispatched.mode === "dispatched") {
+              await notifyOpsReportReady({
+                token,
+                topic: commission.topic,
+                packageId,
+                reportUrl,
+                pdfUrl,
+                questionCount: qCount,
+                status: "generating",
+                generatedBy: "ai",
+              }).catch(() => undefined);
+
+              return Response.json({
+                token,
+                reportUrl,
+                status: "generating",
+                pipeline: "dispatched",
+              });
+            }
+            console.warn("[finalize] dispatch failed, AI fallback", dispatched.detail);
+          }
+
           const report = await generateCommissionedReport({
             token,
             packageId,
@@ -143,7 +193,6 @@ export const Route = createFileRoute("/api/research/finalize")({
             questionsRaw: commission.questions,
           });
 
-          // Append-only: new row for ready state (never overwrite pending row)
           await updateCommission(token, {
             stripeSessionId: sessionId,
             status: "ready",
@@ -151,12 +200,6 @@ export const Route = createFileRoute("/api/research/finalize")({
             errorMessage: report.generationError ?? null,
           });
 
-          const origin = siteOrigin(request);
-          const reportUrl = `${origin}/research/report/${token}`;
-          const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
-          const qCount = parseQuestions(commission.questions).length;
-
-          // Always notify Elenchos ops
           await notifyOpsReportReady({
             token,
             topic: commission.topic,
@@ -168,7 +211,6 @@ export const Route = createFileRoute("/api/research/finalize")({
             generatedBy: report.generatedBy,
           });
 
-          // Optional: payer email from Stripe only (not stored)
           const email =
             session.customer_details?.email?.trim() ||
             session.customer_email?.trim() ||

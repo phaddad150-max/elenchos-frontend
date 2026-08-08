@@ -97,10 +97,13 @@ function ReportPage() {
             attempts += 1;
             try {
               const ok = await loadReport();
-              if (ok || attempts > 40) {
+              // Backend pipeline can take several minutes (X fetch + Pass-1)
+              if (ok || attempts > 120) {
                 setLoading(false);
-                if (!ok && attempts > 40) {
-                  setError("Generation is taking longer than expected. Refresh this page in a minute.");
+                if (!ok && attempts > 120) {
+                  setError(
+                    "Generation is taking longer than expected. Your unique link will work when ready — refresh in a few minutes.",
+                  );
                 }
                 return;
               }
@@ -201,35 +204,44 @@ function ReportPage() {
     <div className="page-shell dash-landing research-brief-shell">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
-      <main className="max-w-[900px] mx-auto w-full min-w-0 px-3 sm:px-4 py-6 sm:py-8 mobile-safe-bottom relative flex-1 overflow-x-clip">
-        <div className="flex flex-wrap gap-2 mb-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-cyan min-h-[40px]"
-          >
+      {/* Same width rhythm as live topic analysis pages */}
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-5 md:py-8 mobile-safe-bottom relative flex-1 overflow-x-clip">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground mb-4"
+        >
+          <Link to="/" className="hover:text-cyan min-h-[36px] inline-flex items-center gap-1">
             <Home className="w-3.5 h-3.5" /> Home
           </Link>
+          <span aria-hidden>/</span>
+          <Link to="/topics" className="hover:text-cyan min-h-[36px] inline-flex items-center">
+            Topics
+          </Link>
+          <span aria-hidden>/</span>
+          <span className="text-foreground/85">Commissioned briefing</span>
+          <span className="text-border mx-1 hidden sm:inline">·</span>
           <Link
             to="/research"
-            className="inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-cyan min-h-[40px]"
+            className="hover:text-cyan min-h-[36px] inline-flex items-center gap-1"
           >
-            <FlaskConical className="w-3.5 h-3.5" /> Research Desk
+            <FlaskConical className="w-3.5 h-3.5" /> Desk
           </Link>
           <Link
             to="/research/library"
-            className="inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-cyan min-h-[40px]"
+            className="hover:text-cyan min-h-[36px] inline-flex items-center gap-1"
           >
             <Library className="w-3.5 h-3.5" /> Library
           </Link>
-        </div>
+        </nav>
 
         {generating && !report && (
           <div className="rounded-2xl border border-cyan/35 bg-cyan/[0.06] px-5 py-8 text-center space-y-3">
             <Loader2 className="w-8 h-8 text-cyan animate-spin mx-auto" />
             <p className="font-display font-semibold text-[16px]">Building your briefing…</p>
             <p className="text-[13px] text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Payment received. We are generating a Topics-style analysis page for your topic and
-              questions. This usually takes under a minute — keep this tab open.
+              Payment received. Running the same Topics analysis workflow (public sample + scored
+              insights). This can take a few minutes — keep this tab open or return with your unique
+              link.
             </p>
           </div>
         )}
@@ -257,8 +269,8 @@ function ReportPage() {
                     </p>
                     <p className="text-[12px] text-muted-foreground leading-relaxed break-words">
                       Optional. Topic-analysis shares appear under{" "}
-                      <strong className="text-foreground/85">Topics → Topics commissioned</strong>.
-                      Deep-dive shares appear under{" "}
+                      <strong className="text-foreground/85">Topics → Archived</strong>{" "}
+                      (Commissioned). Deep-dive shares appear under{" "}
                       <strong className="text-foreground/85">
                         Library → Independently commissioned
                       </strong>

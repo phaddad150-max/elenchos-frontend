@@ -2114,12 +2114,10 @@ function computePipelineConfidence(args: {
 /**
  * Canonical "posts / sample analyzed" for dashboard + KPI hero.
  * Same function everywhere so mobile and desktop never diverge.
- * No localStorage — device-independent, server/sample-derived only.
  *
- * Priority:
- * 1) overview.kpis.total_posts_analyzed (or overview.total_posts_analyzed)
- * 2) sum of live topic snapshot samples
- * 3) sum of live citizen_signal sample_size rows
+ * Prefer server lifetime total (kpis.total_posts_analyzed) which is
+ * append-only / non-decreasing across pipeline runs. Window sample sum
+ * is a floor only — never used to drop below the published lifetime total.
  */
 function resolvePostsAnalyzed(args: {
   overview: DashboardOverview | null;
@@ -2127,8 +2125,14 @@ function resolvePostsAnalyzed(args: {
   citizenSignals?: CitizenSignal[] | FeedCitizenSignal[] | null;
 }): number | undefined {
   const { overview, snapshots, citizenSignals } = args;
-  const k = overview?.kpis;
-  const fromOverview =
+  const k = overview?.kpis as
+    | (DashboardOverview["kpis"] & {
+        window_posts_analyzed?: number;
+        total_posts_analyzed?: number;
+      })
+    | undefined;
+
+  const fromLifetime =
     typeof k?.total_posts_analyzed === "number" && k.total_posts_analyzed > 0
       ? Math.round(k.total_posts_analyzed)
       : typeof overview?.total_posts_analyzed === "number" && overview.total_posts_analyzed > 0
@@ -2163,15 +2167,9 @@ function resolvePostsAnalyzed(args: {
   }
   fromCitizens = Math.round(fromCitizens);
 
-  // Prefer overview when present; else best available live sample sum.
-  const n =
-    fromOverview > 0
-      ? fromOverview
-      : fromSnaps > 0
-        ? fromSnaps
-        : fromCitizens > 0
-          ? fromCitizens
-          : 0;
+  const windowFallback = fromSnaps > 0 ? fromSnaps : fromCitizens > 0 ? fromCitizens : 0;
+  // Lifetime never undercuts window; published lifetime never drops vs itself.
+  const n = Math.max(fromLifetime, windowFallback);
   return n > 0 ? n : undefined;
 }
 
@@ -2182,13 +2180,20 @@ function postsAnalyzedBreakdown(args: {
   citizenSignals?: CitizenSignal[] | FeedCitizenSignal[] | null;
 }): string[] {
   const { overview, snapshots, citizenSignals } = args;
-  const k = overview?.kpis;
+  const k = overview?.kpis as
+    | (DashboardOverview["kpis"] & {
+        window_posts_analyzed?: number;
+        total_posts_analyzed?: number;
+      })
+    | undefined;
   const fromOverview =
     typeof k?.total_posts_analyzed === "number"
       ? k.total_posts_analyzed
       : typeof overview?.total_posts_analyzed === "number"
         ? overview.total_posts_analyzed
         : null;
+  const windowFromKpi =
+    typeof k?.window_posts_analyzed === "number" ? k.window_posts_analyzed : null;
   let fromSnaps = 0;
   if (snapshots) {
     for (const [key, s] of Object.entries(snapshots)) {
@@ -2214,11 +2219,13 @@ function postsAnalyzedBreakdown(args: {
   }
   return [
     fromOverview != null
-      ? `Overview sample total: ${Math.round(fromOverview).toLocaleString()}`
-      : "Overview sample total: not in this sample.",
-    `Live topic snapshots sum: ${Math.round(fromSnaps).toLocaleString()}`,
+      ? `Lifetime posts analyzed: ${Math.round(fromOverview).toLocaleString()} (never decreases)`
+      : "Lifetime total: not in this sample yet.",
+    windowFromKpi != null
+      ? `Current window (latest samples): ${Math.round(windowFromKpi).toLocaleString()}`
+      : `Current window (topic snapshots sum): ${Math.round(fromSnaps).toLocaleString()}`,
     `Live citizen-signal samples: ${Math.round(fromCitizens).toLocaleString()}`,
-    "Face value uses one rule: overview first, else snapshots, else citizen rows.",
+    "Face value = max(lifetime, current window) — same on mobile and desktop.",
   ];
 }
 
@@ -2632,7 +2639,7 @@ function DashboardKpiGrid({
       icon: Activity,
       format: sampleAnalyzed != null && sampleAnalyzed >= 1000 ? "compact" : "number",
       liveNote:
-        "Current published sample total — same number on mobile and desktop (not a device-local cumulative).",
+        "Lifetime posts analyzed across pipeline runs — never decreases. Same number on mobile and desktop.",
       liveFacts: [
         ...sampleFacts,
         typeof k.signals_generated === "number"

@@ -16,14 +16,16 @@ import {
   UAE_FINTECH_REPORT_TOKEN,
   UAE_FINTECH_TOPIC,
 } from "@/lib/research-desk/seeds/uae-fintech-dominance";
+import { dispatchCommissionPipeline } from "@/lib/research-desk/dispatch-pipeline.server";
 
 /**
  * Ops-only: create commission + generate report WITHOUT Stripe.
  * Header: x-admin-secret: ADMIN_SECRET (or RESEARCH_ADMIN_SECRET)
  *
  * Body modes:
- * - { "seed": "uae-fintech" } → goodwill first commission recovery
- * - { packageId, topic, questions, useAi?: boolean }
+ * - { "seed": "uae-fintech" } → goodwill static seed
+ * - { "seed": "uae-fintech", "pipeline": true } → dispatch Topics Pass-1 pipeline
+ * - { packageId, topic, questions, useAi?, pipeline? }
  */
 const BodySchema = z.object({
   seed: z.enum(["uae-fintech"]).optional(),
@@ -32,6 +34,8 @@ const BodySchema = z.object({
   questions: z.string().trim().max(16000).optional(),
   /** default true when not using curated seed */
   useAi: z.boolean().optional(),
+  /** Dispatch backend X + Pass-1 pipeline (same as post-payment) */
+  pipeline: z.boolean().optional(),
 });
 
 function siteOrigin(request: Request): string {
@@ -91,6 +95,49 @@ export const Route = createFileRoute("/api/research/admin/commission")({
               questions: questionsText,
             });
 
+            const reportUrl = `${origin}/research/report/${seedToken}`;
+            const pdfUrl = `${origin}/api/research/report/${seedToken}?format=pdf`;
+
+            // Full Topics pipeline (X + Pass-1) when requested
+            if (parsed.data.pipeline) {
+              await appendCommissionEvent(seedToken, {
+                status: "generating",
+                errorMessage: null,
+                stripeSessionId: `goodwill-pipeline-${seedToken.slice(0, 12)}`,
+                sharedPublic: true,
+                sharedAt: new Date().toISOString(),
+              });
+              const dispatched = await dispatchCommissionPipeline({
+                token: seedToken,
+                topic: UAE_FINTECH_TOPIC,
+                questions: questionsText,
+                packageId: "topic-analysis",
+                sampleSize: 120,
+              });
+              await notifyOpsReportReady({
+                token: seedToken,
+                topic: UAE_FINTECH_TOPIC,
+                packageId: "topic-analysis",
+                reportUrl,
+                pdfUrl,
+                questionCount: UAE_FINTECH_QUESTIONS.length,
+                status: dispatched.ok ? "generating" : "failed",
+                generatedBy: "ai",
+              });
+              return Response.json({
+                ok: dispatched.ok,
+                seed: "uae-fintech",
+                pipeline: dispatched.mode,
+                detail: dispatched.detail,
+                token: seedToken,
+                topic: UAE_FINTECH_TOPIC,
+                questionCount: UAE_FINTECH_QUESTIONS.length,
+                reportUrl,
+                pdfUrl,
+                status: dispatched.ok ? "generating" : "failed",
+              });
+            }
+
             const report = buildUaeFintechReport(seedToken);
             const sharedAt = new Date().toISOString();
             // List under Topics → Archived as commissioned (same card grid)
@@ -102,9 +149,6 @@ export const Route = createFileRoute("/api/research/admin/commission")({
               sharedPublic: true,
               sharedAt,
             });
-
-            const reportUrl = `${origin}/research/report/${seedToken}`;
-            const pdfUrl = `${origin}/api/research/report/${seedToken}?format=pdf`;
 
             await notifyOpsReportReady({
               token: seedToken,
@@ -150,6 +194,45 @@ export const Route = createFileRoute("/api/research/admin/commission")({
             questions,
           });
 
+          const reportUrl = `${origin}/research/report/${token}`;
+          const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
+          const qCount = parseQuestions(questions).length;
+
+          if (parsed.data.pipeline) {
+            await appendCommissionEvent(token, {
+              status: "generating",
+              errorMessage: null,
+              stripeSessionId: `admin-pipeline-${token.slice(0, 12)}`,
+            });
+            const dispatched = await dispatchCommissionPipeline({
+              token,
+              topic,
+              questions,
+              packageId,
+            });
+            await notifyOpsReportReady({
+              token,
+              topic,
+              packageId,
+              reportUrl,
+              pdfUrl,
+              questionCount: qCount,
+              status: dispatched.ok ? "generating" : "failed",
+              generatedBy: "ai",
+            });
+            return Response.json({
+              ok: dispatched.ok,
+              token,
+              topic,
+              questionCount: qCount,
+              reportUrl,
+              pdfUrl,
+              pipeline: dispatched.mode,
+              detail: dispatched.detail,
+              status: dispatched.ok ? "generating" : "failed",
+            });
+          }
+
           const useAi = parsed.data.useAi !== false;
           const report = useAi
             ? await generateCommissionedReport({
@@ -175,17 +258,13 @@ export const Route = createFileRoute("/api/research/admin/commission")({
             stripeSessionId: `admin-${token.slice(0, 12)}`,
           });
 
-          const reportUrl = `${origin}/research/report/${token}`;
-          const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
-          const qCount = parseQuestions(questions).length || report.questions.length;
-
           await notifyOpsReportReady({
             token,
             topic,
             packageId,
             reportUrl,
             pdfUrl,
-            questionCount: qCount,
+            questionCount: qCount || report.questions.length,
             status: "ready",
             generatedBy: report.generatedBy,
           });
@@ -194,7 +273,7 @@ export const Route = createFileRoute("/api/research/admin/commission")({
             ok: true,
             token,
             topic,
-            questionCount: qCount,
+            questionCount: qCount || report.questions.length,
             reportUrl,
             pdfUrl,
             generatedBy: report.generatedBy,

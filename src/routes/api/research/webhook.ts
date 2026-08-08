@@ -10,10 +10,17 @@ import {
   sendReportLinkEmail,
 } from "@/lib/research-desk/email.server";
 import { parseQuestions } from "@/lib/research-desk/build-report";
+import {
+  dispatchCommissionPipeline,
+  packageNeedsXPipeline,
+} from "@/lib/research-desk/dispatch-pipeline.server";
 
 /**
  * Stripe webhook for checkout.session.completed.
  * Configure: https://elenchos.live/api/research/webhook
+ *
+ * X packages (topic-analysis, deep-with-x): dispatch backend Topics pipeline.
+ * deep-no-x: generate via SpaceXAI on this server.
  */
 export const Route = createFileRoute("/api/research/webhook")({
   server: {
@@ -80,7 +87,8 @@ export const Route = createFileRoute("/api/research/webhook")({
 
         if (
           commission.status === "ready" &&
-          commission.report?.generatedBy === "ai"
+          commission.report?.generatedBy === "ai" &&
+          (commission.report.sampleSize == null || commission.report.sampleSize > 0)
         ) {
           return Response.json({ received: true, token, status: "already-ready" });
         }
@@ -94,6 +102,45 @@ export const Route = createFileRoute("/api/research/webhook")({
           ? commission.package_id
           : "topic-analysis";
 
+        const origin =
+          process.env.SITE_URL?.replace(/\/$/, "") || "https://elenchos.live";
+        const reportUrl = `${origin}/research/report/${token}`;
+        const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
+
+        // X packages: backend Topics pipeline (same as manual workflow)
+        if (packageNeedsXPipeline(packageId)) {
+          const dispatched = await dispatchCommissionPipeline({
+            token,
+            topic: commission.topic,
+            questions: commission.questions,
+            packageId,
+          });
+
+          if (dispatched.ok && dispatched.mode === "dispatched") {
+            // Leave status generating — runner appends ready row when done
+            await notifyOpsReportReady({
+              token,
+              topic: commission.topic,
+              packageId,
+              reportUrl,
+              pdfUrl,
+              questionCount: parseQuestions(commission.questions).length,
+              status: "generating",
+              generatedBy: "ai",
+            }).catch(() => undefined);
+
+            return Response.json({
+              received: true,
+              token,
+              status: "generating",
+              pipeline: "dispatched",
+            });
+          }
+
+          // Dispatch failed — fall back to on-server AI so customer is not stuck
+          console.warn("[webhook] dispatch failed, AI fallback", dispatched.detail);
+        }
+
         const report = await generateCommissionedReport({
           token,
           packageId,
@@ -101,18 +148,12 @@ export const Route = createFileRoute("/api/research/webhook")({
           questionsRaw: commission.questions,
         });
 
-        // Append-only ready row
         await updateCommission(token, {
           stripeSessionId: session.id,
           status: "ready",
           report: { ...report, generationStatus: "ready" },
           errorMessage: report.generationError ?? null,
         });
-
-        const origin =
-          process.env.SITE_URL?.replace(/\/$/, "") || "https://elenchos.live";
-        const reportUrl = `${origin}/research/report/${token}`;
-        const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
 
         await notifyOpsReportReady({
           token,
