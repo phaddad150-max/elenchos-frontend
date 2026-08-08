@@ -5,10 +5,28 @@ import { DESK_PACKAGES } from "./packages";
 export type DeskQuestionAnalysis = {
   question: string;
   answer: string;
+  /** Short insight headline for cards — never the full Socratic question */
+  cardTitle?: string | null;
   sentimentScore: number | null;
   sentimentLabel: string | null;
   keyPoints: string[];
   confidence: "high" | "medium" | "low" | "insufficient";
+  theme?: string | null;
+};
+
+/** Structured gap point matching live NarrativeGapPanel */
+export type DeskGapPoint = {
+  claim_citizen?: string | null;
+  claim_official_media?: string | null;
+  why_it_matters?: string | null;
+};
+
+/** Pass-2 style narrative thread */
+export type DeskInsightThread = {
+  theme?: string;
+  headline?: string;
+  summary?: string;
+  confidence?: string;
 };
 
 export type DeskClaim = {
@@ -75,13 +93,24 @@ export type DeskReport = {
     citizenFrame: string | null;
     officialMediaFrame: string | null;
     scoreRationale: string | null;
-    gapPoints: string[];
+    /** Brief synthesis overview (optional) */
+    fullOverview?: string | null;
+    /** Structured preferred; strings accepted for legacy hybrid seeds */
+    gapPoints: Array<string | DeskGapPoint>;
   };
 
   /** Per-user (or standard) Socratic Q&A */
   questionAnalyses?: DeskQuestionAnalysis[];
 
   keyInsights?: string[];
+  /** Pass-2 style threads (preferred over flat keyInsights for UI) */
+  insightThreads?: DeskInsightThread[];
+  /** Pass-2 curated hero (preferred for synthesis block) */
+  curatedSynthesis?: {
+    headline?: string | null;
+    summary?: string | null;
+    confidence?: string | null;
+  };
   claims?: DeskClaim[];
   chapters?: DeskChapter[];
   scenarios?: DeskScenario[];

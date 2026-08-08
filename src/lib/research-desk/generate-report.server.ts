@@ -30,13 +30,27 @@ const AnalysisSchema = z.object({
     citizenFrame: z.string(),
     officialMediaFrame: z.string(),
     scoreRationale: z.string().nullable(),
-    gapPoints: z.array(z.string()).max(8),
+    fullOverview: z.string().nullable().optional(),
+    gapPoints: z
+      .array(
+        z.union([
+          z.string(),
+          z.object({
+            claim_citizen: z.string().nullable().optional(),
+            claim_official_media: z.string().nullable().optional(),
+            why_it_matters: z.string().nullable().optional(),
+          }),
+        ]),
+      )
+      .max(8),
   }),
   questionAnalyses: z
     .array(
       z.object({
         question: z.string(),
         answer: z.string(),
+        /** Short insight title for UI cards — never the full question */
+        cardTitle: z.string().nullable().optional(),
         sentimentScore: z.number().min(0).max(100).nullable(),
         sentimentLabel: z.string().nullable(),
         keyPoints: z.array(z.string()).max(6),
@@ -45,6 +59,24 @@ const AnalysisSchema = z.object({
     )
     .max(9),
   keyInsights: z.array(z.string()).max(8),
+  insightThreads: z
+    .array(
+      z.object({
+        theme: z.string().optional(),
+        headline: z.string().optional(),
+        summary: z.string().optional(),
+        confidence: z.string().optional(),
+      }),
+    )
+    .max(8)
+    .optional(),
+  curatedSynthesis: z
+    .object({
+      headline: z.string().nullable().optional(),
+      summary: z.string().nullable().optional(),
+      confidence: z.string().nullable().optional(),
+    })
+    .optional(),
   claims: z
     .array(
       z.object({
@@ -98,13 +130,20 @@ function xaiClient() {
 
 function packagePrompt(packageId: DeskPackageId): string {
   if (packageId === "topic-analysis") {
-    return `You produce a public-discourse topic analysis in the Elenchos Topics style.
+    return `You produce a public-discourse topic analysis in the Elenchos Topics style (same quality as live topic pages).
 Focus on: citizen frames vs official/media frames, Socratic answers to each user question,
 directional sentiment (0-100) and narrative divergence (0-100) when you can reason about them,
-key insights, 3-5 claims with falsifiers, method notes and hard limits.
-Do NOT invent live post counts, usernames, or verbatim quotes from X.
-If no live sample was provided, set sampleSize null and sampleNote explaining directional open-source reasoning only.
-Chapters can be empty for topic-analysis. Prefer rich questionAnalyses.`;
+key insights, insightThreads, curatedSynthesis, method notes and hard limits.
+
+CRITICAL UI QUALITY RULES:
+- narrativeGap.gapPoints MUST be objects with claim_citizen, claim_official_media, why_it_matters as SEPARATE fields (never merge with "↔" or put both sides in one string).
+- scoreRationale and all prose must be complete sentences (no mid-word truncation).
+- Each questionAnalyses item needs cardTitle: a SHORT insight headline (≤12 words), NEVER the full Socratic question text.
+- curatedSynthesis.headline: 8-12 words; curatedSynthesis.summary: 2-3 clean sentences.
+- insightThreads: 4-6 items with theme, short headline, 1-2 sentence summary.
+- Do NOT invent live post counts, usernames, or verbatim quotes from X.
+- If no live sample was provided, set sampleSize null and sampleNote explaining directional open-source reasoning only.
+- Chapters can be empty for topic-analysis.`;
   }
   if (packageId === "deep-no-x") {
     return `You produce a thesis-style multi-source research brief WITHOUT a public X discourse sample.
@@ -195,9 +234,15 @@ ${packagePrompt(input.packageId)}`,
           a.question.toLowerCase().includes(q.slice(0, 40).toLowerCase()),
         );
       if (hit) {
+        const cardTitle =
+          (hit.cardTitle && hit.cardTitle.trim()) ||
+          (hit.keyPoints?.[0] && hit.keyPoints[0].slice(0, 90)) ||
+          hit.answer.split(/(?<=[.!?])\s+/)[0]?.slice(0, 90) ||
+          null;
         return {
           question: q,
           answer: hit.answer,
+          cardTitle,
           sentimentScore: hit.sentimentScore,
           sentimentLabel: hit.sentimentLabel,
           keyPoints: hit.keyPoints ?? [],
@@ -207,11 +252,19 @@ ${packagePrompt(input.packageId)}`,
       return {
         question: q,
         answer: "No structured answer returned for this question — treat as insufficient evidence.",
+        cardTitle: null,
         sentimentScore: null,
         sentimentLabel: null,
         keyPoints: [] as string[],
         confidence: "insufficient" as const,
       };
+    });
+
+    const gapLines = object.narrativeGap.gapPoints.map((p) => {
+      if (typeof p === "string") return `· ${p}`;
+      const cit = p.claim_citizen ?? "";
+      const off = p.claim_official_media ?? "";
+      return `· Citizens: ${cit} | Official: ${off}`;
     });
 
     const sections: DeskReport["sections"] = [
@@ -236,13 +289,13 @@ ${packagePrompt(input.packageId)}`,
           object.narrativeGap.headline ?? "",
           `Citizens: ${object.narrativeGap.citizenFrame}`,
           `Official/media: ${object.narrativeGap.officialMediaFrame}`,
-          ...object.narrativeGap.gapPoints.map((p) => `· ${p}`),
+          ...gapLines,
         ].filter(Boolean),
       },
       {
         heading: "Question analysis",
         body: questionAnalyses.flatMap((q, i) => [
-          `Q${i + 1}. ${q.question}`,
+          `Q${i + 1}. ${q.cardTitle || q.question}`,
           q.answer,
           ...q.keyPoints.map((k) => `· ${k}`),
         ]),
@@ -285,6 +338,8 @@ ${packagePrompt(input.packageId)}`,
       narrativeGap: object.narrativeGap,
       questionAnalyses,
       keyInsights: object.keyInsights,
+      insightThreads: object.insightThreads,
+      curatedSynthesis: object.curatedSynthesis,
       claims: object.claims,
       chapters: object.chapters,
       scenarios: object.scenarios,

@@ -15,7 +15,12 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
-import type { DeskReport, DeskQuestionAnalysis } from "@/lib/research-desk/build-report";
+import type {
+  DeskGapPoint,
+  DeskInsightThread,
+  DeskReport,
+  DeskQuestionAnalysis,
+} from "@/lib/research-desk/build-report";
 import { DESK_PACKAGES } from "@/lib/research-desk/packages";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
@@ -35,6 +40,95 @@ type InsightCard = {
   evidence: string[];
   confidence?: string;
 };
+
+type ThreadCard = {
+  id: string;
+  theme: string;
+  headline: string;
+  summary: string;
+  confidence?: string;
+};
+
+/** Soft word-boundary truncate for UI chrome (full text still in detail/method). */
+function softTruncate(text: string, max: number): string {
+  const t = (text ?? "").trim();
+  if (!t || t.length <= max) return t;
+  const cut = t.slice(0, max - 1);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > max * 0.55 ? cut.slice(0, sp) : cut).trimEnd() + "…";
+}
+
+function firstSentence(text: string, max = 100): string {
+  const t = (text ?? "").trim();
+  if (!t) return "";
+  const m = t.match(/^(.+?[.!?])(?:\s|$)/);
+  return softTruncate((m?.[1] ?? t).trim(), max);
+}
+
+/** Normalize legacy string gap points and structured objects into NarrativeGapPoint. */
+function normalizeGapPoints(
+  pts: Array<string | DeskGapPoint> | undefined,
+  citizenFrame?: string | null,
+  officialFrame?: string | null,
+): NarrativeGapPoint[] {
+  if (!pts?.length) {
+    const cit = (citizenFrame ?? "").trim();
+    const off = (officialFrame ?? "").trim();
+    if (cit || off) {
+      return [
+        {
+          claim_citizen: cit || undefined,
+          claim_official_media: off || undefined,
+          why_it_matters: "Citizen vs official / media framing",
+        },
+      ];
+    }
+    return [];
+  }
+
+  const out: NarrativeGapPoint[] = [];
+  for (const p of pts) {
+    if (p && typeof p === "object" && !Array.isArray(p)) {
+      const cit = String(p.claim_citizen ?? "").trim();
+      const off = String(p.claim_official_media ?? "").trim();
+      const why = String(p.why_it_matters ?? "").trim();
+      if (!cit && !off) continue;
+      out.push({
+        claim_citizen: cit || undefined,
+        claim_official_media: off || undefined,
+        why_it_matters: why || firstSentence(cit || off, 100) || undefined,
+      });
+      continue;
+    }
+    if (typeof p === "string" && p.trim()) {
+      // Legacy "A ↔ B" or plain string — never dump both sides into citizen only
+      const parts = p.split(/\s*(?:↔|⟷|vs\.?|versus)\s*/i);
+      if (parts.length >= 2) {
+        out.push({
+          claim_citizen: parts[0]!.trim() || undefined,
+          claim_official_media: parts.slice(1).join(" vs ").trim() || undefined,
+          why_it_matters: firstSentence(parts[0]!, 100) || undefined,
+        });
+      } else {
+        out.push({
+          claim_citizen: p.trim(),
+          claim_official_media: undefined,
+          why_it_matters: firstSentence(p, 100) || undefined,
+        });
+      }
+    }
+  }
+
+  // If every official side empty but we have frames, fill first point's official
+  if (out.length && out.every((g) => !g.claim_official_media) && officialFrame?.trim()) {
+    out[0] = {
+      ...out[0]!,
+      claim_official_media: officialFrame.trim(),
+    };
+  }
+
+  return out.slice(0, 6);
+}
 
 /**
  * Commissioned report UI — same structure as live TopicAnalysisPage
@@ -69,32 +163,24 @@ export function CommissionedReportView({
   const [rawOpen, setRawOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
 
-  const gapPoints: NarrativeGapPoint[] = useMemo(() => {
-    const pts = report.narrativeGap?.gapPoints ?? [];
-    if (pts.length === 0) return [];
-    // Pair sequential bullets when possible; else put each under citizen claim
-    const out: NarrativeGapPoint[] = [];
-    for (let i = 0; i < pts.length; i++) {
-      out.push({
-        claim_citizen: pts[i],
-        claim_official_media:
-          report.narrativeGap?.officialMediaFrame && i === 0
-            ? report.narrativeGap.officialMediaFrame.slice(0, 180)
-            : undefined,
-        why_it_matters: pts[i],
-      });
-    }
-    return out.slice(0, 6);
-  }, [report.narrativeGap]);
+  const gapPoints: NarrativeGapPoint[] = useMemo(
+    () =>
+      normalizeGapPoints(
+        report.narrativeGap?.gapPoints,
+        report.narrativeGap?.citizenFrame,
+        report.narrativeGap?.officialMediaFrame,
+      ),
+    [report.narrativeGap],
+  );
 
   const insightCards: InsightCard[] = useMemo(() => {
-    const fromQa = (report.questionAnalyses ?? []).map((q, i) =>
-      qaToInsight(q, i),
-    );
+    const fromQa = (report.questionAnalyses ?? [])
+      .map((q, i) => qaToInsight(q, i))
+      .filter((c) => c.title.trim() && c.summary.trim());
     if (fromQa.length > 0) return fromQa;
     return (report.keyInsights ?? []).map((k, i) => ({
       id: `ki-${i}`,
-      title: k.slice(0, 80),
+      title: firstSentence(k, 90) || softTruncate(k, 80),
       summary: k,
       score: score ?? 50,
       evidence: [],
@@ -102,28 +188,42 @@ export function CommissionedReportView({
     }));
   }, [report.questionAnalyses, report.keyInsights, score]);
 
-  // Curated synthesis — headline only from gap; body from key insights (not re-dump of gap frames)
+  // Curated synthesis — Pass-2 hero preferred; never re-dump gap frames
   const synthesisHeadline =
+    report.curatedSynthesis?.headline?.trim() ||
     report.narrativeGap?.headline?.trim() ||
-    report.keyInsights?.[0] ||
-    report.title;
-  const synthesisBody = (() => {
-    const fromInsights = (report.keyInsights ?? []).slice(0, 3).join(" ");
-    if (fromInsights.trim()) return fromInsights;
-    if (report.narrativeGap?.scoreRationale?.trim()) {
-      return report.narrativeGap.scoreRationale.trim();
+    (report.keyInsights?.[0] ? firstSentence(report.keyInsights[0], 80) : "") ||
+    softTruncate(report.title, 80);
+  const synthesisBody =
+    report.curatedSynthesis?.summary?.trim() ||
+    report.narrativeGap?.fullOverview?.trim() ||
+    (report.keyInsights ?? []).slice(0, 2).join(" ") ||
+    report.sampleNote?.trim() ||
+    "";
+
+  const threadCards: ThreadCard[] = useMemo(() => {
+    const structured = report.insightThreads ?? [];
+    if (structured.length > 0) {
+      return structured
+        .map((t, i) => threadFromStructured(t, i))
+        .filter((t) => t.headline || t.summary)
+        .slice(0, 6);
     }
-    return report.sampleNote?.trim() || "";
-  })();
+    // Fallback: short key insight lines (not full Q&A dump)
+    return (report.keyInsights ?? []).slice(0, 6).map((k, i) => ({
+      id: `thread-${i}`,
+      theme: "Public Opinion",
+      headline: firstSentence(k, 90) || softTruncate(k, 80),
+      summary: k,
+      confidence: "medium",
+    }));
+  }, [report.insightThreads, report.keyInsights]);
 
-  // Threads: short findings only when they are not a full re-list of question cards
   const showInsightCards = insightCards.length > 0;
-  const narrativeThreads = showInsightCards
-    ? (report.keyInsights ?? []).slice(0, 6)
-    : (report.keyInsights ?? []);
-
   const isDeep = report.packageId !== "topic-analysis";
   const showClaims = (report.claims?.length ?? 0) > 0 && (isDeep || !showInsightCards);
+
+  const [pickedThread, setPickedThread] = useState<ThreadCard | null>(null);
 
   const TrendIcon = /increas|improv|up|posit/i.test(trend)
     ? TrendingUp
@@ -133,15 +233,24 @@ export function CommissionedReportView({
 
   const headerLabel = report.topic;
   const confLabel =
-    report.generatedBy === "ai" || report.generatedBy === "hybrid"
+    report.curatedSynthesis?.confidence?.trim() ||
+    (report.generatedBy === "ai" || report.generatedBy === "hybrid"
       ? "medium"
-      : "directional";
+      : "directional");
   const sampleSub =
     report.sampleSize != null && report.sampleSize > 0
       ? "posts"
       : report.packageId === "deep-no-x"
         ? "no X pack"
         : "awaiting sample";
+  const gapOverview =
+    report.narrativeGap?.fullOverview?.trim() ||
+    [
+      report.narrativeGap?.citizenFrame,
+      report.narrativeGap?.officialMediaFrame,
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
   return (
     <div className="space-y-5 sm:space-y-6 min-w-0">
@@ -287,12 +396,7 @@ export function CommissionedReportView({
         citizenFrame={report.narrativeGap?.citizenFrame ?? ""}
         officialMediaFrame={report.narrativeGap?.officialMediaFrame ?? ""}
         gapHeadline={report.narrativeGap?.headline ?? ""}
-        fullOverview={
-          report.narrativeGap?.scoreRationale ||
-          [report.narrativeGap?.citizenFrame, report.narrativeGap?.officialMediaFrame]
-            .filter(Boolean)
-            .join(" · ")
-        }
+        fullOverview={gapOverview}
         scoreRationale={report.narrativeGap?.scoreRationale ?? ""}
         gapPoints={gapPoints}
         sentimentScore={score}
@@ -334,25 +438,42 @@ export function CommissionedReportView({
       )}
 
       {/* Narrative threads first — matches live TopicAnalysisPage order */}
-      {narrativeThreads.length > 0 && (
+      {threadCards.length > 0 && (
         <section className="space-y-3">
           <SectionLabel
             icon={<Lightbulb className="w-3.5 h-3.5" />}
             title="Narrative Threads"
-            sub="Headline findings"
+            sub="Tap for full text"
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {narrativeThreads.map((k, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-border bg-secondary/20 p-4 space-y-1.5"
-                style={{ borderLeft: `3px solid var(--cyan)` }}
+            {threadCards.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setPickedThread(t)}
+                className="text-left rounded-xl border border-border bg-secondary/20 p-4 space-y-1.5 hover:border-cyan/40 active:bg-secondary/40 transition-colors touch-manipulation min-h-[44px]"
+                style={{
+                  borderLeft: `3px solid ${confidenceColor(t.confidence ?? "medium")}`,
+                }}
               >
-                <div className="text-[10px] font-mono uppercase text-muted-foreground">
-                  Thread {String(i + 1).padStart(2, "0")}
+                <div className="flex justify-between gap-2 text-[10px] font-mono uppercase text-muted-foreground">
+                  <span>{t.theme}</span>
+                  {t.confidence && (
+                    <span style={{ color: confidenceColor(t.confidence) }}>
+                      {t.confidence}
+                    </span>
+                  )}
                 </div>
-                <p className="text-[13px] text-foreground/90 leading-relaxed break-words">{k}</p>
-              </div>
+                {t.headline && (
+                  <h4 className="font-display font-semibold text-sm break-words">{t.headline}</h4>
+                )}
+                {t.summary && (
+                  <p className="text-[13px] text-foreground/85 leading-relaxed line-clamp-2">
+                    {t.summary}
+                  </p>
+                )}
+                <span className="text-[10px] font-mono text-cyan md:hidden">Read full →</span>
+              </button>
             ))}
           </div>
         </section>
@@ -642,20 +763,80 @@ export function CommissionedReportView({
           </button>
         </DetailOverlay>
       )}
+
+      {pickedThread && (
+        <DetailOverlay onClose={() => setPickedThread(null)}>
+          <div className="text-[10px] font-mono uppercase text-cyan tracking-[0.18em]">
+            {pickedThread.theme || "Narrative thread"}
+          </div>
+          <h3 className="text-xl font-display font-semibold leading-snug break-words">
+            {pickedThread.headline}
+          </h3>
+          {pickedThread.summary && (
+            <p className="text-[15px] sm:text-sm text-foreground/90 leading-relaxed break-words">
+              {pickedThread.summary}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => setPickedThread(null)}
+            className="inline-flex items-center justify-center min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-border text-muted-foreground hover:bg-secondary touch-manipulation"
+          >
+            Close
+          </button>
+        </DetailOverlay>
+      )}
     </div>
   );
 }
 
+function threadFromStructured(t: DeskInsightThread, i: number): ThreadCard {
+  return {
+    id: `thread-${i}`,
+    theme: (t.theme || "Thread").trim(),
+    headline: softTruncate((t.headline || firstSentence(t.summary || "", 90) || "Thread").trim(), 100),
+    summary: (t.summary || t.headline || "").trim(),
+    confidence: t.confidence,
+  };
+}
+
+/**
+ * Card title = short insight (cardTitle / first key point / first sentence of answer).
+ * NEVER the full long Socratic question (live Topics use Pass-2 card_title the same way).
+ */
 function qaToInsight(q: DeskQuestionAnalysis, i: number): InsightCard {
+  const answer = (q.answer ?? "").trim();
+  const points = (q.keyPoints ?? []).filter(Boolean);
+  let title = (q.cardTitle ?? "").trim();
+  const question = (q.question ?? "").trim();
+
+  // Reject titles that are just the question (truncated or full)
+  const titleIsQuestion =
+    title &&
+    question &&
+    (title === question ||
+      question.startsWith(title.replace(/…$/, "")) ||
+      title.replace(/…$/, "").length > 0 &&
+        question.toLowerCase().startsWith(title.replace(/…$/, "").toLowerCase().slice(0, 40)));
+
+  if (!title || titleIsQuestion) {
+    title =
+      (points[0] && softTruncate(points[0], 90)) ||
+      firstSentence(answer, 90) ||
+      `Insight ${i + 1}`;
+  } else {
+    title = softTruncate(title, 100);
+  }
+
   return {
     id: `q-${i}`,
-    title: q.question.length > 90 ? `${q.question.slice(0, 87)}…` : q.question,
-    summary: q.answer,
+    title,
+    summary: answer,
     score:
       typeof q.sentimentScore === "number" && !Number.isNaN(q.sentimentScore)
         ? Math.round(q.sentimentScore)
         : 50,
-    evidence: q.keyPoints ?? [],
+    evidence: points,
     confidence: q.confidence,
   };
 }
