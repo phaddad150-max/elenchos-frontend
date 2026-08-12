@@ -124,12 +124,28 @@ export function GlobalSearch() {
           <CommandSeparator />
           <CommandGroup heading="Research">
             <CommandItem
-              value="research briefs multi-source case study"
+              value="research briefs multi-source case study desk"
               onSelect={() => go("/research")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Research briefs</span>
+              <span className="truncate">Research Desk</span>
               <CommandShortcut>Research</CommandShortcut>
+            </CommandItem>
+            <CommandItem
+              value="trackers leadership board leader trust rankings"
+              onSelect={() => go("/trackers/leaders")}
+            >
+              <FlaskConical className="w-4 h-4 text-cyan" />
+              <span className="truncate">Leadership board</span>
+              <CommandShortcut>Trackers</CommandShortcut>
+            </CommandItem>
+            <CommandItem
+              value="peace index normalization abraham accords"
+              onSelect={() => go("/trackers/peace")}
+            >
+              <FlaskConical className="w-4 h-4 text-cyan" />
+              <span className="truncate">Peace index</span>
+              <CommandShortcut>Trackers</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

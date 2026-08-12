@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowDownRight, ArrowUpRight, ArrowRight, Trophy, X } from "lucide-react";
@@ -16,9 +16,6 @@ import {
 import { formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/football")({
-  beforeLoad: () => {
-    throw redirect({ to: "/topics" });
-  },
   head: () => ({
     meta: [
       { title: "Football Player Fan Index — Elenchos" },

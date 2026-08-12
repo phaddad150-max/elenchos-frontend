@@ -13,7 +13,11 @@ const TABS = [
     to: "/research",
     label: "Research",
     match: (p: string) =>
-      p === "/research" || p.startsWith("/research/") || p === "/research-migration",
+      p === "/research" ||
+      p.startsWith("/research/") ||
+      p === "/research-migration" ||
+      p === "/trackers" ||
+      p.startsWith("/trackers/"),
     icon: FlaskConical,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },

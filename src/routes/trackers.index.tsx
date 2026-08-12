@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -41,10 +41,6 @@ import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Q
 
 
 export const Route = createFileRoute("/trackers/")({
-  /** Trackers hub temporarily hidden from product — restore by removing this redirect. */
-  beforeLoad: () => {
-    throw redirect({ to: "/topics" });
-  },
   head: () => ({
     meta: [
       { title: "Performance Trackers: Leaders, Peace & Global Issues Ranked by Citizens — Elenchos" },
@@ -1529,6 +1525,16 @@ function TrackersPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
       <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 relative flex-1 mobile-safe-bottom overflow-x-clip">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
+        >
+          <Link to="/research" className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center">
+            Research Desk
+          </Link>
+          <span aria-hidden className="text-border">/</span>
+          <span className="text-foreground/85">Trackers</span>
+        </nav>
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1547,7 +1553,7 @@ function TrackersPage() {
               className="w-1 h-3.5 bg-cyan rounded-sm origin-center"
               style={{ boxShadow: "0 0 10px rgba(0,220,220,0.7)" }}
             />
-            Performance Trackers
+            Research Desk · Performance Trackers
           </motion.div>
           <h1 className="text-[1.6rem] sm:text-3xl md:text-[2.4rem] lg:text-[2.85rem] font-display font-semibold tracking-tight leading-[1.08] break-words">
             Citizens Speak. AI Ranks.{" "}

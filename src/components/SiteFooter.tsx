@@ -26,6 +26,12 @@ export function SiteFooter() {
           <Link to="/research/commission" className="text-cyan hover:underline">
             On-demand · $10
           </Link>
+          <Link to="/trackers/leaders" className="text-cyan hover:underline">
+            Leaders
+          </Link>
+          <Link to="/trackers/peace" className="text-cyan hover:underline">
+            Peace index
+          </Link>
           <ContactEmailMe
             source="footer-enterprise"
             variant="inline"

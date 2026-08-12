@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -8,9 +8,6 @@ import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/leaders")({
-  beforeLoad: () => {
-    throw redirect({ to: "/topics" });
-  },
   head: () => ({
     meta: [
       { title: "Live Leader Leaderboard — Elenchos" },
@@ -44,14 +41,20 @@ function LeadersPage() {
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <SiteNav />
       <main className="max-w-[1200px] mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 relative flex-1 mobile-safe-bottom overflow-x-clip">
-        <div className="mb-6 flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+        <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
           <Link
-            to="/trackers"
-            className="hover:text-cyan transition-colors inline-flex items-center gap-1.5"
+            to="/research"
+            className="hover:text-cyan transition-colors inline-flex items-center gap-1.5 min-h-[36px]"
           >
             <ArrowLeft className="w-3 h-3" />
-            Back to trackers
+            Research
           </Link>
+          <span aria-hidden className="text-border">/</span>
+          <Link to="/trackers" className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center">
+            Trackers
+          </Link>
+          <span aria-hidden className="text-border">/</span>
+          <span className="text-foreground/80">Leaders</span>
         </div>
         <header className="mb-8 space-y-3 max-w-4xl">
           <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">

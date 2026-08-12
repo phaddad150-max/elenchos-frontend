@@ -12,6 +12,8 @@ import {
   Scale,
   Shield,
   Sparkles,
+  Trophy,
+  Users,
   Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -175,6 +177,81 @@ function ResearchDeskLanding() {
           />
           <EnterprisePathCard delay={0.15} />
         </div>
+
+        {/* Trackers subsection — Peace index + Leadership board */}
+        <section className="mb-8 sm:mb-10" aria-labelledby="research-trackers-heading">
+          <div className="flex flex-wrap items-end justify-between gap-2 mb-3 px-0.5">
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                Trackers
+              </p>
+              <h2
+                id="research-trackers-heading"
+                className="text-[15px] sm:text-base font-display font-semibold text-foreground mt-0.5"
+              >
+                Citizen rankings · peace &amp; leaders
+              </h2>
+              <p className="text-[12.5px] text-muted-foreground leading-snug max-w-xl mt-1">
+                Live leaderboards from public discourse — leadership trust and the peace &amp;
+                normalization index. Same evidence discipline as Topics.
+              </p>
+            </div>
+            <Link
+              to="/trackers"
+              className="inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px] touch-manipulation"
+            >
+              All trackers <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Link
+              to="/trackers/leaders"
+              className="rd-card group relative flex flex-col rounded-2xl border border-border/90 bg-card/50 p-4 sm:p-5 min-h-[140px] hover:border-cyan/45 transition-colors touch-manipulation"
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <span className="w-10 h-10 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal">
+                  <Trophy className="w-5 h-5" aria-hidden />
+                </span>
+                <span className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan border border-cyan/30 bg-cyan/10 rounded-full px-2 py-0.5">
+                  Live
+                </span>
+              </div>
+              <h3 className="text-[15px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors">
+                Leadership board
+              </h3>
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-1.5 flex-1">
+                Global leader trust rankings from citizen discourse — trust, leadership, economy,
+                free speech, and more.
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-mono text-cyan">
+                Open leaders <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+            <Link
+              to="/trackers/peace"
+              className="rd-card group relative flex flex-col rounded-2xl border border-border/90 bg-card/50 p-4 sm:p-5 min-h-[140px] hover:border-cyan/45 transition-colors touch-manipulation"
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <span className="w-10 h-10 rounded-xl border border-cyan/40 bg-cyan/10 grid place-items-center text-cyan">
+                  <Users className="w-5 h-5" aria-hidden />
+                </span>
+                <span className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan border border-cyan/30 bg-cyan/10 rounded-full px-2 py-0.5">
+                  Live
+                </span>
+              </div>
+              <h3 className="text-[15px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors">
+                Peace index
+              </h3>
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-1.5 flex-1">
+                Peace &amp; normalization diagnostics — citizen support, momentum, and government
+                vs public gaps by country.
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-mono text-cyan">
+                Open peace index <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+          </div>
+        </section>
 
         {/* How it works */}
         <section className="rounded-2xl border border-border/90 bg-card/40 p-4 sm:p-5 mb-8">
