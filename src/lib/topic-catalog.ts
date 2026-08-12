@@ -82,6 +82,16 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
     rootKey: "Commercial Space Race: SpaceX, Rivals & Public Trust",
     headerLabel: "Commercial Space Race",
   },
+  "ai-productivity-gdp-growth": {
+    rootKey:
+      "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
+    headerLabel: "AI Productivity & GDP Growth",
+  },
+  "india-economic-growth-narrative": {
+    rootKey:
+      "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
+    headerLabel: "India Economic Growth Narrative",
+  },
   /** Archived — history only; still mapped for Topics archive section + snapshot reads */
   "maritime-ai-greece": {
     rootKey: "Maritime AI Industry & Greece's Global Role",
@@ -114,6 +124,8 @@ export const TOPIC_ADDED_AT: Record<string, string> = {
   "save-europe-act": "2026-07-24",
   "commercial-space-race": "2026-07-25",
   "greece-economic-recovery": "2026-07-25",
+  "ai-productivity-gdp-growth": "2026-08-12",
+  "india-economic-growth-narrative": "2026-08-12",
 };
 
 /** How long the NEW pill stays on topic cards after TOPIC_ADDED_AT. */

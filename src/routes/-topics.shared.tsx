@@ -76,6 +76,8 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "save-europe-act": "weekly",
   "greece-economic-recovery": "weekly",
   "us-ai-economy-boom": "weekly",
+  "ai-productivity-gdp-growth": "weekly",
+  "india-economic-growth-narrative": "weekly",
   "new-us-foreign-policy": "weekly",
   "crypto-regulation-financial-markets": "weekly",
   "eu-migration-green-divisions": "weekly",
@@ -422,6 +424,8 @@ function TopicsFilterableGrid({
       "arab-israeli-normalization",
       "new-us-foreign-policy",
       "us-ai-economy-boom",
+      "ai-productivity-gdp-growth",
+      "india-economic-growth-narrative",
     ];
     const prio = (id: string) => {
       const i = PRIORITY.indexOf(id);
@@ -633,6 +637,10 @@ function shortTitle(t: string): string {
     "Public Voices on Elon Musk: Trust, Media Frames & Power": "Elon Musk · Public Voices",
     "Save Europe Act: Citizens, Media & EU Bureaucracy": "Save Europe Act",
     "Commercial Space Race: SpaceX, Rivals & Public Trust": "Commercial Space Race",
+    "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps":
+      "AI Productivity & GDP Growth",
+    "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames":
+      "India Economic Growth Narrative",
   };
   return map[t] ?? t;
 }

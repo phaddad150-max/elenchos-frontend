@@ -1020,6 +1020,48 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
  takeaway: "",
  compare: [],
  },
+ {
+ id: "ai-productivity-gdp-growth",
+ title:
+ "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
+ shortTitle: "AI Productivity & GDP Growth",
+ description:
+ "Citizen discourse on whether AI investment is driving real productivity and GDP gains — or concentrated hype — including energy and grid constraints and gaps with official/media growth narratives.",
+ sampleSize: "",
+ confidence: "Moderate",
+ region: "Global",
+ trackers: [],
+ simulation: {
+ title: "Live data",
+ pathA: { label: "Live", series: [] },
+ pathB: { label: "Live", series: [] },
+ caption: "",
+ },
+ insights: { citizenSays: "", officialSays: "", gap: "" },
+ takeaway: "",
+ compare: [],
+ },
+ {
+ id: "india-economic-growth-narrative",
+ title:
+ "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
+ shortTitle: "India Economic Growth Narrative",
+ description:
+ "Citizen vs official frames of India's growth story: headline GDP, employment quality, youth underemployment, informal sector experience, and AI/IT-services disruption.",
+ sampleSize: "",
+ confidence: "Moderate",
+ region: "India",
+ trackers: [],
+ simulation: {
+ title: "Live data",
+ pathA: { label: "Live", series: [] },
+ pathB: { label: "Live", series: [] },
+ caption: "",
+ },
+ insights: { citizenSays: "", officialSays: "", gap: "" },
+ takeaway: "",
+ compare: [],
+ },
 ];
 
 

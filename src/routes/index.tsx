@@ -201,6 +201,18 @@ const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat:
     lng: -97.74,
   },
   "US AI Economy Boom & American Technological Renaissance": { region: "Austin", subregion: "Eastern Mediterranean", lat: 30.27, lng: -97.74 },
+  "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps": {
+    region: "Global",
+    subregion: "Eastern Mediterranean",
+    lat: 37.77,
+    lng: -122.42,
+  },
+  "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames": {
+    region: "New Delhi",
+    subregion: "Eastern Mediterranean",
+    lat: 28.61,
+    lng: 77.21,
+  },
 };
 
 function topicGeo(topic: string) {

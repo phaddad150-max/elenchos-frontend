@@ -33,6 +33,8 @@ export const CANONICAL_TOPICS = [
   "US AI Economy Boom & American Technological Renaissance",
   "Save Europe Act: Citizens, Media & EU Bureaucracy",
   "Commercial Space Race: SpaceX, Rivals & Public Trust",
+  "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
+  "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
   // History / archive keys (not live output — kept for normalize/legacy only)
   "Maritime AI Industry & Greece's Global Role",
   "fifa-world-cup-2026",
@@ -137,6 +139,18 @@ export const TOPIC_ALIASES: Record<string, string> = {
   "fifa world cup 2026": "fifa-world-cup-2026",
   "fifa world cup 2026 & global fan reactions": "fifa-world-cup-2026",
   "us ai economy boom & american technologies": "US AI Economy Boom & American Technological Renaissance",
+  "ai productivity gdp growth":
+    "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
+  "ai productivity & gdp growth":
+    "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
+  "ai productivity":
+    "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
+  "india economic growth narrative":
+    "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
+  "india economic growth":
+    "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
+  "india gdp growth":
+    "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
   "crime & safety": "Crime, Safety & Lawlessness",
   "crime and safety": "Crime, Safety & Lawlessness",
   "crime-safety-lawlessness": "Crime, Safety & Lawlessness",
