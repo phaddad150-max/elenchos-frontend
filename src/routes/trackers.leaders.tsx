@@ -43,11 +43,11 @@ function LeadersPage() {
       <main className="max-w-[1200px] mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
           <Link
-            to="/research"
+            to="/research/library"
             className="hover:text-cyan transition-colors inline-flex items-center gap-1.5 min-h-[36px]"
           >
             <ArrowLeft className="w-3 h-3" />
-            Research
+            Library
           </Link>
           <span aria-hidden className="text-border">/</span>
           <Link to="/trackers" className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center">

@@ -234,31 +234,37 @@ function ResearchLibraryPage() {
           </div>
         </section>
 
-        {/* Indexes */}
+        {/* Indexes & trackers — only surfaced here (not on Research landing) */}
         <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-idx">
           <SectionHead
             id="lib-idx"
             tone="amber"
-            title="Indexes & leaderboards"
-            sub="Citizen-scored trackers linked from the desk."
+            title="Indexes & trackers"
+            sub="Citizen-scored leadership board and peace index from public discourse."
             icon={<Trophy className="w-3.5 h-3.5" />}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <IndexCard
               href="/trackers/leaders"
-              title="Leaders trust index"
-              body="Citizen-scored leader rankings from public discourse."
+              title="Leadership board"
+              body="Global leader trust rankings — trust, leadership, economy, free speech, and more."
               icon={<Users className="w-4 h-4" />}
               delay={0.08}
             />
             <IndexCard
               href="/trackers/peace"
-              title="Peace & normalisation"
-              body="Country-level peace-health and momentum signals."
+              title="Peace index"
+              body="Peace & normalisation diagnostics — citizen support, momentum, government vs public gap."
               icon={<Trophy className="w-4 h-4" />}
               delay={0.12}
             />
           </div>
+          <Link
+            to="/trackers"
+            className="inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px] touch-manipulation px-0.5"
+          >
+            Open full trackers hub <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </section>
 
         <motion.div
