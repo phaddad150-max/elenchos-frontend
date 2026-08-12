@@ -252,7 +252,7 @@ export function pickBestSnapshots(rows: TopicSnapshot[]): Record<string, TopicSn
 }
 
 // Static UI-only placeholders. NEVER queried against Supabase. NEVER bound
-// to topic_snapshots. Surfaced only as "Coming soon" cards / sponsor options.
+// to topic_snapshots. Surfaced only as "Coming soon" cards when not live.
 export const COMING_SOON_TOPICS = [
   "Rise of EU right-wing/populist parties challenging establishments",
   "Illegal immigration & national security",

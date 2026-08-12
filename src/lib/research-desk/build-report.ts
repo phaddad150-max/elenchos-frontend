@@ -232,156 +232,256 @@ export function buildDeskReport(input: {
   };
 }
 
-/** Flatten rich report into sections for PDF / plain text. */
-export function reportToSections(r: DeskReport): { heading: string; body: string[] }[] {
-  if (r.sections?.length && r.generatedBy === "template" && !r.questionAnalyses?.some((q) => q.answer && !q.answer.includes("pending"))) {
-    return r.sections;
-  }
+function pdfSafe(s: string): string {
+  return (s ?? "")
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, (ch) => {
+      // Keep common punctuation substitutes
+      if (ch === "·" || ch === "•") return "-";
+      if (ch === "—" || ch === "–") return "-";
+      if (ch === "“" || ch === "”" || ch === "„") return '"';
+      if (ch === "‘" || ch === "’") return "'";
+      if (ch === "…") return "...";
+      return "?";
+    })
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+}
 
+function wrapPdfLine(line: string, width = 86): string[] {
+  const clean = pdfSafe(line);
+  if (clean.length <= width) return [clean];
+  const out: string[] = [];
+  let rest = clean;
+  while (rest.length > width) {
+    let cut = rest.lastIndexOf(" ", width);
+    if (cut < width * 0.45) cut = width;
+    out.push(rest.slice(0, cut));
+    rest = rest.slice(cut).trimStart();
+  }
+  if (rest) out.push(rest);
+  return out;
+}
+
+function gapPointLine(p: string | DeskGapPoint): string {
+  if (typeof p === "string") return `- ${p}`;
+  const cit = (p.claim_citizen ?? "").trim();
+  const off = (p.claim_official_media ?? "").trim();
+  const why = (p.why_it_matters ?? "").trim();
+  if (cit && off) return `- ${why ? why + ": " : ""}Citizens: ${cit} | Official: ${off}`;
+  return `- ${why || cit || off}`;
+}
+
+/**
+ * Structured sections for PDF/TXT — mirrors Topics page order, not a raw dump.
+ * Skips long disclaimers, tokens, and redundant sections blocks.
+ */
+export function reportToSections(r: DeskReport): { heading: string; body: string[] }[] {
   const out: { heading: string; body: string[] }[] = [];
+  const pkgTitle = DESK_PACKAGES[r.packageId]?.title ?? r.packageId;
+
   out.push({
-    heading: "Scope",
+    heading: "Topic briefing",
     body: [
-      `Title: ${r.title}`,
-      `Topic: ${r.topic}`,
-      `Package: ${DESK_PACKAGES[r.packageId]?.title ?? r.packageId}`,
-      r.disclaimer,
+      r.topic,
+      `Package: ${pkgTitle}`,
+      r.sampleSize != null && r.sampleSize > 0
+        ? `Sample: ${r.sampleSize} posts`
+        : "Sample: directional (no live X count)",
     ],
   });
 
-  if (r.overallSentiment || r.divergenceScore != null) {
+  out.push({
+    heading: "Headline metrics",
+    body: [
+      `Sentiment: ${r.overallSentiment?.score ?? "-"} (${r.overallSentiment?.label ?? "-"})`,
+      `Divergence: ${r.divergenceScore ?? "-"}`,
+      r.sampleNote && r.sampleSize
+        ? r.sampleNote.slice(0, 200)
+        : "",
+    ].filter(Boolean),
+  });
+
+  if (r.curatedSynthesis?.headline || r.curatedSynthesis?.summary) {
     out.push({
-      heading: "Headline metrics",
+      heading: "Curated synthesis",
       body: [
-        `Sentiment: ${r.overallSentiment?.score ?? "â€”"} (${r.overallSentiment?.label ?? "â€”"})`,
-        `Divergence: ${r.divergenceScore ?? "â€”"}`,
-        r.sampleNote ?? "",
+        r.curatedSynthesis.headline ?? "",
+        r.curatedSynthesis.summary ?? "",
       ].filter(Boolean),
     });
   }
 
   if (r.narrativeGap) {
     const g = r.narrativeGap;
+    const gapLines = (g.gapPoints ?? []).map(gapPointLine);
     out.push({
-      heading: "Narrative gap",
+      heading: "Narrative gap · citizen vs official / media",
       body: [
-        g.headline ? `Headline: ${g.headline}` : "",
+        g.headline ? g.headline : "",
+        g.scoreRationale ? `Why this score: ${g.scoreRationale}` : "",
         g.citizenFrame ? `Citizens: ${g.citizenFrame}` : "",
         g.officialMediaFrame ? `Official / media: ${g.officialMediaFrame}` : "",
-        g.scoreRationale ? `Rationale: ${g.scoreRationale}` : "",
-        ...(g.gapPoints ?? []).map((p) => `Â· ${p}`),
+        ...gapLines,
       ].filter(Boolean),
+    });
+  }
+
+  if (r.insightThreads?.length) {
+    out.push({
+      heading: "Narrative threads",
+      body: r.insightThreads.map((t, i) => {
+        const head = t.headline || t.summary || `Thread ${i + 1}`;
+        const theme = t.theme ? `[${t.theme}] ` : "";
+        const sum = t.summary && t.summary !== head ? ` - ${t.summary}` : "";
+        return `${i + 1}. ${theme}${head}${sum}`;
+      }),
+    });
+  } else if (r.keyInsights?.length) {
+    out.push({
+      heading: "Narrative threads",
+      body: r.keyInsights.slice(0, 6).map((k, i) => `${i + 1}. ${k}`),
     });
   }
 
   if (r.questionAnalyses?.length) {
     out.push({
-      heading: "Question analysis",
-      body: r.questionAnalyses.flatMap((q, i) => [
-        `Q${i + 1}. ${q.question}`,
-        `Answer: ${q.answer}`,
-        q.sentimentScore != null
-          ? `Sentiment: ${q.sentimentScore} (${q.sentimentLabel ?? "â€”"}) Â· confidence ${q.confidence}`
-          : `Confidence: ${q.confidence}`,
-        ...q.keyPoints.map((k) => `  Â· ${k}`),
-        "",
-      ]),
+      heading: "Key insights",
+      body: r.questionAnalyses.flatMap((q, i) => {
+        const title = q.cardTitle?.trim() || q.question.slice(0, 90);
+        const score =
+          q.sentimentScore != null ? ` [${q.sentimentScore}]` : "";
+        return [
+          `${i + 1}. ${title}${score}`,
+          q.answer,
+          ...(q.keyPoints ?? []).slice(0, 3).map((k) => `   - ${k}`),
+          "",
+        ];
+      }),
     });
   }
 
-  if (r.keyInsights?.length) {
-    out.push({ heading: "Key insights", body: r.keyInsights.map((k) => `Â· ${k}`) });
-  }
-
-  if (r.claims?.length) {
+  if (r.packageId !== "topic-analysis" && r.claims?.length) {
     out.push({
       heading: "Claims",
       body: r.claims.map(
         (c) =>
-          `${c.id} [${c.confidence}] ${c.domain}: ${c.statement} Â· Falsifier: ${c.falsifier}`,
+          `${c.id} [${c.confidence}] ${c.domain}: ${c.statement} | Falsifier: ${c.falsifier}`,
       ),
     });
   }
 
-  if (r.chapters?.length) {
+  if (r.packageId !== "topic-analysis" && r.chapters?.length) {
     for (const ch of r.chapters) {
       out.push({
         heading: `${ch.number} ${ch.title}`,
-        body: [ch.summary, ...ch.bullets.map((b) => `Â· ${b}`)],
+        body: [ch.summary, ...ch.bullets.map((b) => `- ${b}`)],
       });
     }
   }
 
-  if (r.scenarios?.length) {
+  // Short method only (max 4 bullets) — no wall of ops notes
+  const method = (r.methodNotes ?? []).slice(0, 4);
+  const limits = (r.limits ?? []).slice(0, 4);
+  if (method.length || limits.length) {
     out.push({
-      heading: "Scenarios",
-      body: r.scenarios.flatMap((s) => [
-        `${s.id} Â· ${s.name}`,
-        `Politics: ${s.politics}`,
-        `Tech may accelerate: ${s.techMayAccelerate}`,
-        `Unlikely fast: ${s.unlikelyFast}`,
-        "",
-      ]),
+      heading: "Method & limits",
+      body: [
+        ...method.map((m) => `- ${m}`),
+        ...limits.map((m) => `- ${m}`),
+      ],
     });
   }
 
-  if (r.methodNotes?.length) {
-    out.push({ heading: "Method", body: r.methodNotes });
-  }
-  if (r.limits?.length) {
-    out.push({ heading: "Limits", body: r.limits });
-  }
-
-  return out.length ? out : r.sections;
+  return out;
 }
 
 export function reportToPlainText(r: DeskReport): string {
   const sections = reportToSections(r);
   const lines = [
+    "ELENCHOS · Public Discourse Lens x Research Desk",
     r.title,
-    `Token: ${r.token}`,
-    `Created: ${r.createdAt}`,
-    r.disclaimer,
+    r.topic,
     "",
     ...sections.flatMap((s) => [`## ${s.heading}`, ...s.body, ""]),
-    "â€” elenchos.live Research Desk",
+    "elenchos.live",
   ];
   return lines.join("\n");
 }
+
 /**
- * Multi-page text PDF (Helvetica, ~52 lines/page).
- * Readable export of the same content as the report URL.
+ * Branded multi-page PDF mirroring Topics briefing structure:
+ * header brand · metrics · synthesis · gap · threads · insights · method.
+ * No raw token dumps, no duplicated section walls.
  */
 export function reportToPdfBytes(r: DeskReport): Uint8Array {
-  const text = reportToPlainText(r);
-  const rawLines = text.split(/\r?\n/);
-  const wrapped: string[] = [];
-  for (const line of rawLines) {
-    const clean = line
-      .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "?")
-      .replace(/\\/g, "\\\\")
-      .replace(/\(/g, "\\(")
-      .replace(/\)/g, "\\)");
-    if (clean.length <= 88) {
-      wrapped.push(clean);
-      continue;
+  const sections = reportToSections(r);
+  const lines: Array<{ text: string; size: number; gapAfter?: number }> = [];
+
+  const push = (text: string, size = 10, gapAfter = 0) => {
+    for (const w of wrapPdfLine(text, size >= 14 ? 52 : size >= 12 ? 62 : 86)) {
+      lines.push({ text: w, size, gapAfter });
     }
-    let rest = clean;
-    while (rest.length > 88) {
-      let cut = rest.lastIndexOf(" ", 88);
-      if (cut < 40) cut = 88;
-      wrapped.push(rest.slice(0, cut));
-      rest = rest.slice(cut).trimStart();
+    if (gapAfter) lines[lines.length - 1]!.gapAfter = gapAfter;
+  };
+
+  push("ELENCHOS", 11, 2);
+  push("Public Discourse Lens x Research Desk", 9, 8);
+  push(r.topic || r.title, 14, 4);
+  push("Topic briefing · commissioned", 9, 10);
+
+  const sent = r.overallSentiment?.score ?? "-";
+  const div = r.divergenceScore ?? "-";
+  const sample =
+    r.sampleSize != null && r.sampleSize > 0 ? String(r.sampleSize) : "-";
+  push(
+    `Sentiment ${sent}   |   Divergence ${div}   |   Sample ${sample}`,
+    11,
+    14,
+  );
+
+  for (const sec of sections) {
+    if (sec.heading === "Topic briefing" || sec.heading === "Headline metrics") {
+      continue; // already in header strip
     }
-    if (rest) wrapped.push(rest);
+    push(sec.heading.toUpperCase(), 11, 6);
+    for (const b of sec.body) {
+      if (!b?.trim()) {
+        lines.push({ text: " ", size: 8, gapAfter: 4 });
+        continue;
+      }
+      push(b, 10, 3);
+    }
+    lines.push({ text: " ", size: 8, gapAfter: 8 });
   }
 
-  const linesPerPage = 52;
-  const pages: string[][] = [];
-  for (let i = 0; i < wrapped.length; i += linesPerPage) {
-    pages.push(wrapped.slice(i, i + linesPerPage));
+  push("elenchos.live · experimental research · not legal advice", 8, 0);
+
+  // Paginate with variable line heights
+  const pageH = 792;
+  const marginTop = 56;
+  const marginBottom = 48;
+  const usable = pageH - marginTop - marginBottom;
+  const pages: Array<Array<{ text: string; size: number; y: number }>> = [];
+  let page: Array<{ text: string; size: number; y: number }> = [];
+  let y = pageH - marginTop;
+
+  const flush = () => {
+    if (page.length) pages.push(page);
+    page = [];
+    y = pageH - marginTop;
+  };
+
+  for (const line of lines) {
+    const lh = line.size + 3 + (line.gapAfter ?? 0);
+    if (y - lh < marginBottom) flush();
+    page.push({ text: line.text, size: line.size, y });
+    y -= lh;
   }
-  if (pages.length === 0) pages.push(["(empty report)"]);
+  flush();
+  if (pages.length === 0) {
+    pages.push([{ text: "(empty report)", size: 10, y: pageH - marginTop }]);
+  }
 
   const enc = new TextEncoder();
   type PdfObj = { id: number; raw: string };
@@ -391,20 +491,45 @@ export function reportToPdfBytes(r: DeskReport): Uint8Array {
     id: 3,
     raw: "3 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n",
   });
+  list.push({
+    id: 4,
+    raw: "4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>endobj\n",
+  });
 
   const pageIds: number[] = [];
-  let nextId = 4;
-  for (const pageLines of pages) {
+  let nextId = 5;
+  const totalPages = pages.length;
+
+  pages.forEach((pageLines, pageIndex) => {
     const contentId = nextId++;
     const pageId = nextId++;
     pageIds.push(pageId);
-    const contentParts = ["BT", "/F1 10 Tf", "50 780 Td", "13 TL"];
-    pageLines.forEach((line, idx) => {
-      if (idx === 0) contentParts.push(`(${line}) Tj`);
-      else contentParts.push(`T* (${line}) Tj`);
-    });
-    contentParts.push("ET");
-    const stream = contentParts.join("\n");
+
+    const ops: string[] = [];
+    // subtle top brand bar
+    ops.push("0.75 0.88 0.92 rg");
+    ops.push("0 760 612 32 re f");
+    ops.push("0.15 0.55 0.65 RG 1.5 w");
+    ops.push("40 758 m 572 758 l S");
+
+    for (const pl of pageLines) {
+      const font = pl.size >= 11 ? "/F2" : "/F1";
+      ops.push("BT");
+      ops.push(`${font} ${pl.size} Tf`);
+      ops.push("0.12 0.14 0.18 rg");
+      ops.push(`50 ${pl.y.toFixed(1)} Td`);
+      ops.push(`(${pl.text}) Tj`);
+      ops.push("ET");
+    }
+
+    // footer
+    const footer = pdfSafe(
+      `elenchos.live  ·  ${pageIndex + 1} / ${totalPages}`,
+    );
+    ops.push("BT /F1 8 Tf 0.45 0.48 0.52 rg 50 28 Td");
+    ops.push(`(${footer}) Tj ET`);
+
+    const stream = ops.join("\n");
     const streamBytes = enc.encode(stream).length;
     list.push({
       id: contentId,
@@ -412,9 +537,10 @@ export function reportToPdfBytes(r: DeskReport): Uint8Array {
     });
     list.push({
       id: pageId,
-      raw: `${pageId} 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${contentId} 0 R /Resources << /Font << /F1 3 0 R >> >> >>endobj\n`,
+      raw: `${pageId} 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${contentId} 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>endobj\n`,
     });
-  }
+  });
+
   const kids = pageIds.map((id) => `${id} 0 R`).join(" ");
   list.push({
     id: 2,

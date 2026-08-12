@@ -333,13 +333,12 @@
   box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
 }
 
-/* Hero KPI: equal-size faces; expand is a popover (does not stretch siblings).
-   ~5% denser internal face (min-height / type) — grid footprint unchanged. */
+/* Hero KPI: compact value-first face; mobile uses bottom sheet for details. */
 .dash-kpi-hero {
   position: relative;
-  overflow: visible;
-  height: 100%;
-  min-height: 8.3rem;
+  overflow: hidden;
+  height: auto;
+  min-height: 0;
   transition:
     border-color 0.25s ease,
     box-shadow 0.3s ease,
@@ -619,28 +618,14 @@
   position: relative;
 }
 
-/* Landing mobile / tablet: KPI expand must not clip (same content as desktop) */
-@media (max-width: 1279px) {
+/* Landing tablet: desktop-style popover under card */
+@media (min-width: 768px) and (max-width: 1279px) {
   .dash-kpi-hero {
     overflow: visible;
   }
   .dash-kpi-hero-open {
     overflow: visible !important;
-    z-index: 50;
-  }
-  .dash-kpi-popover {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    max-height: none;
-    overflow: visible;
-    padding: 0.35rem 0.35rem 0.5rem;
-  }
-  .dash-kpi-popover-panel {
-    max-height: min(50vh, 280px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    z-index: 40;
   }
 }
 @media (max-width: 639px) {
@@ -648,30 +633,40 @@
     padding-left: 0.55rem;
     padding-right: 0.55rem;
     padding-top: 0.65rem;
-    /* Tighter stack between KPI / signals / AI — less vertical sprawl */
     gap: 0.75rem;
+    overflow-x: clip;
   }
   .dash-landing main.space-y-4 > :not([hidden]) ~ :not([hidden]),
   .dash-landing main.space-y-6 > :not([hidden]) ~ :not([hidden]) {
     margin-top: 0.75rem;
   }
+  /* Dense KPI faces — no tall empty clickable chrome */
   .dash-kpi-hero {
-    min-height: 6.5rem;
+    min-height: 0 !important;
   }
   .dash-kpi-hero > button {
-    min-height: 6.5rem !important;
-    padding: 0.4rem 0.3rem !important;
-    gap: 0.15rem !important;
+    min-height: 0 !important;
+    padding: 0.55rem 0.5rem !important;
+    gap: 0.35rem !important;
   }
   .dash-kpi-hero .dash-kpi-label {
-    font-size: 7.5px;
+    font-size: 8.5px;
     letter-spacing: 0.08em;
-    min-height: 1.4rem;
-    line-height: 1.15;
+    min-height: 0;
+    line-height: 1.2;
   }
   .dash-kpi-hero .dash-kpi-value {
-    font-size: 1.15rem;
-    min-height: 1.35rem !important;
+    font-size: 1.25rem;
+    min-height: 0 !important;
+  }
+  /* Prevent banner / chip text bleed off-screen */
+  .dash-landing h1,
+  .dash-landing h2,
+  .dash-landing p,
+  .topics-hero-banner,
+  .topics-hero-banner * {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .dash-landing .globe-stage {
     min-height: 0;
@@ -690,12 +685,15 @@
     min-height: 200px !important;
     padding: 0.65rem !important;
   }
-  /* ≥44px interactive controls on phones */
+  /* ≥44px interactive controls on phones (not dense KPI faces) */
   .tap-target,
-  button.touch-manipulation,
+  button.touch-manipulation:not(.dash-kpi-hero > button),
   a.touch-manipulation,
   [role="button"].touch-manipulation {
     min-height: 44px;
+  }
+  .dash-kpi-hero > button.touch-manipulation {
+    min-height: 0 !important;
   }
   /* Chip / filter rows stay tappable without looking huge */
   .chip-touch {
@@ -716,10 +714,10 @@
 }
 @media (min-width: 640px) and (max-width: 1023px) {
   .dash-kpi-hero {
-    min-height: 7.25rem;
+    min-height: 0;
   }
   .dash-kpi-hero > button {
-    min-height: 7.25rem !important;
+    min-height: 0 !important;
   }
 }
 @media (min-width: 1280px) {

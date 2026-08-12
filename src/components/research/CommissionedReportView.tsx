@@ -65,6 +65,14 @@ function firstSentence(text: string, max = 100): string {
   return softTruncate((m?.[1] ?? t).trim(), max);
 }
 
+/** NarrativeGapPanel drops headlines containing "vs" — normalise for display. */
+function cleanGapHeadline(raw: string): string {
+  let t = (raw ?? "").trim();
+  if (!t) return "";
+  t = t.replace(/\s*\bvs\.?\b\s*/gi, " · ");
+  return softTruncate(t, 72);
+}
+
 /** Normalize legacy string gap points and structured objects into NarrativeGapPoint. */
 function normalizeGapPoints(
   pts: Array<string | DeskGapPoint> | undefined,
@@ -395,9 +403,12 @@ export function CommissionedReportView({
         score={divergence}
         citizenFrame={report.narrativeGap?.citizenFrame ?? ""}
         officialMediaFrame={report.narrativeGap?.officialMediaFrame ?? ""}
-        gapHeadline={report.narrativeGap?.headline ?? ""}
+        gapHeadline={cleanGapHeadline(report.narrativeGap?.headline ?? "")}
         fullOverview={gapOverview}
-        scoreRationale={report.narrativeGap?.scoreRationale ?? ""}
+        scoreRationale={softTruncate(
+          report.narrativeGap?.scoreRationale ?? "",
+          160,
+        )}
         gapPoints={gapPoints}
         sentimentScore={score}
         shareUrl={

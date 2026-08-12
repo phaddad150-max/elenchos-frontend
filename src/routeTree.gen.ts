@@ -9,63 +9,41 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as LeadersRouteImport } from './routes/leaders'
-import { Route as PeaceRouteImport } from './routes/peace'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SponsorRouteImport } from './routes/sponsor'
-import { Route as AdminCurationRouteImport } from './routes/admin.curation'
-import { Route as ResearchIndexRouteImport } from './routes/research.index'
-import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
-import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
-import { Route as ResearchLibraryRouteImport } from './routes/research.library'
-import { Route as SponsorSuccessRouteImport } from './routes/sponsor.success'
-import { Route as TopicsIndexRouteImport } from './routes/topics.index'
-import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
+import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PeaceRouteImport } from './routes/peace'
+import { Route as LeadersRouteImport } from './routes/leaders'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
-import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
-import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
-import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
+import { Route as TopicsIndexRouteImport } from './routes/topics.index'
+import { Route as ResearchIndexRouteImport } from './routes/research.index'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
-import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
-import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
-import { Route as ApiResearchEmailRouteImport } from './routes/api/research/email'
-import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
-import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
-import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
-import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
+import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
+import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
+import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
+import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
+import { Route as ResearchLibraryRouteImport } from './routes/research.library'
+import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
+import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
-import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
 import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
-import { Route as ApiResearchAdminCommissionRouteImport } from './routes/api/research/admin/commission'
+import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
+import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
+import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
+import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
+import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
+import { Route as ApiResearchEmailRouteImport } from './routes/api/research/email'
+import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
+import { Route as ApiResearchAdminCommissionRouteImport } from './routes/api/research/admin/commission'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LeadersRoute = LeadersRouteImport.update({
-  id: '/leaders',
-  path: '/leaders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PeaceRoute = PeaceRouteImport.update({
-  id: '/peace',
-  path: '/peace',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResearchMigrationRoute = ResearchMigrationRouteImport.update({
@@ -73,54 +51,29 @@ const ResearchMigrationRoute = ResearchMigrationRouteImport.update({
   path: '/research-migration',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SponsorRoute = SponsorRouteImport.update({
-  id: '/sponsor',
-  path: '/sponsor',
+const PeaceRoute = PeaceRouteImport.update({
+  id: '/peace',
+  path: '/peace',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCurationRoute = AdminCurationRouteImport.update({
-  id: '/admin/curation',
-  path: '/admin/curation',
+const LeadersRoute = LeadersRouteImport.update({
+  id: '/leaders',
+  path: '/leaders',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchIndexRoute = ResearchIndexRouteImport.update({
-  id: '/research/',
-  path: '/research/',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchSlugRoute = ResearchSlugRouteImport.update({
-  id: '/research/$slug',
-  path: '/research/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchCommissionRoute = ResearchCommissionRouteImport.update({
-  id: '/research/commission',
-  path: '/research/commission',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
-  id: '/research/library',
-  path: '/research/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SponsorSuccessRoute = SponsorSuccessRouteImport.update({
-  id: '/success',
-  path: '/success',
-  getParentRoute: () => SponsorRoute,
-} as any)
-const TopicsIndexRoute = TopicsIndexRouteImport.update({
-  id: '/topics/',
-  path: '/topics/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
-  id: '/topics/$topicId',
-  path: '/topics/$topicId',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackersIndexRoute = TrackersIndexRouteImport.update({
@@ -128,19 +81,14 @@ const TrackersIndexRoute = TrackersIndexRouteImport.update({
   path: '/trackers/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersFootballRoute = TrackersFootballRouteImport.update({
-  id: '/trackers/football',
-  path: '/trackers/football',
+const TopicsIndexRoute = TopicsIndexRouteImport.update({
+  id: '/topics/',
+  path: '/topics/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
-  id: '/trackers/leaders',
-  path: '/trackers/leaders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersMediaRoute = TrackersMediaRouteImport.update({
-  id: '/trackers/media',
-  path: '/trackers/media',
+const ResearchIndexRoute = ResearchIndexRouteImport.update({
+  id: '/research/',
+  path: '/research/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
@@ -148,39 +96,44 @@ const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
   path: '/trackers/peace',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
-  id: '/api/public/contact',
-  path: '/api/public/contact',
+const TrackersMediaRoute = TrackersMediaRouteImport.update({
+  id: '/trackers/media',
+  path: '/trackers/media',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchCheckoutRoute = ApiResearchCheckoutRouteImport.update({
-  id: '/api/research/checkout',
-  path: '/api/research/checkout',
+const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
+  id: '/trackers/leaders',
+  path: '/trackers/leaders',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchEmailRoute = ApiResearchEmailRouteImport.update({
-  id: '/api/research/email',
-  path: '/api/research/email',
+const TrackersFootballRoute = TrackersFootballRouteImport.update({
+  id: '/trackers/football',
+  path: '/trackers/football',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
-  id: '/api/research/finalize',
-  path: '/api/research/finalize',
+const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
+  id: '/topics/$topicId',
+  path: '/topics/$topicId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchShareRoute = ApiResearchShareRouteImport.update({
-  id: '/api/research/share',
-  path: '/api/research/share',
+const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
+  id: '/research/library',
+  path: '/research/library',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchSharedRoute = ApiResearchSharedRouteImport.update({
-  id: '/api/research/shared',
-  path: '/api/research/shared',
+const ResearchCommissionRoute = ResearchCommissionRouteImport.update({
+  id: '/research/commission',
+  path: '/research/commission',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
-  id: '/api/research/webhook',
-  path: '/api/research/webhook',
+const ResearchSlugRoute = ResearchSlugRouteImport.update({
+  id: '/research/$slug',
+  path: '/research/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCurationRoute = AdminCurationRouteImport.update({
+  id: '/admin/curation',
+  path: '/admin/curation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
@@ -188,14 +141,54 @@ const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
   path: '/research/preview/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
+  id: '/research/report/$token',
+  path: '/research/report/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
   id: '/research/preview/$slug',
   path: '/research/preview/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
-  id: '/research/report/$token',
-  path: '/research/report/$token',
+const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
+  id: '/api/research/webhook',
+  path: '/api/research/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchSharedRoute = ApiResearchSharedRouteImport.update({
+  id: '/api/research/shared',
+  path: '/api/research/shared',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchShareRoute = ApiResearchShareRouteImport.update({
+  id: '/api/research/share',
+  path: '/api/research/share',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
+  id: '/api/research/finalize',
+  path: '/api/research/finalize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchEmailRoute = ApiResearchEmailRouteImport.update({
+  id: '/api/research/email',
+  path: '/api/research/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchCheckoutRoute = ApiResearchCheckoutRouteImport.update({
+  id: '/api/research/checkout',
+  path: '/api/research/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchReportTokenRoute = ApiResearchReportTokenRouteImport.update({
+  id: '/api/research/report/$token',
+  path: '/api/research/report/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiResearchAdminCommissionRoute =
@@ -204,11 +197,6 @@ const ApiResearchAdminCommissionRoute =
     path: '/api/research/admin/commission',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiResearchReportTokenRoute = ApiResearchReportTokenRouteImport.update({
-  id: '/api/research/report/$token',
-  path: '/api/research/report/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -218,12 +206,10 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
-  '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -253,12 +239,10 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
-  '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -289,12 +273,10 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sponsor': typeof SponsorRouteWithChildren
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
-  '/sponsor/success': typeof SponsorSuccessRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -326,12 +308,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/research-migration'
     | '/sitemap.xml'
-    | '/sponsor'
     | '/admin/curation'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
-    | '/sponsor/success'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -361,12 +341,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/research-migration'
     | '/sitemap.xml'
-    | '/sponsor'
     | '/admin/curation'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
-    | '/sponsor/success'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -396,12 +374,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/research-migration'
     | '/sitemap.xml'
-    | '/sponsor'
     | '/admin/curation'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
-    | '/sponsor/success'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -432,7 +408,6 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResearchMigrationRoute: typeof ResearchMigrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  SponsorRoute: typeof SponsorRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
   ResearchCommissionRoute: typeof ResearchCommissionRoute
@@ -461,39 +436,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/leaders': {
-      id: '/leaders'
-      path: '/leaders'
-      fullPath: '/leaders'
-      preLoaderRoute: typeof LeadersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/peace': {
-      id: '/peace'
-      path: '/peace'
-      fullPath: '/peace'
-      preLoaderRoute: typeof PeaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/research-migration': {
@@ -503,74 +450,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchMigrationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sponsor': {
-      id: '/sponsor'
-      path: '/sponsor'
-      fullPath: '/sponsor'
-      preLoaderRoute: typeof SponsorRouteImport
+    '/peace': {
+      id: '/peace'
+      path: '/peace'
+      fullPath: '/peace'
+      preLoaderRoute: typeof PeaceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/curation': {
-      id: '/admin/curation'
-      path: '/admin/curation'
-      fullPath: '/admin/curation'
-      preLoaderRoute: typeof AdminCurationRouteImport
+    '/leaders': {
+      id: '/leaders'
+      path: '/leaders'
+      fullPath: '/leaders'
+      preLoaderRoute: typeof LeadersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/': {
-      id: '/research/'
-      path: '/research'
-      fullPath: '/research/'
-      preLoaderRoute: typeof ResearchIndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/$slug': {
-      id: '/research/$slug'
-      path: '/research/$slug'
-      fullPath: '/research/$slug'
-      preLoaderRoute: typeof ResearchSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/commission': {
-      id: '/research/commission'
-      path: '/research/commission'
-      fullPath: '/research/commission'
-      preLoaderRoute: typeof ResearchCommissionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/library': {
-      id: '/research/library'
-      path: '/research/library'
-      fullPath: '/research/library'
-      preLoaderRoute: typeof ResearchLibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sponsor/success': {
-      id: '/sponsor/success'
-      path: '/success'
-      fullPath: '/sponsor/success'
-      preLoaderRoute: typeof SponsorSuccessRouteImport
-      parentRoute: typeof SponsorRoute
-    }
-    '/topics/': {
-      id: '/topics/'
-      path: '/topics'
-      fullPath: '/topics/'
-      preLoaderRoute: typeof TopicsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/topics/$topicId': {
-      id: '/topics/$topicId'
-      path: '/topics/$topicId'
-      fullPath: '/topics/$topicId'
-      preLoaderRoute: typeof TopicsTopicIdRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trackers/': {
@@ -580,25 +492,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trackers/football': {
-      id: '/trackers/football'
-      path: '/trackers/football'
-      fullPath: '/trackers/football'
-      preLoaderRoute: typeof TrackersFootballRouteImport
+    '/topics/': {
+      id: '/topics/'
+      path: '/topics'
+      fullPath: '/topics/'
+      preLoaderRoute: typeof TopicsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trackers/leaders': {
-      id: '/trackers/leaders'
-      path: '/trackers/leaders'
-      fullPath: '/trackers/leaders'
-      preLoaderRoute: typeof TrackersLeadersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/media': {
-      id: '/trackers/media'
-      path: '/trackers/media'
-      fullPath: '/trackers/media'
-      preLoaderRoute: typeof TrackersMediaRouteImport
+    '/research/': {
+      id: '/research/'
+      path: '/research'
+      fullPath: '/research/'
+      preLoaderRoute: typeof ResearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trackers/peace': {
@@ -608,53 +513,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackersPeaceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/contact': {
-      id: '/api/public/contact'
-      path: '/api/public/contact'
-      fullPath: '/api/public/contact'
-      preLoaderRoute: typeof ApiPublicContactRouteImport
+    '/trackers/media': {
+      id: '/trackers/media'
+      path: '/trackers/media'
+      fullPath: '/trackers/media'
+      preLoaderRoute: typeof TrackersMediaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/checkout': {
-      id: '/api/research/checkout'
-      path: '/api/research/checkout'
-      fullPath: '/api/research/checkout'
-      preLoaderRoute: typeof ApiResearchCheckoutRouteImport
+    '/trackers/leaders': {
+      id: '/trackers/leaders'
+      path: '/trackers/leaders'
+      fullPath: '/trackers/leaders'
+      preLoaderRoute: typeof TrackersLeadersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/email': {
-      id: '/api/research/email'
-      path: '/api/research/email'
-      fullPath: '/api/research/email'
-      preLoaderRoute: typeof ApiResearchEmailRouteImport
+    '/trackers/football': {
+      id: '/trackers/football'
+      path: '/trackers/football'
+      fullPath: '/trackers/football'
+      preLoaderRoute: typeof TrackersFootballRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/finalize': {
-      id: '/api/research/finalize'
-      path: '/api/research/finalize'
-      fullPath: '/api/research/finalize'
-      preLoaderRoute: typeof ApiResearchFinalizeRouteImport
+    '/topics/$topicId': {
+      id: '/topics/$topicId'
+      path: '/topics/$topicId'
+      fullPath: '/topics/$topicId'
+      preLoaderRoute: typeof TopicsTopicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/share': {
-      id: '/api/research/share'
-      path: '/api/research/share'
-      fullPath: '/api/research/share'
-      preLoaderRoute: typeof ApiResearchShareRouteImport
+    '/research/library': {
+      id: '/research/library'
+      path: '/research/library'
+      fullPath: '/research/library'
+      preLoaderRoute: typeof ResearchLibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/shared': {
-      id: '/api/research/shared'
-      path: '/api/research/shared'
-      fullPath: '/api/research/shared'
-      preLoaderRoute: typeof ApiResearchSharedRouteImport
+    '/research/commission': {
+      id: '/research/commission'
+      path: '/research/commission'
+      fullPath: '/research/commission'
+      preLoaderRoute: typeof ResearchCommissionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/webhook': {
-      id: '/api/research/webhook'
-      path: '/api/research/webhook'
-      fullPath: '/api/research/webhook'
-      preLoaderRoute: typeof ApiResearchWebhookRouteImport
+    '/research/$slug': {
+      id: '/research/$slug'
+      path: '/research/$slug'
+      fullPath: '/research/$slug'
+      preLoaderRoute: typeof ResearchSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/curation': {
+      id: '/admin/curation'
+      path: '/admin/curation'
+      fullPath: '/admin/curation'
+      preLoaderRoute: typeof AdminCurationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/research/preview/': {
@@ -664,13 +576,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchPreviewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/preview/$slug': {
-      id: '/research/preview/$slug'
-      path: '/research/preview/$slug'
-      fullPath: '/research/preview/$slug'
-      preLoaderRoute: typeof ResearchPreviewSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/research/report/$token': {
       id: '/research/report/$token'
       path: '/research/report/$token'
@@ -678,11 +583,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchReportTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/admin/commission': {
-      id: '/api/research/admin/commission'
-      path: '/api/research/admin/commission'
-      fullPath: '/api/research/admin/commission'
-      preLoaderRoute: typeof ApiResearchAdminCommissionRouteImport
+    '/research/preview/$slug': {
+      id: '/research/preview/$slug'
+      path: '/research/preview/$slug'
+      fullPath: '/research/preview/$slug'
+      preLoaderRoute: typeof ResearchPreviewSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/webhook': {
+      id: '/api/research/webhook'
+      path: '/api/research/webhook'
+      fullPath: '/api/research/webhook'
+      preLoaderRoute: typeof ApiResearchWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/shared': {
+      id: '/api/research/shared'
+      path: '/api/research/shared'
+      fullPath: '/api/research/shared'
+      preLoaderRoute: typeof ApiResearchSharedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/share': {
+      id: '/api/research/share'
+      path: '/api/research/share'
+      fullPath: '/api/research/share'
+      preLoaderRoute: typeof ApiResearchShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/finalize': {
+      id: '/api/research/finalize'
+      path: '/api/research/finalize'
+      fullPath: '/api/research/finalize'
+      preLoaderRoute: typeof ApiResearchFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/email': {
+      id: '/api/research/email'
+      path: '/api/research/email'
+      fullPath: '/api/research/email'
+      preLoaderRoute: typeof ApiResearchEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/checkout': {
+      id: '/api/research/checkout'
+      path: '/api/research/checkout'
+      fullPath: '/api/research/checkout'
+      preLoaderRoute: typeof ApiResearchCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/research/report/$token': {
@@ -692,19 +646,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiResearchReportTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/research/admin/commission': {
+      id: '/api/research/admin/commission'
+      path: '/api/research/admin/commission'
+      fullPath: '/api/research/admin/commission'
+      preLoaderRoute: typeof ApiResearchAdminCommissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
-
-interface SponsorRouteChildren {
-  SponsorSuccessRoute: typeof SponsorSuccessRoute
-}
-
-const SponsorRouteChildren: SponsorRouteChildren = {
-  SponsorSuccessRoute: SponsorSuccessRoute,
-}
-
-const SponsorRouteWithChildren =
-  SponsorRoute._addFileChildren(SponsorRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -714,7 +664,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResearchMigrationRoute: ResearchMigrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  SponsorRoute: SponsorRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
   ResearchSlugRoute: ResearchSlugRoute,
   ResearchCommissionRoute: ResearchCommissionRoute,
@@ -743,3 +692,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

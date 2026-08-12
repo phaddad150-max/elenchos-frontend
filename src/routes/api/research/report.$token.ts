@@ -1,7 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getCommission, getReportByToken } from "@/lib/research-desk/store.server";
-import { reportToPdfBytes, reportToPlainText } from "@/lib/research-desk/build-report";
+import {
+  reportToPdfBytes,
+  reportToPlainText,
+  type DeskReport,
+} from "@/lib/research-desk/build-report";
 import { getStaticCommissionedReport } from "@/lib/research-desk/seeds/catalog";
+
+/**
+ * Thin pipeline = generic default questions used, or missing structured curation.
+ * Prefer the curated static seed for known goodwill tokens when that happens.
+ */
+function isThinPipelineReport(report: DeskReport, staticReport: DeskReport): boolean {
+  const qs = report.questions ?? [];
+  const staticQs = staticReport.questions ?? [];
+  if (staticQs.length >= 5 && qs.length >= 3) {
+    // Default-question heuristic from run_commission_topic.default_questions
+    const genericHits = qs.filter((q) =>
+      /what do ordinary people emphasize|where do official or media frames diverge|what evidence is strong, thin/i.test(
+        q,
+      ),
+    ).length;
+    if (genericHits >= 2) return true;
+  }
+  // Missing Pass-2 style fields + no structured gap objects
+  const gaps = report.narrativeGap?.gapPoints ?? [];
+  const structuredGaps = gaps.filter((g) => g && typeof g === "object").length;
+  const hasCardTitles = (report.questionAnalyses ?? []).some((q) => q.cardTitle?.trim());
+  const hasSynthesis = Boolean(report.curatedSynthesis?.headline?.trim());
+  if (!hasCardTitles && !hasSynthesis && structuredGaps === 0 && staticQs.length >= 5) {
+    return true;
+  }
+  return false;
+}
 
 export const Route = createFileRoute("/api/research/report/$token")({
   server: {
@@ -13,11 +44,37 @@ export const Route = createFileRoute("/api/research/report/$token")({
         }
 
         const commission = await getCommission(token);
-        // Prefer DB, then static goodwill seeds (always available for customer delivery)
-        const report =
+        let report =
           commission?.report ??
           (await getReportByToken(token)) ??
           getStaticCommissionedReport(token);
+
+        const staticReport = getStaticCommissionedReport(token);
+        if (report && staticReport && isThinPipelineReport(report, staticReport)) {
+          // Prefer curated seed body; keep real sample metrics when pipeline had X posts
+          const sampleN =
+            typeof report.sampleSize === "number" && report.sampleSize > 0
+              ? report.sampleSize
+              : null;
+          report = {
+            ...staticReport,
+            sampleSize: sampleN ?? staticReport.sampleSize,
+            sampleNote: sampleN
+              ? report.sampleNote ?? staticReport.sampleNote
+              : staticReport.sampleNote,
+            overallSentiment: sampleN
+              ? report.overallSentiment ?? staticReport.overallSentiment
+              : staticReport.overallSentiment,
+            divergenceScore: sampleN
+              ? report.divergenceScore ?? staticReport.divergenceScore
+              : staticReport.divergenceScore,
+            generationStatus:
+              commission?.status === "ready"
+                ? "ready"
+                : commission?.status ?? report.generationStatus ?? "ready",
+          };
+        }
+
         if (!report && !commission) {
           return Response.json({ error: "Not found" }, { status: 404 });
         }
@@ -25,7 +82,6 @@ export const Route = createFileRoute("/api/research/report/$token")({
         const url = new URL(request.url);
         const format = url.searchParams.get("format");
 
-        // Status-only for polling while generating
         if (url.searchParams.get("meta") === "1") {
           return Response.json({
             token,
@@ -45,8 +101,7 @@ export const Route = createFileRoute("/api/research/report/$token")({
           );
         }
 
-        // Merge generation status onto report for the page
-        const payload = {
+        const payload: DeskReport = {
           ...report,
           generationStatus:
             commission?.status ?? report.generationStatus ?? "ready",

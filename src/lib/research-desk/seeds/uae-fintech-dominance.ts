@@ -36,8 +36,9 @@ export function buildUaeFintechReport(token: string): DeskReport {
   const questionAnalyses = [
     {
       question: questions[0]!,
+      cardTitle: "Speed and apps drive “superior to banks” talk",
       answer:
-        "Public praise for UAE fintech often clusters around speed (onboarding, remittances, card issuance), 24/7 app reliability, and English/Arabic product polish—not abstract “innovation.” Users contrast that with branch queues, slow wire desks, and opaque fees at traditional banks. Official hub messaging (global finance gateway, free-zone licences, crypto/fintech sandboxes) overlaps when citizens cite regulatory clarity and multi-currency cards; it diverges when “superior” is treated as lifestyle branding while complaints about FX spreads, frozen accounts, or support dead-ends remain local and persistent. Directional read: superiority claims track UX and access more than systemic trust in the financial state.",
+        "Public praise for UAE fintech often clusters around speed (onboarding, remittances, card issuance), 24/7 app reliability, and English/Arabic product polish—not abstract “innovation.” Users contrast that with branch queues, slow wire desks, and opaque fees at traditional banks. Official hub messaging overlaps when citizens cite regulatory clarity and multi-currency cards; it diverges when “superior” is treated as lifestyle branding while fee and freeze complaints remain local and persistent.",
       sentimentScore: 62,
       sentimentLabel: "cautiously positive",
       keyPoints: [
@@ -46,37 +47,43 @@ export function buildUaeFintechReport(token: string): DeskReport {
         "Contradictions appear around fees, freezes, and support quality",
       ],
       confidence: "medium" as const,
+      theme: "Society",
     },
     {
       question: questions[1]!,
+      cardTitle: "Policy scaffolding outweighs pure “organic” frames",
       answer:
-        "Citizen discourse rarely frames success as pure garage entrepreneurship. Mentions of ADQ/Mubadala-adjacent capital, DIFC/ADGM pathways, and state digital agendas sit beside founder stories—so the public often treats UAE fintech as policy-enabled scale. “Organic” language appears for product stickiness (daily payments, salary cards); “directed” language appears for sudden category pushes (crypto, CBDC pilots, national payment rails). Evidence from discourse is asymmetric: policy infrastructure is highly visible; independent customer-led growth is asserted more than measured. Honest limit: without a purposive X sample, this is structural reading of common frames, not a census.",
+        "Citizen discourse rarely frames success as pure garage entrepreneurship. Mentions of sovereign-adjacent capital, DIFC/ADGM pathways, and state digital agendas sit beside founder stories—so the public often treats UAE fintech as policy-enabled scale. Organic language appears for product stickiness; directed language appears for category pushes (crypto, CBDC pilots, national rails).",
       sentimentScore: 55,
       sentimentLabel: "mixed / policy-aware",
       keyPoints: [
         "Sovereign and free-zone scaffolding is hard for users to ignore",
-        "Organic signals = habitual product use; directed signals = campaign-like category pushes",
+        "Organic signals = habitual product use; directed signals = campaign-like pushes",
         "Do not treat either story as exclusive without transaction-level evidence",
       ],
       confidence: "medium" as const,
+      theme: "Governance",
     },
     {
       question: questions[2]!,
+      cardTitle: "Trust attaches to licences and fee clarity",
       answer:
-        "Spontaneous trust on public platforms tends to attach to concrete affordances: visible licensing (DFSA/FSRA/CBUAE framing), salary and government payment integrations, local card schemes, and low-friction KYC that still feels “official.” Marketing-heavy superlatives without those anchors draw more skepticism. Features that create credibility in discourse: clear dispute paths, transparent fee tables, and interoperability with established banks. Mere influencer placement without operational reliability is often called out as promo. Without a live X scrape this run, treat named “winners” as hypotheses to test—not ranked proof.",
+        "Spontaneous trust tends to attach to concrete affordances: visible licensing, salary and government payment integrations, local card schemes, and KYC that still feels official. Marketing-heavy superlatives without those anchors draw more skepticism. Promo without ops reliability is often called out.",
       sentimentScore: 58,
       sentimentLabel: "trust conditional",
       keyPoints: [
         "Licence + integration + fee clarity beat slogans",
         "Promo without ops reliability erodes spontaneous trust",
-        "No live X ranking in this report — confidence is directional",
+        "Named winners remain hypotheses without a live ranking sample",
       ],
       confidence: "low" as const,
+      theme: "Economy",
     },
     {
       question: questions[3]!,
+      cardTitle: "Fees and freezes outpace official accountability",
       answer:
-        "Credibility losses cluster around fee surprises, account freezes/AML friction, delayed support, and scam/phishing vectors that users blame partly on platform design. Official hub narratives typically stay on licence counts, AUM, and event diplomacy; public complaints move faster and more granularly on fees and freezes. The gap is temporal and tonal: citizen posts personalise harm; official updates generalise progress. Acknowledgement lag is a narrative-gap driver even when regulators later act. Empty stays empty: this briefing does not assert specific unresolved enforcement cases without primary cites.",
+        "Credibility losses cluster around fee surprises, account freezes, delayed support, and scam/phishing vectors. Official hub narratives typically stay on licence counts, AUM, and event diplomacy; public complaints move faster and more granularly. Acknowledgement lag is a core narrative-gap driver.",
       sentimentScore: 42,
       sentimentLabel: "skeptical on accountability",
       keyPoints: [
@@ -85,24 +92,28 @@ export function buildUaeFintechReport(token: string): DeskReport {
         "Depth gap: personal harm vs aggregate success metrics",
       ],
       confidence: "medium" as const,
+      theme: "Governance",
     },
     {
       question: questions[4]!,
+      cardTitle: "UAE hub experience ≠ pan-MENA service",
       answer:
-        "UAE-based users more often describe mature app ecosystems, card utility, and multi-currency life; wider Arab/MENA discourse more often stresses remittance cost, currency stress, and uneven local licensing. “Regional leadership” claims look thinner when customers outside the UAE describe delayed expansion, poorer support, or products that work best for residents with Emirates ID and salary in-country. Practical differences reveal that hub leadership can be real for infrastructure and capital—and still not translate to uniform citizen experience region-wide.",
+        "UAE-based users more often describe mature app ecosystems and multi-currency life; wider Arab/MENA discourse stresses remittance cost, currency stress, and uneven local licensing. Regional leadership claims look thinner when customers outside the UAE describe delayed expansion or resident-only products.",
       sentimentScore: 52,
       sentimentLabel: "split by geography",
       keyPoints: [
-        "UAE experience ≠ pan-MENA experience",
+        "UAE experience does not equal pan-MENA experience",
         "Leadership claims over-index on hub metrics",
         "Remittance and local-market friction bound the region story",
       ],
       confidence: "medium" as const,
+      theme: "Economy",
     },
     {
       question: questions[5]!,
+      cardTitle: "Speed and capital edges fray on redress",
       answer:
-        "Comparisons to Europe/US/Asia swing between “faster regulation and capital” and “weaker consumer redress / higher promo noise.” Assumed advantages that partially hold in discourse: speed of licensing pathways and lifestyle banking. Assumptions that fray under complaints: always-lower fees, always-safer products, and seamless cross-border MENA use. Asia comparisons often praise super-app density; Europe comparisons praise consumer protection. UAE/Saudi discourse sits between ambition and enforcement reality—advantages are not universal and must be claim-tested.",
+        "Comparisons to Europe, the US, and Asia swing between faster regulation and capital versus weaker consumer redress. Speed of licensing pathways partially holds; always-lower fees and seamless cross-border MENA use fray under complaints.",
       sentimentScore: 54,
       sentimentLabel: "comparative / mixed",
       keyPoints: [
@@ -111,37 +122,43 @@ export function buildUaeFintechReport(token: string): DeskReport {
         "Cross-border MENA usability is a frequent limit case",
       ],
       confidence: "medium" as const,
+      theme: "Diplomacy",
     },
     {
       question: questions[6]!,
+      cardTitle: "State capacity is both trust and freeze risk",
       answer:
-        "Official messaging leans on safety, compliance, and state capacity as trust anchors. Citizen divergences surface when accounts freeze without clear timelines, when “transparency” means marketing dashboards rather than dispute logs, or when sovereign-linked platforms feel politically adjacent. Low-corruption assumptions are not usually denied outright; they are stress-tested by process opacity. That is a subtler gap than “scam vs honest”—it is about predictability and voice for ordinary customers under powerful institutions.",
+        "Official messaging leans on safety, compliance, and state capacity as trust anchors. Citizen divergences surface when accounts freeze without clear timelines or when transparency means marketing dashboards rather than dispute logs. Low-corruption assumptions are stress-tested by process opacity.",
       sentimentScore: 48,
       sentimentLabel: "trust under stress",
       keyPoints: [
         "State capacity is both trust source and freeze risk",
         "Transparency claims meet process opacity",
-        "Sovereign influence is a discourse undercurrent, not always a headline",
+        "Sovereign influence is an undercurrent, not always a headline",
       ],
       confidence: "medium" as const,
+      theme: "Governance",
     },
     {
       question: questions[7]!,
+      cardTitle: "Fraud and freezes would swing scores fastest",
       answer:
-        "Large sentiment swings would most likely follow: (a) high-profile fraud or exchange failure with retail losses; (b) mass freeze/AML waves affecting salary users; (c) major regulatory wins that actually cut fees or open interoperability; (d) funding/IPO spectacles that feel extractive if retail product quality lags. Earned trust tracks incident response quality; paid/promoted narratives track conferences and TV. A falsifier for “hub hype dominates trust” would be sustained positive organic discourse after a crisis handled transparently—not after a sponsorship cycle.",
+        "Large sentiment swings would most likely follow high-profile fraud with retail losses, mass freeze/AML waves, major fee or interoperability wins, or funding spectacles that feel extractive if product quality lags. Crisis response quality separates earned from promoted trust.",
       sentimentScore: 50,
       sentimentLabel: "event-sensitive",
       keyPoints: [
-        "Fraud + freezes are downside catalysts",
-        "Real fee/interop wins are upside catalysts",
+        "Fraud and freezes are downside catalysts",
+        "Real fee and interop wins are upside catalysts",
         "Crisis response quality separates earned vs promoted trust",
       ],
       confidence: "medium" as const,
+      theme: "Future Outlook",
     },
     {
       question: questions[8]!,
+      cardTitle: "Citizen success needs SLAs, not only AUM",
       answer:
-        "Authentic citizen-led success would show up as: low surprise fees, predictable dispute resolution, products that work for non-expat and cross-border users, and discourse that cites personal utility without heavy promo framing. Leaders close authenticity gaps by matching hub metrics with published complaint SLAs, clearer freeze/AML communication, and less reliance on superlatives when regional service is uneven. Sovereign metrics (licences, AUM, rankings) remain useful—but incomplete without ordinary-user outcomes.",
+        "Authentic citizen-led success would show low surprise fees, predictable dispute resolution, products that work for non-expat and cross-border users, and discourse that cites personal utility without heavy promo framing. Leaders close gaps by matching hub metrics with published complaint SLAs.",
       sentimentScore: 60,
       sentimentLabel: "constructive / conditional",
       keyPoints: [
@@ -150,6 +167,7 @@ export function buildUaeFintechReport(token: string): DeskReport {
         "Regional leadership must be felt outside the hub city",
       ],
       confidence: "medium" as const,
+      theme: "Public Opinion",
     },
   ];
 
@@ -211,20 +229,97 @@ export function buildUaeFintechReport(token: string): DeskReport {
   ];
 
   const narrativeGap = {
-    headline:
-      "Hub superlatives vs lived speed, fees, and freezes—where “dominance” is felt and where it frays",
+    headline: "Hub superlatives · lived fees and freezes",
     citizenFrame:
       "Citizens and customers often describe UAE fintech as faster and more modern than traditional banks, while remaining sharp on fees, freezes, support, and uneven regional rollout. Trust is practical and revocable.",
     officialMediaFrame:
       "Official and hub-facing narratives emphasise global ranking, licence growth, sovereign partnership, events, and strategic positioning as a MENA/global fintech capital.",
     scoreRationale:
-      "Moderate–elevated divergence: overlap on modernisation and speed; gap on complaint depth, regional uniformity, and how much success is policy-directed versus organic.",
+      "Moderate–elevated divergence: overlap on modernisation and speed; gap on complaint depth, regional uniformity, and policy-directed versus organic success frames.",
+    fullOverview:
+      "Citizens credit speed and apps; officials credit hub rankings and licences. The clash is most visible on fees, freezes, and whether leadership is felt outside the UAE hub.",
     gapPoints: [
-      "Speed/UX consensus vs fee/freeze friction",
-      "Aggregate hub metrics vs personal harm stories",
-      "UAE-centric success vs wider MENA service limits",
-      "Innovation branding vs visible state scaffolding",
+      {
+        claim_citizen:
+          "Fintech wins on speed, apps, and 24/7 access compared with branch banks.",
+        claim_official_media:
+          "UAE is framed as a global fintech capital via licences, free zones, and hub rankings.",
+        why_it_matters: "Speed consensus · fee and freeze friction",
+      },
+      {
+        claim_citizen:
+          "Personal harm stories about freezes, fees, and support lag drive distrust.",
+        claim_official_media:
+          "Official updates emphasise aggregate success metrics and event diplomacy.",
+        why_it_matters: "Incident depth · aggregate hub metrics",
+      },
+      {
+        claim_citizen:
+          "Service quality outside the UAE is uneven; remittance and local support lag.",
+        claim_official_media:
+          "Regional leadership claims treat the UAE hub as pan-MENA proof.",
+        why_it_matters: "Hub success · MENA service limits",
+      },
+      {
+        claim_citizen:
+          "Success looks policy- and capital-enabled, not pure startup selection.",
+        claim_official_media:
+          "Innovation and ecosystem branding stress organic entrepreneurial energy.",
+        why_it_matters: "Directed policy · organic branding",
+      },
     ],
+  };
+
+  const insightThreads = [
+    {
+      theme: "Society",
+      headline: "Operational praise, not blank-cheque trust",
+      summary:
+        "Public talk of superiority is mostly about speed and apps. That is not the same as endorsing every hub-strategy claim.",
+      confidence: "medium",
+    },
+    {
+      theme: "Governance",
+      headline: "Sovereign scaffolding is hard to ignore",
+      summary:
+        "Citizen frames treat free-zone and sovereign capital pathways as part of the product story, not a side note.",
+      confidence: "medium",
+    },
+    {
+      theme: "Economy",
+      headline: "Trust needs licences and fee clarity",
+      summary:
+        "Spontaneous trust anchors to concrete affordances. Promo without ops reliability is discounted.",
+      confidence: "medium",
+    },
+    {
+      theme: "Public Opinion",
+      headline: "Accountability lag is the primary gap",
+      summary:
+        "Public complaints about fees and freezes move faster and deeper than official hub success narratives.",
+      confidence: "medium",
+    },
+    {
+      theme: "Diplomacy",
+      headline: "Hub leadership is not pan-MENA experience",
+      summary:
+        "UAE-resident product maturity does not automatically equal regional leadership for ordinary users elsewhere.",
+      confidence: "medium",
+    },
+    {
+      theme: "Future Outlook",
+      headline: "Citizen metrics must include dispute SLAs",
+      summary:
+        "Authentic success needs predictability and voice—not only licences, AUM, and conference rankings.",
+      confidence: "medium",
+    },
+  ];
+
+  const curatedSynthesis = {
+    headline: "Hub rankings · conditional citizen trust",
+    summary:
+      "UAE fintech wins citizen praise on speed and apps, while official narratives stress hub rankings and licences. The durable gap is accountability: fees, freezes, and uneven MENA rollout. Directional scores only until a live X sample is attached.",
+    confidence: "medium",
   };
 
   const methodNotes = [
@@ -268,13 +363,16 @@ export function buildUaeFintechReport(token: string): DeskReport {
         narrativeGap.headline!,
         `Citizens: ${narrativeGap.citizenFrame}`,
         `Official/media: ${narrativeGap.officialMediaFrame}`,
-        ...narrativeGap.gapPoints.map((p) => `· ${p}`),
+        ...narrativeGap.gapPoints.map(
+          (p) =>
+            `· ${p.why_it_matters}: Citizens — ${p.claim_citizen} | Official — ${p.claim_official_media}`,
+        ),
       ],
     },
     {
       heading: "Question analysis",
       body: questionAnalyses.flatMap((q, i) => [
-        `Q${i + 1}. ${q.question}`,
+        `Q${i + 1}. ${q.cardTitle}`,
         q.answer,
         ...q.keyPoints.map((k) => `· ${k}`),
         "",
@@ -318,6 +416,8 @@ export function buildUaeFintechReport(token: string): DeskReport {
     narrativeGap,
     questionAnalyses,
     keyInsights,
+    insightThreads,
+    curatedSynthesis,
     claims,
     chapters: [],
     scenarios: [],

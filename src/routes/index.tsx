@@ -2279,38 +2279,128 @@ function KpiHeroTile({
   const barPct =
     has && tile.format === "percent" ? Math.min(100, Math.max(0, Math.round(numericValue))) : null;
 
+  const detailPanel = (
+    <div className="dash-kpi-popover-panel rounded-xl border border-border/80 bg-background/95 p-3 sm:p-3 space-y-2 min-w-0">
+      <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan break-words">
+        {tile.label}
+      </p>
+      {has && (
+        <p className="text-[1.35rem] sm:text-[16px] font-display font-semibold tabular-nums text-cyan leading-none">
+          {tile.format === "percent"
+            ? `${Math.round(numericValue!)}%`
+            : Math.round(numericValue!).toLocaleString()}
+          {tile.unit && tile.format !== "percent" ? (
+            <span className="text-[11px] font-mono text-muted-foreground ml-1">
+              {tile.unit}
+            </span>
+          ) : null}
+        </p>
+      )}
+      <p className="text-[12px] sm:text-[11px] text-foreground/90 leading-snug break-words">
+        {tile.liveNote?.trim() ||
+          (has
+            ? `Current value: ${typeof tile.value === "number" ? tile.value.toLocaleString() : tile.value}${tile.format === "percent" ? "%" : tile.unit ? ` ${tile.unit}` : ""}.`
+            : "No value for this metric in the current sample yet.")}
+      </p>
+      {tile.liveFacts && tile.liveFacts.length > 0 && (
+        <ul className="space-y-1">
+          {tile.liveFacts.slice(0, 4).map((line, i) => (
+            <li
+              key={i}
+              className="text-[11px] sm:text-[10.5px] font-mono text-muted-foreground leading-snug flex gap-1.5 min-w-0"
+            >
+              <span className="text-cyan shrink-0">›</span>
+              <span className="break-words min-w-0">{line}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {history.length > 1 && (
+        <p className="text-[10px] font-mono text-muted-foreground/90 break-all">
+          Recent: {history.slice(-5).join(" → ")}
+        </p>
+      )}
+      {(tile.links?.length || tile.cta) && (
+        <div className="pt-1.5 border-t border-border/70 flex flex-col gap-1.5">
+          {tile.links?.map((lnk) => (
+            <Link
+              key={lnk.href + lnk.label}
+              to={lnk.href}
+              className="inline-flex items-center gap-1 text-[12px] sm:text-[11px] font-mono text-cyan hover:text-cyan/80 transition-colors min-h-[40px] sm:min-h-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {lnk.label}
+              <ArrowRight className="w-3 h-3 shrink-0" />
+            </Link>
+          ))}
+          {tile.cta && (
+            <div onClick={(e) => e.stopPropagation()}>
+              {tile.cta.note && (
+                <p className="text-[10px] font-mono text-muted-foreground leading-snug mb-1 break-words">
+                  {tile.cta.note}
+                </p>
+              )}
+              {tile.cta.comingSoon || !tile.cta.href ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/60 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                  <Sparkles className="w-3 h-3 text-cyan/70" strokeWidth={2.2} />
+                  {tile.cta.label}
+                </span>
+              ) : (
+                <Link
+                  to={tile.cta.href}
+                  className={
+                    tile.cta.emphasis === "primary"
+                      ? "inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[40px]"
+                      : "inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors min-h-[40px]"
+                  }
+                >
+                  {tile.cta.label}
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div
-      className={`dash-kpi dash-kpi-hero relative min-w-0 w-full h-full ${
-        expanded
-          ? "dash-kpi-hero-open z-20 col-span-2 sm:col-span-3 xl:col-span-1"
-          : "z-0"
+      className={`dash-kpi dash-kpi-hero relative min-w-0 w-full ${
+        expanded ? "dash-kpi-hero-open z-20" : "z-0"
       } ${flash ? "dash-kpi-flash" : ""}`}
     >
+      {/* Compact face: value-first, no empty chrome on mobile */}
       <motion.button
         type="button"
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-        whileHover={{ y: -1 }}
-        whileTap={{ scale: 0.99 }}
+        transition={{ delay, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        whileTap={{ scale: 0.98 }}
         onClick={onToggle}
         aria-expanded={expanded}
-        className="relative z-[1] w-full h-full text-left cursor-pointer flex flex-col items-center justify-between gap-0.5 px-1.5 py-1.5 sm:px-2.5 sm:py-2.5 min-h-[6.5rem] sm:min-h-[8.3rem] touch-manipulation"
+        className="relative z-[1] w-full text-left cursor-pointer flex flex-col items-stretch justify-center gap-1 px-2 py-2 sm:px-2.5 sm:py-2.5 min-h-0 touch-manipulation overflow-hidden rounded-[inherit]"
       >
         <span className="dash-kpi-glow" aria-hidden />
-        <span
-          className="shrink-0 w-6.5 h-6.5 sm:w-7.5 sm:h-7.5 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 shadow-[0_0_16px_-6px_var(--color-cyan-glow)] group-hover:border-cyan/55 transition-colors"
-          aria-hidden
-        >
-          <tile.icon className="w-3.5 h-3.5 sm:w-[0.95rem] sm:h-[0.95rem] text-cyan data-pulse" strokeWidth={2.2} />
-        </span>
-        <span className="dash-kpi-label text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-[0.1em] sm:tracking-[0.13em] text-muted-foreground leading-tight line-clamp-2 min-h-[1.9rem] w-full flex items-center justify-center text-center px-0.5 break-words">
-          {tile.label}
-        </span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            className="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-md grid place-items-center border border-cyan/35 bg-cyan/10"
+            aria-hidden
+          >
+            <tile.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan" strokeWidth={2.2} />
+          </span>
+          <span className="dash-kpi-label text-[9px] sm:text-[9.5px] font-mono uppercase tracking-[0.1em] text-muted-foreground leading-tight line-clamp-2 min-w-0 flex-1">
+            {tile.label}
+          </span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 shrink-0 text-muted-foreground/70 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            aria-hidden
+          />
+        </div>
         {has ? (
           <div
-            className={`dash-kpi-value text-[1.33rem] sm:text-[1.42rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan min-h-[1.5rem] flex items-center justify-center ${
+            className={`dash-kpi-value text-[1.35rem] sm:text-[1.42rem] font-display font-semibold tabular-nums leading-none tracking-tight text-cyan px-0.5 ${
               flash ? "ticker-flash" : ""
             }`}
             style={{ textShadow: "0 0 14px var(--color-cyan-glow)" }}
@@ -2324,142 +2414,74 @@ function KpiHeroTile({
             )}
           </div>
         ) : (
-          <div className="text-[11px] font-mono text-muted-foreground min-h-[1.6rem] flex items-center">
-            —
-          </div>
+          <div className="text-[12px] font-mono text-muted-foreground px-0.5">—</div>
         )}
-        {/* Fixed delta slot so all cards share the same height */}
-        <span
-          className={`text-[9px] font-mono tabular-nums min-h-[0.95rem] leading-none ${
-            delta == null
-              ? "text-transparent select-none"
-              : delta > 0
-                ? "text-emerald-signal"
-                : delta < 0
-                  ? "text-rose-signal"
-                  : "text-muted-foreground"
-          }`}
-          aria-hidden={delta == null}
-        >
-          {delta == null
-            ? "·"
-            : `${delta > 0 ? "+" : ""}${Math.round(delta)}${tile.format === "percent" ? " pts" : ""} vs last`}
-        </span>
-        <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden shrink-0">
-          {barPct != null ? (
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
-              initial={{ width: 0 }}
-              animate={{ width: `${barPct}%` }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: delay * 0.4 }}
-            />
-          ) : (
-            <div className="h-full w-0" />
+        {/* Desktop-only subtle delta / bar — mobile stays dense */}
+        <div className="hidden sm:flex flex-col gap-1 w-full">
+          <span
+            className={`text-[9px] font-mono tabular-nums leading-none ${
+              delta == null
+                ? "text-transparent select-none"
+                : delta > 0
+                  ? "text-emerald-signal"
+                  : delta < 0
+                    ? "text-rose-signal"
+                    : "text-muted-foreground"
+            }`}
+            aria-hidden={delta == null}
+          >
+            {delta == null
+              ? "·"
+              : `${delta > 0 ? "+" : ""}${Math.round(delta)}${tile.format === "percent" ? " pts" : ""} vs last`}
+          </span>
+          {barPct != null && (
+            <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden shrink-0">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
+                initial={{ width: 0 }}
+                animate={{ width: `${barPct}%` }}
+                transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: delay * 0.4 }}
+              />
+            </div>
           )}
         </div>
-        <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-muted-foreground/80">
-          <ChevronDown
-            className={`w-3 h-3 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-          />
-          {expanded ? "Less" : "Details"}
-        </span>
       </motion.button>
 
-      {/* Popover expand — keeps all face cards equal height */}
+      {/* Mobile: bottom sheet (does not stretch grid). Desktop: popover under card. */}
       <AnimatePresence initial={false}>
         {expanded && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18 }}
-            className="dash-kpi-popover absolute left-0 right-0 top-[calc(100%-2px)] z-30 px-2.5 pb-2.5 pt-1.5 sm:px-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="dash-kpi-popover-panel rounded-lg p-3 space-y-2 min-h-[4.5rem]">
-              <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
-                {tile.label}
-              </p>
-              {has && (
-                <p className="text-[18px] sm:text-[16px] font-display font-semibold tabular-nums text-cyan leading-none">
-                  {tile.format === "percent"
-                    ? `${Math.round(numericValue!)}%`
-                    : Math.round(numericValue!).toLocaleString()}
-                  {tile.unit && tile.format !== "percent" ? (
-                    <span className="text-[11px] font-mono text-muted-foreground ml-1">
-                      {tile.unit}
-                    </span>
-                  ) : null}
-                </p>
-              )}
-              <p className="text-[12px] sm:text-[11px] text-foreground/90 leading-snug">
-                {tile.liveNote?.trim() ||
-                  (has
-                    ? `Current value: ${typeof tile.value === "number" ? tile.value.toLocaleString() : tile.value}${tile.format === "percent" ? "%" : tile.unit ? ` ${tile.unit}` : ""}.`
-                    : "No value for this metric in the current sample yet.")}
-              </p>
-              {tile.liveFacts && tile.liveFacts.length > 0 && (
-                <ul className="space-y-1">
-                  {tile.liveFacts.map((line, i) => (
-                    <li
-                      key={i}
-                      className="text-[11px] sm:text-[10.5px] font-mono text-muted-foreground leading-snug flex gap-1.5"
-                    >
-                      <span className="text-cyan shrink-0">›</span>
-                      <span>{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {history.length > 1 && (
-                <p className="text-[10px] font-mono text-muted-foreground/90">
-                  Recent: {history.slice(-5).join(" → ")}
-                </p>
-              )}
-              {(tile.links?.length || tile.cta) && (
-                <div className="pt-1.5 border-t border-border/70 flex flex-col gap-1.5">
-                  {tile.links?.map((lnk) => (
-                    <Link
-                      key={lnk.href + lnk.label}
-                      to={lnk.href}
-                      className="inline-flex items-center gap-1 text-[12px] sm:text-[11px] font-mono text-cyan hover:text-cyan/80 transition-colors min-h-[36px] sm:min-h-0"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {lnk.label}
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  ))}
-                  {tile.cta && (
-                    <div onClick={(e) => e.stopPropagation()}>
-                      {tile.cta.note && (
-                        <p className="text-[10px] font-mono text-muted-foreground leading-snug mb-1">
-                          {tile.cta.note}
-                        </p>
-                      )}
-                      {tile.cta.comingSoon || !tile.cta.href ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/60 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
-                          <Sparkles className="w-3 h-3 text-cyan/70" strokeWidth={2.2} />
-                          {tile.cta.label}
-                        </span>
-                      ) : (
-                        <Link
-                          to={tile.cta.href}
-                          className={
-                            tile.cta.emphasis === "primary"
-                              ? "inline-flex items-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-2.5 py-1.5 text-[11px] font-medium transition-colors min-h-[36px]"
-                              : "inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-cyan transition-colors"
-                          }
-                        >
-                          {tile.cta.label}
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.div>
+          <>
+            {/* Mobile sheet backdrop */}
+            <motion.button
+              type="button"
+              aria-label="Close details"
+              className="md:hidden fixed inset-0 z-[60] bg-background/70 backdrop-blur-[2px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onToggle}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.2 }}
+              className="dash-kpi-popover md:absolute md:left-0 md:right-0 md:top-[calc(100%-2px)] md:z-30 fixed inset-x-0 bottom-0 z-[70] md:bottom-auto p-3 md:p-0 md:px-0 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-0 max-h-[70dvh] md:max-h-none overflow-y-auto md:overflow-visible"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="md:hidden flex justify-center pb-2">
+                <span className="w-10 h-1 rounded-full bg-border" aria-hidden />
+              </div>
+              {detailPanel}
+              <button
+                type="button"
+                onClick={onToggle}
+                className="md:hidden mt-2 w-full min-h-[44px] rounded-full border border-border text-[12px] font-mono text-muted-foreground"
+              >
+                Close
+              </button>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
@@ -2705,7 +2727,7 @@ function DashboardKpiGrid({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-stretch min-w-0 max-sm:gap-1.5"
+      className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5 items-start min-w-0 max-sm:gap-1.5 overflow-x-clip"
       data-kpi-source="shared-desktop-mobile"
     >
       {tiles.map((t, i) => (
