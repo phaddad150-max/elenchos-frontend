@@ -414,6 +414,7 @@ function TopicsFilterableGrid({
   };
 
   const { activeTopics, archivedTopics } = useMemo(() => {
+    /** Established live monitors (elevated order within cadence). */
     const PRIORITY = [
       NEAR_REALTIME_TOPIC_ID,
       "elon-musk-public-voices",
@@ -424,12 +425,22 @@ function TopicsFilterableGrid({
       "arab-israeli-normalization",
       "new-us-foreign-policy",
       "us-ai-economy-boom",
+    ];
+    /**
+     * Newest live topics always render after all established live cards.
+     * Append future launches here (do not put them in PRIORITY).
+     */
+    const NEW_TOPIC_CARD_TAIL = [
       "ai-productivity-gdp-growth",
       "india-economic-growth-narrative",
-    ];
+    ] as const;
     const prio = (id: string) => {
       const i = PRIORITY.indexOf(id);
       return i === -1 ? 99 : i;
+    };
+    const tailRank = (id: string) => {
+      const i = (NEW_TOPIC_CARD_TAIL as readonly string[]).indexOf(id);
+      return i; // -1 = established live; >=0 = append after established
     };
     /** Live (near real-time) always before weekly, then monthly. */
     const cadenceRank = (id: string) => {
@@ -446,6 +457,13 @@ function TopicsFilterableGrid({
     const active = available
       .filter((t) => !isArchivedTopicId(t.id))
       .sort((a, b) => {
+        // 0) New launches always after every established live topic
+        const ta = tailRank(a.id);
+        const tb = tailRank(b.id);
+        const aNew = ta >= 0;
+        const bNew = tb >= 0;
+        if (aNew !== bNew) return aNew ? 1 : -1;
+        if (aNew && bNew) return ta - tb;
         // 1) Cadence: Live first, then weekly, then monthly
         const ca = cadenceRank(a.id);
         const cb = cadenceRank(b.id);
