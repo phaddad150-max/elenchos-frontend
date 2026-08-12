@@ -78,18 +78,58 @@ export function isLiveOutputTopic(raw: string | null | undefined): boolean {
   return true;
 }
 
-/** Pick the dashboard overview the live UI should show.
- *  Prefer newest row; if it has no AI summary (e.g. zero-cost refresh), use the
- *  newest prior row that still has grok_ai_summary so a blank run cannot blank the page.
+/**
+ * Pick the freshest overview for the UI.
+ * - Prefer latest row for signals / heatmap / timestamps.
+ * - If latest lacks grok_ai_summary, graft summary from a recent row (append-only).
+ * - Lifetime posts KPI = peak across recent rows so summary fallback never
+ *   oscillates the face value (was 2455 ↔ 11587 when older rows were chosen whole).
  */
 export function pickLiveDashboardOverview(
   rows: DashboardOverview[] | null | undefined,
 ): DashboardOverview | null {
   if (!rows?.length) return null;
-  const latest = rows[0];
-  if (latest.grok_ai_summary?.trim()) return latest;
-  const withSummary = rows.find((r) => !!r.grok_ai_summary?.trim());
-  return withSummary ?? latest;
+  const latest = rows[0]!;
+
+  let peakPosts = 0;
+  for (const r of rows) {
+    const n =
+      (typeof r.kpis?.total_posts_analyzed === "number"
+        ? r.kpis.total_posts_analyzed
+        : undefined) ??
+      (typeof r.total_posts_analyzed === "number" ? r.total_posts_analyzed : 0);
+    if (typeof n === "number" && n > peakPosts) peakPosts = n;
+  }
+
+  const summaryDonor =
+    latest.grok_ai_summary?.trim()
+      ? latest
+      : rows.find((r) => !!r.grok_ai_summary?.trim()) ?? latest;
+
+  // Always base on latest so we do not re-surface stale KPI windows
+  const merged: DashboardOverview = {
+    ...latest,
+    grok_ai_summary: latest.grok_ai_summary?.trim()
+      ? latest.grok_ai_summary
+      : summaryDonor.grok_ai_summary,
+    kpis: { ...(latest.kpis ?? {}) },
+  };
+
+  const current =
+    typeof merged.kpis?.total_posts_analyzed === "number"
+      ? merged.kpis.total_posts_analyzed
+      : typeof merged.total_posts_analyzed === "number"
+        ? merged.total_posts_analyzed
+        : 0;
+
+  if (peakPosts > 0 && peakPosts > (current || 0)) {
+    merged.kpis = {
+      ...merged.kpis,
+      total_posts_analyzed: peakPosts,
+    };
+  }
+
+  return merged;
 }
 
 /** Legacy / truncated DB topic strings → canonical TOPIC_CONFIG keys (keep in sync with backend). */
@@ -748,7 +788,10 @@ export type IntelFeedItem = {
 
 export type DashboardKpis = {
   total_topics_monitored?: number;
+  /** Lifetime cumulative posts across all historical live snapshots (never decreases). */
   total_posts_analyzed?: number;
+  /** Latest-per-topic window only (may move up/down). */
+  window_posts_analyzed?: number;
   signals_generated?: number;
   regions_monitored?: number;
   active_topics?: number;
@@ -992,7 +1035,7 @@ export async function loadDashboardOverview(force = false): Promise<DashboardOve
       // Fetch a short history so a blank zero-cost refresh can fall back to the
       // last overview that still has the AI cross-topic summary (append-only restore).
       const res = await supabaseFetch(
-        "dashboard_overviews?select=*&order=generated_at.desc&limit=5",
+        "dashboard_overviews?select=*&order=generated_at.desc&limit=12",
       );
       if (!res.ok) throw new Error("HTTP " + res.status);
       const rows = (await res.json()) as DashboardOverview[];

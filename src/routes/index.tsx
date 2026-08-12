@@ -2167,9 +2167,17 @@ function resolvePostsAnalyzed(args: {
   }
   fromCitizens = Math.round(fromCitizens);
 
-  const windowFallback = fromSnaps > 0 ? fromSnaps : fromCitizens > 0 ? fromCitizens : 0;
-  // Lifetime never undercuts window; published lifetime never drops vs itself.
-  const n = Math.max(fromLifetime, windowFallback);
+  const windowOnly =
+    typeof k?.window_posts_analyzed === "number" && k.window_posts_analyzed > 0
+      ? Math.round(k.window_posts_analyzed)
+      : fromSnaps > 0
+        ? fromSnaps
+        : fromCitizens > 0
+          ? fromCitizens
+          : 0;
+
+  // Prefer published lifetime; only fall back to window if overview has no lifetime yet
+  const n = fromLifetime > 0 ? Math.max(fromLifetime, windowOnly) : windowOnly;
   return n > 0 ? n : undefined;
 }
 
@@ -2219,13 +2227,13 @@ function postsAnalyzedBreakdown(args: {
   }
   return [
     fromOverview != null
-      ? `Lifetime posts analyzed: ${Math.round(fromOverview).toLocaleString()} (never decreases)`
+      ? `Lifetime (all historical live snapshots): ${Math.round(fromOverview).toLocaleString()}`
       : "Lifetime total: not in this sample yet.",
     windowFromKpi != null
-      ? `Current window (latest samples): ${Math.round(windowFromKpi).toLocaleString()}`
+      ? `Current window (latest per topic): ${Math.round(windowFromKpi).toLocaleString()}`
       : `Current window (topic snapshots sum): ${Math.round(fromSnaps).toLocaleString()}`,
     `Live citizen-signal samples: ${Math.round(fromCitizens).toLocaleString()}`,
-    "Face value = max(lifetime, current window) — same on mobile and desktop.",
+    "Face value uses lifetime total — grows with every pipeline insert; same on mobile and desktop.",
   ];
 }
 
@@ -2661,7 +2669,7 @@ function DashboardKpiGrid({
       icon: Activity,
       format: sampleAnalyzed != null && sampleAnalyzed >= 1000 ? "compact" : "number",
       liveNote:
-        "Lifetime posts analyzed across pipeline runs — never decreases. Same number on mobile and desktop.",
+        "All posts ever analyzed for live topics (full Supabase history). Grows with every pipeline run; never drops.",
       liveFacts: [
         ...sampleFacts,
         typeof k.signals_generated === "number"
