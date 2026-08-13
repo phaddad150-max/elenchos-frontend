@@ -427,10 +427,10 @@ function TopicsFilterableGrid({
       "us-ai-economy-boom",
     ];
     /**
-     * Newest live topics always render after all established live cards.
-     * Append future launches here (do not put them in PRIORITY).
+     * Newest live topics always render first among active cards.
+     * Prepend future launches here (most recent first; do not put them only in PRIORITY).
      */
-    const NEW_TOPIC_CARD_TAIL = [
+    const NEW_TOPIC_CARD_HEAD = [
       "ai-productivity-gdp-growth",
       "india-economic-growth-narrative",
     ] as const;
@@ -438,9 +438,9 @@ function TopicsFilterableGrid({
       const i = PRIORITY.indexOf(id);
       return i === -1 ? 99 : i;
     };
-    const tailRank = (id: string) => {
-      const i = (NEW_TOPIC_CARD_TAIL as readonly string[]).indexOf(id);
-      return i; // -1 = established live; >=0 = append after established
+    const newRank = (id: string) => {
+      const i = (NEW_TOPIC_CARD_HEAD as readonly string[]).indexOf(id);
+      return i; // -1 = established; >=0 = pin to front (lower index = earlier)
     };
     /** Live (near real-time) always before weekly, then monthly. */
     const cadenceRank = (id: string) => {
@@ -457,13 +457,13 @@ function TopicsFilterableGrid({
     const active = available
       .filter((t) => !isArchivedTopicId(t.id))
       .sort((a, b) => {
-        // 0) New launches always after every established live topic
-        const ta = tailRank(a.id);
-        const tb = tailRank(b.id);
-        const aNew = ta >= 0;
-        const bNew = tb >= 0;
-        if (aNew !== bNew) return aNew ? 1 : -1;
-        if (aNew && bNew) return ta - tb;
+        // 0) New launches always first among active cards
+        const na = newRank(a.id);
+        const nb = newRank(b.id);
+        const aNew = na >= 0;
+        const bNew = nb >= 0;
+        if (aNew !== bNew) return aNew ? -1 : 1;
+        if (aNew && bNew) return na - nb;
         // 1) Cadence: Live first, then weekly, then monthly
         const ca = cadenceRank(a.id);
         const cb = cadenceRank(b.id);
