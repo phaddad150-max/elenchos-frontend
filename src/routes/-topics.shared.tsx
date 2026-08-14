@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  getWowTrendForTopic,
   loadCuratedQaPairs,
   loadCuratedTopicInsights,
   loadDashboardData,
@@ -186,21 +187,21 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-5 sm:space-y-6"
       >
-        <header className="page-hero-banner">
-          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(200px,38%)] lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,36%)] items-stretch min-h-0">
-            <div className="relative z-[2] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0">
+        <header className="page-hero-banner overflow-hidden">
+          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(200px,38%)] lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,36%)] items-stretch min-h-0 min-w-0">
+            <div className="relative z-[2] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0 max-w-full overflow-hidden">
               <div className="page-hero-kicker">
                 <span className="w-1 h-3.5 bg-cyan rounded-sm" />
                 Topics
               </div>
-              <h1 className="page-hero-title text-[1.35rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] break-words">
+              <h1 className="page-hero-title text-[1.25rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] break-words hyphens-auto">
                 What citizens say vs{" "}
                 <span className="text-cyan">official narratives</span>
               </h1>
-              <p className="page-hero-sub w-full max-w-none whitespace-normal lg:whitespace-nowrap lg:overflow-hidden lg:text-ellipsis">
+              <p className="page-hero-sub w-full max-w-full whitespace-normal">
                 Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
               </p>
-              <div className="flex flex-wrap gap-2 mt-1">
+              <div className="flex flex-wrap gap-2 mt-1 min-w-0">
                 <Link
                   to="/research"
                   className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-medium touch-manipulation"
@@ -211,31 +212,31 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
                   to="/research/commission"
                   className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-border text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
                 >
-                  Commission · $10
+                  Multi-source report · $10
                 </Link>
               </div>
               <button
                 type="button"
                 onClick={() => onOpen("commercial-space-race")}
-                className="mt-1 inline-flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2.5 sm:py-2 text-left transition-colors touch-manipulation min-h-[44px] sm:min-h-[40px] w-full sm:w-fit max-w-full"
+                className="mt-1 inline-flex flex-col items-stretch gap-1 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2.5 text-left transition-colors touch-manipulation min-h-[44px] w-full max-w-full min-w-0 overflow-hidden"
               >
                 <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
                   Featured case study
                 </span>
-                <span className="text-[12.5px] sm:text-[13px] font-display font-semibold text-foreground truncate">
+                <span className="text-[12px] sm:text-[13px] font-display font-semibold text-foreground leading-snug line-clamp-2 break-words min-w-0 w-full">
                   Commercial Space Race: public trust vs rivals and official frames
                 </span>
               </button>
             </div>
 
             <div
-              className="page-hero-art z-[1] hidden md:block min-h-[118px] lg:min-h-[132px]"
+              className="page-hero-art z-[1] hidden md:block min-h-[118px] lg:min-h-[132px] min-w-0 overflow-hidden"
               aria-hidden
             >
               <img
                 src="/brand/headbanner.png"
                 alt=""
-                className="absolute inset-0 object-[72%_center] lg:object-[70%_center]"
+                className="absolute inset-0 w-full h-full object-cover object-[72%_center] lg:object-[70%_center]"
                 loading="eager"
                 decoding="async"
               />
@@ -316,10 +317,7 @@ function topicCategory(id: string): TopicCategory {
 
 
 function readWowTrend(rootKey: string): WowTrend | null {
-  if (typeof window === "undefined") return null;
-  const map = (window as Window & { wowSentimentTrends?: Record<string, WowTrend> })
-    .wowSentimentTrends;
-  return map?.[rootKey] ?? null;
+  return getWowTrendForTopic(rootKey);
 }
 
 function TopicsFilterableGrid({
@@ -858,6 +856,10 @@ function TopicCard({
   // Fallback: Pass 1 overall_sentiment.trend label when no curated/history WoW yet
   const resolvedWow: WowTrend | null = (() => {
     if (wowTrend) return wowTrend;
+    // Retry lookup by live root key / title in case trends finished after first render
+    const liveRoot = LIVE_TOPIC_KEYS[topic.id]?.rootKey;
+    const late = getWowTrendForTopic(liveRoot) ?? getWowTrendForTopic(topic.title);
+    if (late) return late;
     const label =
       typeof os === "object" && os && typeof os.trend === "string" ? os.trend : null;
     if (!label) return null;

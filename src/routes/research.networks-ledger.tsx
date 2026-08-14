@@ -1,8 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   ExternalLink,
   Filter,
   FlaskConical,
@@ -14,6 +13,10 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import {
+  ResearchBreadcrumb,
+  ResearchDeskNav,
+} from "@/components/research/ResearchDeskNav";
 import {
   ACTION_TYPE_LABELS,
   ALL_ENTRIES,
@@ -92,42 +95,11 @@ function NetworksLedgerPage() {
       <SiteNav />
 
       <main className="max-w-[1180px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-8 py-5 sm:py-7 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        {/* Breadcrumb */}
-        <nav
-          aria-label="Research location"
-          className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground mb-3"
-        >
-          <Link to="/" className="hover:text-cyan touch-manipulation min-h-[36px] inline-flex items-center">
-            Home
-          </Link>
-          <span aria-hidden>/</span>
-          <Link
-            to="/research"
-            className="hover:text-cyan touch-manipulation min-h-[36px] inline-flex items-center"
-          >
-            Research Desk
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="text-foreground/90 font-medium">Networks Ledger</span>
-        </nav>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          <Link
-            to="/research"
-            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground min-h-[40px] px-2.5 rounded-full border border-border/70 touch-manipulation"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Desk
-          </Link>
-          <Link
-            to="/research/library"
-            className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground min-h-[40px] px-2.5 rounded-full border border-border/70 touch-manipulation"
-          >
-            Library
-          </Link>
-        </div>
+        <ResearchBreadcrumb current="Networks Ledger" />
+        <ResearchDeskNav />
 
         {/* Hero */}
-        <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden relative">
+        <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden relative min-w-0">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-rose-signal/8 pointer-events-none" />
           <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5">
             <div className="page-hero-kicker">

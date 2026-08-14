@@ -2,13 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   ArrowRight,
   FileText,
   FlaskConical,
   Library,
   MapPin,
-  Scale,
   Share2,
   Trophy,
   Users,
@@ -16,6 +14,10 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import {
+  ResearchBreadcrumb,
+  ResearchDeskNav,
+} from "@/components/research/ResearchDeskNav";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
 
 type SharedItem = {
@@ -81,52 +83,9 @@ function ResearchLibraryPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[920px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-8 py-6 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        {/* Breadcrumb + desk nav */}
-        <nav
-          aria-label="Research location"
-          className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground mb-3 min-w-0"
-        >
-          <Link to="/" className="hover:text-cyan touch-manipulation min-h-[36px] inline-flex items-center">
-            Home
-          </Link>
-          <span aria-hidden>/</span>
-          <Link
-            to="/research"
-            className="hover:text-cyan touch-manipulation min-h-[36px] inline-flex items-center"
-          >
-            Research Desk
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="text-foreground/90 font-medium">Library</span>
-        </nav>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          <Link
-            to="/research"
-            className="rd-btn-ghost inline-flex items-center gap-1.5 text-[12px] text-muted-foreground min-h-[40px] px-2.5 rounded-full border border-border/70 touch-manipulation"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Desk
-          </Link>
-          <Link
-            to="/research/commission"
-            className="rd-btn-ghost inline-flex items-center gap-1.5 text-[12px] text-cyan min-h-[40px] px-2.5 rounded-full border border-cyan/35 bg-cyan/8 touch-manipulation"
-          >
-            <Zap className="w-3.5 h-3.5" /> On-demand · $10
-          </Link>
-          <Link
-            to="/research/networks-ledger"
-            className="rd-btn-ghost inline-flex items-center gap-1.5 text-[12px] text-cyan min-h-[40px] px-2.5 rounded-full border border-cyan/35 bg-cyan/8 touch-manipulation"
-          >
-            <Scale className="w-3.5 h-3.5" /> Networks Ledger
-          </Link>
-          <Link
-            to="/topics"
-            className="rd-btn-ghost inline-flex items-center gap-1.5 text-[12px] text-muted-foreground min-h-[40px] px-2.5 rounded-full border border-border/70 touch-manipulation"
-          >
-            Live Topics
-          </Link>
-        </div>
+      <main className="max-w-[920px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-8 py-5 sm:py-7 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
+        <ResearchBreadcrumb current="Library" />
+        <ResearchDeskNav />
 
         <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden relative min-w-0">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-emerald-signal/5 pointer-events-none" />
@@ -139,15 +98,15 @@ function ResearchLibraryPage() {
               Case studies, crisis briefings &amp; indexes
             </h1>
             <p className="page-hero-sub max-w-xl break-words">
-              Everything to read on the desk except live Topics analysis. Jump with the bar below.
+              Deep-dive briefs and shared multi-source reports. Live Topics analysis stays on the Topics page.
             </p>
           </div>
         </header>
 
-        {/* Sticky in-page nav */}
+        {/* In-page section jump (below Research Desk nav) */}
         <nav
           aria-label="Library sections"
-          className="sticky top-[3.6rem] z-20 mb-6 -mx-1 px-1 py-2 bg-background/90 backdrop-blur-md border-b border-border/70"
+          className="sticky top-[7.25rem] sm:top-[7.5rem] z-[15] mb-6 -mx-1 px-1 py-2 bg-background/92 backdrop-blur-md border-b border-border/70"
         >
           <div className="flex gap-1.5 overflow-x-auto pb-0.5 custom-scroll overscroll-x-contain">
             <JumpChip href="#lib-crisis" label="Crisis" tone="rose" />

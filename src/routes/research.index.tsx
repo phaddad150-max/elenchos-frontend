@@ -4,11 +4,9 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
-  CheckCircle2,
   FlaskConical,
   Library,
   Lock,
-  Radio,
   Scale,
   Shield,
   Sparkles,
@@ -17,6 +15,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
+import { ResearchDeskNav } from "@/components/research/ResearchDeskNav";
 import { RESEARCH_NORTH_STAR } from "@/lib/research-catalog";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
 
@@ -26,20 +25,20 @@ const ENTERPRISE_DEFAULT_MESSAGE =
 export const Route = createFileRoute("/research/")({
   head: () => ({
     meta: [
-      { title: "Research Desk · Public discourse & on-demand reports · Elenchos" },
+      { title: "Research Desk · Case studies, networks & on-demand reports · Elenchos" },
       {
         name: "description",
         content:
-          "Elenchos Research Desk: live Topics analysis, case studies, on-demand reports from $10, or Enterprise (personalized dashboards) via contact — no self-serve checkout for enterprise.",
+          "Elenchos Research Desk: library case studies, Networks Ledger, multi-source on-demand reports from $10, or Enterprise dashboards via contact.",
       },
       {
         property: "og:title",
-        content: "Research Desk · Socratic depth beyond the live pulse · Elenchos",
+        content: "Research Desk · Depth beyond the live pulse · Elenchos",
       },
       {
         property: "og:description",
         content:
-          "Topics analysis, library, on-demand reports, or Enterprise personalization. Safe research space — card data never stored on Elenchos.",
+          "Library, official networks tracker, and privacy-first multi-source reports. Live Topics stay on the Topics page.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
       { property: "og:type", content: "website" },
@@ -53,7 +52,7 @@ export const Route = createFileRoute("/research/")({
           "@type": "WebPage",
           name: "Research Desk · Elenchos",
           description:
-            "Public discourse analysis, case studies, and privacy-first on-demand research reports.",
+            "Case studies, networks ledger, and privacy-first on-demand research reports.",
           url: "https://elenchos.live/research",
           isPartOf: { "@type": "WebSite", name: "Elenchos", url: "https://elenchos.live" },
         }),
@@ -69,55 +68,57 @@ function ResearchDeskLanding() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-8 py-6 sm:py-8 md:py-10 mobile-safe-bottom md:pb-16 relative flex-1 overflow-x-clip">
-        <header className="page-hero-banner mb-6 sm:mb-8 overflow-hidden relative">
+      <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-8 py-5 sm:py-7 md:py-9 mobile-safe-bottom md:pb-16 relative flex-1 overflow-x-clip min-w-0">
+        <ResearchDeskNav />
+
+        <header className="page-hero-banner mb-5 sm:mb-7 overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan/12 via-transparent to-rose-signal/6 pointer-events-none" />
           <div className="relative p-4 sm:p-5 md:p-7 min-w-0 space-y-3">
             <div className="page-hero-kicker">
               <FlaskConical className="w-3.5 h-3.5" aria-hidden />
               Research Desk
             </div>
-            <h1 className="page-hero-title text-[1.5rem] sm:text-2xl md:text-[2rem] lg:text-[2.2rem] break-words">
-              Plan, read, or commission research
+            <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] lg:text-[2.15rem] break-words hyphens-auto">
+              Read briefs, track networks, or commission depth
             </h1>
-            <p className="text-[13px] sm:text-[14px] font-display font-medium text-cyan/95 leading-snug max-w-xl">
+            <p className="text-[13px] sm:text-[14px] font-display font-medium text-cyan/95 leading-snug max-w-xl break-words">
               {ELENCHOS_TAGLINE}
             </p>
-            <p className="page-hero-sub max-w-2xl">{RESEARCH_NORTH_STAR}</p>
+            <p className="page-hero-sub max-w-2xl break-words">{RESEARCH_NORTH_STAR}</p>
             <div className="mt-1 flex flex-wrap gap-2">
               <Link
-                to="/research/commission"
-                className="rd-btn-primary inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-display font-semibold text-[13px] shadow-[0_0_32px_-8px_var(--color-cyan-glow)] touch-manipulation"
-              >
-                <Zap className="w-4 h-4" />
-                On-demand from $10
-              </Link>
-              <Link
                 to="/research/library"
-                className="rd-btn-ghost inline-flex items-center gap-2 min-h-[48px] px-4 py-2.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
+                className="rd-btn-primary inline-flex items-center gap-2 min-h-[48px] px-5 py-2.5 rounded-full bg-cyan text-background font-display font-semibold text-[13px] shadow-[0_0_32px_-8px_var(--color-cyan-glow)] touch-manipulation"
               >
                 <Library className="w-4 h-4" />
                 Browse library
               </Link>
               <Link
-                to="/topics"
-                className="rd-btn-ghost inline-flex items-center gap-1.5 min-h-[48px] px-3 rounded-full border border-transparent text-[12px] text-muted-foreground touch-manipulation"
+                to="/research/networks-ledger"
+                className="rd-btn-ghost inline-flex items-center gap-2 min-h-[48px] px-4 py-2.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
               >
-                Live Topics <ArrowRight className="w-3.5 h-3.5" />
+                <Scale className="w-4 h-4" />
+                Networks Ledger
+              </Link>
+              <Link
+                to="/research/commission"
+                className="rd-btn-ghost inline-flex items-center gap-2 min-h-[48px] px-4 py-2.5 rounded-full border border-border text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
+              >
+                <Zap className="w-4 h-4" />
+                On-demand from $10
               </Link>
             </div>
           </div>
         </header>
 
-        {/* Trust strip */}
         <section
           aria-label="Why this desk is safe"
-          className="mb-7 sm:mb-8 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3"
+          className="mb-6 sm:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3"
         >
           <TrustChip
             icon={<Lock className="w-3.5 h-3.5" />}
             title="Browse free"
-            body="No account required to read Topics, library, or public briefings."
+            body="No account required for library, Networks Ledger, or public briefings."
             delay={0}
           />
           <TrustChip
@@ -135,25 +136,14 @@ function ResearchDeskLanding() {
         </section>
 
         <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3 px-0.5">
-          Ways to use the desk
+          Choose a path
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           <PathCard
             delay={0}
-            icon={<Radio className="w-6 h-6 text-cyan" />}
-            step="01"
-            title="Live Topics"
-            subtitle="Public discourse analysis"
-            body="What people say on X vs official and media frames. Socratic questions, sentiment, narrative gap."
-            cta="Open Topics"
-            to="/topics"
-            glow="cyan"
-          />
-          <PathCard
-            delay={0.05}
             icon={<BookOpen className="w-6 h-6 text-cyan" />}
-            step="02"
+            step="01"
             title="Deep-dive library"
             subtitle="Case studies & crisis briefings"
             body="Thesis-style multi-source reports and public crisis briefings — for reading, not a live pulse."
@@ -162,9 +152,9 @@ function ResearchDeskLanding() {
             glow="emerald"
           />
           <PathCard
-            delay={0.08}
+            delay={0.05}
             icon={<Scale className="w-6 h-6 text-cyan" />}
-            step="03"
+            step="02"
             title="Networks Ledger"
             subtitle="Official designations tracker"
             body="US + Gulf public actions on IRGC, Hezbollah, MB, Hamas financing — designations, arrests, freezes."
@@ -175,10 +165,10 @@ function ResearchDeskLanding() {
           <PathCard
             delay={0.1}
             icon={<Sparkles className="w-6 h-6 text-cyan" />}
-            step="04"
+            step="03"
             title="On-demand report"
-            subtitle="Your topic · $10 / $20"
-            body="Topic analysis $10 · multi-source deep dive $10 (no X) or $20 (with X). Unique private link + PDF."
+            subtitle="Your question · $10 / $20"
+            body="Multi-source deep dive from $10. Unique private link + PDF. Topic X-analysis commissions stay under Topics."
             cta="Start commission"
             to="/research/commission"
             glow="rose"
@@ -187,17 +177,16 @@ function ResearchDeskLanding() {
           <EnterprisePathCard delay={0.15} />
         </div>
 
-        {/* How it works */}
         <section className="rounded-2xl border border-border/90 bg-card/40 p-4 sm:p-5 mb-8">
           <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">
-            How a commissioned report works
+            How an on-demand report works
           </h2>
           <ol className="grid sm:grid-cols-3 gap-2.5 sm:gap-3">
             {[
               {
                 n: "1",
                 t: "Choose package",
-                d: "Pick topic-style analysis or multi-source depth. Write your question in plain language.",
+                d: "Pick multi-source depth. Write your research question in plain language.",
               },
               {
                 n: "2",
@@ -217,25 +206,26 @@ function ResearchDeskLanding() {
                 <span className="shrink-0 w-7 h-7 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-mono grid place-items-center">
                   {s.n}
                 </span>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[13px] font-display font-semibold text-foreground">{s.t}</p>
-                  <p className="text-[12.5px] text-muted-foreground leading-snug mt-0.5">{s.d}</p>
+                  <p className="text-[12.5px] text-muted-foreground leading-snug mt-0.5 break-words">
+                    {s.d}
+                  </p>
                 </div>
               </li>
             ))}
           </ol>
         </section>
 
-        {/* Bottom CTA */}
-        <section className="rd-cta-panel rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/12 via-card/50 to-transparent p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+        <section className="rd-cta-panel rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/12 via-card/50 to-transparent p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between min-w-0">
           <div className="space-y-1.5 min-w-0">
             <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">
               Ready when you are
             </p>
-            <p className="text-[15px] sm:text-base font-display font-semibold leading-snug">
-              Check the live pulse — or generate a deeper report on your topic.
+            <p className="text-[15px] sm:text-base font-display font-semibold leading-snug break-words">
+              Open the library, scan the Networks Ledger, or commission a deeper brief.
             </p>
-            <p className="text-[12.5px] text-muted-foreground leading-snug max-w-lg">
+            <p className="text-[12.5px] text-muted-foreground leading-snug max-w-lg break-words">
               Same evidence discipline as the rest of Elenchos. Experimental research, not legal or
               investment advice.
             </p>
@@ -279,9 +269,9 @@ function EnterprisePathCard({ delay }: { delay: number }) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="h-full"
+      className="h-full min-w-0"
     >
-      <div className="rd-card rd-card-amber group relative flex flex-col h-full rounded-2xl border border-amber-signal/40 bg-gradient-to-b from-amber-signal/10 to-card/80 p-4 sm:p-5 min-h-[200px] sm:min-h-[220px]">
+      <div className="rd-card rd-card-amber group relative flex flex-col h-full rounded-2xl border border-amber-signal/40 bg-gradient-to-b from-amber-signal/10 to-card/80 p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] min-w-0 overflow-hidden">
         <span className="absolute top-3 right-3 z-[1] text-[9px] font-mono uppercase tracking-[0.14em] text-amber-signal bg-amber-signal/15 border border-amber-signal/40 rounded-full px-2 py-0.5">
           Contact
         </span>
@@ -289,15 +279,15 @@ function EnterprisePathCard({ delay }: { delay: number }) {
           <div className="rd-icon-lift w-11 h-11 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal">
             <Building2 className="w-6 h-6" />
           </div>
-          <span className="text-[11px] font-mono text-muted-foreground tabular-nums">05</span>
+          <span className="text-[11px] font-mono text-muted-foreground tabular-nums">04</span>
         </div>
-        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug group-hover:text-amber-signal transition-colors">
+        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug group-hover:text-amber-signal transition-colors break-words">
           Enterprise
         </h2>
         <p className="text-[12px] text-amber-signal mt-0.5 font-medium">
           Personalized dashboards &amp; more
         </p>
-        <p className="text-[13px] text-muted-foreground leading-relaxed mt-2.5 flex-1">
+        <p className="text-[13px] text-muted-foreground leading-relaxed mt-2.5 flex-1 break-words">
           Custom topics, branded or private dashboards, team workflows, and deeper ongoing research.
           Not self-serve checkout — we scope it with you.
         </p>
@@ -330,21 +320,15 @@ function TrustChip({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
+      className="flex gap-2.5 rounded-xl border border-border/80 bg-card/40 px-3 py-2.5 min-w-0"
     >
-      <div className="rd-chip rounded-xl border border-border/80 bg-card/50 px-3.5 py-3 flex gap-2.5 min-h-[44px]">
-        <span className="rd-icon-lift shrink-0 w-8 h-8 rounded-lg border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center mt-0.5">
-          {icon}
-        </span>
-        <div className="min-w-0">
-          <p className="text-[13px] font-display font-semibold text-foreground flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-cyan shrink-0 hidden sm:inline" aria-hidden />
-            {title}
-          </p>
-          <p className="text-[12px] text-muted-foreground leading-snug mt-0.5">{body}</p>
-        </div>
+      <span className="shrink-0 mt-0.5 text-cyan">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-[12.5px] font-display font-semibold text-foreground">{title}</p>
+        <p className="text-[11.5px] text-muted-foreground leading-snug mt-0.5 break-words">{body}</p>
       </div>
     </motion.div>
   );
@@ -381,11 +365,11 @@ function PathCard({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="h-full"
+      className="h-full min-w-0"
     >
       <Link
         to={to}
-        className={`rd-card ${glowClass} group relative flex flex-col h-full rounded-2xl border bg-card/60 backdrop-blur-sm p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] touch-manipulation ${
+        className={`rd-card ${glowClass} group relative flex flex-col h-full rounded-2xl border bg-card/60 backdrop-blur-sm p-4 sm:p-5 min-h-[200px] sm:min-h-[220px] touch-manipulation min-w-0 overflow-hidden ${
           featured
             ? "border-cyan/55 bg-gradient-to-b from-cyan/15 to-card/80 ring-1 ring-cyan/30"
             : "border-border/90"
@@ -402,14 +386,15 @@ function PathCard({
           </div>
           <span className="text-[11px] font-mono text-muted-foreground tabular-nums">{step}</span>
         </div>
-        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground group-hover:text-cyan leading-snug transition-colors">
+        <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug group-hover:text-cyan transition-colors break-words">
           {title}
         </h2>
-        <p className="text-[12px] text-cyan mt-0.5 font-medium">{subtitle}</p>
-        <p className="text-[13px] text-muted-foreground leading-relaxed mt-2.5 flex-1">{body}</p>
-        <span className="inline-flex items-center gap-1.5 text-[13px] text-cyan font-semibold mt-4">
-          {cta}
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+        <p className="text-[12px] text-cyan mt-0.5 font-medium break-words">{subtitle}</p>
+        <p className="text-[13px] text-muted-foreground leading-relaxed mt-2.5 flex-1 break-words">
+          {body}
+        </p>
+        <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">
+          {cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </span>
       </Link>
     </motion.div>

@@ -519,6 +519,7 @@
   overflow-wrap: anywhere;
   word-break: break-word;
   max-width: 100%;
+  min-width: 0;
 }
 .page-hero-banner .page-hero-sub {
   font-size: 13px;
@@ -527,6 +528,15 @@
   overflow-wrap: anywhere;
   word-break: break-word;
   max-width: 100%;
+  min-width: 0;
+}
+/* Hide horizontal scrollbar on Research Desk pill nav (still scrollable) */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 /* Research case-study pages: never spill past viewport on mobile */
 .research-brief-shell {

@@ -1289,9 +1289,30 @@ function directionFromTrendLabel(label?: string | null): WowTrend["direction"] |
 }
 
 /**
+ * Index a WoW trend under canonical + raw topic strings so card lookups by
+ * LIVE_TOPIC_KEYS.rootKey always resolve.
+ */
+function indexWowTrend(
+  out: Record<string, WowTrend>,
+  topicRaw: string | null | undefined,
+  trend: WowTrend,
+  { overwrite = false }: { overwrite?: boolean } = {},
+) {
+  if (!topicRaw?.trim()) return;
+  const raw = topicRaw.trim();
+  const key = normalizeTopicKey(raw) ?? raw;
+  const targets = new Set<string>([key, raw]);
+  for (const t of targets) {
+    if (!overwrite && out[t]) continue;
+    out[t] = trend;
+  }
+}
+
+/**
  * Load WoW sentiment trends for all live topics.
- * Prefer Pass 2 curated `sentiment_delta` (wow window); fall back to comparing
- * the two most recent substantive Pass 1 snapshots per topic.
+ * Prefer Pass 1 history (two newest substantive snapshots) for real deltas when
+ * multi-run history exists; use Pass 2 curated sentiment_delta as fill; last
+ * resort = Pass 1 overall_sentiment.trend label.
  */
 export async function loadWowSentimentTrends(
   force = false,
@@ -1304,7 +1325,7 @@ export async function loadWowSentimentTrends(
   if (force) {
     w.wowSentimentTrends = undefined;
     w.__wowSentimentTrendsPromise = undefined;
-  } else if (w.wowSentimentTrends) {
+  } else if (w.wowSentimentTrends && Object.keys(w.wowSentimentTrends).length > 0) {
     return w.wowSentimentTrends;
   }
   if (!force && w.__wowSentimentTrendsPromise) return w.__wowSentimentTrendsPromise;
@@ -1312,59 +1333,92 @@ export async function loadWowSentimentTrends(
   w.__wowSentimentTrendsPromise = (async () => {
     const out: Record<string, WowTrend> = {};
     try {
-      // 1) Curated WoW deltas (skip empty-run curation that invents +12 from 0 posts)
-      const curatedRes = await supabaseFetch(
-        "latest_curated_topic_insights?comparison_window=eq.wow&select=topic,sentiment_delta,hero_headline,hero_summary,evolution_note&order=generated_at.desc&limit=80",
-      );
-      if (curatedRes.ok) {
-        const rows = (await curatedRes.json()) as CuratedTopicInsights[];
-        for (const row of rows ?? []) {
-          const key = normalizeTopicKey(row.topic);
-          if (!key || out[key]) continue;
-          if (isEmptyCuratedInsight(row)) continue;
-          if (typeof row.sentiment_delta !== "number" || Number.isNaN(row.sentiment_delta)) continue;
-          out[key] = {
-            delta: Math.round(row.sentiment_delta * 10) / 10,
-            direction: directionFromDelta(row.sentiment_delta),
-          };
-        }
-      }
-
-      // 2) Fill gaps from Pass 1 history (two newest substantive snapshots)
+      // 1) Pass 1 history first — real multi-run deltas when available
       const histRes = await supabaseFetch(
-        "topic_snapshots?select=topic,last_updated,overall_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=500",
+        "topic_snapshots?select=topic,last_updated,overall_sentiment,sample_size,fetched_post_count&order=last_updated.desc&limit=1000",
       );
       if (histRes.ok) {
         const histRows = (await histRes.json()) as TopicSnapshot[];
         const byTopic: Record<string, TopicSnapshot[]> = {};
         for (const row of histRows ?? []) {
-          const key = normalizeTopicKey(row.topic);
+          const key = normalizeTopicKey(row.topic) ?? row.topic?.trim();
           if (!key) continue;
           if (snapshotQuality(row) < 0) continue;
           (byTopic[key] ??= []).push(row);
         }
         for (const [key, group] of Object.entries(byTopic)) {
-          if (out[key]) continue;
+          // Dedupe near-identical timestamps by last_updated+score
           const sorted = [...group].sort(compareSnapshotsForLive);
-          const current = sorted[0];
-          const prior = sorted[1];
-          if (!current || !prior) {
-            const label =
-              typeof current?.overall_sentiment === "object"
-                ? current.overall_sentiment?.trend
-                : undefined;
-            const dir = directionFromTrendLabel(label);
-            if (dir) out[key] = { delta: null, direction: dir };
-            continue;
+          const unique: TopicSnapshot[] = [];
+          for (const row of sorted) {
+            const prev = unique[unique.length - 1];
+            if (
+              prev &&
+              prev.last_updated === row.last_updated &&
+              overallSentimentScore(prev) === overallSentimentScore(row)
+            ) {
+              continue;
+            }
+            unique.push(row);
           }
-          const curScore = overallSentimentScore(current);
-          const priorScore = overallSentimentScore(prior);
-          if (curScore == null || priorScore == null) continue;
-          const delta = curScore - priorScore;
-          out[key] = {
-            delta: Math.round(delta * 10) / 10,
-            direction: directionFromDelta(delta),
+          const current = unique[0];
+          // Prefer a prior with a different score, else next row
+          let prior: TopicSnapshot | undefined;
+          if (current) {
+            const curScore = overallSentimentScore(current);
+            prior = unique.find((r, i) => {
+              if (i === 0) return false;
+              const s = overallSentimentScore(r);
+              return s != null && curScore != null && s !== curScore;
+            });
+            if (!prior && unique.length > 1) prior = unique[1];
+          }
+          if (current && prior) {
+            const curScore = overallSentimentScore(current);
+            const priorScore = overallSentimentScore(prior);
+            if (curScore != null && priorScore != null) {
+              const delta = curScore - priorScore;
+              indexWowTrend(out, key, {
+                delta: Math.round(delta * 10) / 10,
+                direction: directionFromDelta(delta),
+              });
+              indexWowTrend(out, current.topic, {
+                delta: Math.round(delta * 10) / 10,
+                direction: directionFromDelta(delta),
+              });
+              continue;
+            }
+          }
+          // Single-run fallback: model trend label on latest snapshot
+          const label =
+            typeof current?.overall_sentiment === "object"
+              ? current.overall_sentiment?.trend
+              : undefined;
+          const dir = directionFromTrendLabel(label);
+          if (dir) {
+            indexWowTrend(out, key, { delta: null, direction: dir });
+            if (current?.topic) indexWowTrend(out, current.topic, { delta: null, direction: dir });
+          }
+        }
+      }
+
+      // 2) Curated WoW deltas fill remaining gaps (skip empty-run noise)
+      const curatedRes = await supabaseFetch(
+        "latest_curated_topic_insights?comparison_window=eq.wow&select=topic,sentiment_delta,hero_headline,hero_summary,evolution_note&order=generated_at.desc&limit=120",
+      );
+      if (curatedRes.ok) {
+        const rows = (await curatedRes.json()) as CuratedTopicInsights[];
+        for (const row of rows ?? []) {
+          const key = normalizeTopicKey(row.topic) ?? row.topic?.trim();
+          if (!key || out[key]) continue;
+          if (isEmptyCuratedInsight(row)) continue;
+          if (typeof row.sentiment_delta !== "number" || Number.isNaN(row.sentiment_delta)) continue;
+          const trend: WowTrend = {
+            delta: Math.round(row.sentiment_delta * 10) / 10,
+            direction: directionFromDelta(row.sentiment_delta),
           };
+          indexWowTrend(out, key, trend);
+          indexWowTrend(out, row.topic, trend);
         }
       }
     } catch (e) {
@@ -1375,6 +1429,19 @@ export async function loadWowSentimentTrends(
   })();
 
   return w.__wowSentimentTrendsPromise;
+}
+
+/** Resolve a card trend by rootKey or any known alias of that topic. */
+export function getWowTrendForTopic(topicKey: string | null | undefined): WowTrend | null {
+  if (typeof window === "undefined" || !topicKey?.trim()) return null;
+  const map = (window as Window & { wowSentimentTrends?: Record<string, WowTrend> })
+    .wowSentimentTrends;
+  if (!map) return null;
+  const raw = topicKey.trim();
+  if (map[raw]) return map[raw]!;
+  const canonical = normalizeTopicKey(raw);
+  if (canonical && map[canonical]) return map[canonical]!;
+  return null;
 }
 
 export function legacyTopicNames(canonical: string): string[] {

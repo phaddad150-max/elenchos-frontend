@@ -1,9 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Building2, FlaskConical, Shield } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Building2, FlaskConical, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { CommissionBriefForm } from "@/components/research/CommissionBriefForm";
+import {
+  ResearchBreadcrumb,
+  ResearchDeskNav,
+} from "@/components/research/ResearchDeskNav";
 
 const ENTERPRISE_DEFAULT_MESSAGE =
   "Hi — I'm interested in Enterprise for Elenchos: personalized dashboards, custom topics, and team research. Here's what we need:\n\n";
@@ -39,25 +43,22 @@ function CommissionPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[640px] mx-auto w-full px-3 sm:px-4 py-6 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <Link
-          to="/research"
-          className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-cyan min-h-[40px] touch-manipulation mb-4"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Research Desk
-        </Link>
+      <main className="max-w-[640px] mx-auto w-full px-3 sm:px-4 py-5 sm:py-7 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip min-w-0">
+        <ResearchBreadcrumb current="On-demand" />
+        <ResearchDeskNav />
 
-        <header className="page-hero-banner mb-5 sm:mb-6">
-          <div className="p-4 sm:p-5">
+        <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden min-w-0">
+          <div className="p-4 sm:p-5 min-w-0">
             <div className="page-hero-kicker">
               <FlaskConical className="w-3.5 h-3.5" aria-hidden />
-              On-demand
+              On-demand · multi-source
             </div>
-            <h1 className="page-hero-title text-[1.35rem] sm:text-2xl mt-2">
+            <h1 className="page-hero-title text-[1.35rem] sm:text-2xl mt-2 break-words">
               Commission your report
             </h1>
-            <p className="page-hero-sub mt-2">
-              Same method we use on the desk. Fixed low price. Unique link + PDF when ready.
+            <p className="page-hero-sub mt-2 break-words">
+              Multi-source deep dive at a fixed price. Unique link + PDF when ready. For live X
+              topic-analysis commissions, use the Topics page.
             </p>
           </div>
         </header>
