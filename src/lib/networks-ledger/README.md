@@ -10,7 +10,8 @@ Public tracker of **official government designations, arrests/charges, and quant
 
 **Geography (Phase 1):** United States + US-allied Gulf (primarily UAE + TFTC partners).
 
-**Live URL:** `/research/networks-ledger` on elenchos.live (Research Desk).
+**Live URL:** `/research/networks-ledger` (Research Desk → **Intelligence** tab).  
+The Intelligence hub also links Leadership, Peace, Media, Football trackers and the Fraud Ledger shell.
 
 ---
 

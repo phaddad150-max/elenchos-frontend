@@ -7,7 +7,7 @@ import {
   FlaskConical,
   Library,
   Lock,
-  Scale,
+  Brain,
   Shield,
   Sparkles,
   Zap,
@@ -97,8 +97,8 @@ function ResearchDeskLanding() {
                 to="/research/networks-ledger"
                 className="rd-btn-ghost inline-flex items-center gap-2 min-h-[48px] px-4 py-2.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
               >
-                <Scale className="w-4 h-4" />
-                Networks Ledger
+                <Brain className="w-4 h-4" />
+                Intelligence
               </Link>
               <Link
                 to="/research/commission"
@@ -128,7 +128,7 @@ function ResearchDeskLanding() {
             delay={0.05}
           />
           <TrustChip
-            icon={<Scale className="w-3.5 h-3.5" />}
+            icon={<Brain className="w-3.5 h-3.5" />}
             title="Limits shown"
             body="Sample sizes, sources, and confidence stay visible. Empty stays empty."
             delay={0.1}
@@ -144,21 +144,21 @@ function ResearchDeskLanding() {
             delay={0}
             icon={<BookOpen className="w-6 h-6 text-cyan" />}
             step="01"
-            title="Deep-dive library"
-            subtitle="Case studies & crisis briefings"
-            body="Thesis-style multi-source reports and public crisis briefings — for reading, not a live pulse."
+            title="Library"
+            subtitle="Published case studies"
+            body="All Elenchos multi-source case studies on one shelf — including public crisis briefings."
             cta="Open library"
             to="/research/library"
             glow="emerald"
           />
           <PathCard
             delay={0.05}
-            icon={<Scale className="w-6 h-6 text-cyan" />}
+            icon={<Brain className="w-6 h-6 text-cyan" />}
             step="02"
-            title="Networks Ledger"
-            subtitle="Official designations tracker"
-            body="US + Gulf public actions on IRGC, Hezbollah, MB, Hamas financing — designations, arrests, freezes."
-            cta="Open ledger"
+            title="Intelligence"
+            subtitle="Ledgers & citizen trackers"
+            body="Designations ledger, fraud ledger shell, leadership board, peace index, and more."
+            cta="Open intelligence"
             to="/research/networks-ledger"
             glow="cyan"
           />
@@ -223,7 +223,7 @@ function ResearchDeskLanding() {
               Ready when you are
             </p>
             <p className="text-[15px] sm:text-base font-display font-semibold leading-snug break-words">
-              Open the library, scan the Networks Ledger, or commission a deeper brief.
+              Open the library, explore Intelligence tools, or commission a deeper brief.
             </p>
             <p className="text-[12.5px] text-muted-foreground leading-snug max-w-lg break-words">
               Same evidence discipline as the rest of Elenchos. Experimental research, not legal or

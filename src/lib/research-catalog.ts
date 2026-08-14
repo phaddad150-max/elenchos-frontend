@@ -98,7 +98,7 @@ export const SOURCE_CLASS_LEGEND: ResearchBrief["sourceClasses"] = [
 
 /** North-star copy for Research Desk landing */
 export const RESEARCH_NORTH_STAR =
-  "A clear desk for three jobs: live public-discourse analysis (Topics), deep-dive case studies, or an on-demand report on your topic. Evidence and limits you can check — not vibes.";
+  "A clear desk for published case studies (Library), ledgers & citizen trackers (Intelligence), or an on-demand multi-source report. Live Topics stay on the Topics page. Evidence and limits you can check — not vibes.";
 
 export const RESEARCH_HUMAN_FIRST =
   "Machines may collect and draft. A human analyst reviews the source plan and every claim before publish. No auto-published claims.";

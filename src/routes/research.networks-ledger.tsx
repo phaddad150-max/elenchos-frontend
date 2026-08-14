@@ -1,14 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, lazy, Suspense } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState, lazy, Suspense, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
+  ArrowRight,
+  Brain,
   ExternalLink,
   Filter,
   FlaskConical,
   MapPin,
-  Scale,
+  MessageSquareQuote,
   Search,
   Shield,
+  Trophy,
+  Users,
   Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -42,21 +46,21 @@ export const Route = createFileRoute("/research/networks-ledger")({
   head: () => ({
     meta: [
       {
-        title: "Networks Ledger · Official designations & enforcement · Elenchos",
+        title: "Intelligence · Ledgers & citizen trackers · Elenchos",
       },
       {
         name: "description",
         content:
-          "Phase 1 tracker of public official designations, arrests, and asset freezes involving IRGC, Hezbollah, Muslim Brotherhood, and Hamas-linked financing — US and US-allied Gulf sources only.",
+          "Elenchos Intelligence hub: terror-finance designations ledger, fraud ledger, leadership board, peace index, and other citizen trackers.",
       },
       {
         property: "og:title",
-        content: "Networks Ledger · Elenchos Research Desk",
+        content: "Intelligence · Ledgers & trackers · Elenchos Research Desk",
       },
       {
         property: "og:description",
         content:
-          "Independent aggregation of OFAC, DOJ, State, UAE Cabinet, and TFTC public announcements. Allegations until adjudicated.",
+          "Official-source ledgers and citizen-scored indexes. Designations, freezes, leadership trust, peace, and more.",
       },
       {
         property: "og:url",
@@ -67,10 +71,10 @@ export const Route = createFileRoute("/research/networks-ledger")({
       { rel: "canonical", href: "https://elenchos.live/research/networks-ledger" },
     ],
   }),
-  component: NetworksLedgerPage,
+  component: IntelligencePage,
 });
 
-function NetworksLedgerPage() {
+function IntelligencePage() {
   const [q, setQ] = useState("");
   const [network, setNetwork] = useState("all");
   const [type, setType] = useState("all");
@@ -89,43 +93,151 @@ function NetworksLedgerPage() {
     return [...set].sort();
   }, []);
 
+  // Deep-link #designations-ledger from hub cards
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#designations-ledger" || window.location.hash === "#fraud-ledger") {
+      const el = document.querySelector(window.location.hash);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
       <main className="max-w-[1180px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-8 py-5 sm:py-7 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <ResearchBreadcrumb current="Networks Ledger" />
+        <ResearchBreadcrumb current="Intelligence" />
         <ResearchDeskNav />
 
         {/* Hero */}
         <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden relative min-w-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-rose-signal/8 pointer-events-none" />
-          <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-violet-500/8 pointer-events-none" />
+          <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5 min-w-0">
             <div className="page-hero-kicker">
-              <Scale className="w-3.5 h-3.5" aria-hidden />
-              Research Desk · Phase 1
+              <Brain className="w-3.5 h-3.5" aria-hidden />
+              Intelligence
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Networks Ledger
+              Ledgers &amp; citizen trackers
             </h1>
-            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed">
-              High-confidence public actions only: official designations, arrests/charges, and
-              quantified freezes involving{" "}
-              <span className="text-foreground/90">IRGC</span>,{" "}
-              <span className="text-foreground/90">Hezbollah</span>,{" "}
-              <span className="text-foreground/90">Muslim Brotherhood</span>,{" "}
-              <span className="text-foreground/90">Hamas-linked financing</span>, and clear{" "}
-              <span className="text-foreground/90">Mixed / Axis</span> overlaps — focused on the{" "}
-              <span className="text-foreground/90">United States</span> and{" "}
-              <span className="text-foreground/90">US-allied Gulf</span> (UAE, TFTC partners).
-            </p>
-            <p className="text-[11px] font-mono text-cyan/90">
-              {NETWORKS_LEDGER_DATA.meta.version} · {ALL_ENTRIES.length} starter entries ·{" "}
-              {NETWORKS_LEDGER_DATA.meta.lastReviewed}
+            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed break-words">
+              One place for official-source ledgers (designations, freezes, fraud-style cases) and
+              citizen-scored indexes (leaders, peace, media, sport). Pick a tool below — or open the
+              Designations Ledger on this page.
             </p>
           </div>
         </header>
+
+        {/* Tool hub */}
+        <section className="mb-7 sm:mb-8" aria-labelledby="intel-tools">
+          <h2
+            id="intel-tools"
+            className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-3 px-0.5"
+          >
+            Tools
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+            <ToolCard
+              href="#designations-ledger"
+              title="Designations Ledger"
+              body="OFAC, DOJ, State, UAE, TFTC — IRGC, Hezbollah, MB, Hamas financing. Live below."
+              icon={<Shield className="w-5 h-5" />}
+              badge="On this page"
+              tone="cyan"
+            />
+            <ToolCard
+              href="#fraud-ledger"
+              title="Fraud Ledger"
+              body="Public financial-crime designations & prosecutions (same evidence style as designations)."
+              icon={<Zap className="w-5 h-5" />}
+              badge="Phase 1"
+              tone="amber"
+            />
+            <ToolCard
+              href="/trackers/leaders"
+              title="Leadership board"
+              body="Citizen trust rankings for world leaders vs official narratives."
+              icon={<Users className="w-5 h-5" />}
+              badge="Live"
+              tone="amber"
+            />
+            <ToolCard
+              href="/trackers/peace"
+              title="Peace index"
+              body="Normalization & peace diagnostics — support, momentum, official gap."
+              icon={<Trophy className="w-5 h-5" />}
+              badge="Live"
+              tone="cyan"
+            />
+            <ToolCard
+              href="/trackers/media"
+              title="Media trust"
+              body="Citizen trust signals on media outlets and narrative framing."
+              icon={<MessageSquareQuote className="w-5 h-5" />}
+              badge="Tracker"
+              tone="violet"
+            />
+            <ToolCard
+              href="/trackers/football"
+              title="Football player index"
+              body="Fan discourse rankings — form, legacy, post-match sentiment."
+              icon={<Trophy className="w-5 h-5" />}
+              badge="Live"
+              tone="emerald"
+            />
+          </div>
+          <Link
+            to="/trackers"
+            className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px] px-0.5"
+          >
+            Open full trackers hub <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </section>
+
+        {/* Fraud ledger stub */}
+        <section
+          id="fraud-ledger"
+          className="scroll-mt-28 mb-8 rounded-2xl border border-amber-signal/35 bg-amber-signal/5 p-4 sm:p-5 space-y-2"
+          aria-labelledby="fraud-heading"
+        >
+          <h2
+            id="fraud-heading"
+            className="text-[13px] font-display font-semibold text-foreground flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4 text-amber-signal" />
+            Fraud Ledger
+          </h2>
+          <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-2xl">
+            Phase 1 shell for high-confidence public financial-crime actions (OFAC, DOJ forfeitures,
+            major fraud indictments). Same rules as Designations: primary government sources only,
+            allegations until adjudicated, append-only history. Starter corpus ships next — use
+            Designations Ledger below for terror-finance packages already live.
+          </p>
+          <p className="text-[11px] text-muted-foreground/90 leading-snug border-t border-amber-signal/20 pt-2">
+            {NETWORKS_LEDGER_DISCLAIMER}
+          </p>
+        </section>
+
+        {/* Designations ledger (full product) */}
+        <div id="designations-ledger" className="scroll-mt-28 space-y-5 sm:space-y-6">
+          <div className="flex flex-wrap items-end justify-between gap-2 px-0.5">
+            <div className="min-w-0">
+              <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground">
+                Designations Ledger
+              </h2>
+              <p className="text-[12.5px] text-muted-foreground mt-0.5 max-w-2xl leading-snug">
+                High-confidence public actions: designations, arrests/charges, quantified freezes —
+                IRGC, Hezbollah, Muslim Brotherhood, Hamas-linked financing, Mixed/Axis. US +
+                US-allied Gulf focus.
+              </p>
+              <p className="text-[11px] font-mono text-cyan/90 mt-1">
+                {NETWORKS_LEDGER_DATA.meta.version} · {ALL_ENTRIES.length} entries ·{" "}
+                {NETWORKS_LEDGER_DATA.meta.lastReviewed}
+              </p>
+            </div>
+          </div>
 
         <DisclaimerBanner />
 
@@ -370,6 +482,7 @@ function NetworksLedgerPage() {
         </section>
 
         <DisclaimerBanner />
+        </div>
       </main>
 
       <SiteFooter />
@@ -377,13 +490,83 @@ function NetworksLedgerPage() {
   );
 }
 
+function ToolCard({
+  href,
+  title,
+  body,
+  icon,
+  badge,
+  tone,
+}: {
+  href: string;
+  title: string;
+  body: string;
+  icon: React.ReactNode;
+  badge: string;
+  tone: "cyan" | "amber" | "violet" | "emerald";
+}) {
+  const toneCls =
+    tone === "amber"
+      ? "border-amber-signal/35 hover:border-amber-signal/55"
+      : tone === "violet"
+        ? "border-violet-400/35 hover:border-violet-400/55"
+        : tone === "emerald"
+          ? "border-emerald-signal/35 hover:border-emerald-signal/55"
+          : "border-cyan/35 hover:border-cyan/55";
+  const badgeCls =
+    tone === "amber"
+      ? "text-amber-signal bg-amber-signal/10 border-amber-signal/35"
+      : tone === "violet"
+        ? "text-violet-300 bg-violet-500/10 border-violet-400/35"
+        : tone === "emerald"
+          ? "text-emerald-signal bg-emerald-signal/10 border-emerald-signal/35"
+          : "text-cyan bg-cyan/10 border-cyan/35";
+
+  const inner = (
+    <>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <span className="w-10 h-10 rounded-xl border border-border/80 bg-secondary/40 text-cyan grid place-items-center shrink-0">
+          {icon}
+        </span>
+        <span
+          className={`text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full border ${badgeCls}`}
+        >
+          {badge}
+        </span>
+      </div>
+      <h3 className="text-[14px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors break-words">
+        {title}
+      </h3>
+      <p className="text-[12px] text-muted-foreground leading-snug mt-1 break-words flex-1">{body}</p>
+      <span className="mt-2.5 inline-flex items-center gap-1 text-[11.5px] font-medium text-cyan">
+        Open <ArrowRight className="w-3.5 h-3.5" />
+      </span>
+    </>
+  );
+
+  const className = `group flex flex-col h-full min-h-[148px] rounded-2xl border bg-card/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0 overflow-hidden ${toneCls}`;
+
+  if (href.startsWith("#")) {
+    return (
+      <a href={href} className={className}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <Link to={href} className={className}>
+      {inner}
+    </Link>
+  );
+}
+
 function DisclaimerBanner() {
   return (
     <aside
       role="note"
-      className="mb-5 rounded-lg border border-amber-500/35 bg-amber-500/8 px-3 py-2.5 text-[11.5px] sm:text-[12px] leading-snug text-amber-100/90"
+      className="mb-5 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2.5 text-[11.5px] sm:text-[12px] leading-snug text-foreground/85"
     >
-      <strong className="font-semibold text-amber-50">Disclaimer — </strong>
+      <strong className="font-semibold text-foreground">Disclaimer — </strong>
       {NETWORKS_LEDGER_DISCLAIMER}
     </aside>
   );

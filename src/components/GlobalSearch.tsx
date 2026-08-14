@@ -140,11 +140,11 @@ export function GlobalSearch() {
               <CommandShortcut>Library</CommandShortcut>
             </CommandItem>
             <CommandItem
-              value="networks ledger ofac hezbollah irgc muslim brotherhood hamas tftc designations"
+              value="intelligence ledgers trackers designations fraud leaders peace ofac hezbollah"
               onSelect={() => go("/research/networks-ledger")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Networks Ledger</span>
+              <span className="truncate">Intelligence · ledgers & trackers</span>
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
             <CommandItem

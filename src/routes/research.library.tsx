@@ -1,16 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
   FileText,
   FlaskConical,
   Library,
-  MapPin,
+  Search,
   Share2,
-  Trophy,
-  Users,
-  Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -29,23 +26,37 @@ type SharedItem = {
   sharedAt: string | null;
 };
 
+/** Unified shelf of Elenchos-published case studies (same product form). */
+type LibraryPublication = {
+  id: string;
+  title: string;
+  subtitle: string;
+  region: string;
+  statusLabel: string;
+  updatedAt: string;
+  href: string;
+  params?: { slug: string };
+  pdf?: boolean;
+  themeTags: string[];
+};
+
 export const Route = createFileRoute("/research/library")({
   head: () => ({
     meta: [
-      { title: "Research library · Case studies & crisis briefings · Elenchos" },
+      { title: "Research library · Published case studies · Elenchos" },
       {
         name: "description",
         content:
-          "Browse Elenchos deep-dive case studies, real-time crisis briefings, community shared reports, and indexes. Separate from live Topics analysis.",
+          "All Elenchos-published multi-source case studies and public briefings in one library. Community-shared deep dives included when authors opt in.",
       },
       {
         property: "og:title",
-        content: "Research library · Case studies & crisis briefings · Elenchos",
+        content: "Research library · Published case studies · Elenchos",
       },
       {
         property: "og:description",
         content:
-          "One shelf for thesis-style reports, crisis briefings, community reports, and leader/peace indexes.",
+          "One shelf for Elenchos case studies and shared multi-source reports. Live Topics analysis is on the Topics page.",
       },
       { property: "og:url", content: "https://elenchos.live/research/library" },
     ],
@@ -54,14 +65,50 @@ export const Route = createFileRoute("/research/library")({
   component: ResearchLibraryPage,
 });
 
+function buildElenchosPublications(): LibraryPublication[] {
+  const fromCatalog: LibraryPublication[] = listResearchBriefs().map((b) => ({
+    id: b.slug,
+    title: b.title,
+    subtitle: b.subtitle,
+    region: b.region,
+    statusLabel: researchStatusLabel(b.status),
+    updatedAt: b.updatedAt,
+    href: "/research/preview/$slug",
+    params: { slug: b.slug },
+    pdf: !!b.pdfUrl,
+    themeTags: b.themes.slice(0, 4),
+  }));
+
+  // Same product form as catalog briefs — not a separate “crisis product”
+  const editorial: LibraryPublication[] = [
+    {
+      id: "irregular-migration",
+      title: "Irregular migration — public briefing",
+      subtitle:
+        "Scale since 2011, corridors, open vs resist frames, discourse, and returns honesty. Multi-source public briefing (under 10 minutes).",
+      region: "EU · UK Channel",
+      statusLabel: "Published",
+      updatedAt: "2026-07-01",
+      href: "/research-migration",
+      pdf: false,
+      themeTags: ["migration", "borders", "discourse", "policy"],
+    },
+  ];
+
+  return [...editorial, ...fromCatalog].sort((a, b) =>
+    b.updatedAt.localeCompare(a.updatedAt),
+  );
+}
+
 function ResearchLibraryPage() {
-  const briefs = listResearchBriefs();
+  const publications = useMemo(() => buildElenchosPublications(), []);
   const [shared, setShared] = useState<SharedItem[]>([]);
   const [sharedReady, setSharedReady] = useState(false);
+  const [q, setQ] = useState("");
+  const [view, setView] = useState<"elenchos" | "community">("elenchos");
 
   useEffect(() => {
     let cancelled = false;
-    // Deep-dive packages only — topic-analysis shares live under Topics → Topics commissioned
     fetch("/api/research/shared?kind=deep")
       .then((r) => r.json())
       .then((data: { items?: SharedItem[] }) => {
@@ -78,6 +125,25 @@ function ResearchLibraryPage() {
     };
   }, []);
 
+  const filteredPubs = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return publications;
+    return publications.filter((p) =>
+      [p.title, p.subtitle, p.region, p.statusLabel, ...p.themeTags]
+        .join(" ")
+        .toLowerCase()
+        .includes(needle),
+    );
+  }, [publications, q]);
+
+  const filteredShared = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return shared;
+    return shared.filter((s) =>
+      [s.title, s.topic, s.packageId].join(" ").toLowerCase().includes(needle),
+    );
+  }, [shared, q]);
+
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
@@ -87,7 +153,7 @@ function ResearchLibraryPage() {
         <ResearchBreadcrumb current="Library" />
         <ResearchDeskNav />
 
-        <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden relative min-w-0">
+        <header className="page-hero-banner mb-5 overflow-hidden relative min-w-0">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-emerald-signal/5 pointer-events-none" />
           <div className="relative p-4 sm:p-5 md:p-6 space-y-2 min-w-0">
             <div className="page-hero-kicker">
@@ -95,178 +161,149 @@ function ResearchLibraryPage() {
               Library
             </div>
             <h1 className="page-hero-title text-[1.35rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Case studies, crisis briefings &amp; indexes
+              Published case studies
             </h1>
             <p className="page-hero-sub max-w-xl break-words">
-              Deep-dive briefs and shared multi-source reports. Live Topics analysis stays on the Topics page.
+              Every multi-source report Elenchos has published — same format, one shelf. Search or
+              switch to community-shared deep dives.
             </p>
           </div>
         </header>
 
-        {/* In-page section jump (below Research Desk nav) */}
-        <nav
-          aria-label="Library sections"
-          className="sticky top-[7.25rem] sm:top-[7.5rem] z-[15] mb-6 -mx-1 px-1 py-2 bg-background/92 backdrop-blur-md border-b border-border/70"
-        >
-          <div className="flex gap-1.5 overflow-x-auto pb-0.5 custom-scroll overscroll-x-contain">
-            <JumpChip href="#lib-crisis" label="Crisis" tone="rose" />
-            <JumpChip href="#lib-thesis" label="Case studies" tone="cyan" />
-            <JumpChip href="#lib-commissioned" label="Commissioned" tone="cyan" />
-            <JumpChip href="#lib-idx" label="Indexes" tone="amber" />
-            <JumpChip href="#lib-commission" label="Commission" tone="cyan" />
-          </div>
-        </nav>
-
-        {/* Crisis briefings */}
-        <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-crisis">
-          <SectionHead
-            id="lib-crisis"
-            tone="rose"
-            title="Crisis briefings"
-            sub="Public briefings on unfolding crises — e.g. irregular migration. Not legal advice."
-          />
-          <LibCard
-            to="/research-migration"
-            kicker="Crisis briefing · EU + UK Channel"
-            title="Irregular migration — public briefing"
-            body="Scale since 2011, interactive corridors, open vs resist, discourse, returns honesty. Under 10 minutes."
-            accent="rose"
-            delay={0}
-            icon={<MapPin className="w-4 h-4" />}
-          />
-        </section>
-
-        {/* Thesis case studies */}
-        <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-thesis">
-          <SectionHead
-            id="lib-thesis"
-            tone="cyan"
-            title="Deep-dive case studies"
-            sub="Thesis-like multi-source reports for serious reading."
-          />
-          <div className="space-y-2.5">
-            {briefs.map((b, i) => (
-              <LibCard
-                key={b.slug}
-                to="/research/preview/$slug"
-                params={{ slug: b.slug }}
-                kicker={`${b.region} · ${researchStatusLabel(b.status)}`}
-                title={b.title}
-                body={b.subtitle}
-                accent="cyan"
-                pdf={!!b.pdfUrl}
-                delay={0.04 + i * 0.04}
-                icon={<FileText className="w-4 h-4" />}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Independently commissioned deep-dive reports (opt-in share) */}
-        <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-commissioned">
-          <SectionHead
-            id="lib-commissioned"
-            tone="cyan"
-            title="Independently commissioned"
-            sub="Deep-dive reports commissioned by users and shared by them — not Elenchos editorial case studies. Topic-analysis shares appear under Topics → Topics commissioned."
-            icon={<Share2 className="w-3.5 h-3.5" />}
-          />
-          {!sharedReady && (
-            <p className="text-[12px] font-mono text-muted-foreground px-0.5">
-              Loading commissioned reports…
-            </p>
-          )}
-          {sharedReady && shared.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border bg-card/30 px-4 py-4 text-[13px] text-muted-foreground leading-relaxed">
-              No independently commissioned deep-dive reports shared yet. After you commission a
-              multi-source report, open your unique link and choose{" "}
-              <strong className="text-foreground/85">Share on Elenchos</strong>.
-            </div>
-          )}
-          <div className="space-y-2.5">
-            {shared.map((s, i) => (
-              <LibCard
-                key={s.token}
-                to="/research/report/$token"
-                params={{ token: s.token }}
-                kicker={`Independently commissioned · ${s.packageId}`}
-                title={s.title}
-                body={s.topic}
-                accent="cyan"
-                delay={0.06 + i * 0.03}
-                icon={<Share2 className="w-4 h-4" />}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Indexes & trackers — only surfaced here (not on Research landing) */}
-        <section className="mb-9 space-y-3 scroll-mt-28" aria-labelledby="lib-idx">
-          <SectionHead
-            id="lib-idx"
-            tone="amber"
-            title="Indexes & trackers"
-            sub="Citizen-scored leadership board and peace index from public discourse."
-            icon={<Trophy className="w-3.5 h-3.5" />}
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <IndexCard
-              href="/trackers/leaders"
-              title="Leadership board"
-              body="Global leader trust rankings — trust, leadership, economy, free speech, and more."
-              icon={<Users className="w-4 h-4" />}
-              delay={0.08}
-            />
-            <IndexCard
-              href="/trackers/peace"
-              title="Peace index"
-              body="Peace & normalisation diagnostics — citizen support, momentum, government vs public gap."
-              icon={<Trophy className="w-4 h-4" />}
-              delay={0.12}
-            />
-          </div>
-          <Link
-            to="/trackers"
-            className="inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px] touch-manipulation px-0.5"
+        {/* Simple two-shelf switcher + search */}
+        <div className="mb-5 space-y-2.5">
+          <div
+            className="flex rounded-xl border border-border/80 bg-card/70 p-1 gap-1"
+            role="tablist"
+            aria-label="Library shelves"
           >
-            Open full trackers hub <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </section>
+            <ShelfTab
+              active={view === "elenchos"}
+              onClick={() => setView("elenchos")}
+              label="Elenchos publications"
+              count={publications.length}
+            />
+            <ShelfTab
+              active={view === "community"}
+              onClick={() => setView("community")}
+              label="Community shared"
+              count={sharedReady ? shared.length : null}
+            />
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={
+                view === "elenchos"
+                  ? "Search case studies…"
+                  : "Search shared reports…"
+              }
+              className="w-full min-h-[44px] pl-10 pr-3 rounded-xl border border-border/80 bg-background/80 text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-cyan/50"
+            />
+          </div>
+        </div>
+
+        {view === "elenchos" && (
+          <section aria-labelledby="lib-elenchos" className="space-y-3 mb-8">
+            <div className="px-0.5 flex items-end justify-between gap-2">
+              <div className="min-w-0">
+                <h2
+                  id="lib-elenchos"
+                  className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan"
+                >
+                  Elenchos case studies
+                </h2>
+                <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">
+                  Thesis-style multi-source briefs published by the desk (including public crisis
+                  briefings).
+                </p>
+              </div>
+              <span className="text-[11px] font-mono text-muted-foreground shrink-0 tabular-nums">
+                {filteredPubs.length}
+              </span>
+            </div>
+            {filteredPubs.length === 0 && (
+              <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted-foreground">
+                No publications match your search.
+              </p>
+            )}
+            <div className="space-y-2.5">
+              {filteredPubs.map((p, i) => (
+                <PubCard key={p.id} pub={p} delay={i * 0.03} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {view === "community" && (
+          <section aria-labelledby="lib-community" className="space-y-3 mb-8">
+            <div className="px-0.5">
+              <h2
+                id="lib-community"
+                className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan flex items-center gap-2"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Community shared
+              </h2>
+              <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug max-w-xl">
+                Multi-source reports commissioned by users and shared by them. Topic-analysis
+                commissions stay under Topics.
+              </p>
+            </div>
+            {!sharedReady && (
+              <p className="text-[12px] font-mono text-muted-foreground px-0.5">Loading…</p>
+            )}
+            {sharedReady && filteredShared.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border bg-card/30 px-4 py-5 text-[13px] text-muted-foreground leading-relaxed">
+                {shared.length === 0
+                  ? "No community deep dives shared yet. After a multi-source commission, open your private link and choose Share on Elenchos."
+                  : "No shared reports match your search."}
+              </div>
+            )}
+            <div className="space-y-2.5">
+              {filteredShared.map((s, i) => (
+                <LibLinkCard
+                  key={s.token}
+                  to="/research/report/$token"
+                  params={{ token: s.token }}
+                  kicker={`Community · ${s.packageId}`}
+                  title={s.title}
+                  body={s.topic}
+                  delay={i * 0.03}
+                  icon={<Share2 className="w-4 h-4" />}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         <motion.div
-          id="lib-commission"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rd-cta-panel scroll-mt-28 rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/12 via-card/50 to-transparent px-4 py-4 sm:px-5 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between"
+          className="rounded-2xl border border-cyan/30 bg-gradient-to-br from-cyan/10 via-card/40 to-transparent px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between"
         >
           <div className="flex items-start gap-2.5 min-w-0">
-            <span className="rd-icon-lift w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center shrink-0">
+            <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center shrink-0">
               <FlaskConical className="w-4 h-4" />
             </span>
             <div className="min-w-0">
-              <p className="text-[13px] sm:text-[14px] font-display font-semibold text-foreground leading-snug break-words">
-                Want the same method on your topic?
+              <p className="text-[13px] font-display font-semibold break-words">
+                Need a brief on your question?
               </p>
-              <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug break-words">
-                Fixed-price on-demand report — unique private link + PDF. Optional public share later.
+              <p className="text-[12px] text-muted-foreground mt-0.5 break-words">
+                Commission a multi-source report — private link + PDF.
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Link
-              to="/research/commission"
-              className="rd-btn-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full bg-cyan text-background text-[12px] font-semibold touch-manipulation"
-            >
-              On-demand report <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <Link
-              to="/research"
-              className="rd-btn-ghost inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-border text-[12px] text-muted-foreground touch-manipulation"
-            >
-              Back to desk
-            </Link>
-          </div>
+          <Link
+            to="/research/commission"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full bg-cyan text-background text-[12px] font-semibold touch-manipulation shrink-0"
+          >
+            On-demand <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </motion.div>
       </main>
 
@@ -275,72 +312,61 @@ function ResearchLibraryPage() {
   );
 }
 
-function JumpChip({
-  href,
+function ShelfTab({
+  active,
+  onClick,
   label,
-  tone,
+  count,
 }: {
-  href: string;
+  active: boolean;
+  onClick: () => void;
   label: string;
-  tone: "rose" | "cyan" | "amber";
+  count: number | null;
 }) {
-  const cls =
-    tone === "rose"
-      ? "border-rose-signal/35 text-rose-signal"
-      : tone === "amber"
-        ? "border-amber-signal/35 text-amber-signal"
-        : "border-cyan/35 text-cyan";
   return (
-    <a
-      href={href}
-      className={`rd-btn-ghost shrink-0 inline-flex items-center min-h-[40px] px-3 rounded-full border text-[11px] font-mono uppercase tracking-[0.12em] touch-manipulation ${cls}`}
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`flex-1 min-w-0 min-h-[42px] px-2.5 rounded-lg text-[12px] sm:text-[12.5px] font-medium touch-manipulation transition-colors ${
+        active
+          ? "bg-cyan/15 text-cyan border border-cyan/40"
+          : "text-muted-foreground border border-transparent hover:bg-secondary/50"
+      }`}
     >
-      {label}
-    </a>
+      <span className="truncate">{label}</span>
+      {count != null && (
+        <span className="ml-1.5 font-mono text-[10.5px] opacity-80 tabular-nums">({count})</span>
+      )}
+    </button>
   );
 }
 
-function SectionHead({
-  id,
-  tone,
-  title,
-  sub,
-  icon,
-}: {
-  id: string;
-  tone: "rose" | "cyan" | "amber";
-  title: string;
-  sub: string;
-  icon?: React.ReactNode;
-}) {
-  const color =
-    tone === "rose"
-      ? "text-rose-signal"
-      : tone === "amber"
-        ? "text-amber-signal"
-        : "text-cyan";
+function PubCard({ pub, delay }: { pub: LibraryPublication; delay: number }) {
   return (
-    <div className="px-0.5 space-y-1 min-w-0">
-      <h2
-        id={id}
-        className={`text-[11px] font-mono uppercase tracking-[0.16em] ${color} flex items-center gap-2 scroll-mt-28`}
-      >
-        {icon}
-        {title}
-      </h2>
-      <p className="text-[12.5px] text-muted-foreground leading-snug max-w-xl break-words">{sub}</p>
-    </div>
+    <LibLinkCard
+      to={pub.href}
+      params={pub.params}
+      kicker={`${pub.region} · ${pub.statusLabel}${pub.pdf ? " · PDF" : ""}`}
+      title={pub.title}
+      body={pub.subtitle}
+      meta={pub.updatedAt}
+      tags={pub.themeTags}
+      delay={delay}
+      icon={<FileText className="w-4 h-4" />}
+    />
   );
 }
 
-function LibCard({
+function LibLinkCard({
   to,
   params,
   kicker,
   title,
   body,
-  accent,
-  pdf,
+  meta,
+  tags,
   delay = 0,
   icon,
 }: {
@@ -349,113 +375,54 @@ function LibCard({
   kicker: string;
   title: string;
   body: string;
-  accent: "rose" | "cyan";
-  pdf?: boolean;
+  meta?: string;
+  tags?: string[];
   delay?: number;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
 }) {
-  const accentClass = accent === "rose" ? "rd-card-rose" : "rd-card-cyan";
-  const accentColor = accent === "rose" ? "var(--rose-signal)" : "var(--cyan)";
-  const iconBorder =
-    accent === "rose"
-      ? "border-rose-signal/35 bg-rose-signal/10 text-rose-signal"
-      : "border-cyan/35 bg-cyan/10 text-cyan";
-
-  const inner = (
-    <div className="flex items-start gap-3 sm:gap-3.5 min-w-0">
-      <span
-        className={`rd-icon-lift shrink-0 w-10 h-10 rounded-xl border grid place-items-center ${iconBorder}`}
-      >
-        {icon ?? <FileText className="w-4 h-4" />}
-      </span>
-      <div className="min-w-0 flex-1 overflow-hidden">
-        <p
-          className="text-[10px] font-mono uppercase tracking-[0.12em] truncate"
-          style={{ color: accentColor }}
-        >
-          {kicker}
-        </p>
-        <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground mt-1 leading-snug group-hover:text-cyan transition-colors break-words [overflow-wrap:anywhere]">
-          {title}
-        </p>
-        <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug line-clamp-2 break-words">
-          {body}
-        </p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5">
-          {pdf && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
-              <FileText className="w-3 h-3" style={{ color: accentColor }} /> PDF available
-            </span>
-          )}
-          <span className="rd-lib-arrow inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground">
-            Open <ArrowRight className="w-3.5 h-3.5" />
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-
-  const className = `rd-card rd-lib-row ${accentClass} group block rounded-2xl border border-border/90 bg-card/50 backdrop-blur-sm px-3.5 py-3.5 sm:px-4 sm:py-4 touch-manipulation min-h-[44px] min-w-0 overflow-hidden`;
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
+      transition={{ delay, duration: 0.3 }}
       className="min-w-0"
     >
-      {params ? (
-        <Link to={to} params={params as never} className={className}>
-          {inner}
-        </Link>
-      ) : (
-        <Link to={to} className={className}>
-          {inner}
-        </Link>
-      )}
-    </motion.div>
-  );
-}
-
-function IndexCard({
-  href,
-  title,
-  body,
-  icon,
-  delay = 0,
-}: {
-  href: string;
-  title: string;
-  body: string;
-  icon: React.ReactNode;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      className="h-full min-w-0"
-    >
-      <a
-        href={href}
-        className="rd-card rd-card-amber rd-lib-row group flex flex-col h-full rounded-2xl border border-border/90 bg-card/50 backdrop-blur-sm px-3.5 py-3.5 sm:px-4 sm:py-4 touch-manipulation min-h-[44px] min-w-0 overflow-hidden"
+      <Link
+        to={to}
+        params={params as never}
+        className="group flex gap-3 rounded-2xl border border-border/90 bg-card/50 hover:border-cyan/45 hover:bg-card/80 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0 overflow-hidden"
       >
-        <div className="flex items-start gap-3 min-w-0">
-          <span className="rd-icon-lift shrink-0 w-10 h-10 rounded-xl border border-amber-signal/35 bg-amber-signal/10 text-amber-signal grid place-items-center">
-            {icon}
-          </span>
-          <div className="min-w-0 flex-1 overflow-hidden">
-            <p className="text-[14px] font-display font-semibold text-foreground group-hover:text-amber-signal transition-colors leading-snug break-words">
-              {title}
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-1 leading-snug break-words">{body}</p>
-            <span className="rd-lib-arrow inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground mt-2.5">
-              Open tracker <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
+        <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90 truncate">
+            {kicker}
+          </p>
+          <h3 className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors leading-snug mt-0.5 break-words">
+            {title}
+          </h3>
+          <p className="text-[12.5px] text-muted-foreground leading-snug mt-1 line-clamp-2 break-words">
+            {body}
+          </p>
+          {(meta || (tags && tags.length > 0)) && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {meta && (
+                <span className="text-[10px] font-mono text-muted-foreground">Updated {meta}</span>
+              )}
+              {tags?.map((t) => (
+                <span
+                  key={t}
+                  className="text-[9.5px] px-1.5 py-0.5 rounded-full border border-border/70 text-muted-foreground"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-      </a>
+        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0 mt-1 transition-colors" />
+      </Link>
     </motion.div>
   );
 }

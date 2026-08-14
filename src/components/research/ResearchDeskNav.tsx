@@ -1,11 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  BookOpen,
-  FlaskConical,
-  Library,
-  Scale,
-  Sparkles,
-} from "lucide-react";
+import { Brain, FlaskConical, Library, Sparkles } from "lucide-react";
 
 /**
  * Secondary nav for Research Desk + subpages.
@@ -27,14 +21,19 @@ const ITEMS = [
     match: (p: string) =>
       p.startsWith("/research/library") ||
       p.startsWith("/research/preview") ||
-      p.startsWith("/research/report"),
+      p.startsWith("/research/report") ||
+      p.startsWith("/research-migration"),
   },
   {
     to: "/research/networks-ledger",
-    label: "Networks Ledger",
-    short: "Networks",
-    icon: Scale,
-    match: (p: string) => p.startsWith("/research/networks-ledger"),
+    label: "Intelligence",
+    short: "Intel",
+    icon: Brain,
+    match: (p: string) =>
+      p.startsWith("/research/networks-ledger") ||
+      p.startsWith("/research/intelligence") ||
+      p.startsWith("/research/fraud-ledger") ||
+      p.startsWith("/trackers"),
   },
   {
     to: "/research/commission",
@@ -79,22 +78,20 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
         </ul>
       </div>
       <p className="mt-1.5 px-0.5 text-[10.5px] text-muted-foreground leading-snug">
-        Live Topics &amp; topic-analysis commissions live on{" "}
+        <strong className="font-medium text-foreground/80">Library</strong> = published case
+        studies. <strong className="font-medium text-foreground/80">Intelligence</strong> =
+        ledgers &amp; citizen trackers. Live Topics stay on{" "}
         <Link to="/topics" className="text-cyan hover:underline font-medium">
           Topics
         </Link>
-        . This desk is library, networks, and multi-source reports.
+        .
       </p>
     </nav>
   );
 }
 
 /** Compact breadcrumb trail for Research subpages */
-export function ResearchBreadcrumb({
-  current,
-}: {
-  current: string;
-}) {
+export function ResearchBreadcrumb({ current }: { current: string }) {
   return (
     <nav
       aria-label="Breadcrumb"
@@ -121,8 +118,4 @@ export function ResearchBreadcrumb({
       <span className="text-foreground/90 font-medium truncate min-w-0">{current}</span>
     </nav>
   );
-}
-
-export function ResearchDeskIcon() {
-  return <BookOpen className="w-3.5 h-3.5" aria-hidden />;
 }
