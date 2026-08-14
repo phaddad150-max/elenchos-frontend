@@ -24,6 +24,7 @@ import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
+import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.networks-ledger'
 import { Route as ResearchLibraryRouteImport } from './routes/research.library'
 import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
@@ -114,6 +115,11 @@ const TrackersFootballRoute = TrackersFootballRouteImport.update({
 const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
   id: '/topics/$topicId',
   path: '/topics/$topicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchNetworksLedgerRoute = ResearchNetworksLedgerRouteImport.update({
+  id: '/research/networks-ledger',
+  path: '/research/networks-ledger',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
+  '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
+  '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
+  '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
+    | '/research/networks-ledger'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
+    | '/research/networks-ledger'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
+    | '/research/networks-ledger'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -412,6 +424,7 @@ export interface RootRouteChildren {
   ResearchSlugRoute: typeof ResearchSlugRoute
   ResearchCommissionRoute: typeof ResearchCommissionRoute
   ResearchLibraryRoute: typeof ResearchLibraryRoute
+  ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
@@ -541,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TopicsTopicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research/networks-ledger': {
+      id: '/research/networks-ledger'
+      path: '/research/networks-ledger'
+      fullPath: '/research/networks-ledger'
+      preLoaderRoute: typeof ResearchNetworksLedgerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/library': {
       id: '/research/library'
       path: '/research/library'
@@ -668,6 +688,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchSlugRoute: ResearchSlugRoute,
   ResearchCommissionRoute: ResearchCommissionRoute,
   ResearchLibraryRoute: ResearchLibraryRoute,
+  ResearchNetworksLedgerRoute: ResearchNetworksLedgerRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
