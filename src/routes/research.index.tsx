@@ -138,7 +138,7 @@ function ResearchDeskLanding() {
           Ways to use the desk
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
           <PathCard
             delay={0}
             icon={<Radio className="w-6 h-6 text-cyan" />}
@@ -162,9 +162,20 @@ function ResearchDeskLanding() {
             glow="emerald"
           />
           <PathCard
+            delay={0.08}
+            icon={<Scale className="w-6 h-6 text-cyan" />}
+            step="03"
+            title="Networks Ledger"
+            subtitle="Official designations tracker"
+            body="US + Gulf public actions on IRGC, Hezbollah, MB, Hamas financing — designations, arrests, freezes."
+            cta="Open ledger"
+            to="/research/networks-ledger"
+            glow="cyan"
+          />
+          <PathCard
             delay={0.1}
             icon={<Sparkles className="w-6 h-6 text-cyan" />}
-            step="03"
+            step="04"
             title="On-demand report"
             subtitle="Your topic · $10 / $20"
             body="Topic analysis $10 · multi-source deep dive $10 (no X) or $20 (with X). Unique private link + PDF."
@@ -278,7 +289,7 @@ function EnterprisePathCard({ delay }: { delay: number }) {
           <div className="rd-icon-lift w-11 h-11 rounded-xl border border-amber-signal/40 bg-amber-signal/10 grid place-items-center text-amber-signal">
             <Building2 className="w-6 h-6" />
           </div>
-          <span className="text-[11px] font-mono text-muted-foreground tabular-nums">04</span>
+          <span className="text-[11px] font-mono text-muted-foreground tabular-nums">05</span>
         </div>
         <h2 className="text-[16px] sm:text-[17px] font-display font-semibold text-foreground leading-snug group-hover:text-amber-signal transition-colors">
           Enterprise

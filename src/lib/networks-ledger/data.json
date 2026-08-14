@@ -1,0 +1,699 @@
+{
+  "meta": {
+    "title": "Networks Ledger",
+    "version": "1.0.0-phase1",
+    "phase": "Phase 1 — US + US-allied Gulf; high-confidence public official actions",
+    "lastReviewed": "2026-08-13",
+    "disclaimer": "Independent aggregation of public official announcements only (US Treasury/OFAC, DOJ, State, UAE Cabinet/TFTC). Charges and designations are allegations until adjudicated. Not affiliated with any government.",
+    "scope": "Networks: IRGC, Hezbollah, Muslim Brotherhood, Hamas-linked financing, Mixed/Axis. Geography: United States and US-allied Gulf (UAE, TFTC partners). Phase 2+ will expand Europe/Africa and Lebanon capital-flight cases."
+  },
+  "entries": [
+    {
+      "id": "ofac-mb-egypt-jordan-2026-01-13",
+      "date": "2026-01-13",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": [
+        "Egyptian Muslim Brotherhood",
+        "Jordanian Muslim Brotherhood"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "OFAC designates Egyptian and Jordanian Muslim Brotherhood branches as SDGTs",
+      "summary": "Treasury OFAC designated the Egyptian Muslim Brotherhood and Jordanian Muslim Brotherhood as Specially Designated Global Terrorists under E.O. 13224 (as amended) for material support to Hamas. Concurrent State action covered the Lebanese chapter (separate entry).",
+      "source": {
+        "label": "Treasury press release sb0357",
+        "url": "https://home.treasury.gov/news/press-releases/sb0357",
+        "agency": "US Treasury / OFAC"
+      },
+      "flagship": true,
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "state-mb-lebanon-fto-2026-01-13",
+      "date": "2026-01-13",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": [
+        "Lebanese Muslim Brotherhood (al-Jamaa al-Islamiyah)",
+        "Muhammad Fawzi Taqqosh"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "State designates Lebanese Muslim Brotherhood as FTO and SDGT",
+      "summary": "Department of State designated the Lebanese Muslim Brotherhood (al-Jamaa al-Islamiyah) as a Foreign Terrorist Organization and SDGT, and designated Secretary General Muhammad Fawzi Taqqosh as an SDGT, concurrent with Treasury designations of Egyptian and Jordanian MB branches.",
+      "source": {
+        "label": "State Department release (Jan 13, 2026)",
+        "url": "https://www.state.gov/releases/office-of-the-spokesperson/2026/01/terrorist-designations-of-muslim-brotherhood-chapters",
+        "agency": "US Department of State"
+      },
+      "flagship": true,
+      "regionFocus": ["US", "Lebanon"]
+    },
+    {
+      "id": "ofac-sdn-mb-2026-01-13",
+      "date": "2026-01-13",
+      "type": "asset_freeze",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": [
+        "Egyptian Muslim Brotherhood",
+        "Jordanian Muslim Brotherhood",
+        "Lebanese Muslim Brotherhood"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "amountNote": "Blocking of property and interests in property of designated persons subject to US jurisdiction (amount not quantified in announcement).",
+      "title": "OFAC SDN list update — MB branches blocked under CT authorities",
+      "summary": "OFAC published SDN List updates adding Egyptian, Jordanian, and related Muslim Brotherhood listings under SDGT (and FTO for the Lebanese chapter via State), implementing asset blocking for US persons and US jurisdiction property.",
+      "source": {
+        "label": "OFAC Recent Actions 2026-01-13",
+        "url": "https://ofac.treasury.gov/recent-actions/20260113",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "state-sudanese-mb-2026-03-09",
+      "date": "2026-03-09",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood"],
+      "entities": ["Sudanese Muslim Brotherhood"],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "Terrorist designation of the Sudanese Muslim Brotherhood",
+      "summary": "OFAC Recent Actions record a terrorist designation related to the Sudanese Muslim Brotherhood (counterterrorism designations; Sudan-related designation update), continuing the 2026 MB chapter designation campaign.",
+      "source": {
+        "label": "OFAC Recent Actions 2026-03-09",
+        "url": "https://ofac.treasury.gov/recent-actions/20260309",
+        "agency": "US Treasury / OFAC"
+      },
+      "flagship": true,
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "ofac-hamas-sham-charities-2026-03-12",
+      "date": "2026-03-12",
+      "type": "designation",
+      "networks": ["Hamas", "Muslim Brotherhood"],
+      "entities": [
+        "Hamas-linked sham charities (package)",
+        "Hayat Yolu (Türkiye-based, referenced as MB financial hub)"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "OFAC designates sham charities funding Hamas military wing",
+      "summary": "Treasury announced designations of four sham charities that directly fund Hamas’s military wing (Izz ad-Din al-Qassam Brigades). Announcement also referenced Türkiye-based Hayat Yolu as an operational headquarters and banking/financial hub for Muslim Brotherhood-related activity.",
+      "source": {
+        "label": "Treasury press release sb0415 (Mar 12, 2026)",
+        "url": "https://home.treasury.gov/news/press-releases/sb0415",
+        "agency": "US Treasury / OFAC"
+      },
+      "flagship": true,
+      "regionFocus": ["US", "Other"]
+    },
+    {
+      "id": "uae-hezbollah-iran-network-arrests-2026-03-19",
+      "date": "2026-03-19",
+      "type": "arrest",
+      "networks": ["Hezbollah", "IRGC", "Mixed / Axis"],
+      "entities": [
+        "Hezbollah/Iran-funded network (UAE commercial cover)"
+      ],
+      "location": {
+        "label": "Abu Dhabi / UAE",
+        "country": "UAE",
+        "lat": 24.4539,
+        "lng": 54.3773
+      },
+      "amountUsd": null,
+      "title": "UAE State Security dismantles Hezbollah/Iran-funded terror network",
+      "summary": "UAE State Security Apparatus announced the dismantling of a terrorist network funded and operated by Hezbollah and Iran, with members arrested. Authorities said the network operated under fictitious commercial cover and sought to infiltrate the national economy.",
+      "source": {
+        "label": "WAM / official UAE State Security announcement (via WAM English)",
+        "url": "https://x.com/WAMNEWS_ENG/status/2034820034342871347",
+        "agency": "UAE State Security / WAM"
+      },
+      "flagship": true,
+      "regionFocus": ["Gulf"]
+    },
+    {
+      "id": "ofac-alaa-hamieh-network-2026-03-20",
+      "date": "2026-03-20",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": [
+        "Alaa Hassan Hamieh",
+        "Muhammad Hasan Hamieh",
+        "Seven Seas SAL Offshore",
+        "Calllync network entities",
+        "16 individuals/entities (package)"
+      ],
+      "location": {
+        "label": "Washington, DC (network ops: Lebanon + multi-jurisdiction)",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": 100000000,
+      "amountNote": "Treasury stated the network enabled diversion of over $100 million since 2020 (estimate in official release).",
+      "title": "OFAC sanctions Alaa Hamieh global network diverting funds to Hezbollah",
+      "summary": "OFAC designated a network of 16 individuals and entities led by Hezbollah financier and former Lebanese public investment official Alaa Hassan Hamieh. Treasury said companies in Lebanon, Syria, Poland, Slovenia, Qatar, and Canada launder and raise funds for Hezbollah’s finance team.",
+      "source": {
+        "label": "Treasury press release sb0420",
+        "url": "https://home.treasury.gov/news/press-releases/sb0420",
+        "agency": "US Treasury / OFAC"
+      },
+      "flagship": true,
+      "regionFocus": ["US", "Lebanon", "Other"]
+    },
+    {
+      "id": "uae-local-terrorist-list-hezbollah-2026-05-12",
+      "date": "2026-05-12",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": [
+        "16 Lebanese individuals (Cabinet Resolution 63/2026)",
+        "5 Lebanon-based entities incl. al-Qard al-Hassan (per official reporting)"
+      ],
+      "location": {
+        "label": "Abu Dhabi, UAE",
+        "country": "UAE",
+        "lat": 24.4539,
+        "lng": 54.3773
+      },
+      "amountUsd": null,
+      "title": "UAE Local Terrorist List: 16 individuals + 5 entities over Hezbollah links",
+      "summary": "UAE Cabinet Resolution No. (63) of 2026 added 16 Lebanese nationals and five Lebanon-based entities to the UAE Local Terrorist List over links to Hezbollah, as reported by WAM. Entities reported include al-Qard al-Hassan and related companies.",
+      "source": {
+        "label": "WAM / Gulf News official cabinet reporting",
+        "url": "https://gulfnews.com/uae/government/uae-designates-16-individuals-five-entities-on-its-local-terrorist-list-over-lebanons-hezbollah-links-1.500538377",
+        "agency": "UAE Cabinet / WAM"
+      },
+      "flagship": true,
+      "regionFocus": ["Gulf", "Lebanon"]
+    },
+    {
+      "id": "doj-sdny-al-saadi-irgc-kataib-2026-05-15",
+      "date": "2026-05-15",
+      "type": "charges",
+      "networks": ["IRGC", "Hezbollah", "Mixed / Axis"],
+      "entities": [
+        "Mohammad Baqer Saad Dawood Al-Saadi",
+        "Kata’ib Hizballah",
+        "IRGC"
+      ],
+      "location": {
+        "label": "Southern District of New York",
+        "country": "US",
+        "usState": "NY",
+        "lat": 40.7128,
+        "lng": -74.006
+      },
+      "amountUsd": null,
+      "title": "SDNY charges Iraqi operative with material support to IRGC and Kata’ib Hizballah",
+      "summary": "US Attorney SDNY announced arrest and charges against Mohammad Baqer Saad Dawood Al-Saadi, alleged senior Kata’ib Hizballah member, for material support to Kata’ib Hizballah and the IRGC and related terrorism offenses. Charges are allegations until adjudicated.",
+      "source": {
+        "label": "DOJ SDNY press release (May 15, 2026)",
+        "url": "https://www.justice.gov/usao-sdny/pr/iraqi-national-arrested-and-charged-providing-material-support-iranian-backed",
+        "agency": "US DOJ / USAO SDNY"
+      },
+      "flagship": true,
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "ofac-hamieh-expansion-2026-06-18",
+      "date": "2026-06-18",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": [
+        "Alaa Hamieh network expansion",
+        "Globe Technology Providers SARL",
+        "Globe International SPC (Oman)",
+        "Al-‘Ahd Company",
+        "Tyke SAL"
+      ],
+      "location": {
+        "label": "Washington, DC (ops: Lebanon, Syria, Iraq, Oman)",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": 10000000,
+      "amountNote": "Release cites nearly $10 million in fees on certain Syria-related equipment contracts linked to the network (not a total freeze amount).",
+      "title": "OFAC expands Alaa Hamieh designations + Hezbollah-aligned officials",
+      "summary": "OFAC designated additional Hezbollah-aligned Lebanese officials and expanded the March 2026 Alaa Hamieh network action, targeting interlocutors in Lebanon, Syria, Iraq, and Oman alleged to raise funds and operate front companies for Hezbollah revenue.",
+      "source": {
+        "label": "Treasury press release sb0535",
+        "url": "https://home.treasury.gov/news/press-releases/sb0535",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["US", "Lebanon", "Gulf"]
+    },
+    {
+      "id": "tftc-hezbollah-finance-2026-06-30",
+      "date": "2026-06-30",
+      "type": "joint_action",
+      "networks": ["Hezbollah", "Mixed / Axis"],
+      "entities": [
+        "Al-Qard Al-Hassan (AQAH)",
+        "Bayt al-Mal",
+        "5 entities + 16 individuals (TFTC Round 9 package)"
+      ],
+      "location": {
+        "label": "Washington, DC / TFTC (US + GCC co-chairs)",
+        "country": "MULTI",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "TFTC joint designations: Hezbollah financial institutions and senior officials",
+      "summary": "Terrorist Financing Targeting Center (US and Gulf members, co-chaired by the United States and Saudi Arabia) announced joint designations targeting key Hezbollah financial infrastructure, including Al-Qard Al-Hassan and Bayt al-Mal and senior leaders (five entities and 16 individuals).",
+      "source": {
+        "label": "Treasury press release sb0546",
+        "url": "https://home.treasury.gov/news/press-releases/sb0546",
+        "agency": "US Treasury / TFTC"
+      },
+      "flagship": true,
+      "regionFocus": ["US", "Gulf", "Lebanon"]
+    },
+    {
+      "id": "tftc-round9-portal-2026-06-30",
+      "date": "2026-06-30",
+      "type": "joint_action",
+      "networks": ["Hezbollah"],
+      "entities": ["Lebanese Hezbollah financial entities (TFTC Round 9)"],
+      "location": {
+        "label": "TFTC (US–Gulf)",
+        "country": "MULTI",
+        "lat": 24.7136,
+        "lng": 46.6753
+      },
+      "amountUsd": null,
+      "title": "TFTC Round 9 designation record — Lebanese Hezbollah financial entities",
+      "summary": "TFTC public designations index records Round 9 (June 30, 2026): coordinated designation of Lebanese Hezbollah financial entities by TFTC member states.",
+      "source": {
+        "label": "TFTC Designations index — Round 9",
+        "url": "https://www.tftc-istehdaf.org/designations",
+        "agency": "TFTC"
+      },
+      "regionFocus": ["Gulf", "Lebanon"]
+    },
+    {
+      "id": "ofac-al-abyari-mb-hamas-2026-07-23",
+      "date": "2026-07-23",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": [
+        "Mahmoud al-Abyari",
+        "3 additional individuals",
+        "3 entities (incl. sham charities / facilitators)",
+        "Filistin Vakfi (prior SDN, fundraising support)",
+        "Hayat Yolu (prior SDN, fundraising support)"
+      ],
+      "location": {
+        "label": "Washington, DC (al-Abyari: UK-based)",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "OFAC designates Mahmoud al-Abyari + Hamas/MB financial facilitators",
+      "summary": "OFAC designated UK-based senior Egyptian Muslim Brotherhood official Mahmoud al-Abyari (Secretary General of the MB General Secretariat) for acting on behalf of the Egyptian MB, plus three individuals and three entities providing material support to Hamas. Release cites support for previously sanctioned Filistin Vakfi and Hayat Yolu and MB-linked fundraising for Hamas.",
+      "source": {
+        "label": "Treasury press release sb0572",
+        "url": "https://home.treasury.gov/news/press-releases/sb0572",
+        "agency": "US Treasury / OFAC"
+      },
+      "flagship": true,
+      "regionFocus": ["US", "Other"]
+    },
+    {
+      "id": "ofac-aqah-officials-2025-07-03",
+      "date": "2025-07-03",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": [
+        "Al-Qard Al-Hassan senior officials",
+        "Hizballah financial officials (package)"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "Treasury sanctions Hezbollah financial officials tied to Al-Qard Al-Hassan",
+      "summary": "OFAC sanctioned Hezbollah financial officials who served in senior management roles for Al-Qard Al-Hassan (AQAH), a Hezbollah-linked financial institution previously designated in 2007. Builds the public record for later TFTC joint AQAH targeting.",
+      "source": {
+        "label": "Treasury press release sb0189",
+        "url": "https://home.treasury.gov/news/press-releases/sb0189",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["US", "Lebanon"]
+    },
+    {
+      "id": "doj-edva-kassis-narco-terror-2026-03-23",
+      "date": "2026-03-23",
+      "type": "charges",
+      "networks": ["Hamas", "Mixed / Axis"],
+      "entities": [
+        "Antoine Kassis",
+        "Narco-terrorism conspiracy (Hamas among alleged beneficiaries)"
+      ],
+      "location": {
+        "label": "Eastern District of Virginia (Alexandria)",
+        "country": "US",
+        "usState": "VA",
+        "lat": 38.8048,
+        "lng": -77.0469
+      },
+      "amountUsd": 100000000,
+      "amountNote": "Trial evidence cited nearly $100,000,000 moved by co-conspirators in less than 18 months (not all attributed solely to listed networks).",
+      "title": "EDVA jury convicts Lebanese-Syrian national in narco-terrorism / material support case",
+      "summary": "Federal jury in EDVA convicted dual Lebanese-Syrian national Antoine Kassis on narco-terrorism conspiracy and conspiracy to provide material support to a designated FTO. Court records cited large-scale money movement involving organizations including Hamas among others. Conviction is a court outcome; read full DOJ release for charges and evidence summary.",
+      "source": {
+        "label": "DOJ EDVA press release (Mar 23, 2026)",
+        "url": "https://www.justice.gov/usao-edva/pr/federal-jury-convicts-dual-lebanese-syrian-national-his-role-narco-terrorism",
+        "agency": "US DOJ / USAO EDVA"
+      },
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "doj-opa-hasna-turkey-charity-2026-08-04",
+      "date": "2026-08-04",
+      "type": "charges",
+      "networks": ["Hamas"],
+      "entities": [
+        "Mohammad Yousef Hasna (a.k.a. Orhan Korkmaz)",
+        "Turkey-based sham charity network"
+      ],
+      "location": {
+        "label": "United States (defendant based Istanbul, Turkey)",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "DOJ: Turkey-based sham charity director charged with material support to Hamas",
+      "summary": "DOJ Office of Public Affairs announced arrest and charging of Mohammad Yousef Hasna, described as Turkey-based global director of a sham charity, with conspiring to provide material support to Hamas. Charges are allegations until adjudicated.",
+      "source": {
+        "label": "DOJ OPA — Turkey-based sham charity director (Hasna)",
+        "url": "https://www.justice.gov/opa/pr/turkey-based-global-director-sham-charity-arrested-and-charged-conspiring-provide-material",
+        "agency": "US DOJ"
+      },
+      "regionFocus": ["US", "Other"]
+    },
+    {
+      "id": "ofac-secondary-hizballah-fsr-2025-03-28",
+      "date": "2025-03-28",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": [
+        "Individuals subject to secondary sanctions under Hizballah Financial Sanctions Regulations"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "OFAC adds secondary sanctions information (Hizballah FSR)",
+      "summary": "OFAC Recent Actions updated SDN listings with secondary sanctions information pursuant to the Hizballah Financial Sanctions Regulations, expanding compliance exposure for non-US persons dealing with listed Hezbollah-linked actors.",
+      "source": {
+        "label": "OFAC Recent Actions 2025-03-28",
+        "url": "https://ofac.treasury.gov/recent-actions/20250328",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "state-mb-chapters-policy-2026-01-13b",
+      "date": "2026-01-13",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": [
+        "Egyptian MB",
+        "Jordanian MB",
+        "Lebanese MB"
+      ],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "US policy package: first-step MB chapter terrorist designations",
+      "summary": "State and Treasury coordinated first-step designations against Egyptian, Jordanian, and Lebanese Muslim Brotherhood chapters under the Administration’s MB-focused counterterrorism policy (E.O. 14362 context as described in State release).",
+      "source": {
+        "label": "State + Treasury coordinated package",
+        "url": "https://home.treasury.gov/news/press-releases/sb0357",
+        "agency": "US State / Treasury"
+      },
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "beirut-aqah-context-pin-2026-06-30",
+      "date": "2026-06-30",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": ["Al-Qard Al-Hassan", "Bayt al-Mal"],
+      "location": {
+        "label": "Beirut, Lebanon (entity headquarters context)",
+        "country": "LB",
+        "lat": 33.8938,
+        "lng": 35.5018
+      },
+      "amountUsd": null,
+      "title": "Geographic pin: Hezbollah financial institutions headquartered in Lebanon",
+      "summary": "Map pin for Lebanon-based Hezbollah financial institutions (AQAH, Bayt al-Mal) targeted in the June 30, 2026 TFTC/US joint action. Source is the Treasury TFTC release describing the entities as major Hezbollah financial infrastructure.",
+      "source": {
+        "label": "Treasury / TFTC sb0546",
+        "url": "https://home.treasury.gov/news/press-releases/sb0546",
+        "agency": "US Treasury / TFTC"
+      },
+      "regionFocus": ["Lebanon", "Gulf"]
+    },
+    {
+      "id": "istanbul-hayat-yolu-hub-2026-03-12",
+      "date": "2026-03-12",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": ["Hayat Yolu (Türkiye)"],
+      "location": {
+        "label": "Istanbul / Türkiye (financial hub context)",
+        "country": "TR",
+        "lat": 41.0082,
+        "lng": 28.9784
+      },
+      "amountUsd": null,
+      "title": "Geographic pin: Türkiye-based Hayat Yolu cited as MB financial hub",
+      "summary": "Treasury’s March 12, 2026 Hamas sham-charity action identified Türkiye-based Hayat Yolu as an operational headquarters and banking/financial hub for Muslim Brotherhood-related activity. Pin is for map context of that official description.",
+      "source": {
+        "label": "Treasury press release sb0415",
+        "url": "https://home.treasury.gov/news/press-releases/sb0415",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["Other"]
+    },
+    {
+      "id": "london-al-abyari-base-2026-07-23",
+      "date": "2026-07-23",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": ["Mahmoud al-Abyari"],
+      "location": {
+        "label": "London, United Kingdom (residence/base per Treasury)",
+        "country": "UK",
+        "lat": 51.5074,
+        "lng": -0.1278
+      },
+      "amountUsd": null,
+      "title": "Geographic pin: UK-based EMB senior official Mahmoud al-Abyari",
+      "summary": "Treasury described Mahmoud al-Abyari as a United Kingdom-based senior leader of the Egyptian Muslim Brotherhood designated July 23, 2026. Pin marks the publicly stated base location; designation authority is US OFAC.",
+      "source": {
+        "label": "Treasury press release sb0572",
+        "url": "https://home.treasury.gov/news/press-releases/sb0572",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["Other", "US"]
+    },
+    {
+      "id": "riyadh-tftc-cochair-2026-06-30",
+      "date": "2026-06-30",
+      "type": "joint_action",
+      "networks": ["Hezbollah"],
+      "entities": ["TFTC member-state joint designations (Saudi co-chair)"],
+      "location": {
+        "label": "Riyadh, Saudi Arabia (TFTC co-chair)",
+        "country": "SA",
+        "lat": 24.7136,
+        "lng": 46.6753
+      },
+      "amountUsd": null,
+      "title": "Geographic pin: TFTC co-chair Saudi Arabia in Hezbollah finance action",
+      "summary": "TFTC is co-chaired by the United States and Saudi Arabia with GCC members. This pin marks the Gulf co-chair side of the June 30, 2026 joint Hezbollah financial designations.",
+      "source": {
+        "label": "Treasury press release sb0546",
+        "url": "https://home.treasury.gov/news/press-releases/sb0546",
+        "agency": "US Treasury / TFTC"
+      },
+      "regionFocus": ["Gulf"]
+    },
+    {
+      "id": "manama-tftc-member-2026-06-30",
+      "date": "2026-06-30",
+      "type": "joint_action",
+      "networks": ["Hezbollah"],
+      "entities": ["TFTC member states incl. Bahrain"],
+      "location": {
+        "label": "Manama, Bahrain (TFTC member)",
+        "country": "BH",
+        "lat": 26.2285,
+        "lng": 50.586
+      },
+      "amountUsd": null,
+      "title": "Geographic pin: Bahrain as TFTC member in joint Hezbollah action",
+      "summary": "Bahrain is a TFTC member state. Pin supports Phase-1 Gulf geography for the June 30, 2026 joint designations of Hezbollah financial infrastructure.",
+      "source": {
+        "label": "Treasury press release sb0546",
+        "url": "https://home.treasury.gov/news/press-releases/sb0546",
+        "agency": "US Treasury / TFTC"
+      },
+      "regionFocus": ["Gulf"]
+    },
+    {
+      "id": "dubai-uae-hezbollah-list-2026-05-12",
+      "date": "2026-05-12",
+      "type": "designation",
+      "networks": ["Hezbollah"],
+      "entities": ["UAE Local Terrorist List — Hezbollah-linked package"],
+      "location": {
+        "label": "Dubai / UAE commercial center context",
+        "country": "UAE",
+        "lat": 25.2048,
+        "lng": 55.2708
+      },
+      "amountUsd": null,
+      "title": "Geographic pin: UAE commercial jurisdiction for Local Terrorist List action",
+      "summary": "Secondary UAE map pin for the May 2026 Cabinet Local Terrorist List action against Hezbollah-linked individuals and entities (primary announcement in Abu Dhabi).",
+      "source": {
+        "label": "UAE Cabinet / WAM reporting",
+        "url": "https://english.alarabiya.net/News/gulf/2026/05/12/uae-designates-16-individuals-five-entities-on-local-terrorist-list-over-hezbollah-links",
+        "agency": "UAE Cabinet / WAM"
+      },
+      "regionFocus": ["Gulf"]
+    },
+    {
+      "id": "ofac-hamieh-100m-freeze-context-2026-03-20",
+      "date": "2026-03-20",
+      "type": "asset_freeze",
+      "networks": ["Hezbollah"],
+      "entities": ["Alaa Hamieh network (blocked property interest)"],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": 100000000,
+      "amountNote": "Official estimate of funds diverted since 2020 by the designated network — not a single seized bank balance figure.",
+      "title": "Asset-blocking implications of Alaa Hamieh network SDGT package",
+      "summary": "Companion ledger row emphasizing the asset-blocking effect of the March 20, 2026 OFAC package: US persons blocked from transactions with designated parties; Treasury quantified over $100 million diverted since 2020 via the network’s schemes.",
+      "source": {
+        "label": "Treasury press release sb0420",
+        "url": "https://home.treasury.gov/news/press-releases/sb0420",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["US", "Lebanon"]
+    },
+    {
+      "id": "doj-sdny-hamas-fundraising-context-2024-2026",
+      "date": "2026-01-01",
+      "type": "charges",
+      "networks": ["Hamas"],
+      "entities": [
+        "Hamas leadership material-support charges (prior SDNY unsealings referenced in later complaints)"
+      ],
+      "location": {
+        "label": "Southern District of New York",
+        "country": "US",
+        "usState": "NY",
+        "lat": 40.7128,
+        "lng": -74.006
+      },
+      "amountUsd": null,
+      "title": "SDNY ongoing Hamas material-support enforcement posture",
+      "summary": "Placeholder chronology anchor: SDNY has unsealed multiple Hamas material-support matters (including leadership complaints) that frame later 2025–2026 financing cases. Prefer specific defendant PR rows for case-level detail. Allegations until adjudicated.",
+      "source": {
+        "label": "DOJ SDNY (representative Hamas material-support docket context)",
+        "url": "https://www.justice.gov/usao-sdny",
+        "agency": "US DOJ / USAO SDNY"
+      },
+      "regionFocus": ["US"]
+    },
+    {
+      "id": "ofac-jan-2026-mb-linked-to-hamas-rationale",
+      "date": "2026-01-13",
+      "type": "designation",
+      "networks": ["Muslim Brotherhood", "Hamas"],
+      "entities": ["Egyptian MB — material support rationale to Hamas"],
+      "location": {
+        "label": "Washington, DC",
+        "country": "US",
+        "usState": "DC",
+        "lat": 38.9072,
+        "lng": -77.0369
+      },
+      "amountUsd": null,
+      "title": "Designation rationale: Egyptian/Jordanian MB material support to Hamas",
+      "summary": "Treasury stated Egyptian and Jordanian MB branches were designated for having materially assisted, sponsored, or provided financial, material, or technological support for Hamas under E.O. 13224 as amended — establishing the legal nexus used in later al-Abyari and sham-charity actions.",
+      "source": {
+        "label": "Treasury press release sb0357",
+        "url": "https://home.treasury.gov/news/press-releases/sb0357",
+        "agency": "US Treasury / OFAC"
+      },
+      "regionFocus": ["US"]
+    }
+  ]
+}

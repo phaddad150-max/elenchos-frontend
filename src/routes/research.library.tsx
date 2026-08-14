@@ -8,6 +8,7 @@ import {
   FlaskConical,
   Library,
   MapPin,
+  Scale,
   Share2,
   Trophy,
   Users,
@@ -112,6 +113,12 @@ function ResearchLibraryPage() {
             className="rd-btn-ghost inline-flex items-center gap-1.5 text-[12px] text-cyan min-h-[40px] px-2.5 rounded-full border border-cyan/35 bg-cyan/8 touch-manipulation"
           >
             <Zap className="w-3.5 h-3.5" /> On-demand · $10
+          </Link>
+          <Link
+            to="/research/networks-ledger"
+            className="rd-btn-ghost inline-flex items-center gap-1.5 text-[12px] text-cyan min-h-[40px] px-2.5 rounded-full border border-cyan/35 bg-cyan/8 touch-manipulation"
+          >
+            <Scale className="w-3.5 h-3.5" /> Networks Ledger
           </Link>
           <Link
             to="/topics"

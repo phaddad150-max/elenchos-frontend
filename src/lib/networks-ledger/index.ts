@@ -1,0 +1,161 @@
+import raw from "./data.json";
+import type {
+  ActionType,
+  LedgerEntry,
+  NetworkTag,
+  NetworksLedgerData,
+} from "./types";
+
+export type {
+  ActionType,
+  CountryCode,
+  LedgerEntry,
+  LedgerLocation,
+  LedgerSource,
+  NetworkTag,
+  NetworksLedgerData,
+} from "./types";
+
+export const NETWORKS_LEDGER_DISCLAIMER =
+  (raw as NetworksLedgerData).meta.disclaimer;
+
+export const NETWORKS_LEDGER_DATA = raw as NetworksLedgerData;
+
+export const ALL_ENTRIES: LedgerEntry[] = NETWORKS_LEDGER_DATA.entries;
+
+export const ACTION_TYPE_LABELS: Record<ActionType, string> = {
+  designation: "Designation",
+  arrest: "Arrest",
+  charges: "Charges / Case",
+  asset_freeze: "Asset freeze / block",
+  forfeiture: "Forfeiture",
+  joint_action: "Joint action (TFTC/multilateral)",
+};
+
+export const NETWORK_OPTIONS: NetworkTag[] = [
+  "IRGC",
+  "Hezbollah",
+  "Muslim Brotherhood",
+  "Hamas",
+  "Mixed / Axis",
+];
+
+const SINCE_2025 = "2025-01-01";
+
+export function computeMetrics(entries: LedgerEntry[] = ALL_ENTRIES) {
+  const designations = entries.filter(
+    (e) => e.type === "designation" || e.type === "joint_action",
+  ).length;
+  const arrestsCharges = entries.filter(
+    (e) => e.type === "arrest" || e.type === "charges",
+  ).length;
+  const quantified = entries
+    .filter((e) => typeof e.amountUsd === "number" && e.amountUsd > 0)
+    .reduce((sum, e) => sum + (e.amountUsd ?? 0), 0);
+  // Prefer unique quantified packages (avoid double-count companion rows)
+  const seenAmounts = new Set<string>();
+  let quantifiedUnique = 0;
+  for (const e of entries) {
+    if (!e.amountUsd || e.amountUsd <= 0) continue;
+    const key = `${e.amountUsd}|${e.title.slice(0, 40)}`;
+    const packageKey =
+      e.id.includes("hamieh") && e.amountUsd === 100_000_000
+        ? "hamieh-100m"
+        : key;
+    if (seenAmounts.has(packageKey)) continue;
+    seenAmounts.add(packageKey);
+    quantifiedUnique += e.amountUsd;
+  }
+  const since2025 = entries.filter((e) => e.date >= SINCE_2025).length;
+
+  return {
+    totalDesignations: designations,
+    totalArrestsCharges: arrestsCharges,
+    quantifiedFundsUsd: quantifiedUnique || quantified,
+    actionsSince2025: since2025,
+    totalEntries: entries.length,
+  };
+}
+
+export function flagshipEntries(entries: LedgerEntry[] = ALL_ENTRIES): LedgerEntry[] {
+  return entries
+    .filter((e) => e.flagship)
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export function formatUsd(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+  return `$${n.toLocaleString()}`;
+}
+
+export function formatDate(iso: string): string {
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+export function filterEntries(
+  entries: LedgerEntry[],
+  opts: {
+    q?: string;
+    network?: string;
+    type?: string;
+    country?: string;
+  },
+): LedgerEntry[] {
+  const q = (opts.q ?? "").trim().toLowerCase();
+  return entries
+    .filter((e) => {
+      if (opts.network && opts.network !== "all") {
+        if (!e.networks.includes(opts.network as NetworkTag)) return false;
+      }
+      if (opts.type && opts.type !== "all") {
+        if (e.type !== opts.type) return false;
+      }
+      if (opts.country && opts.country !== "all") {
+        if (e.location.country !== opts.country) return false;
+      }
+      if (!q) return true;
+      const hay = [
+        e.title,
+        e.summary,
+        e.entities.join(" "),
+        e.networks.join(" "),
+        e.location.label,
+        e.source.agency,
+        e.id,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    })
+    .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+}
+
+/** Collapse map pins by rounded lat/lng so click shows stacked actions. */
+export function groupEntriesByLocation(entries: LedgerEntry[]) {
+  const map = new Map<string, { lat: number; lng: number; label: string; entries: LedgerEntry[] }>();
+  for (const e of entries) {
+    const key = `${e.location.lat.toFixed(2)},${e.location.lng.toFixed(2)}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.entries.push(e);
+    } else {
+      map.set(key, {
+        lat: e.location.lat,
+        lng: e.location.lng,
+        label: e.location.label,
+        entries: [e],
+      });
+    }
+  }
+  return [...map.values()];
+}
