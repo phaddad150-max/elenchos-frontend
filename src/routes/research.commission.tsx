@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useCallback, useState } from "react";
 import {
   Building2,
   Check,
@@ -17,8 +18,10 @@ import {
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
 import {
+  COMMISSION_PACKAGE_IDS,
   DESK_PACKAGES,
-  LANDING_TIER_IDS,
+  HOW_IT_WORKS_STEPS,
+  type DeskPackageId,
 } from "@/lib/research-desk/packages";
 
 const ENTERPRISE_DEFAULT_MESSAGE =
@@ -50,6 +53,9 @@ export const Route = createFileRoute("/research/commission")({
 });
 
 function CommissionPage() {
+  const [selectedPkg, setSelectedPkg] = useState<DeskPackageId>("deep-no-x");
+  const onPackageChange = useCallback((id: DeskPackageId) => setSelectedPkg(id), []);
+
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
@@ -77,19 +83,24 @@ function CommissionPage() {
               </div>
             </header>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {LANDING_TIER_IDS.map((id, i) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {COMMISSION_PACKAGE_IDS.map((id, i) => {
                 const p = DESK_PACKAGES[id];
+                const isSelected = selectedPkg === id;
+                const isFeatured = id === "deep-with-x";
                 return (
                   <motion.div
                     key={id}
+                    id={`pkg-${id}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className={`rounded-2xl border p-4 min-w-0 ${
-                      id === "deep-with-x"
-                        ? "border-cyan/50 bg-cyan/10"
-                        : "border-border/80 bg-card/50"
+                    className={`rounded-2xl border p-4 min-w-0 transition-shadow ${
+                      isSelected
+                        ? "border-cyan/70 bg-cyan/10 ring-1 ring-cyan/40 shadow-[0_0_24px_-12px_var(--color-cyan-glow)]"
+                        : isFeatured
+                          ? "border-cyan/50 bg-cyan/10"
+                          : "border-border/80 bg-card/50"
                     }`}
                   >
                     <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
@@ -114,17 +125,26 @@ function CommissionPage() {
               <h2 className="text-[12px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
                 How it works
               </h2>
-              <ol className="space-y-2.5">
-                {[
-                  "Choose package and write your question in plain language.",
-                  "Pay once on Stripe — card data never stored by Elenchos.",
-                  "Open your private link + PDF (automated, minutes).",
-                ].map((t, i) => (
-                  <li key={t} className="flex gap-2.5 text-[13px] text-foreground/90 leading-snug">
+              <ol className="space-y-3">
+                {HOW_IT_WORKS_STEPS.map((step, i) => (
+                  <li key={step.title} className="flex gap-2.5 min-w-0">
                     <span className="shrink-0 w-6 h-6 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[11px] font-mono grid place-items-center">
                       {i + 1}
                     </span>
-                    <span className="break-words pt-0.5">{t}</span>
+                    <div className="min-w-0 pt-0.5">
+                      <p className="text-[13px] font-medium text-foreground leading-snug">
+                        {step.title}
+                        {step.formLabel ? (
+                          <span className="text-muted-foreground font-normal">
+                            {" "}
+                            · {step.formLabel}
+                          </span>
+                        ) : null}
+                      </p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug break-words">
+                        {step.body}
+                      </p>
+                    </div>
                   </li>
                 ))}
               </ol>
@@ -198,7 +218,7 @@ function CommissionPage() {
             <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan mb-3">
               Start checkout
             </p>
-            <CommissionBriefForm />
+            <CommissionBriefForm onPackageChange={onPackageChange} />
           </div>
         </div>
 

@@ -1,20 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Loader2, Lock } from "lucide-react";
 import {
+  CHECKOUT_PACKAGE_ORDER,
   DESK_PACKAGES,
   isDeskPackageId,
   topicViolatesSafetyPolicy,
   type DeskPackageId,
 } from "@/lib/research-desk/packages";
 
-const ORDER: DeskPackageId[] = ["deep-no-x", "deep-with-x", "topic-analysis"];
+type CommissionBriefFormProps = {
+  onPackageChange?: (id: DeskPackageId) => void;
+};
 
 /**
  * On-demand commission → Stripe Checkout → unique report URL + PDF.
  * Optional email goes to Stripe/mail provider for one-time delivery only.
  * Commissioned data → research_desk_reports only (never live Topics tables).
  */
-export function CommissionBriefForm() {
+export function CommissionBriefForm({ onPackageChange }: CommissionBriefFormProps) {
   const [pkg, setPkg] = useState<DeskPackageId>("deep-no-x");
   const [topic, setTopic] = useState("");
   const [questions, setQuestions] = useState("");
@@ -32,9 +35,16 @@ export function CommissionBriefForm() {
     if (preTopic?.trim()) setTopic(preTopic.trim().slice(0, 800));
   }, []);
 
+  useEffect(() => {
+    onPackageChange?.(pkg);
+  }, [pkg, onPackageChange]);
+
   const meta = DESK_PACKAGES[pkg];
   const needQuestions = pkg === "topic-analysis";
-  const packages = useMemo(() => ORDER.map((id) => DESK_PACKAGES[id]), []);
+  const packages = useMemo(
+    () => CHECKOUT_PACKAGE_ORDER.map((id) => DESK_PACKAGES[id]),
+    [],
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -89,39 +99,39 @@ export function CommissionBriefForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       <div>
-        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
           1 · Package
         </p>
-        <div className="space-y-2">
+        <p className="text-[11.5px] text-muted-foreground mb-2 leading-snug">
+          Full details for each option are on the left — pick one to continue.
+        </p>
+        <div className="space-y-1.5" role="radiogroup" aria-label="Research package">
           {packages.map((p) => (
             <button
               key={p.id}
               type="button"
+              role="radio"
+              aria-checked={pkg === p.id}
               onClick={() => setPkg(p.id)}
-              className={`w-full text-left rounded-xl border px-3.5 py-3.5 min-h-[48px] touch-manipulation transition-all ${
+              className={`w-full text-left rounded-xl border px-3 py-2.5 min-h-[44px] touch-manipulation transition-all ${
                 pkg === p.id
-                  ? "border-cyan/60 bg-cyan/15 shadow-[0_0_24px_-12px_var(--color-cyan-glow)] scale-[1.01]"
+                  ? "border-cyan/60 bg-cyan/15 shadow-[0_0_24px_-12px_var(--color-cyan-glow)]"
                   : "border-border bg-card/50 hover:border-cyan/35"
               }`}
             >
-              <div className="flex items-baseline justify-between gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90">
                     {p.tierLabel}
                   </p>
-                  <p className="text-[14px] font-display font-semibold text-foreground">
+                  <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
                     {p.title}
                   </p>
                 </div>
-                <span className="text-cyan font-mono text-[16px] font-semibold shrink-0">
+                <span className="text-cyan font-mono text-[15px] font-semibold shrink-0">
                   ${p.priceUsd}
                 </span>
               </div>
-              <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{p.blurb}</p>
-              <p className="text-[11px] text-foreground/80 mt-1.5 leading-snug">
-                You get: {p.delivers}
-              </p>
-              <p className="text-[10.5px] font-mono text-cyan/85 mt-1">{p.deliveryNote}</p>
             </button>
           ))}
         </div>
@@ -171,10 +181,6 @@ export function CommissionBriefForm() {
           className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
           autoComplete="email"
         />
-        <p className="text-[11px] text-muted-foreground leading-snug">
-          EU operator · GDPR-minded: card data stays with Stripe; Elenchos does not store card
-          numbers or build user profiles.
-        </p>
       </div>
 
       <label className="flex gap-2.5 items-start text-[12px] text-muted-foreground leading-snug cursor-pointer">

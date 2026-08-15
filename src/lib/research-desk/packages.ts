@@ -69,6 +69,48 @@ export const DESK_PACKAGES: Record<DeskPackageId, DeskPackageMeta> = {
 /** Landing page dual-tier order (primary paid path). */
 export const LANDING_TIER_IDS: DeskPackageId[] = ["deep-no-x", "deep-with-x"];
 
+/** All packages shown on the commission page (left column + checkout). */
+export const COMMISSION_PACKAGE_IDS: DeskPackageId[] = [
+  "deep-no-x",
+  "deep-with-x",
+  "topic-analysis",
+];
+
+/** Checkout form package order. */
+export const CHECKOUT_PACKAGE_ORDER: DeskPackageId[] = COMMISSION_PACKAGE_IDS;
+
+export type HowItWorksStep = {
+  title: string;
+  body: string;
+  formLabel?: string;
+};
+
+/** Commission page guide — maps to checkout steps on the right. */
+export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
+  {
+    title: "Choose your research type",
+    body:
+      "Standard ($10) — multi-source deep dive, no X. Deeper + discourse ($20) — same plus capped X sample. Topic analysis ($10) — public discourse themes (live Topics method).",
+    formLabel: "1 · Package",
+  },
+  {
+    title: "Write your question",
+    body:
+      "One clear topic in plain language. For Topic analysis, you can add up to 9 optional questions after the topic.",
+    formLabel: "2 · Topic",
+  },
+  {
+    title: "Pay once on Stripe",
+    body:
+      "Card data stays with Stripe — never stored by Elenchos. Optional email is for one-time link delivery only.",
+    formLabel: "3 · Email (optional)",
+  },
+  {
+    title: "Open your private link + PDF",
+    body: "Automated delivery — typically seconds to a few minutes after payment.",
+  },
+];
+
 export function isDeskPackageId(v: string): v is DeskPackageId {
   return v === "topic-analysis" || v === "deep-no-x" || v === "deep-with-x";
 }
