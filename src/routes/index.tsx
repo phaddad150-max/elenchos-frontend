@@ -517,21 +517,6 @@ function Dashboard() {
 
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-3 sm:py-6 md:py-7 space-y-3 sm:space-y-5 md:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
-        <div className="flex flex-wrap items-center justify-between gap-2 min-w-0 -mb-0.5 sm:-mb-1">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="live-chip shrink-0">
-              <span className="live-chip-dot" aria-hidden />
-              Live sample
-            </span>
-            <span className="hidden sm:inline text-[11px] font-mono text-muted-foreground truncate">
-              Public discourse · intelligence overview
-            </span>
-          </div>
-          <span className="text-[10px] sm:text-[11px] font-mono text-muted-foreground tabular-nums shrink-0">
-            {fmtNum(kpis.postsAnalyzed)} posts · {kpis.topics} topics
-          </span>
-        </div>
-
         {/* KPI hero — one grid for all viewports; same data mobile + desktop */}
         <DashboardKpiGrid
           overview={overview}
