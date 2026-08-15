@@ -7,12 +7,10 @@ import {
   FileText,
   MessageSquareQuote,
   Radio,
-  Search,
   Share2,
   Shield,
   Trophy,
   Users,
-  Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -21,8 +19,6 @@ import {
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
-import { FEATURE_TOPICS } from "@/lib/feature-topics";
-import { isArchivedTopicId } from "@/lib/topic-catalog";
 
 type SharedItem = {
   token: string;
@@ -54,7 +50,7 @@ export const Route = createFileRoute("/research/library")({
       {
         name: "description",
         content:
-          "All free Elenchos work: public discourse topic analysis, multi-source case studies, leadership boards, peace index, designations and fraud ledgers.",
+          "Free Elenchos library: public discourse topic analysis on X, multi-source case studies, leadership boards, peace index, and official designations ledger.",
       },
       {
         property: "og:title",
@@ -63,7 +59,7 @@ export const Route = createFileRoute("/research/library")({
       {
         property: "og:description",
         content:
-          "One free library: X topic analysis, deep-dive case studies, and citizen trackers.",
+          "Three free doors: topic analysis on X, deep-dive case studies, and citizen trackers.",
       },
       { property: "og:url", content: "https://elenchos.live/research/library" },
     ],
@@ -104,17 +100,57 @@ function buildCaseStudies(): CaseStudy[] {
   );
 }
 
-type SectionId = "discourse" | "cases" | "trackers";
+type DeepSection = "cases" | "trackers" | null;
+
+const DOORS = [
+  {
+    id: "discourse" as const,
+    title: "Public discourse on X",
+    kicker: "Topic analysis",
+    description:
+      "Live Topics monitors — citizen voices on X vs official and media frames. Scores, narrative gaps, and insights per topic.",
+    leadsTo: "Opens the Topics desk with active, commissioned, and archived reports.",
+    cta: "Go to Topics",
+    href: "/topics",
+    externalNav: true,
+    icon: MessageSquareQuote,
+    accent: "cyan",
+    glow: "from-cyan/25 via-cyan/5 to-transparent border-cyan/40",
+  },
+  {
+    id: "cases" as const,
+    title: "Case studies",
+    kicker: "Deep dives",
+    description:
+      "Multi-source research briefs — scholarly, official, media, and optional discourse. Thesis-style claims with limits you can check.",
+    leadsTo: "Opens published deep dives and community-shared reports in this library.",
+    cta: "Browse case studies",
+    href: "#cases",
+    externalNav: false,
+    icon: FileText,
+    accent: "emerald",
+    glow: "from-emerald-signal/20 via-emerald-signal/5 to-transparent border-emerald-signal/35",
+  },
+  {
+    id: "trackers" as const,
+    title: "Trackers",
+    kicker: "Indexes & ledgers",
+    description:
+      "Leadership board, peace index, football player index, and the designations ledger (official terror-finance and financial-crime actions).",
+    leadsTo: "Opens free indexes and the networks ledger from this library.",
+    cta: "Browse trackers",
+    href: "#trackers",
+    externalNav: false,
+    icon: Trophy,
+    accent: "amber",
+    glow: "from-amber-signal/20 via-amber-signal/5 to-transparent border-amber-signal/35",
+  },
+] as const;
 
 function ResearchLibraryPage() {
   const cases = useMemo(() => buildCaseStudies(), []);
-  const liveTopics = useMemo(
-    () => FEATURE_TOPICS.filter((t) => !isArchivedTopicId(t.id)).slice(0, 8),
-    [],
-  );
   const [shared, setShared] = useState<SharedItem[]>([]);
-  const [q, setQ] = useState("");
-  const [section, setSection] = useState<SectionId>("discourse");
+  const [deep, setDeep] = useState<DeepSection>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,39 +167,26 @@ function ResearchLibraryPage() {
     };
   }, []);
 
-  // Deep-link hash from Intelligence redirects
   useEffect(() => {
     if (typeof window === "undefined") return;
     const h = window.location.hash.replace("#", "");
-    if (h === "trackers" || h === "cases" || h === "discourse") {
-      setSection(h as SectionId);
+    if (h === "cases" || h === "trackers") {
+      setDeep(h);
       requestAnimationFrame(() => {
         document.getElementById(`lib-${h}`)?.scrollIntoView({ behavior: "smooth" });
       });
     }
   }, []);
 
-  const needle = q.trim().toLowerCase();
-  const filteredCases = useMemo(() => {
-    if (!needle) return cases;
-    return cases.filter((c) =>
-      [c.title, c.subtitle, c.region, c.statusLabel].join(" ").toLowerCase().includes(needle),
-    );
-  }, [cases, needle]);
-
-  const filteredTopics = useMemo(() => {
-    if (!needle) return liveTopics;
-    return liveTopics.filter((t) =>
-      [t.title, t.shortTitle, t.description, t.region].join(" ").toLowerCase().includes(needle),
-    );
-  }, [liveTopics, needle]);
-
-  const filteredShared = useMemo(() => {
-    if (!needle) return shared;
-    return shared.filter((s) =>
-      [s.title, s.topic, s.packageId].join(" ").toLowerCase().includes(needle),
-    );
-  }, [shared, needle]);
+  const openDeep = (id: "cases" | "trackers") => {
+    setDeep(id);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${id}`);
+    }
+    requestAnimationFrame(() => {
+      document.getElementById(`lib-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   return (
     <div className="page-shell dash-landing">
@@ -174,142 +197,144 @@ function ResearchLibraryPage() {
         <ResearchBreadcrumb current="Library" />
         <ResearchDeskNav />
 
-        <header className="page-hero-banner mb-5 overflow-hidden min-w-0">
-          <div className="p-4 sm:p-5 md:p-6 space-y-2 min-w-0">
+        <header className="page-hero-banner mb-6 sm:mb-8 overflow-hidden min-w-0 relative">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_20%_0%,color-mix(in_oklab,var(--cyan)_18%,transparent),transparent_55%),radial-gradient(ellipse_at_90%_20%,color-mix(in_oklab,var(--amber-signal)_10%,transparent),transparent_50%)]" />
+          <div className="relative p-4 sm:p-5 md:p-7 space-y-2.5 min-w-0">
             <div className="page-hero-kicker">
               <BookOpen className="w-3.5 h-3.5" aria-hidden />
               Library
             </div>
-            <h1 className="page-hero-title text-[1.35rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Free reports, case studies &amp; trackers
+            <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] break-words max-w-3xl">
+              Three free doors into Elenchos intelligence
             </h1>
-            <p className="page-hero-sub max-w-2xl break-words">
-              Everything Elenchos publishes for free — public discourse on X, multi-source case
-              studies, and citizen indexes. Commission a private report when you need your own.
+            <p className="page-hero-sub max-w-2xl break-words text-[13.5px] sm:text-[14px]">
+              Pick where you want to go — live discourse on X, multi-source case studies, or
+              citizen trackers and ledgers. No paywall on published work.
             </p>
           </div>
         </header>
 
-        {/* Section switcher */}
-        <div className="mb-5 flex flex-col sm:flex-row gap-2.5 sm:items-center">
-          <div
-            className="flex rounded-xl border border-border/80 bg-card/70 p-1 gap-1 overflow-x-auto scrollbar-none"
-            role="tablist"
-            aria-label="Library sections"
-          >
-            {(
-              [
-                { id: "discourse" as const, label: "Public discourse on X" },
-                { id: "cases" as const, label: "Case studies" },
-                { id: "trackers" as const, label: "Trackers" },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={section === tab.id}
-                onClick={() => {
-                  setSection(tab.id);
-                  window.history.replaceState(null, "", `#${tab.id}`);
-                }}
-                className={`shrink-0 min-h-[40px] px-3 rounded-lg text-[12px] font-medium touch-manipulation transition-colors ${
-                  section === tab.id
-                    ? "bg-cyan/15 text-cyan border border-cyan/40"
-                    : "text-muted-foreground border border-transparent hover:bg-secondary/50"
-                }`}
+        {/* Three creative doors */}
+        <section
+          aria-label="Library sections"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-8"
+        >
+          {DOORS.map((door, i) => {
+            const Icon = door.icon;
+            const isOpen = deep === door.id;
+            const cardClass = `lib-door group relative flex flex-col h-full min-h-[260px] sm:min-h-[280px] rounded-2xl border bg-gradient-to-b ${door.glow} bg-card/70 p-4 sm:p-5 overflow-hidden transition-all touch-manipulation ${
+              isOpen ? "ring-1 ring-cyan/40 shadow-[0_0_36px_-12px_var(--cyan-glow)]" : "hover:shadow-[0_0_36px_-14px_var(--cyan-glow)]"
+            }`;
+
+            const body = (
+              <>
+                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-cyan/10 blur-2xl pointer-events-none group-hover:bg-cyan/15 transition-colors" />
+                <div className="relative flex items-start justify-between gap-2 mb-4">
+                  <span className="w-12 h-12 rounded-2xl border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center group-hover:scale-105 transition-transform">
+                    <Icon className="w-6 h-6" />
+                  </span>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground tabular-nums">
+                    0{i + 1}
+                  </span>
+                </div>
+                <p className="relative text-[10px] font-mono uppercase tracking-[0.18em] text-cyan mb-1">
+                  {door.kicker}
+                </p>
+                <h2 className="relative text-[1.15rem] sm:text-xl font-display font-semibold text-foreground group-hover:text-cyan transition-colors break-words">
+                  {door.title}
+                </h2>
+                <p className="relative text-[13px] text-muted-foreground leading-relaxed mt-2 flex-1 break-words">
+                  {door.description}
+                </p>
+                <p className="relative text-[11.5px] font-mono text-foreground/75 leading-snug mt-3 border-t border-border/60 pt-3 break-words">
+                  {door.leadsTo}
+                </p>
+                <span className="relative mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">
+                  {door.cta}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </>
+            );
+
+            return (
+              <motion.div
+                key={door.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.06 * i, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="min-w-0 h-full"
               >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search library…"
-              className="w-full min-h-[42px] pl-10 pr-3 rounded-xl border border-border/80 bg-background/80 text-[13px] focus:outline-none focus:ring-1 focus:ring-cyan/50"
-            />
-          </div>
-        </div>
-
-        {/* —— Public discourse on X —— */}
-        {section === "discourse" && (
-          <section id="lib-discourse" className="space-y-4 scroll-mt-28" aria-labelledby="h-discourse">
-            <SectionIntro
-              id="h-discourse"
-              title="Public discourse on X"
-              sub="Live Topics analysis — citizen voices vs official and media frames. Open any topic for scores, gaps, and insights."
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
-              {filteredTopics.map((t, i) => (
-                <motion.div
-                  key={t.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                >
-                  <Link
-                    to="/topics/$topicId"
-                    params={{ topicId: t.id }}
-                    className="rd-card group flex flex-col h-full min-h-[140px] rounded-2xl border border-border/80 bg-card/60 hover:border-cyan/50 p-3.5 transition-colors touch-manipulation"
-                  >
-                    <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
-                      Topic analysis
-                    </span>
-                    <h3 className="text-[14px] font-display font-semibold mt-1 group-hover:text-cyan transition-colors line-clamp-2 break-words">
-                      {t.shortTitle || t.title}
-                    </h3>
-                    <p className="text-[12px] text-muted-foreground mt-1 line-clamp-2 flex-1 break-words">
-                      {t.description || t.region}
-                    </p>
-                    <span className="mt-2 text-[12px] font-medium text-cyan inline-flex items-center gap-1">
-                      Open report <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
+                {door.externalNav ? (
+                  <Link to={door.href} className={cardClass}>
+                    {body}
                   </Link>
-                </motion.div>
-              ))}
-            </div>
-            {filteredTopics.length === 0 && (
-              <EmptySearch />
-            )}
-            <Link
-              to="/topics"
-              className="inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px]"
-            >
-              <Radio className="w-3.5 h-3.5" /> All live Topics
-            </Link>
-          </section>
-        )}
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openDeep(door.id)}
+                    className={`${cardClass} w-full text-left`}
+                    aria-expanded={isOpen}
+                  >
+                    {body}
+                  </button>
+                )}
+              </motion.div>
+            );
+          })}
+        </section>
 
-        {/* —— Case studies —— */}
-        {section === "cases" && (
-          <section id="lib-cases" className="space-y-4 scroll-mt-28" aria-labelledby="h-cases">
-            <SectionIntro
-              id="h-cases"
-              title="Case studies"
-              sub="Multi-source deep dives (multichannel ± X). Published by Elenchos — same research discipline as commissioned briefs."
-            />
+        {/* Case studies panel */}
+        {deep === "cases" && (
+          <section
+            id="lib-cases"
+            className="scroll-mt-28 space-y-4 mb-8 rounded-2xl border border-emerald-signal/25 bg-emerald-signal/[0.04] p-3.5 sm:p-5"
+            aria-labelledby="h-cases"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h2
+                  id="h-cases"
+                  className="text-[15px] sm:text-base font-display font-semibold text-foreground"
+                >
+                  Case studies
+                </h2>
+                <p className="text-[12.5px] text-muted-foreground mt-1 max-w-2xl leading-snug">
+                  Multi-source deep dives published by Elenchos — same research discipline as
+                  commissioned briefs.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeep(null);
+                  window.history.replaceState(null, "", "/research/library");
+                }}
+                className="text-[12px] font-mono text-muted-foreground hover:text-cyan min-h-[36px] px-2"
+              >
+                Close
+              </button>
+            </div>
             <div className="space-y-2.5">
-              {filteredCases.map((c, i) => (
+              {cases.map((c, i) => (
                 <CaseCard key={c.id} item={c} delay={i * 0.03} />
               ))}
             </div>
-            {filteredCases.length === 0 && <EmptySearch />}
-
-            {filteredShared.length > 0 && (
+            {cases.length === 0 && (
+              <p className="text-[13px] text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
+                No case studies published yet.
+              </p>
+            )}
+            {shared.length > 0 && (
               <div className="pt-4 space-y-2.5">
                 <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                   <Share2 className="w-3.5 h-3.5" /> Community shared deep dives
                 </p>
-                {filteredShared.map((s, i) => (
+                {shared.map((s) => (
                   <Link
                     key={s.token}
                     to="/research/report/$token"
                     params={{ token: s.token }}
-                    className="group flex gap-3 rounded-2xl border border-border/80 bg-card/40 hover:border-cyan/40 p-3.5 transition-colors"
+                    className="group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-cyan/40 p-3.5 transition-colors"
                   >
                     <Share2 className="w-4 h-4 text-cyan shrink-0 mt-1" />
                     <div className="min-w-0 flex-1">
@@ -329,27 +354,42 @@ function ResearchLibraryPage() {
           </section>
         )}
 
-        {/* —— Trackers —— */}
-        {section === "trackers" && (
-          <section id="lib-trackers" className="space-y-4 scroll-mt-28" aria-labelledby="h-trackers">
-            <SectionIntro
-              id="h-trackers"
-              title="Trackers"
-              sub="Indexes, leadership boards, and official-source ledgers — free to explore."
-            />
+        {/* Trackers panel */}
+        {deep === "trackers" && (
+          <section
+            id="lib-trackers"
+            className="scroll-mt-28 space-y-4 mb-8 rounded-2xl border border-amber-signal/25 bg-amber-signal/[0.04] p-3.5 sm:p-5"
+            aria-labelledby="h-trackers"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h2
+                  id="h-trackers"
+                  className="text-[15px] sm:text-base font-display font-semibold text-foreground"
+                >
+                  Trackers
+                </h2>
+                <p className="text-[12.5px] text-muted-foreground mt-1 max-w-2xl leading-snug">
+                  Indexes, leadership board, and the designations ledger — free to explore.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeep(null);
+                  window.history.replaceState(null, "", "/research/library");
+                }}
+                className="text-[12px] font-mono text-muted-foreground hover:text-cyan min-h-[36px] px-2"
+              >
+                Close
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               <ToolCard
-                href="/research/networks-ledger#designations-ledger"
-                title="Designations Ledger"
-                body="OFAC, DOJ, State, UAE, TFTC — terror-finance designations & freezes."
+                href="/research/networks-ledger"
+                title="Designations ledger"
+                body="Official terror-finance and financial-crime designations, freezes, and related public actions (OFAC, DOJ, State, UAE, TFTC) in one ledger."
                 icon={<Shield className="w-5 h-5" />}
-                badge="Ledger"
-              />
-              <ToolCard
-                href="/research/networks-ledger#fraud-ledger"
-                title="Fraud Ledger"
-                body="Public financial-crime designations shell — same evidence rules as designations."
-                icon={<Zap className="w-5 h-5" />}
                 badge="Ledger"
               />
               <ToolCard
@@ -367,30 +407,24 @@ function ResearchLibraryPage() {
                 badge="Index"
               />
               <ToolCard
-                href="/trackers/media"
-                title="Media trust"
-                body="Citizen trust signals on media outlets and narrative framing."
-                icon={<MessageSquareQuote className="w-5 h-5" />}
-                badge="Index"
-              />
-              <ToolCard
                 href="/trackers/football"
                 title="Football player index"
                 body="Fan discourse rankings — form, legacy, post-match sentiment."
                 icon={<Trophy className="w-5 h-5" />}
                 badge="Index"
               />
+              <ToolCard
+                href="/trackers"
+                title="All trackers hub"
+                body="Full citizen rankings hub — leaders, peace, football, and upcoming indexes."
+                icon={<Radio className="w-5 h-5" />}
+                badge="Hub"
+              />
             </div>
-            <Link
-              to="/trackers"
-              className="inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px]"
-            >
-              Full trackers hub <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
           </section>
         )}
 
-        <div className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+        <div className="mt-4 rounded-2xl border border-cyan/30 bg-cyan/[0.06] px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90 break-words">
             Need a private brief on your own question?
           </p>
@@ -408,35 +442,6 @@ function ResearchLibraryPage() {
   );
 }
 
-function SectionIntro({
-  id,
-  title,
-  sub,
-}: {
-  id: string;
-  title: string;
-  sub: string;
-}) {
-  return (
-    <div className="px-0.5 min-w-0">
-      <h2 id={id} className="text-[15px] sm:text-base font-display font-semibold text-foreground">
-        {title}
-      </h2>
-      <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug max-w-2xl break-words">
-        {sub}
-      </p>
-    </div>
-  );
-}
-
-function EmptySearch() {
-  return (
-    <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-[13px] text-muted-foreground">
-      No matches for your search.
-    </p>
-  );
-}
-
 function CaseCard({ item, delay }: { item: CaseStudy; delay: number }) {
   return (
     <motion.div
@@ -447,7 +452,7 @@ function CaseCard({ item, delay }: { item: CaseStudy; delay: number }) {
       <Link
         to={item.href}
         params={item.params as never}
-        className="rd-lib-row group flex gap-3 rounded-2xl border border-border/90 bg-card/55 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0"
+        className="rd-lib-row group flex gap-3 rounded-2xl border border-border/90 bg-card/70 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0"
       >
         <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
           <FileText className="w-4 h-4" />
@@ -488,7 +493,7 @@ function ToolCard({
     href.startsWith("/research") ||
     href.startsWith("/topics");
   const className =
-    "rd-card group flex flex-col h-full min-h-[148px] rounded-2xl border border-border/80 bg-card/55 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
+    "rd-card group flex flex-col h-full min-h-[148px] rounded-2xl border border-border/80 bg-card/60 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
 
   const inner = (
     <>

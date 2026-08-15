@@ -20,7 +20,6 @@ import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as ResearchIndexRouteImport } from './routes/research.index'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
-import { Route as TrackersMediaRouteImport } from './routes/trackers.media'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
@@ -95,11 +94,6 @@ const ResearchIndexRoute = ResearchIndexRouteImport.update({
 const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
   id: '/trackers/peace',
   path: '/trackers/peace',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersMediaRoute = TrackersMediaRouteImport.update({
-  id: '/trackers/media',
-  path: '/trackers/media',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
@@ -220,7 +214,6 @@ export interface FileRoutesByFullPath {
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
-  '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research/': typeof ResearchIndexRoute
   '/topics/': typeof TopicsIndexRoute
@@ -254,7 +247,6 @@ export interface FileRoutesByTo {
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
-  '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research': typeof ResearchIndexRoute
   '/topics': typeof TopicsIndexRoute
@@ -289,7 +281,6 @@ export interface FileRoutesById {
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
-  '/trackers/media': typeof TrackersMediaRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research/': typeof ResearchIndexRoute
   '/topics/': typeof TopicsIndexRoute
@@ -325,7 +316,6 @@ export interface FileRouteTypes {
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
-    | '/trackers/media'
     | '/trackers/peace'
     | '/research/'
     | '/topics/'
@@ -359,7 +349,6 @@ export interface FileRouteTypes {
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
-    | '/trackers/media'
     | '/trackers/peace'
     | '/research'
     | '/topics'
@@ -393,7 +382,6 @@ export interface FileRouteTypes {
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
-    | '/trackers/media'
     | '/trackers/peace'
     | '/research/'
     | '/topics/'
@@ -428,7 +416,6 @@ export interface RootRouteChildren {
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
-  TrackersMediaRoute: typeof TrackersMediaRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
   ResearchIndexRoute: typeof ResearchIndexRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
@@ -524,13 +511,6 @@ declare module '@tanstack/react-router' {
       path: '/trackers/peace'
       fullPath: '/trackers/peace'
       preLoaderRoute: typeof TrackersPeaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/media': {
-      id: '/trackers/media'
-      path: '/trackers/media'
-      fullPath: '/trackers/media'
-      preLoaderRoute: typeof TrackersMediaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trackers/leaders': {
@@ -692,7 +672,6 @@ const rootRouteChildren: RootRouteChildren = {
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
-  TrackersMediaRoute: TrackersMediaRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
   ResearchIndexRoute: ResearchIndexRoute,
   TopicsIndexRoute: TopicsIndexRoute,

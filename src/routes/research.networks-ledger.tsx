@@ -8,7 +8,7 @@ import {
   Filter,
   FlaskConical,
   MapPin,
-  MessageSquareQuote,
+
   Search,
   Shield,
   Trophy,
@@ -46,21 +46,21 @@ export const Route = createFileRoute("/research/networks-ledger")({
   head: () => ({
     meta: [
       {
-        title: "Designations & fraud ledgers · Library · Elenchos",
+        title: "Designations ledger · Library · Elenchos",
       },
       {
         name: "description",
         content:
-          "Elenchos free trackers: terror-finance designations ledger, fraud ledger, leadership board, peace index, and other citizen indexes.",
+          "Elenchos designations ledger: official terror-finance and financial-crime designations, freezes, leadership board, peace index, and citizen trackers.",
       },
       {
         property: "og:title",
-        content: "Ledgers & trackers · Library · Elenchos Research Desk",
+        content: "Designations ledger · Library · Elenchos Research Desk",
       },
       {
         property: "og:description",
         content:
-          "Official-source ledgers and citizen-scored indexes. Designations, freezes, leadership trust, peace, and more.",
+          "Official-source designations and freezes, plus citizen-scored indexes. Leadership trust, peace, and more.",
       },
       {
         property: "og:url",
@@ -93,12 +93,14 @@ function NetworksLedgerPage() {
     return [...set].sort();
   }, []);
 
-  // Deep-link #designations-ledger from hub cards
+  // Deep-link #designations-ledger from hub cards (legacy #fraud-ledger aliases here)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash === "#designations-ledger" || window.location.hash === "#fraud-ledger") {
-      const el = document.querySelector(window.location.hash);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const h = window.location.hash;
+    if (h === "#designations-ledger" || h === "#fraud-ledger" || h === "#ledger") {
+      document
+        .getElementById("designations-ledger")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
 
@@ -120,11 +122,12 @@ function NetworksLedgerPage() {
               Library · Trackers
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Ledgers &amp; citizen indexes
+              Designations ledger &amp; citizen indexes
             </h1>
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed break-words">
-              Designations and fraud ledgers, leadership board, peace index, and more — part of the
-              free Library.{" "}
+              One official-source ledger for terror-finance and financial-crime designations,
+              freezes, and related public actions — plus leadership board, peace index, and other
+              free trackers.{" "}
               <Link to="/research/library" className="text-cyan hover:underline">
                 Back to full library
               </Link>
@@ -144,19 +147,11 @@ function NetworksLedgerPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             <ToolCard
               href="#designations-ledger"
-              title="Designations Ledger"
-              body="OFAC, DOJ, State, UAE, TFTC — IRGC, Hezbollah, MB, Hamas financing. Live below."
+              title="Designations ledger"
+              body="One tracker for official designations, freezes, and financial-crime public actions — OFAC, DOJ, State, UAE, TFTC."
               icon={<Shield className="w-5 h-5" />}
               badge="On this page"
               tone="cyan"
-            />
-            <ToolCard
-              href="#fraud-ledger"
-              title="Fraud Ledger"
-              body="Public financial-crime designations & prosecutions (same evidence style as designations)."
-              icon={<Zap className="w-5 h-5" />}
-              badge="Phase 1"
-              tone="amber"
             />
             <ToolCard
               href="/trackers/leaders"
@@ -175,14 +170,6 @@ function NetworksLedgerPage() {
               tone="cyan"
             />
             <ToolCard
-              href="/trackers/media"
-              title="Media trust"
-              body="Citizen trust signals on media outlets and narrative framing."
-              icon={<MessageSquareQuote className="w-5 h-5" />}
-              badge="Tracker"
-              tone="violet"
-            />
-            <ToolCard
               href="/trackers/football"
               title="Football player index"
               body="Fan discourse rankings — form, legacy, post-match sentiment."
@@ -199,41 +186,17 @@ function NetworksLedgerPage() {
           </Link>
         </section>
 
-        {/* Fraud ledger stub */}
-        <section
-          id="fraud-ledger"
-          className="scroll-mt-28 mb-8 rounded-2xl border border-amber-signal/35 bg-amber-signal/5 p-4 sm:p-5 space-y-2"
-          aria-labelledby="fraud-heading"
-        >
-          <h2
-            id="fraud-heading"
-            className="text-[13px] font-display font-semibold text-foreground flex items-center gap-2"
-          >
-            <Zap className="w-4 h-4 text-amber-signal" />
-            Fraud Ledger
-          </h2>
-          <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-2xl">
-            Phase 1 shell for high-confidence public financial-crime actions (OFAC, DOJ forfeitures,
-            major fraud indictments). Same rules as Designations: primary government sources only,
-            allegations until adjudicated, append-only history. Starter corpus ships next — use
-            Designations Ledger below for terror-finance packages already live.
-          </p>
-          <p className="text-[11px] text-muted-foreground/90 leading-snug border-t border-amber-signal/20 pt-2">
-            {NETWORKS_LEDGER_DISCLAIMER}
-          </p>
-        </section>
-
-        {/* Designations ledger (full product) */}
+        {/* Designations ledger — single tracker (terror-finance + financial-crime public actions) */}
         <div id="designations-ledger" className="scroll-mt-28 space-y-5 sm:space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-2 px-0.5">
             <div className="min-w-0">
               <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground">
-                Designations Ledger
+                Designations ledger
               </h2>
               <p className="text-[12.5px] text-muted-foreground mt-0.5 max-w-2xl leading-snug">
-                High-confidence public actions: designations, arrests/charges, quantified freezes —
-                IRGC, Hezbollah, Muslim Brotherhood, Hamas-linked financing, Mixed/Axis. US +
-                US-allied Gulf focus.
+                One official-source tracker: terror-finance designations, freezes, arrests/charges,
+                and high-confidence financial-crime public actions (OFAC, DOJ, State, UAE, TFTC).
+                Allegations until adjudicated — US + US-allied Gulf focus.
               </p>
               <p className="text-[11px] font-mono text-cyan/90 mt-1">
                 {NETWORKS_LEDGER_DATA.meta.version} · {ALL_ENTRIES.length} entries ·{" "}

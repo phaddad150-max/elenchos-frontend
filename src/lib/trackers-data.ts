@@ -265,17 +265,13 @@ function trackerRowQuality(row: TrackerRow): number {
     return itemCount;
   }
 
-  // Peace / media: any non-empty structured data counts as substantive.
+  // Peace: any non-empty structured data counts as substantive.
   if (data.detailed_countries && typeof data.detailed_countries === "object") {
     const n = Object.keys(data.detailed_countries as object).length;
     return n > 0 ? n : -1;
   }
   if (data.countries && typeof data.countries === "object") {
     const n = Object.keys(data.countries as object).length;
-    return n > 0 ? n : -1;
-  }
-  if (data.regions && typeof data.regions === "object" && row.tracker_type === "media_trust") {
-    const n = Object.keys(data.regions as object).length;
     return n > 0 ? n : -1;
   }
   if (Array.isArray(data.ranked_leaders) && data.ranked_leaders.length > 0) {
