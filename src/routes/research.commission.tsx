@@ -57,8 +57,19 @@ function CommissionPage() {
               Commission your report
             </h1>
             <p className="page-hero-sub mt-2 break-words">
-              Multi-source deep dive at a fixed price. Unique link + PDF when ready. For live X
-              topic-analysis commissions, use the Topics page.
+              $10 standard multi-source or $20 with X discourse. Automated after pay — typically
+              minutes. Unique private link + PDF. Sample:{" "}
+              <a href="/research-migration" className="text-cyan hover:underline">
+                migration briefing
+              </a>
+              {" · "}
+              <a
+                href="/research/report/uae-fintech-dominance-mena-2026"
+                className="text-cyan hover:underline"
+              >
+                topic report (UAE fintech)
+              </a>
+              .
             </p>
           </div>
         </header>
@@ -92,9 +103,10 @@ function CommissionPage() {
         <div className="rounded-lg border border-border bg-secondary/20 px-3 py-2.5 mb-5 flex gap-2 text-[11.5px] text-muted-foreground leading-snug">
           <Shield className="w-3.5 h-3.5 text-cyan shrink-0 mt-0.5" aria-hidden />
           <p>
-            <strong className="text-foreground/85">Safe research space:</strong> we do not sell
-            dossiers on researchers. Card data stays with Stripe. Optional email is used once to
-            send your unique link, then not kept by Elenchos. Research is experimental and provided
+            <strong className="text-foreground/85">Safe research space:</strong> Elenchos is run by
+            an independent researcher in the EU — no dossiers on visitors. Card data stays with
+            Stripe. Optional email is one-time delivery only. Commissioned reports never overwrite
+            live Topics tables. Lawful public research only; X terms apply. Experimental research,
             as-is.
           </p>
         </div>

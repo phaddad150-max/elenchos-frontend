@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { DESK_PACKAGES, isDeskPackageId } from "@/lib/research-desk/packages";
+import {
+  DESK_PACKAGES,
+  isDeskPackageId,
+  topicViolatesSafetyPolicy,
+} from "@/lib/research-desk/packages";
 import { createPendingCommission } from "@/lib/research-desk/store.server";
 
 const BodySchema = z.object({
@@ -44,6 +48,10 @@ export const Route = createFileRoute("/api/research/checkout")({
           const { packageId, topic, questions, email } = parsed.data;
           if (!isDeskPackageId(packageId)) {
             return Response.json({ error: "Unknown package" }, { status: 400 });
+          }
+          const safety = topicViolatesSafetyPolicy(topic);
+          if (safety) {
+            return Response.json({ error: safety }, { status: 400 });
           }
           const pkg = DESK_PACKAGES[packageId];
           const origin = siteOrigin(request);

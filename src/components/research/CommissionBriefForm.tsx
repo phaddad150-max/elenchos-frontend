@@ -1,15 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Loader2, Lock } from "lucide-react";
-import { DESK_PACKAGES, type DeskPackageId } from "@/lib/research-desk/packages";
+import {
+  DESK_PACKAGES,
+  isDeskPackageId,
+  topicViolatesSafetyPolicy,
+  type DeskPackageId,
+} from "@/lib/research-desk/packages";
 
-const ORDER: DeskPackageId[] = ["topic-analysis", "deep-no-x", "deep-with-x"];
+const ORDER: DeskPackageId[] = ["deep-no-x", "deep-with-x", "topic-analysis"];
 
 /**
  * On-demand commission → Stripe Checkout → unique report URL + PDF.
- * Optional email goes to Stripe only (delivery); never stored on Elenchos.
+ * Optional email goes to Stripe/mail provider for one-time delivery only.
+ * Commissioned data → research_desk_reports only (never live Topics tables).
  */
 export function CommissionBriefForm() {
-  const [pkg, setPkg] = useState<DeskPackageId>("topic-analysis");
+  const [pkg, setPkg] = useState<DeskPackageId>("deep-no-x");
   const [topic, setTopic] = useState("");
   const [questions, setQuestions] = useState("");
   const [email, setEmail] = useState("");
@@ -17,9 +23,17 @@ export function CommissionBriefForm() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("pkg") ?? params.get("package");
+    if (raw && isDeskPackageId(raw)) setPkg(raw);
+    const preTopic = params.get("topic");
+    if (preTopic?.trim()) setTopic(preTopic.trim().slice(0, 800));
+  }, []);
+
   const meta = DESK_PACKAGES[pkg];
   const needQuestions = pkg === "topic-analysis";
-
   const packages = useMemo(() => ORDER.map((id) => DESK_PACKAGES[id]), []);
 
   async function onSubmit(e: React.FormEvent) {
@@ -27,6 +41,11 @@ export function CommissionBriefForm() {
     setErr(null);
     if (!topic.trim() || topic.trim().length < 8) {
       setErr("Describe your topic in at least a short sentence.");
+      return;
+    }
+    const blocked = topicViolatesSafetyPolicy(topic);
+    if (blocked) {
+      setErr(blocked);
       return;
     }
     if (needQuestions && questions.trim()) {
@@ -86,13 +105,23 @@ export function CommissionBriefForm() {
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[14px] font-display font-semibold text-foreground">{p.title}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90">
+                    {p.tierLabel}
+                  </p>
+                  <p className="text-[14px] font-display font-semibold text-foreground">
+                    {p.title}
+                  </p>
+                </div>
                 <span className="text-cyan font-mono text-[16px] font-semibold shrink-0">
                   ${p.priceUsd}
                 </span>
               </div>
               <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{p.blurb}</p>
-              <p className="text-[11px] text-foreground/80 mt-1.5 leading-snug">You get: {p.delivers}</p>
+              <p className="text-[11px] text-foreground/80 mt-1.5 leading-snug">
+                You get: {p.delivers}
+              </p>
+              <p className="text-[10.5px] font-mono text-cyan/85 mt-1">{p.deliveryNote}</p>
             </button>
           ))}
         </div>
@@ -118,7 +147,7 @@ export function CommissionBriefForm() {
             3 · Your questions (up to 9, optional)
           </p>
           <p className="text-[12px] text-muted-foreground leading-snug">
-            One per line. If empty, we apply a standard Socratic pack for discourse analysis.
+            One per line. If empty, a standard Socratic pack is applied for discourse analysis.
           </p>
           <textarea
             value={questions}
@@ -138,10 +167,14 @@ export function CommissionBriefForm() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="One-time delivery only — deleted after send, never stored"
+          placeholder="One-time delivery only — not a mailing list"
           className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
           autoComplete="email"
         />
+        <p className="text-[11px] text-muted-foreground leading-snug">
+          EU operator · GDPR-minded: card data stays with Stripe; Elenchos does not store card
+          numbers or build user profiles.
+        </p>
       </div>
 
       <label className="flex gap-2.5 items-start text-[12px] text-muted-foreground leading-snug cursor-pointer">
@@ -153,9 +186,10 @@ export function CommissionBriefForm() {
         />
         <span>
           <Lock className="w-3.5 h-3.5 text-cyan inline mr-1 align-[-2px]" aria-hidden />
-          Research tool as-is — not legal/medical/investment advice. One-time ${meta.priceUsd}. Unique
-          link + PDF after pay. No account. No personal data stored on Elenchos (email only used once
-          by the mail provider if provided).
+          Research tool as-is — not legal/medical/investment advice. One-time ${meta.priceUsd}.
+          Unique link + PDF after pay (typically minutes, automated). Lawful public research only;
+          no illegal use and no violation of X terms or community rules. No account. No personal
+          research profile stored on Elenchos.
         </span>
       </label>
 
@@ -177,9 +211,6 @@ export function CommissionBriefForm() {
           </>
         )}
       </button>
-      <p className="text-[11px] font-mono text-muted-foreground text-center">
-        Card via Stripe Checkout · crypto if enabled on your Stripe account
-      </p>
     </form>
   );
 }

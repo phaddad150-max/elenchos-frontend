@@ -613,22 +613,16 @@ export function TopicAnalysisPage({
           Want this style on your topic?
         </p>
         <p className="text-[13px] sm:text-[14px] text-foreground/90 leading-relaxed">
-          This page is a live Topics analysis (public discourse on X). Use the Research Desk to
-          commission the same style for a topic you choose — fixed low price, unique link + PDF.
+          This page is a live Topics analysis (public discourse on X). Commission the same method
+          for a topic you choose — $10, unique link + PDF, typically minutes after payment.
         </p>
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
-          <Link
-            to="/research/commission"
+          <a
+            href={`/research/commission?pkg=topic-analysis&topic=${encodeURIComponent(headerLabel.slice(0, 200))}`}
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[13px] font-medium touch-manipulation"
           >
-            Commission topic analysis · $10
-          </Link>
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-border text-muted-foreground hover:text-cyan text-[13px] touch-manipulation"
-          >
-            Back to homepage
-          </Link>
+            Deepen this topic · $10
+          </a>
           <Link
             to="/research"
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-border text-muted-foreground hover:text-cyan text-[13px] touch-manipulation"
