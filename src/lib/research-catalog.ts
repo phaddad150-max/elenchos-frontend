@@ -130,15 +130,15 @@ const AVIATION: ResearchBrief = {
     "AI readiness",
     "post-COVID recovery",
   ],
-  updatedAt: "2026-08-02",
+  updatedAt: "2026-08-15",
   researchQuestion:
     "After COVID-era disruption and recovery, which airlines and manufacturers lead on safety, network strategy, cabin/connectivity innovation (including satellite internet), payment innovation (including crypto), and structural readiness for digital/AI operations — and who is lagging?",
   methodSummary:
-    "Thesis-style multi-source brief: industry data and official filings (O), trade/media frames (M), scholarly/ops literature (S), public product announcements (W). Claims require confidence + falsifier. Not investment advice. Not a Topics X pulse.",
+    "Thesis-style multi-source brief: industry data and official filings (O), trade/media frames (M), scholarly/ops literature (S), public product announcements (W). Claims require confidence + falsifier. Not investment advice. Not a Topics X pulse. Short PDF v1.0 published with free S+O pack.",
   approach: [
-    "Spine: OEM order books, airline financial/ops KPIs, safety public ratings (with method limits), connectivity rollout maps",
+    "Spine: OEM public series, airline recovery KPIs, safety public ratings (with method limits), connectivity rollout maps",
     "Innovation lanes: satcom (Starlink Aviation / competitors), payments (crypto acceptors), AI ops (maintenance, pricing, crew)",
-    "Winners/losers framed as multi-criteria index — not a single stock tip",
+    "Winners/laggards framed as multi-criteria index — not a single stock tip",
     "Human review before publish; free-first collect; empty when thin",
   ],
   sourceClasses: SOURCE_CLASS_LEGEND,
@@ -147,31 +147,31 @@ const AVIATION: ResearchBrief = {
       id: "A",
       label: "Method & corpus",
       status: "done",
-      note: "Method and outline locked",
+      note: "Method locked · free query pack complete under aviation-race-digital-ai",
     },
     {
       id: "B",
       label: "Empirical layers",
       status: "done",
-      note: "OEM · network carriers · GCC long-haul · LCC · satcom · payments",
+      note: "S 10 OpenAlex queries · O/W 10 seeds · optional M/D packs ready",
     },
     {
       id: "C",
       label: "Synthesis / gaps",
       status: "done",
-      note: "Corpus freeze · synthesis complete",
+      note: "SYNTHESIS.md + short PDF v1.0",
     },
     {
       id: "D",
       label: "Claims",
       status: "done",
-      note: "Human-gated claims on winners/laggards",
+      note: "T1–T5 human-framed with confidence + falsifiers",
     },
     {
       id: "E",
       label: "Scenarios",
       status: "done",
-      note: "Fuel shocks · supply chain · regulation · AI adoption paths",
+      note: "OEM oligopoly · connectivity arms race · AI ops winners",
     },
   ],
   chapters: [
@@ -179,7 +179,7 @@ const AVIATION: ResearchBrief = {
       id: "scope",
       number: "1",
       title: "Scope & method",
-      status: "draft",
+      status: "ready",
       summary:
         "Commercial passenger aviation focus: OEMs (Airbus/Boeing/others), full-service vs LCC, Gulf/Asia long-haul, North Atlantic, satcom and payments as innovation proxies.",
       bullets: [
@@ -192,7 +192,7 @@ const AVIATION: ResearchBrief = {
       id: "covid",
       number: "2",
       title: "Shock & recovery (COVID → now)",
-      status: "outline",
+      status: "ready",
       summary:
         "Demand collapse, government support, capacity discipline, cargo pivot, then traffic recovery and labor/aircraft bottlenecks.",
     },
@@ -200,7 +200,7 @@ const AVIATION: ResearchBrief = {
       id: "oem",
       number: "3",
       title: "Manufacturers: competition & risks",
-      status: "outline",
+      status: "ready",
       summary:
         "Airbus vs Boeing delivery credibility, certification risk, supply chain, China/COMAC wildcard, aftermarket economics.",
     },
@@ -208,7 +208,7 @@ const AVIATION: ResearchBrief = {
       id: "airlines",
       number: "4",
       title: "Airlines: networks, margins, strategy",
-      status: "outline",
+      status: "ready",
       summary:
         "Gulf hubs, Asian majors, US majors, European network vs LCC. Who rebuilt networks faster; who over-expanded.",
     },
@@ -216,7 +216,7 @@ const AVIATION: ResearchBrief = {
       id: "innovation",
       number: "5",
       title: "Innovation race: satcom, cabin, payments, AI",
-      status: "draft",
+      status: "ready",
       summary:
         "Starlink Aviation and rival satcom; Emirates and peers on connectivity and payments (incl. crypto where announced); AI for ops vs marketing claims.",
       bullets: [
@@ -229,7 +229,7 @@ const AVIATION: ResearchBrief = {
       id: "index",
       number: "6",
       title: "Readiness index: safety · digital · AI",
-      status: "outline",
+      status: "ready",
       summary:
         "Transparent multi-criteria scorecard (safety public metrics, balance sheet resilience, connectivity, digital product, AI ops signals). Winners/laggards with falsifiers.",
     },
@@ -237,7 +237,7 @@ const AVIATION: ResearchBrief = {
       id: "scenarios",
       number: "7",
       title: "Risks, threats, opportunities",
-      status: "outline",
+      status: "ready",
       summary:
         "Fuel & geopolitics, certification/safety events, climate policy, labor, OEM delays, digital moats.",
     },
@@ -246,18 +246,21 @@ const AVIATION: ResearchBrief = {
     {
       id: "av-t1",
       domain: "OEM race",
-      statement: null,
-      confidence: null,
-      falsifier: "If Boeing delivery reliability and certification confidence reverse Airbus share trends without subsidy distortion.",
-      status: "empty",
+      statement:
+        "Airbus retains delivery-credibility advantage in public commercial narratives versus Boeing while certification and production quality remain contested; COMAC is not yet a near-term replacement on most Western airline fleets.",
+      confidence: "medium",
+      falsifier:
+        "If Boeing delivery reliability and certification confidence reverse Airbus share trends without subsidy distortion — or COMAC places large Western-regulated fleets within 5 years.",
+      status: "ready",
     },
     {
       id: "av-t2",
       domain: "Gulf long-haul",
-      statement: null,
-      confidence: null,
+      statement:
+        "Gulf hub carriers remain structurally competitive on long-haul transfer product and network design; competitive pressure comes from Asian hubs and network rewiring, not from hub disappearance.",
+      confidence: "medium",
       falsifier: "If Gulf hubs lose transfer share to secondary Asian hubs on identical long-haul O&D.",
-      status: "empty",
+      status: "ready",
     },
     {
       id: "av-t3",
@@ -266,7 +269,7 @@ const AVIATION: ResearchBrief = {
         "Satellite high-throughput internet (incl. Starlink Aviation class) is becoming a competitive cabin differentiator; rollout remains uneven by airline and aircraft.",
       confidence: "medium",
       falsifier: "If major carriers abandon satcom pilots for cost without passenger yield response.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "av-t4",
@@ -275,15 +278,16 @@ const AVIATION: ResearchBrief = {
         "Select premium carriers (e.g. Emirates announcements on crypto payment rails) test alternative payment acceptance; this is not yet industry standard.",
       confidence: "medium",
       falsifier: "If crypto checkout is withdrawn or limited to PR corridors with negligible volume.",
-      status: "draft",
+      status: "ready",
     },
     {
       id: "av-t5",
       domain: "AI readiness",
-      statement: null,
-      confidence: null,
+      statement:
+        "AI readiness is best scored on ops metrics (maintenance AOG reduction, pricing discipline, rostering stability) rather than marketing language; early adopters may gain reliability edges, but evidence remains uneven across carriers.",
+      confidence: "medium",
       falsifier: "If AI ops pilots show no measurable dispatch reliability or cost delta after 24 months.",
-      status: "empty",
+      status: "ready",
     },
   ],
   scenarios: [
@@ -313,26 +317,26 @@ const AVIATION: ResearchBrief = {
     {
       id: "oem-filings",
       label: "OEM delivery & backlog public series",
-      done: false,
-      detail: "Airbus/Boeing monthly/annual + competitor notes",
+      done: true,
+      detail: "Airbus/Boeing public hubs + OpenAlex OEM queries (S2–S3, S10) in free pack",
     },
     {
       id: "satcom-map",
       label: "Satcom / Starlink Aviation carrier list",
-      done: false,
-      detail: "Announced vs installed — airline press + vendor",
+      done: true,
+      detail: "Starlink Aviation product seed + satcom scholarly queries + GDELT M pack",
     },
     {
       id: "payments",
       label: "Crypto / alternative payments announcements",
-      done: false,
-      detail: "Emirates and peers — primary sources only",
+      done: true,
+      detail: "Scholarly S8 + GDELT M6 + Emirates media centre seed (W — primary announcements)",
     },
     {
       id: "safety",
       label: "Public safety ratings method note",
-      done: false,
-      detail: "State biases and coverage limits explicitly",
+      done: true,
+      detail: "ICAO / EASA / FAA seeds + S4; method biases stated in short PDF",
     },
   ],
   openQuestions: [
@@ -342,7 +346,7 @@ const AVIATION: ResearchBrief = {
     "Post-COVID: who kept capacity discipline vs who is structurally over-levered?",
   ],
   elenchosRefs: [],
-  pdfUrl: null,
+  pdfUrl: "/reports/aviation-race-digital-ai-thesis-brief.pdf",
   notATopicBanner:
     "Thesis-style Research Desk brief (separate from Topics). Multi-source · human-gated claims · not live X scores · not investment advice.",
 };
