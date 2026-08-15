@@ -108,7 +108,7 @@ function IntelligencePage() {
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <ResearchBreadcrumb current="Intelligence" />
+        <ResearchBreadcrumb current="Library · Trackers" />
         <ResearchDeskNav />
 
         {/* Hero */}
@@ -117,15 +117,18 @@ function IntelligencePage() {
           <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5 min-w-0">
             <div className="page-hero-kicker">
               <Brain className="w-3.5 h-3.5" aria-hidden />
-              Intelligence
+              Library · Trackers
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Ledgers &amp; citizen trackers
+              Ledgers &amp; citizen indexes
             </h1>
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed break-words">
-              One place for official-source ledgers (designations, freezes, fraud-style cases) and
-              citizen-scored indexes (leaders, peace, media, sport). Pick a tool below — or open the
-              Designations Ledger on this page.
+              Designations and fraud ledgers, leadership board, peace index, and more — part of the
+              free Library.{" "}
+              <Link to="/research/library" className="text-cyan hover:underline">
+                Back to full library
+              </Link>
+              .
             </p>
           </div>
         </header>

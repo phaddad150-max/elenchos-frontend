@@ -3,10 +3,9 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
-  Brain,
   Building2,
+  FilePenLine,
   FlaskConical,
-  Sparkles,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -21,21 +20,18 @@ export const Route = createFileRoute("/research/")({
   head: () => ({
     meta: [
       {
-        title: "Research Desk · Free briefs, intelligence & on-demand · Elenchos",
+        title: "Research Desk · Library & commission report · Elenchos",
       },
       {
         name: "description",
         content:
-          "Elenchos Research Desk: explore free case studies and intelligence trackers, or commission a multi-source report. Independent EU researcher — privacy-first.",
+          "Elenchos Research Desk: free library of topic analysis, case studies, and trackers — or commission a private multi-source report.",
       },
-      {
-        property: "og:title",
-        content: "Research Desk · Elenchos",
-      },
+      { property: "og:title", content: "Research Desk · Elenchos" },
       {
         property: "og:description",
         content:
-          "Navigate free Library and Intelligence tools, or open On-demand for fixed-price reports.",
+          "Two clear doors: free Library, or Commission report. Independent EU researcher.",
       },
       { property: "og:url", content: "https://elenchos.live/research" },
       { property: "og:type", content: "website" },
@@ -49,32 +45,22 @@ const PATHS = [
   {
     to: "/research/library",
     title: "Library",
-    subtitle: "Free published case studies",
-    body: "Multi-source briefs on one shelf — migration, Lebanon, aviation, and more.",
+    subtitle: "Free — everything published",
+    body: "Public discourse on X, multi-source case studies, leadership boards, peace index, designations & fraud ledgers.",
     icon: BookOpen,
     accent: "from-emerald-signal/20 to-transparent border-emerald-signal/35",
     glow: "group-hover:border-emerald-signal/55",
-    cta: "Open library",
-  },
-  {
-    to: "/research/networks-ledger",
-    title: "Intelligence",
-    subtitle: "Ledgers & citizen trackers",
-    body: "Designations ledger, fraud shell, leadership, peace, media, football.",
-    icon: Brain,
-    accent: "from-cyan/20 to-transparent border-cyan/35",
-    glow: "group-hover:border-cyan/55",
-    cta: "Open intelligence",
+    cta: "Browse free library",
   },
   {
     to: "/research/commission",
-    title: "On-demand",
-    subtitle: "Commission a report · $10 / $20",
-    body: "Your question, fixed price, private link + PDF — typically minutes after pay.",
-    icon: Sparkles,
-    accent: "from-rose-signal/15 to-transparent border-cyan/50",
+    title: "Commission report",
+    subtitle: "Private brief · $10 / $20",
+    body: "Your question, fixed price, unique link + PDF — typically minutes after pay.",
+    icon: FilePenLine,
+    accent: "from-cyan/20 to-transparent border-cyan/50",
     glow: "group-hover:border-cyan/70 ring-1 ring-cyan/20",
-    cta: "Commission report",
+    cta: "Commission a report",
     featured: true,
   },
 ] as const;
@@ -95,22 +81,21 @@ function ResearchDeskLanding() {
               Research Desk
             </div>
             <h1 className="page-hero-title text-[1.45rem] sm:text-2xl md:text-[2rem] break-words">
-              Navigate free research or go deeper on demand
+              Free library — or commission your own report
             </h1>
             <p className="page-hero-sub max-w-2xl break-words">
-              Three clear doors. Free Library and Intelligence first — commission only when you
-              need a private brief. {ELENCHOS_TAGLINE}
+              Two doors. Browse everything Elenchos publishes for free, or commission a private
+              multi-source brief. {ELENCHOS_TAGLINE}
             </p>
             <p className="text-[12px] text-muted-foreground/90 max-w-xl break-words">
-              Independent researcher · EU · privacy-first. Live Topics stay on the Topics page.
+              Independent researcher · EU · privacy-first.
             </p>
           </div>
         </header>
 
-        {/* Animated path cards — visual nav, not pricing dump */}
         <section
           aria-label="Research Desk paths"
-          className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4"
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 max-w-4xl"
         >
           {PATHS.map((p, i) => {
             const Icon = p.icon;
@@ -154,30 +139,7 @@ function ResearchDeskLanding() {
           })}
         </section>
 
-        {/* Quick facts strip — visual, short */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-2"
-          aria-label="At a glance"
-        >
-          {[
-            { t: "Free first", d: "Library & Intelligence need no account" },
-            { t: "Private pay", d: "Stripe holds cards · no research profile" },
-            { t: "Live Topics", d: "Public discourse pulse lives under Topics" },
-          ].map((x) => (
-            <div
-              key={x.t}
-              className="rounded-xl border border-border/70 bg-card/40 px-3.5 py-3 min-w-0"
-            >
-              <p className="text-[12px] font-display font-semibold text-foreground">{x.t}</p>
-              <p className="text-[11.5px] text-muted-foreground mt-0.5 break-words">{x.d}</p>
-            </div>
-          ))}
-        </motion.section>
-
-        <section className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between rounded-xl border border-amber-signal/25 bg-amber-signal/[0.05] px-4 py-3 min-w-0">
+        <section className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between rounded-xl border border-amber-signal/25 bg-amber-signal/[0.05] px-4 py-3 min-w-0 max-w-4xl">
           <div className="flex items-center gap-2 min-w-0">
             <Building2 className="w-4 h-4 text-amber-signal shrink-0" />
             <p className="text-[12.5px] text-muted-foreground break-words">

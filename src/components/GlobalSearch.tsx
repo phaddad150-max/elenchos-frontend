@@ -132,19 +132,19 @@ export function GlobalSearch() {
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
             <CommandItem
-              value="library indexes trackers leadership board peace"
+              value="library case studies trackers topics discourse designations fraud leaders peace"
               onSelect={() => go("/research/library")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Library · indexes & trackers</span>
+              <span className="truncate">Library · free reports & trackers</span>
               <CommandShortcut>Library</CommandShortcut>
             </CommandItem>
             <CommandItem
-              value="intelligence ledgers trackers designations fraud leaders peace ofac hezbollah"
-              onSelect={() => go("/research/networks-ledger")}
+              value="commission report on demand paid multi-source deep dive"
+              onSelect={() => go("/research/commission")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Intelligence · ledgers & trackers</span>
+              <span className="truncate">Commission report · $10 / $20</span>
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
             <CommandItem

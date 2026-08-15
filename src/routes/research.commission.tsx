@@ -15,7 +15,7 @@ const ENTERPRISE_DEFAULT_MESSAGE =
 export const Route = createFileRoute("/research/commission")({
   head: () => ({
     meta: [
-      { title: "On-demand report · $10 / $20 · Research Desk · Elenchos" },
+      { title: "Commission report · $10 / $20 · Research Desk · Elenchos" },
       {
         name: "description",
         content:
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/research/commission")({
 });
 
 /**
- * Single on-demand checkout surface. Pricing + form only.
+ * Single commission checkout surface. Pricing + form only.
  * Payment packages, Stripe path, and offerings live in CommissionBriefForm / packages.ts — do not fork.
  */
 function CommissionPage() {
@@ -48,13 +48,13 @@ function CommissionPage() {
       <SiteNav />
 
       <main className="max-w-[720px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
-        <ResearchBreadcrumb current="On-demand" />
+        <ResearchBreadcrumb current="Commission report" />
         <ResearchDeskNav />
 
         <header className="mb-6 min-w-0 space-y-2">
           <div className="page-hero-kicker">
             <FlaskConical className="w-3.5 h-3.5" aria-hidden />
-            On-demand
+            Commission report
           </div>
           <h1 className="page-hero-title text-[1.4rem] sm:text-2xl break-words">
             Commission a report

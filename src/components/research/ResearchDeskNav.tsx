@@ -1,9 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Brain, FlaskConical, Library, Sparkles } from "lucide-react";
+import { BookOpen, FlaskConical, FilePenLine } from "lucide-react";
 
 /**
- * Secondary nav for Research Desk + subpages.
- * Live Topics and topic-analysis commissions stay under /topics only.
+ * Research Desk secondary nav — three doors only:
+ * Desk (hub) · Library (all free work) · Commission report (paid)
  */
 const ITEMS = [
   {
@@ -17,19 +17,12 @@ const ITEMS = [
     to: "/research/library",
     label: "Library",
     short: "Library",
-    icon: Library,
+    icon: BookOpen,
     match: (p: string) =>
       p.startsWith("/research/library") ||
       p.startsWith("/research/preview") ||
       p.startsWith("/research/report") ||
-      p.startsWith("/research-migration"),
-  },
-  {
-    to: "/research/networks-ledger",
-    label: "Intelligence",
-    short: "Intel",
-    icon: Brain,
-    match: (p: string) =>
+      p.startsWith("/research-migration") ||
       p.startsWith("/research/networks-ledger") ||
       p.startsWith("/research/intelligence") ||
       p.startsWith("/research/fraud-ledger") ||
@@ -37,9 +30,9 @@ const ITEMS = [
   },
   {
     to: "/research/commission",
-    label: "On-demand",
-    short: "On-demand",
-    icon: Sparkles,
+    label: "Commission report",
+    short: "Commission",
+    icon: FilePenLine,
     match: (p: string) => p.startsWith("/research/commission"),
   },
 ] as const;
@@ -53,7 +46,7 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
       className={`sticky top-[3.25rem] md:top-[3.75rem] z-20 -mx-0.5 mb-4 sm:mb-5 ${className}`}
     >
       <div className="overflow-x-auto scrollbar-none -mx-1 px-1">
-        <ul className="flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-full sm:flex-wrap rounded-xl border border-border/80 bg-card/85 backdrop-blur-md p-1 shadow-sm">
+        <ul className="flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-full rounded-xl border border-border/80 bg-card/85 backdrop-blur-md p-1 shadow-sm">
           {ITEMS.map((item) => {
             const active = item.match(pathname);
             const Icon = item.icon;
@@ -81,7 +74,6 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
   );
 }
 
-/** Compact breadcrumb trail for Research subpages */
 export function ResearchBreadcrumb({ current }: { current: string }) {
   return (
     <nav
