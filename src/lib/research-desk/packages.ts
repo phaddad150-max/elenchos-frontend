@@ -47,8 +47,8 @@ export const DESK_PACKAGES: Record<DeskPackageId, DeskPackageMeta> = {
       "Chapters, evidence map, claims with confidence and falsifiers where evidence holds. Unique private link + PDF.",
     includesX: false,
     deliveryNote: "Automated after payment — typically seconds to a few minutes.",
-    sampleHref: "/research-migration",
-    sampleLabel: "Sample deep dive (irregular migration briefing)",
+    sampleHref: "/research-aviation",
+    sampleLabel: "Sample deep dive (aviation interactive brief)",
   },
   "deep-with-x": {
     id: "deep-with-x",
@@ -61,8 +61,8 @@ export const DESK_PACKAGES: Record<DeskPackageId, DeskPackageMeta> = {
     includesX: true,
     deliveryNote:
       "Automated after payment — typically a few minutes (X fetch + analysis when API credits allow).",
-    sampleHref: "/research-migration",
-    sampleLabel: "Sample deep dive (irregular migration briefing)",
+    sampleHref: "/research-aviation",
+    sampleLabel: "Sample deep dive (aviation interactive brief)",
   },
 };
 

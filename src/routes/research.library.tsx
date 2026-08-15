@@ -69,18 +69,6 @@ export const Route = createFileRoute("/research/library")({
 });
 
 function buildCaseStudies(): CaseStudy[] {
-  const fromCatalog: CaseStudy[] = listResearchBriefs().map((b) => ({
-    id: b.slug,
-    title: b.title,
-    subtitle: b.subtitle,
-    region: b.region,
-    statusLabel: researchStatusLabel(b.status),
-    updatedAt: b.updatedAt,
-    href: "/research/preview/$slug",
-    params: { slug: b.slug },
-    pdf: !!b.pdfUrl,
-  }));
-
   const editorial: CaseStudy[] = [
     {
       id: "irregular-migration",
@@ -93,7 +81,33 @@ function buildCaseStudies(): CaseStudy[] {
       href: "/research-migration",
       pdf: false,
     },
+    {
+      id: "aviation-race-digital-ai",
+      title:
+        "Aviation after disruption — OEM race, satcom, AI readiness",
+      subtitle:
+        "Interactive deep dive: delivery trust, networks, Starlink-class cabin bandwidth, payments, AI ops KPIs.",
+      region: "Global",
+      statusLabel: "Published",
+      updatedAt: "2026-08-15",
+      href: "/research-aviation",
+      pdf: true,
+    },
   ];
+
+  const fromCatalog: CaseStudy[] = listResearchBriefs()
+    .filter((b) => b.slug !== "aviation-race-digital-ai")
+    .map((b) => ({
+      id: b.slug,
+      title: b.title,
+      subtitle: b.subtitle,
+      region: b.region,
+      statusLabel: researchStatusLabel(b.status),
+      updatedAt: b.updatedAt,
+      href: "/research/preview/$slug",
+      params: { slug: b.slug },
+      pdf: !!b.pdfUrl,
+    }));
 
   return [...editorial, ...fromCatalog].sort((a, b) =>
     b.updatedAt.localeCompare(a.updatedAt),
@@ -443,34 +457,44 @@ function ResearchLibraryPage() {
 }
 
 function CaseCard({ item, delay }: { item: CaseStudy; delay: number }) {
+  const className =
+    "rd-lib-row group flex gap-3 rounded-2xl border border-border/90 bg-card/70 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
+  const inner = (
+    <>
+      <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
+        <FileText className="w-4 h-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90 truncate">
+          {item.region} · {item.statusLabel}
+          {item.pdf ? " · PDF" : ""}
+        </p>
+        <h3 className="text-[14px] sm:text-[15px] font-display font-semibold group-hover:text-cyan transition-colors leading-snug mt-0.5 break-words">
+          {item.title}
+        </h3>
+        <p className="text-[12.5px] text-muted-foreground leading-snug mt-1 line-clamp-2 break-words">
+          {item.subtitle}
+        </p>
+      </div>
+      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0 mt-1" />
+    </>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
     >
-      <Link
-        to={item.href}
-        params={item.params as never}
-        className="rd-lib-row group flex gap-3 rounded-2xl border border-border/90 bg-card/70 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0"
-      >
-        <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
-          <FileText className="w-4 h-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90 truncate">
-            {item.region} · {item.statusLabel}
-            {item.pdf ? " · PDF" : ""}
-          </p>
-          <h3 className="text-[14px] sm:text-[15px] font-display font-semibold group-hover:text-cyan transition-colors leading-snug mt-0.5 break-words">
-            {item.title}
-          </h3>
-          <p className="text-[12.5px] text-muted-foreground leading-snug mt-1 line-clamp-2 break-words">
-            {item.subtitle}
-          </p>
-        </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0 mt-1" />
-      </Link>
+      {item.params ? (
+        <Link to={item.href} params={item.params as never} className={className}>
+          {inner}
+        </Link>
+      ) : (
+        <a href={item.href} className={className}>
+          {inner}
+        </a>
+      )}
     </motion.div>
   );
 }

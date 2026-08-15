@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -22,6 +22,12 @@ import {
 } from "@/lib/research-catalog";
 
 export const Route = createFileRoute("/research/preview/$slug")({
+  beforeLoad: ({ params }) => {
+    // Interactive deep dives live on dedicated routes (migration-style UX)
+    if (params.slug === "aviation-race-digital-ai") {
+      throw redirect({ to: "/research-aviation", replace: true });
+    }
+  },
   head: ({ params }) => {
     const brief = getResearchBrief(params.slug);
     const title = brief

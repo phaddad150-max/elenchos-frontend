@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
+import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PeaceRouteImport } from './routes/peace'
 import { Route as LeadersRouteImport } from './routes/leaders'
@@ -49,6 +50,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ResearchMigrationRoute = ResearchMigrationRouteImport.update({
   id: '/research-migration',
   path: '/research-migration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchAviationRoute = ResearchAviationRouteImport.update({
+  id: '/research-aviation',
+  path: '/research-aviation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
   '/research-migration': typeof ResearchMigrationRoute
+  '/research-aviation': typeof ResearchAviationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
   '/research-migration': typeof ResearchMigrationRoute
+  '/research-aviation': typeof ResearchAviationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
   '/research-migration': typeof ResearchMigrationRoute
+  '/research-aviation': typeof ResearchAviationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
     | '/peace'
     | '/privacy'
     | '/research-migration'
+    | '/research-aviation'
     | '/sitemap.xml'
     | '/admin/curation'
     | '/research/$slug'
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/peace'
     | '/privacy'
     | '/research-migration'
+    | '/research-aviation'
     | '/sitemap.xml'
     | '/admin/curation'
     | '/research/$slug'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/peace'
     | '/privacy'
     | '/research-migration'
+    | '/research-aviation'
     | '/sitemap.xml'
     | '/admin/curation'
     | '/research/$slug'
@@ -407,6 +419,7 @@ export interface RootRouteChildren {
   PeaceRoute: typeof PeaceRoute
   PrivacyRoute: typeof PrivacyRoute
   ResearchMigrationRoute: typeof ResearchMigrationRoute
+  ResearchAviationRoute: typeof ResearchAviationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdminCurationRoute: typeof AdminCurationRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       path: '/research-migration'
       fullPath: '/research-migration'
       preLoaderRoute: typeof ResearchMigrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research-aviation': {
+      id: '/research-aviation'
+      path: '/research-aviation'
+      fullPath: '/research-aviation'
+      preLoaderRoute: typeof ResearchAviationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -663,6 +683,7 @@ const rootRouteChildren: RootRouteChildren = {
   PeaceRoute: PeaceRoute,
   PrivacyRoute: PrivacyRoute,
   ResearchMigrationRoute: ResearchMigrationRoute,
+  ResearchAviationRoute: ResearchAviationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdminCurationRoute: AdminCurationRoute,
   ResearchSlugRoute: ResearchSlugRoute,
