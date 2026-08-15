@@ -77,15 +77,6 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
           })}
         </ul>
       </div>
-      <p className="mt-1.5 px-0.5 text-[10.5px] text-muted-foreground leading-snug">
-        <strong className="font-medium text-foreground/80">Library</strong> = published case
-        studies. <strong className="font-medium text-foreground/80">Intelligence</strong> =
-        ledgers &amp; citizen trackers. Live Topics stay on{" "}
-        <Link to="/topics" className="text-cyan hover:underline font-medium">
-          Topics
-        </Link>
-        .
-      </p>
     </nav>
   );
 }

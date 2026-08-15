@@ -187,61 +187,45 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-5 sm:space-y-6"
       >
-        <header className="page-hero-banner overflow-hidden">
-          <div className="relative grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(200px,38%)] lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,36%)] items-stretch min-h-0 min-w-0">
-            <div className="relative z-[2] flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0 max-w-full overflow-hidden">
-              <div className="page-hero-kicker">
-                <span className="w-1 h-3.5 bg-cyan rounded-sm" />
-                Topics
-              </div>
-              <h1 className="page-hero-title text-[1.25rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] break-words hyphens-auto">
-                What citizens say vs{" "}
-                <span className="text-cyan">official narratives</span>
-              </h1>
-              <p className="page-hero-sub w-full max-w-full whitespace-normal">
-                Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-1 min-w-0">
-                <Link
-                  to="/research"
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-medium touch-manipulation"
-                >
-                  Research Desk
-                </Link>
-                <Link
-                  to="/research/commission"
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-border text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
-                >
-                  Multi-source report · $10
-                </Link>
-              </div>
-              <button
-                type="button"
-                onClick={() => onOpen("commercial-space-race")}
-                className="mt-1 inline-flex flex-col items-stretch gap-1 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2.5 text-left transition-colors touch-manipulation min-h-[44px] w-full max-w-full min-w-0 overflow-hidden"
+        <header className="page-hero-banner overflow-hidden min-w-0">
+          <div className="relative flex flex-col justify-center gap-1.5 sm:gap-2 p-3.5 sm:p-4 md:p-5 min-w-0 max-w-full">
+            <div className="page-hero-kicker">
+              <span className="w-1 h-3.5 bg-cyan rounded-sm" />
+              Topics
+            </div>
+            <h1 className="page-hero-title text-[1.25rem] sm:text-2xl md:text-[1.85rem] lg:text-[2.15rem] break-words hyphens-auto">
+              What citizens say vs{" "}
+              <span className="text-cyan">official narratives</span>
+            </h1>
+            <p className="page-hero-sub w-full max-w-2xl whitespace-normal">
+              Directional samples of public discourse on X — not national polls. Open a topic for scores, gaps, and insights.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-1 min-w-0">
+              <Link
+                to="/research"
+                className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[12px] font-medium touch-manipulation"
               >
-                <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
-                  Featured case study
-                </span>
-                <span className="text-[12px] sm:text-[13px] font-display font-semibold text-foreground leading-snug line-clamp-2 break-words min-w-0 w-full">
-                  Commercial Space Race: public trust vs rivals and official frames
-                </span>
-              </button>
+                Research Desk
+              </Link>
+              <a
+                href="/research/commission?pkg=topic-analysis"
+                className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-border text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
+              >
+                Commission new topic analysis · $10
+              </a>
             </div>
-
-            <div
-              className="page-hero-art z-[1] hidden md:block min-h-[118px] lg:min-h-[132px] min-w-0 overflow-hidden"
-              aria-hidden
+            <button
+              type="button"
+              onClick={() => onOpen("commercial-space-race")}
+              className="mt-1 inline-flex flex-col items-stretch gap-1 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2.5 text-left transition-colors touch-manipulation min-h-[44px] w-full max-w-full min-w-0 overflow-hidden"
             >
-              <img
-                src="/brand/headbanner.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-[72%_center] lg:object-[70%_center]"
-                loading="eager"
-                decoding="async"
-              />
-              <div className="page-hero-blend" />
-            </div>
+              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
+                Featured case study
+              </span>
+              <span className="text-[12px] sm:text-[13px] font-display font-semibold text-foreground leading-snug line-clamp-2 break-words min-w-0 w-full">
+                Commercial Space Race: public trust vs rivals and official frames
+              </span>
+            </button>
           </div>
         </header>
 
@@ -673,8 +657,9 @@ const CARD_SCORE_VALUE =
 const CARD_CTA =
   "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.12em] font-semibold text-[11.5px] md:text-[12px] min-h-[40px] md:min-h-[36px]";
 
+/** Fixed card height was clipping the CTA — use min-height only so Open/View always shows. */
 const TOPIC_CARD_SHELL =
-  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[200px] sm:min-h-[220px] md:min-h-[210px] md:h-[210px]";
+  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] sm:min-h-[260px]";
 
 function TopicCardCadence({
   cadence,
@@ -742,11 +727,11 @@ function CommissionedTopicCard({
           <TopicCardScore label="Sentiment" shortLabel="Sent." value={sent} color={sentColor} />
           <TopicCardScore label="Divergence" shortLabel="Div." value={div} color={divColor} />
         </div>
-        <div className="mt-auto pt-2 shrink-0 w-full">
+        <div className="mt-auto pt-2 shrink-0 w-full relative z-10">
           <span
-            className={`${CARD_CTA} border border-cyan/40 bg-cyan/10 text-cyan group-hover:bg-cyan/15`}
+            className={`${CARD_CTA} border border-cyan/40 bg-cyan/10 text-cyan group-hover:bg-cyan group-hover:text-primary-foreground`}
           >
-            Open report
+            Open report →
           </span>
         </div>
       </Link>
@@ -923,13 +908,15 @@ function TopicCard({
         </div>
       </div>
 
-      {/* Slot 4 — CTA (fixed height) */}
-      <span
-        className={`${CARD_CTA} mt-auto shrink-0 bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all`}
-      >
-        <span className="md:hidden">Open →</span>
-        <span className="hidden md:inline">View Analysis →</span>
-      </span>
+      {/* Slot 4 — CTA always visible (not clipped by fixed card height) */}
+      <div className="mt-auto pt-2 shrink-0 w-full">
+        <span
+          className={`${CARD_CTA} bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all`}
+        >
+          <span className="md:hidden">Open report →</span>
+          <span className="hidden md:inline">Open report →</span>
+        </span>
+      </div>
     </motion.button>
   );
 }

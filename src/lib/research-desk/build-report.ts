@@ -428,7 +428,13 @@ export function reportToPdfBytes(r: DeskReport): Uint8Array {
   push("ELENCHOS", 11, 2);
   push("Public Discourse Lens x Research Desk", 9, 8);
   push(r.topic || r.title, 14, 4);
-  push("Topic briefing · commissioned", 9, 10);
+  const kind =
+    r.generatedBy === "hybrid" || r.packageId === "topic-analysis"
+      ? "Topic briefing"
+      : r.packageId.startsWith("deep")
+        ? "Multi-source briefing"
+        : "Research briefing";
+  push(`${kind} · elenchos.live`, 9, 10);
 
   const sent = r.overallSentiment?.score ?? "-";
   const div = r.divergenceScore ?? "-";

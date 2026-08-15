@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Brain,
   ChevronDown,
+  Download,
   Lightbulb,
   MessageSquare,
   Radio,
@@ -15,6 +16,7 @@ import {
   Minus,
   X,
 } from "lucide-react";
+import { downloadLiveTopicPdf } from "@/lib/research-desk/topic-pdf";
 import { buildInsightShareText, buildTwitterShareHref } from "@/lib/share-insight";
 import {
   Bar,
@@ -281,6 +283,13 @@ export function TopicAnalysisPage({
               </span>
             )}
             <TrendIcon className="w-5 h-5" style={{ color: sentimentColor(score) }} />
+            <button
+              type="button"
+              onClick={() => downloadLiveTopicPdf(rootKey, headerLabel, data, curated, qa)}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-cyan/40 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-wider touch-manipulation min-h-[32px]"
+            >
+              <Download className="w-3 h-3" /> PDF
+            </button>
           </div>
         </div>
       </div>
@@ -315,6 +324,13 @@ export function TopicAnalysisPage({
             </span>
           )}
           <TrendIcon className="w-5 h-5 shrink-0" style={{ color: sentimentColor(score) }} />
+          <button
+            type="button"
+            onClick={() => downloadLiveTopicPdf(rootKey, headerLabel, data, curated, qa)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[11px] font-mono uppercase tracking-wider hover:bg-cyan/15 touch-manipulation min-h-[36px] shrink-0"
+          >
+            <Download className="w-3.5 h-3.5" /> PDF
+          </button>
         </div>
       </div>
 

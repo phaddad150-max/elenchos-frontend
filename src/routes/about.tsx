@@ -45,23 +45,23 @@ function AboutPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[900px] mx-auto w-full px-4 md:px-6 py-6 md:py-10 mobile-safe-bottom md:pb-12 space-y-10 md:space-y-14 relative flex-1 overflow-x-clip">
-        <header className="page-hero-banner">
-          <div className="p-4 sm:p-5 md:p-6 space-y-3">
+      <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-12 space-y-8 md:space-y-10 relative flex-1 overflow-x-clip min-w-0">
+        <header className="page-hero-banner overflow-hidden min-w-0">
+          <div className="p-4 sm:p-5 md:p-6 space-y-3 min-w-0">
             <div className="page-hero-kicker">
               <Radio className="w-3.5 h-3.5" aria-hidden />
               About
             </div>
-            <h1 className="page-hero-title text-[1.5rem] sm:text-3xl md:text-[2.1rem]">
+            <h1 className="page-hero-title text-[1.5rem] sm:text-3xl md:text-[2.1rem] break-words">
               Elenchos <span className="text-cyan">ἔλεγχος</span>
             </h1>
-            <p className="text-[15px] sm:text-base font-display font-medium text-cyan/95 leading-snug max-w-xl">
+            <p className="text-[15px] sm:text-base font-display font-medium text-cyan/95 leading-snug max-w-xl break-words">
               {ELENCHOS_TAGLINE}
             </p>
-            <p className="page-hero-sub max-w-2xl text-[14px] leading-relaxed">
-              Ancient Greek for cross-examination. We help ordinary people see the gap between
-              public conversation and official or media frames — and run deeper research when a
-              topic needs more than a pulse.
+            <p className="page-hero-sub max-w-2xl text-[14px] leading-relaxed break-words">
+              Ancient Greek for cross-examination. Elenchos helps ordinary people see the gap
+              between public conversation and official or media frames — and run deeper research
+              when a topic needs more than a pulse. Independent researcher · EU.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               <Link

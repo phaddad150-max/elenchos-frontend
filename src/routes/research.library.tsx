@@ -149,7 +149,7 @@ function ResearchLibraryPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[920px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-8 py-5 sm:py-7 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
         <ResearchBreadcrumb current="Library" />
         <ResearchDeskNav />
 
