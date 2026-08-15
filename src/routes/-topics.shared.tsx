@@ -437,14 +437,15 @@ function TopicsFilterableGrid({
   }, [simMode, wowTick]);
 
   const topicGridClass =
-    "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
+    "topic-card-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
   const showSkeleton =
     !simMode && !dataReady && typeof window !== "undefined" && !window.dashboardData;
 
   const scrollCarousel = (dir: -1 | 1) => {
     const el = carouselRef.current;
     if (!el) return;
-    const step = Math.min(el.clientWidth * 0.85, 320);
+    const first = el.querySelector<HTMLElement>(".topic-carousel-slide");
+    const step = first ? first.offsetWidth + 8 : Math.min(el.clientWidth * 0.5, 200);
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
@@ -455,11 +456,7 @@ function TopicsFilterableGrid({
     return (
       <div
         key={t.id}
-        className={
-          carousel
-            ? "snap-start shrink-0 w-[min(78vw,15.5rem)] sm:w-[16.25rem] md:w-[17rem] h-full"
-            : "h-full min-w-0"
-        }
+        className={carousel ? "topic-carousel-slide snap-start shrink-0" : "h-full min-w-0"}
       >
         <TopicCard
           topic={t}
@@ -534,7 +531,7 @@ function TopicsFilterableGrid({
           <div className="relative">
             <div
               ref={carouselRef}
-              className="topics-active-carousel flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 snap-x snap-mandatory custom-scroll overscroll-x-contain"
+              className="topics-active-carousel flex gap-2 sm:gap-3 overflow-x-auto pb-2 snap-x snap-mandatory custom-scroll overscroll-x-contain"
               style={{ scrollbarWidth: "thin" }}
             >
               {activeTopics.map((t, i) => renderTopicCard(t, i, false, true))}
@@ -680,21 +677,9 @@ function shortTitle(t: string): string {
   return map[t] ?? t;
 }
 
-/** Shared typography + row heights — card shell size stays fixed; type is larger & centered */
-const CARD_LABEL =
-  "text-[10.5px] md:text-[11px] font-mono uppercase tracking-[0.12em] leading-none text-center";
-const CARD_TITLE =
-  "text-[16px] md:text-[17px] font-display font-semibold tracking-tight leading-[1.18] text-center w-full";
-const CARD_SCORE_LABEL =
-  "text-[10.5px] md:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground leading-none text-center";
-const CARD_SCORE_VALUE =
-  "text-[1.95rem] md:text-[2.05rem] font-display font-semibold tabular-nums leading-none text-center";
-const CARD_CTA =
-  "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.12em] font-semibold text-[11.5px] md:text-[12px] min-h-[40px] md:min-h-[36px]";
-
-/** Fixed card height was clipping the CTA — use min-height only so Open/View always shows. */
+/** Shared dashboard tile shell — fixed height so carousel + grid match on mobile. */
 const TOPIC_CARD_SHELL =
-  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/35 p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/65 md:hover:shadow-[0_0_32px_-10px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] sm:min-h-[260px]";
+  "topic-card-shell topic-dash-tile group relative overflow-hidden rounded-xl border flex flex-col w-full min-w-0 touch-manipulation transition-all";
 
 function TopicCardCadence({
   cadence,
@@ -703,27 +688,190 @@ function TopicCardCadence({
 }) {
   return (
     <span
-      className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full ${CARD_LABEL} ${
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.1em] leading-none shrink-0 ${
         cadence === "realtime"
-          ? "text-cyan bg-cyan/10 border border-cyan/30"
+          ? "text-cyan bg-cyan/12 border border-cyan/35"
           : cadence === "commissioned"
-            ? "text-amber-signal bg-amber-signal/10 border border-amber-signal/35"
+            ? "text-amber-signal bg-amber-signal/12 border border-amber-signal/35"
             : cadence === "archived"
               ? "text-muted-foreground bg-secondary/50 border border-border/70"
-              : "text-muted-foreground bg-background/50 border border-border/50"
+              : "text-muted-foreground bg-background/50 border border-border/55"
       }`}
     >
       {cadence === "realtime" && (
         <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" />
       )}
-      <span>
-        {cadence === "commissioned" ? "Commissioned" : cadenceLabel(cadence, true)}
-      </span>
+      <span>{cadence === "commissioned" ? "Commissioned" : cadenceLabel(cadence, true)}</span>
     </span>
   );
 }
 
-/** Commissioned report card — amber chrome (distinct from active cyan). */
+/** Mini KPI pod with value + signal bar — dashboard, not document. */
+function DashMetric({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number | undefined;
+  color: string;
+}) {
+  const pct = typeof value === "number" ? Math.max(0, Math.min(100, value)) : 0;
+  return (
+    <div className="topic-dash-metric relative flex flex-col gap-1 min-w-0 rounded-lg border border-border/70 bg-background/35 px-1.5 py-1.5 sm:px-2 sm:py-2 overflow-hidden">
+      <span className="text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-[0.12em] text-muted-foreground leading-none">
+        {label}
+      </span>
+      <span
+        className="text-[1.35rem] sm:text-[1.55rem] font-display font-semibold tabular-nums leading-none tracking-tight"
+        style={{
+          color,
+          textShadow: typeof value === "number" ? `0 0 16px ${color}44` : undefined,
+        }}
+      >
+        {typeof value === "number" ? value : "—"}
+      </span>
+      <div className="h-1 w-full rounded-full bg-border/70 overflow-hidden mt-0.5">
+        <div
+          className="h-full rounded-full transition-[width] duration-700 ease-out"
+          style={{
+            width: typeof value === "number" ? `${pct}%` : "0%",
+            background: color,
+            boxShadow: `0 0 8px ${color}66`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function TopicCardWowChip({ trend }: { trend: WowTrend | null }) {
+  if (!trend) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground/70">
+        <Minus className="w-3 h-3" strokeWidth={2.4} />
+        WoW
+      </span>
+    );
+  }
+  const Icon =
+    trend.direction === "up" ? TrendingUp : trend.direction === "down" ? TrendingDown : Minus;
+  const color =
+    trend.direction === "up"
+      ? "var(--emerald-signal)"
+      : trend.direction === "down"
+        ? "var(--rose-signal)"
+        : "var(--muted-foreground)";
+  const deltaText =
+    typeof trend.delta === "number" && !Number.isNaN(trend.delta) && trend.delta !== 0
+      ? `${trend.delta > 0 ? "+" : ""}${Math.round(trend.delta)}`
+      : null;
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-mono font-semibold tabular-nums"
+      style={{
+        color,
+        borderColor: `${color}55`,
+        background: `color-mix(in oklab, ${color} 12%, transparent)`,
+      }}
+      title="Week-over-week sentiment"
+    >
+      <Icon className="w-3 h-3 shrink-0" strokeWidth={2.6} />
+      {deltaText ?? "flat"}
+      <span className="opacity-70 font-normal">WoW</span>
+    </span>
+  );
+}
+
+/** Shared dashboard face used by live + commissioned + archived tiles. */
+function TopicDashFace({
+  category,
+  cadence,
+  title,
+  isNew,
+  sentiment,
+  divergence,
+  sentimentTone,
+  divergenceTone,
+  wowTrend,
+  ctaLabel,
+  ctaTone = "cyan",
+  eyebrow,
+}: {
+  category?: string;
+  cadence: "realtime" | "weekly" | "monthly" | "archived" | "commissioned";
+  title: string;
+  isNew?: boolean;
+  sentiment?: number;
+  divergence?: number;
+  sentimentTone: string;
+  divergenceTone: string;
+  wowTrend?: WowTrend | null;
+  ctaLabel: string;
+  ctaTone?: "cyan" | "amber";
+  eyebrow?: string;
+}) {
+  const ctaClass =
+    ctaTone === "amber"
+      ? "border-amber-signal/40 bg-amber-signal/12 text-amber-signal group-hover:bg-amber-signal group-hover:text-background"
+      : "border-cyan/40 bg-cyan/12 text-cyan group-hover:bg-cyan group-hover:text-primary-foreground";
+
+  return (
+    <>
+      <span className="topic-dash-scan" aria-hidden />
+      <div className="relative flex items-center justify-between gap-1.5 shrink-0 min-w-0">
+        <div className="flex items-center gap-1 min-w-0 flex-wrap">
+          {category && (
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90 truncate max-w-[5.5rem] sm:max-w-none">
+              {category}
+            </span>
+          )}
+          {eyebrow && (
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.12em] text-amber-signal/85 truncate">
+              {eyebrow}
+            </span>
+          )}
+          <TopicCardCadence cadence={cadence} />
+          {isNew && (
+            <span className="inline-flex items-center px-1 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-wider text-background bg-cyan shrink-0">
+              New
+            </span>
+          )}
+        </div>
+        {cadence !== "commissioned" && cadence !== "archived" && (
+          <span className="hidden xs:inline-flex items-center gap-1 text-[9px] font-mono text-cyan/70 shrink-0">
+            <span className="w-1 h-1 rounded-full bg-cyan pulse-dot" />
+            Live
+          </span>
+        )}
+      </div>
+
+      <h3 className="relative text-[13px] sm:text-[14.5px] md:text-[15px] font-display font-semibold tracking-tight leading-[1.2] text-left text-foreground group-hover:text-cyan transition-colors line-clamp-2 min-h-[2.4em] break-words">
+        {title}
+      </h3>
+
+      <div className="relative flex items-center min-h-[1.35rem]">
+        <TopicCardWowChip trend={wowTrend ?? null} />
+      </div>
+
+      <div className="relative grid grid-cols-2 gap-1.5 sm:gap-2 flex-1 content-start min-h-0">
+        <DashMetric label="Sent." value={sentiment} color={sentimentTone} />
+        <DashMetric label="Div." value={divergence} color={divergenceTone} />
+      </div>
+
+      <div className="relative mt-auto pt-1 shrink-0 w-full">
+        <span
+          className={`w-full inline-flex items-center justify-between gap-1 rounded-lg border px-2.5 min-h-[36px] sm:min-h-[38px] text-[11px] sm:text-[12px] font-display font-semibold tracking-wide transition-all ${ctaClass}`}
+        >
+          {ctaLabel}
+          <ArrowRight className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        </span>
+      </div>
+    </>
+  );
+}
+
+/** Commissioned report card — same tile geometry, amber chrome. */
 function CommissionedTopicCard({
   item,
 }: {
@@ -735,9 +883,7 @@ function CommissionedTopicCard({
   const div =
     typeof item.divergenceScore === "number" ? Math.round(item.divergenceScore) : undefined;
   const sentColor =
-    typeof sent === "number"
-      ? scoreColorsSentiment(sent)
-      : "var(--muted-foreground)";
+    typeof sent === "number" ? scoreColorsSentiment(sent) : "var(--muted-foreground)";
   const divColor =
     typeof div === "number" ? scoreColorsDivergence(div) : "var(--muted-foreground)";
 
@@ -746,105 +892,21 @@ function CommissionedTopicCard({
       <Link
         to="/research/report/$token"
         params={{ token: item.token }}
-        className={`${TOPIC_CARD_SHELL} topic-card-commissioned no-underline text-inherit opacity-100`}
-        style={{ opacity: 1 }}
+        className={`${TOPIC_CARD_SHELL} topic-card-commissioned no-underline text-inherit p-2.5 sm:p-3`}
       >
-        <div className="flex flex-col items-center gap-1.5 shrink-0 w-full">
-          <TopicCardCadence cadence="commissioned" />
-          <h3 className={`${CARD_TITLE} line-clamp-2 px-0.5`}>{item.topic || item.title}</h3>
-        </div>
-        <div className="h-8 w-full shrink-0 flex items-center justify-center" aria-hidden>
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-amber-signal/80">
-            Independent report
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-1 flex-1 min-h-0 content-center">
-          <TopicCardScore label="Sentiment" shortLabel="Sent." value={sent} color={sentColor} />
-          <TopicCardScore label="Divergence" shortLabel="Div." value={div} color={divColor} />
-        </div>
-        <div className="mt-auto pt-2 shrink-0 w-full relative z-10">
-          <span
-            className={`${CARD_CTA} border border-amber-signal/40 bg-amber-signal/10 text-amber-signal group-hover:bg-amber-signal group-hover:text-background`}
-          >
-            Open report →
-          </span>
-        </div>
+        <TopicDashFace
+          cadence="commissioned"
+          title={item.topic || item.title}
+          eyebrow="Independent"
+          sentiment={sent}
+          divergence={div}
+          sentimentTone={sentColor}
+          divergenceTone={divColor}
+          wowTrend={null}
+          ctaLabel="Open report"
+          ctaTone="amber"
+        />
       </Link>
-    </div>
-  );
-}
-
-function TopicCardScore({
-  label,
-  shortLabel,
-  value,
-  color,
-}: {
-  label: string;
-  shortLabel: string;
-  value: number | undefined;
-  color: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center text-center px-0.5 min-w-0 h-full gap-1.5">
-      <span className={CARD_SCORE_LABEL}>
-        <span className="md:hidden">{shortLabel}</span>
-        <span className="hidden md:inline">{label}</span>
-      </span>
-      <span className={CARD_SCORE_VALUE} style={{ color }}>
-        {typeof value === "number" ? value : "—"}
-      </span>
-    </div>
-  );
-}
-
-/** WoW sentiment arrow between topic title and score row. */
-function TopicCardWowTrend({ trend }: { trend: WowTrend | null }) {
-  if (!trend) {
-    return (
-      <div
-        className="h-8 w-full shrink-0 flex items-center justify-center"
-        aria-hidden
-      >
-        <Minus className="w-5 h-5 text-muted-foreground/35" strokeWidth={2.5} />
-      </div>
-    );
-  }
-  const Icon =
-    trend.direction === "up"
-      ? TrendingUp
-      : trend.direction === "down"
-        ? TrendingDown
-        : Minus;
-  const color =
-    trend.direction === "up"
-      ? "var(--emerald-signal)"
-      : trend.direction === "down"
-        ? "var(--rose-signal)"
-        : "var(--muted-foreground)";
-  const label =
-    trend.direction === "up"
-      ? "Week-over-week sentiment up"
-      : trend.direction === "down"
-        ? "Week-over-week sentiment down"
-        : "Week-over-week sentiment stable";
-  const deltaText =
-    typeof trend.delta === "number" && !Number.isNaN(trend.delta) && trend.delta !== 0
-      ? `${trend.delta > 0 ? "+" : ""}${Math.round(trend.delta)}`
-      : null;
-
-  return (
-    <div
-      className="h-8 w-full shrink-0 flex items-center justify-center gap-1.5 text-center"
-      title={deltaText ? `${label} (${deltaText} pts)` : label}
-      aria-label={deltaText ? `${label}, ${deltaText} points` : label}
-    >
-      <Icon className="w-5 h-5 shrink-0" style={{ color }} strokeWidth={2.75} />
-      {deltaText && (
-        <span className="text-xs md:text-[13px] font-mono font-semibold tabular-nums leading-none" style={{ color }}>
-          {deltaText}
-        </span>
-      )}
     </div>
   );
 }
@@ -874,67 +936,28 @@ function TopicCard({
 
   return (
     <motion.button
+      type="button"
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01, y: -1 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ delay }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ delay, duration: 0.28 }}
       onClick={onOpen}
-      className={`${TOPIC_CARD_SHELL} w-full min-w-0 ${archived ? "topic-card-archived" : ""}`}
+      className={`${TOPIC_CARD_SHELL} p-2.5 sm:p-3 ${archived ? "topic-card-archived" : "topic-card-active"}`}
     >
-      {/* Slot 1 — meta (fixed height, centered) */}
-      <div className="h-9 shrink-0 flex flex-col items-center justify-center gap-1">
-        <span className={`${CARD_LABEL} text-cyan truncate max-w-full`}>{category}</span>
-        <div className="flex items-center justify-center gap-1 min-h-[1.25rem]">
-          <TopicCardCadence cadence={cadence} />
-          {isNew && (
-            <span
-              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-[0.14em] leading-none text-background bg-cyan border border-cyan/50 shrink-0"
-              aria-label="New topic"
-            >
-              New
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Slot 2 — title + trend arrow (centered under name, especially mobile) */}
-      <div className="shrink-0 w-full flex flex-col items-center justify-center px-1.5">
-        <div className="h-[3.5rem] w-full flex items-center justify-center">
-          <h3 className={`${CARD_TITLE} text-foreground group-hover:text-cyan transition-colors line-clamp-2 text-center mx-auto`}>
-            {shortTitle(topic.title)}
-          </h3>
-        </div>
-        <TopicCardWowTrend trend={resolvedWow} />
-      </div>
-
-      {/* Slot 3 — scores (fixed height, always 2 equal columns, centered) */}
-      <div className="h-[4.1rem] shrink-0 w-full">
-        <div className="grid grid-cols-2 h-full w-full divide-x divide-border/60 items-center justify-items-center">
-          <TopicCardScore
-            label="Sentiment"
-            shortLabel="Sent."
-            value={sentiment}
-            color={sentimentTone}
-          />
-          <TopicCardScore
-            label="Divergence"
-            shortLabel="Div."
-            value={divergence}
-            color={divergenceTone}
-          />
-        </div>
-      </div>
-
-      {/* Slot 4 — CTA always visible (not clipped by fixed card height) */}
-      <div className="mt-auto pt-2 shrink-0 w-full">
-        <span
-          className={`${CARD_CTA} bg-cyan/15 text-cyan border border-cyan/40 group-hover:bg-cyan group-hover:text-primary-foreground active:bg-cyan active:text-primary-foreground transition-all`}
-        >
-          <span className="md:hidden">Open report →</span>
-          <span className="hidden md:inline">Open report →</span>
-        </span>
-      </div>
+      <TopicDashFace
+        category={category}
+        cadence={cadence}
+        title={shortTitle(topic.shortTitle || topic.title)}
+        isNew={isNew}
+        sentiment={sentiment}
+        divergence={divergence}
+        sentimentTone={sentimentTone}
+        divergenceTone={divergenceTone}
+        wowTrend={resolvedWow}
+        ctaLabel="Open analysis"
+        ctaTone="cyan"
+      />
     </motion.button>
   );
 }
