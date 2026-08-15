@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Loader2, Lock } from "lucide-react";
+import { ArrowRight, Check, ExternalLink, Loader2, Lock } from "lucide-react";
 import {
   CHECKOUT_PACKAGE_ORDER,
   DESK_PACKAGES,
@@ -8,16 +8,11 @@ import {
   type DeskPackageId,
 } from "@/lib/research-desk/packages";
 
-type CommissionBriefFormProps = {
-  onPackageChange?: (id: DeskPackageId) => void;
-};
-
 /**
  * On-demand commission → Stripe Checkout → unique report URL + PDF.
- * Optional email goes to Stripe/mail provider for one-time delivery only.
- * Commissioned data → research_desk_reports only (never live Topics tables).
+ * Do not change package ids, prices, or checkout payload without backend review.
  */
-export function CommissionBriefForm({ onPackageChange }: CommissionBriefFormProps) {
+export function CommissionBriefForm() {
   const [pkg, setPkg] = useState<DeskPackageId>("deep-no-x");
   const [topic, setTopic] = useState("");
   const [questions, setQuestions] = useState("");
@@ -34,10 +29,6 @@ export function CommissionBriefForm({ onPackageChange }: CommissionBriefFormProp
     const preTopic = params.get("topic");
     if (preTopic?.trim()) setTopic(preTopic.trim().slice(0, 800));
   }, []);
-
-  useEffect(() => {
-    onPackageChange?.(pkg);
-  }, [pkg, onPackageChange]);
 
   const meta = DESK_PACKAGES[pkg];
   const needQuestions = pkg === "topic-analysis";
@@ -96,52 +87,97 @@ export function CommissionBriefForm({ onPackageChange }: CommissionBriefFormProp
     }
   }
 
+  const sampleIsExternal = meta.sampleHref.startsWith("http");
+
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      <div>
-        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
-          1 · Package
-        </p>
-        <p className="text-[11.5px] text-muted-foreground mb-2 leading-snug">
-          Full details for each option are on the left — pick one to continue.
-        </p>
-        <div className="space-y-1.5" role="radiogroup" aria-label="Research package">
-          {packages.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              role="radio"
-              aria-checked={pkg === p.id}
-              onClick={() => setPkg(p.id)}
-              className={`w-full text-left rounded-xl border px-3 py-2.5 min-h-[44px] touch-manipulation transition-all ${
-                pkg === p.id
-                  ? "border-cyan/60 bg-cyan/15 shadow-[0_0_24px_-12px_var(--color-cyan-glow)]"
-                  : "border-border bg-card/50 hover:border-cyan/35"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90">
-                    {p.tierLabel}
-                  </p>
-                  <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
-                    {p.title}
-                  </p>
+      {/* Package picker — full cards, not bare price tiles */}
+      <fieldset>
+        <legend className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2.5">
+          1 · Choose package
+        </legend>
+        <div
+          className="space-y-2"
+          role="radiogroup"
+          aria-label="Research package"
+        >
+          {packages.map((p) => {
+            const selected = pkg === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setPkg(p.id)}
+                className={`w-full text-left rounded-xl border px-3.5 py-3 min-h-[56px] touch-manipulation transition-all ${
+                  selected
+                    ? "border-cyan/60 bg-cyan/12 ring-1 ring-cyan/30"
+                    : "border-border/80 bg-background/40 hover:border-cyan/35"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={`mt-0.5 shrink-0 w-5 h-5 rounded-full border grid place-items-center ${
+                      selected
+                        ? "border-cyan bg-cyan text-background"
+                        : "border-border"
+                    }`}
+                    aria-hidden
+                  >
+                    {selected ? <Check className="w-3 h-3" strokeWidth={3} /> : null}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="text-[14px] font-display font-semibold text-foreground leading-snug break-words">
+                        {p.tierLabel}
+                      </p>
+                      <span className="text-cyan font-mono text-[17px] font-semibold shrink-0">
+                        ${p.priceUsd}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground leading-snug mt-0.5 break-words">
+                      {p.blurb}
+                    </p>
+                    {selected && (
+                      <div className="mt-2 pt-2 border-t border-cyan/20 space-y-1">
+                        <p className="text-[11.5px] text-foreground/85 leading-snug break-words">
+                          <span className="text-muted-foreground">Includes: </span>
+                          {p.delivers}
+                        </p>
+                        <p className="text-[10.5px] font-mono text-cyan/90">
+                          {p.deliveryNote}
+                        </p>
+                        <a
+                          href={p.sampleHref}
+                          className="inline-flex items-center gap-1 text-[11px] text-cyan hover:underline min-h-[28px]"
+                          {...(p.sampleHref.startsWith("http")
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {p.sampleLabel}
+                          <ExternalLink className="w-3 h-3 opacity-70" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <span className="text-cyan font-mono text-[15px] font-semibold shrink-0">
-                  ${p.priceUsd}
-                </span>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </fieldset>
 
       <div className="space-y-2">
-        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-          2 · Topic
-        </p>
+        <label
+          htmlFor="commission-topic"
+          className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground"
+        >
+          2 · Your topic
+        </label>
         <textarea
+          id="commission-topic"
           required
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
@@ -153,31 +189,39 @@ export function CommissionBriefForm({ onPackageChange }: CommissionBriefFormProp
 
       {needQuestions && (
         <div className="space-y-2">
-          <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-            3 · Your questions (up to 9, optional)
-          </p>
+          <label
+            htmlFor="commission-questions"
+            className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground"
+          >
+            3 · Questions (optional, up to 9)
+          </label>
           <p className="text-[12px] text-muted-foreground leading-snug">
-            One per line. If empty, a standard Socratic pack is applied for discourse analysis.
+            One per line. Leave empty for a standard Socratic pack.
           </p>
           <textarea
+            id="commission-questions"
             value={questions}
             onChange={(e) => setQuestions(e.target.value)}
-            rows={5}
+            rows={4}
             placeholder={"1. …\n2. …\n3. …"}
-            className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] font-mono min-h-[110px] focus:outline-none focus:border-cyan/50"
+            className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] font-mono min-h-[100px] focus:outline-none focus:border-cyan/50"
           />
         </div>
       )}
 
       <div className="space-y-2">
-        <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+        <label
+          htmlFor="commission-email"
+          className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground"
+        >
           {needQuestions ? "4" : "3"} · Email for link (optional)
-        </p>
+        </label>
         <input
+          id="commission-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="One-time delivery only — not a mailing list"
+          placeholder="One-time delivery only"
           className="w-full rounded-xl border border-border bg-background/80 px-3 py-2.5 text-[13px] min-h-[44px] focus:outline-none focus:border-cyan/50"
           autoComplete="email"
         />
@@ -188,18 +232,21 @@ export function CommissionBriefForm({ onPackageChange }: CommissionBriefFormProp
           type="checkbox"
           checked={consent}
           onChange={(e) => setConsent(e.target.checked)}
-          className="mt-1 rounded border-border"
+          className="mt-1 rounded border-border shrink-0"
         />
         <span>
           <Lock className="w-3.5 h-3.5 text-cyan inline mr-1 align-[-2px]" aria-hidden />
-          Research tool as-is — not legal/medical/investment advice. One-time ${meta.priceUsd}.
-          Unique link + PDF after pay (typically minutes, automated). Lawful public research only;
-          no illegal use and no violation of X terms or community rules. No account. No personal
-          research profile stored on Elenchos.
+          Experimental research tool — not legal, medical, or investment advice. One-time $
+          {meta.priceUsd}. Unique link + PDF after pay. Lawful public research only; X terms apply.
+          No account. No research profile stored on Elenchos.
         </span>
       </label>
 
-      {err && <p className="text-[12px] text-rose-signal font-mono">{err}</p>}
+      {err && (
+        <p className="text-[12px] text-rose-signal font-mono" role="alert">
+          {err}
+        </p>
+      )}
 
       <button
         type="submit"
