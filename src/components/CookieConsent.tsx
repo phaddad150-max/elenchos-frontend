@@ -58,8 +58,10 @@ export function CookieConsent() {
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               We use a session cookie to keep you signed in and store your email +
-              authentication metadata in EU-region cloud infrastructure. No
-              advertising or third-party tracking. See our{" "}
+              authentication metadata in EU-region cloud infrastructure. If you
+              accept, we also load Google Analytics so we can see which pages are
+              visited — no ads and no selling of profiles. Choose Essential only
+              to skip analytics. See our{" "}
               <Link to="/privacy" className="text-cyan hover:underline">
                 Privacy Notice
               </Link>{" "}

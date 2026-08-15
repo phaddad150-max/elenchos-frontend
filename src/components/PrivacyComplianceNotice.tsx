@@ -8,7 +8,7 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
     return (
       <p className="text-[11px] text-muted-foreground leading-relaxed">
         <Shield className="w-3 h-3 inline-block mr-1 text-cyan align-[-2px]" />
-        EU/GDPR: session cookie for sign-in; profile data on EU infrastructure. No ad tracking.{" "}
+        EU/GDPR: session cookie for sign-in; optional Google Analytics after you accept. No ads.{" "}
         <Link to="/privacy" className="text-cyan hover:underline">
           Privacy Notice
         </Link>
@@ -26,7 +26,8 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
         We use a session cookie to keep you signed in and store your email and authentication
-        metadata on EU-region cloud infrastructure. No advertising or third-party tracking. See our{" "}
+        metadata on EU-region cloud infrastructure. Google Analytics runs only if you accept
+        cookies; we do not use it for ads or sell profiles. See our{" "}
         <Link to="/privacy" className="text-cyan hover:underline">
           Privacy Notice
         </Link>{" "}
