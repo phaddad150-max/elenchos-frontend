@@ -46,16 +46,16 @@ export const Route = createFileRoute("/research/networks-ledger")({
   head: () => ({
     meta: [
       {
-        title: "Intelligence · Ledgers & citizen trackers · Elenchos",
+        title: "Designations & fraud ledgers · Library · Elenchos",
       },
       {
         name: "description",
         content:
-          "Elenchos Intelligence hub: terror-finance designations ledger, fraud ledger, leadership board, peace index, and other citizen trackers.",
+          "Elenchos free trackers: terror-finance designations ledger, fraud ledger, leadership board, peace index, and other citizen indexes.",
       },
       {
         property: "og:title",
-        content: "Intelligence · Ledgers & trackers · Elenchos Research Desk",
+        content: "Ledgers & trackers · Library · Elenchos Research Desk",
       },
       {
         property: "og:description",
@@ -71,10 +71,10 @@ export const Route = createFileRoute("/research/networks-ledger")({
       { rel: "canonical", href: "https://elenchos.live/research/networks-ledger" },
     ],
   }),
-  component: IntelligencePage,
+  component: NetworksLedgerPage,
 });
 
-function IntelligencePage() {
+function NetworksLedgerPage() {
   const [q, setQ] = useState("");
   const [network, setNetwork] = useState("all");
   const [type, setType] = useState("all");

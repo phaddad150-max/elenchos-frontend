@@ -87,7 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Topics analysis on X, case studies, on-demand reports, Enterprise. Privacy-first.",
+          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Topics analysis on X, case studies, commission reports, Enterprise. Privacy-first.",
       },
       { name: "author", content: "Elenchos" },
       { property: "og:site_name", content: "Elenchos" },
@@ -98,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Citizen voices vs official frames. Live Topics, crisis briefings, thesis-style case studies, on-demand research from $10, Enterprise contact.",
+          "Citizen voices vs official frames. Live Topics, crisis briefings, thesis-style case studies, commission reports from $10, Enterprise contact.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -110,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "twitter:description",
         content:
-          "Public Discourse Lens x Research Desk. Topics analysis, case studies, privacy-first on-demand reports.",
+          "Public Discourse Lens x Research Desk. Topics analysis, case studies, privacy-first commission reports.",
       },
       { property: "og:image", content: "https://elenchos.live/elenchos-og.webp" },
       { name: "twitter:image", content: "https://elenchos.live/elenchos-og.webp" },
@@ -139,7 +139,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               name: "Elenchos",
               url: "https://elenchos.live",
               description:
-                "Public Discourse Lens x Research Desk. Citizen sentiment, narrative gaps, case studies, and on-demand reports.",
+                "Public Discourse Lens x Research Desk. Citizen sentiment, narrative gaps, case studies, and commission reports.",
             },
           ],
         }),

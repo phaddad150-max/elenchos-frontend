@@ -56,7 +56,7 @@ export async function sendReportLinkEmail(opts: {
     to,
     subject: "Your Elenchos research report link",
     text: [
-      "Your on-demand research report is ready.",
+      "Your commissioned research report is ready.",
       "",
       `Topic: ${opts.topic.slice(0, 300)}`,
       `Unique link (save this — we do not store your email):`,

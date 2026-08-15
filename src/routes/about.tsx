@@ -24,13 +24,13 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Socratic method on public discourse on X, case studies, on-demand reports. Safe place to check and generate research.",
+          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Socratic method on public discourse on X, case studies, commission reports. Safe place to check and generate research.",
       },
       { property: "og:title", content: "About Elenchos · Public Discourse Lens x Research Desk" },
       {
         property: "og:description",
         content:
-          "Citizen voices vs official frames. Topics analysis on X. Research Desk for deep dives and on-demand reports. Privacy-first.",
+          "Citizen voices vs official frames. Topics analysis on X. Research Desk for free library deep dives and commissioned reports. Privacy-first.",
       },
       { property: "og:url", content: "https://elenchos.live/about" },
     ],
@@ -88,7 +88,7 @@ function AboutPage() {
           <ul className="text-[13.5px] text-foreground/90 space-y-1.5 leading-relaxed">
             <li>· Browse the site without an account.</li>
             <li>· We do not sell personal dossiers or store card numbers.</li>
-            <li>· On-demand reports use a unique private link + optional one-time email delivery.</li>
+            <li>· Commissioned reports use a unique private link + optional one-time email delivery.</li>
             <li>· Methods and sample sizes are shown so you can weigh the evidence.</li>
           </ul>
         </section>
@@ -115,7 +115,7 @@ function AboutPage() {
               to="/research"
               icon={<FlaskConical className="w-4 h-4" />}
               title="Research Desk"
-              body="Deep-dive case studies, on-demand reports from $10, and Enterprise (personalized dashboards — contact us)."
+              body="Free library (topics, case studies, trackers), commission reports from $10, and Enterprise (personalized dashboards — contact us)."
             />
           </div>
         </section>

@@ -98,11 +98,11 @@ export const SOURCE_CLASS_LEGEND: ResearchBrief["sourceClasses"] = [
 
 /** North-star copy for Research Desk landing */
 export const RESEARCH_NORTH_STAR =
-  "Published case studies (Library), ledgers & citizen trackers (Intelligence), or a fixed-price multi-source report. Live Topics stay on the Topics page. Evidence and limits you can check — not vibes.";
+  "Free Library: public discourse on X, multi-source case studies, indexes and ledgers — or commission a private multi-source report. Evidence and limits you can check — not vibes.";
 
 /** Short landing line (solo operator, privacy-first). */
 export const RESEARCH_LANDING_LINE =
-  "Multi-source case studies and citizen trackers free. Fixed-price deep dives when you need more.";
+  "Free library of topics, case studies, and trackers. Commission a private deep dive when you need more.";
 
 export const RESEARCH_HUMAN_FIRST =
   "Machines may collect and draft. A human analyst reviews the source plan and every claim before publish. No auto-published claims.";

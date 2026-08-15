@@ -89,7 +89,7 @@ export function liveTopicToDeskReport(
     ],
     limits: [
       "Not a national poll. Sample is directional public discourse on X.",
-      "Charges/designations elsewhere are separate Intelligence tools.",
+      "Charges/designations elsewhere are separate Library trackers.",
     ],
     sections: [
       {

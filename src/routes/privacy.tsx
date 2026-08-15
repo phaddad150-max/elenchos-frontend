@@ -19,7 +19,7 @@ export const Route = createFileRoute("/privacy")({
       {
         name: "description",
         content:
-          "Elenchos privacy notice: browse without an account. On-demand Research Desk reports store no personal identity. Card data stays with Stripe. GDPR-aligned.",
+          "Elenchos privacy notice: browse without an account. Commissioned Research Desk reports store no personal identity. Card data stays with Stripe. GDPR-aligned.",
       },
       { property: "og:title", content: "Privacy Notice · Elenchos" },
       {
@@ -66,7 +66,7 @@ function PrivacyPage() {
           <p className="page-hero-kicker">Privacy &amp; data protection</p>
           <h1 className="page-hero-title text-2xl md:text-3xl mt-2">Privacy Notice</h1>
           <p className="page-hero-sub mt-2 text-[13px]">
-            Version 2 · Updated for Research Desk on-demand reports · {new Date().getFullYear()}
+            Version 2 · Updated for Research Desk commission reports · {new Date().getFullYear()}
           </p>
         </header>
 
@@ -106,7 +106,7 @@ function PrivacyPage() {
             </p>
           </Section>
 
-          <Section icon={FlaskConical} title="Research Desk · on-demand reports">
+          <Section icon={FlaskConical} title="Research Desk · commission reports">
             <p>
               When you commission a report, we process{" "}
               <strong className="text-foreground/90">topic text and package choice</strong> — not
@@ -154,7 +154,7 @@ function PrivacyPage() {
 
           <Section icon={CreditCard} title="Payments">
             <p>
-              One-time fees for on-demand research are processed by Stripe Checkout. Elenchos never
+              One-time fees for commissioned research are processed by Stripe Checkout. Elenchos never
               receives or stores full card data (PCI stays with the processor). Crypto is available
               only if enabled on the Stripe account.
             </p>

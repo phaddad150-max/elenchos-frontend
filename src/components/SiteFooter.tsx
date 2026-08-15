@@ -24,10 +24,7 @@ export function SiteFooter() {
             Library
           </Link>
           <Link to="/research/commission" className="text-cyan hover:underline">
-            On-demand · $10
-          </Link>
-          <Link to="/research/library" className="text-cyan hover:underline">
-            Indexes
+            Commission report · $10
           </Link>
           <ContactEmailMe
             source="footer-enterprise"
