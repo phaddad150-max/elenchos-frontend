@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   getWowTrendForTopic,
@@ -19,12 +19,14 @@ import {
   type WowTrend,
 } from "@/lib/dashboard-data";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   Brain,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   MessageSquare,
   ThumbsDown,
   ThumbsUp,
@@ -40,12 +42,6 @@ import {
   Radio,
   Flame,
   FileDown,
-  Search,
-  LayoutGrid,
-  List,
-  Archive,
-  FilePenLine,
-  Zap,
 } from "lucide-react";
 
 import { SiteNav } from "@/components/SiteNav";
@@ -205,10 +201,8 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               <span className="text-cyan">official narratives</span>
             </h1>
             <p className="page-hero-sub w-full max-w-2xl whitespace-normal">
-              Directional samples of public discourse on X — not national polls. Browse{" "}
-              <strong className="text-foreground/90 font-medium">active</strong> monitors,{" "}
-              <strong className="text-amber-signal/95 font-medium">commissioned</strong> reports, or{" "}
-              <strong className="text-muted-foreground font-medium">archived</strong> history.
+              Directional samples of public discourse on X — not national polls. Open a topic for
+              scores, gaps, and insights.
             </p>
             <div className="flex flex-wrap gap-2 mt-1 min-w-0">
               <Link
@@ -224,18 +218,6 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
                 Commission new topic analysis · $10
               </a>
             </div>
-            <button
-              type="button"
-              onClick={() => onOpen("commercial-space-race")}
-              className="mt-1 inline-flex flex-col items-stretch gap-1 rounded-lg border border-cyan/35 bg-cyan/8 hover:bg-cyan/14 px-3 py-2.5 text-left transition-colors touch-manipulation min-h-[44px] w-full max-w-full min-w-0 overflow-hidden"
-            >
-              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan shrink-0">
-                Featured case study
-              </span>
-              <span className="text-[12px] sm:text-[13px] font-display font-semibold text-foreground leading-snug line-clamp-2 break-words min-w-0 w-full">
-                Commercial Space Race: public trust vs rivals and official frames
-              </span>
-            </button>
           </div>
         </header>
 
@@ -321,19 +303,11 @@ function TopicsFilterableGrid({
   simMode: boolean;
   onOpen: (id: string) => void;
 }) {
-  const [category, setCategory] = useState<"all" | TopicCategory>("all");
-  const [cadenceFilter, setCadenceFilter] = useState<
-    "all" | "realtime" | "weekly" | "monthly"
-  >("all");
-  const [query, setQuery] = useState("");
-  const [view, setView] = useState<"list" | "grid">("list");
-  const [focusId, setFocusId] = useState<string | null>(null);
-  const [archivedOpen, setArchivedOpen] = useState(true);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [wowTick, setWowTick] = useState(0);
   const [dataReady, setDataReady] = useState(
     () => typeof window !== "undefined" && Boolean(window.dashboardData),
   );
-  // Static catalog always present so Commissioned never depends only on API/seed
   const [commissioned, setCommissioned] = useState<CommissionedArchiveCard[]>(() =>
     STATIC_TOPIC_COMMISSIONED_ARCHIVE.map((s) => ({
       token: s.token,
@@ -462,151 +436,47 @@ function TopicsFilterableGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simMode, wowTick]);
 
-  const needle = query.trim().toLowerCase();
-
-  const filteredActive = useMemo(() => {
-    return activeTopics.filter((t) => {
-      if (category !== "all" && topicCategory(t.id) !== category) return false;
-      if (cadenceFilter !== "all" && topicCadence(t.id) !== cadenceFilter) return false;
-      if (!needle) return true;
-      const hay = [t.title, t.shortTitle, t.description, t.region, topicCategory(t.id)]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return hay.includes(needle);
-    });
-  }, [activeTopics, category, cadenceFilter, needle]);
-
-  const filteredCommissioned = useMemo(() => {
-    if (!needle) return commissioned;
-    return commissioned.filter((c) =>
-      [c.title, c.topic, c.packageId].join(" ").toLowerCase().includes(needle),
-    );
-  }, [commissioned, needle]);
-
-  const filteredArchived = useMemo(() => {
-    return archivedTopics.filter((t) => {
-      if (category !== "all" && topicCategory(t.id) !== category) return false;
-      if (!needle) return true;
-      const hay = [t.title, t.shortTitle, t.description, t.region]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return hay.includes(needle);
-    });
-  }, [archivedTopics, category, needle]);
-
-  /** Spotlight rail: NEW badges + near-realtime + first few active (unique). */
-  const spotlight = useMemo(() => {
-    const out: FeatureTopic[] = [];
-    const seen = new Set<string>();
-    const push = (t: FeatureTopic | undefined) => {
-      if (!t || seen.has(t.id)) return;
-      seen.add(t.id);
-      out.push(t);
-    };
-    for (const t of filteredActive) {
-      if (isNewTopicBadge(t.id) || topicCadence(t.id) === "realtime") push(t);
-    }
-    for (const t of filteredActive) {
-      if (out.length >= 6) break;
-      push(t);
-    }
-    return out.slice(0, 6);
-  }, [filteredActive]);
-
-  const cats: ("all" | TopicCategory)[] = ["all", "Political", "Economic", "Social"];
-  const cadenceOpts: { id: "all" | "realtime" | "weekly" | "monthly"; label: string }[] = [
-    { id: "all", label: "All cadence" },
-    { id: "realtime", label: "Active sample" },
-    { id: "weekly", label: "Weekly" },
-    { id: "monthly", label: "Monthly" },
-  ];
   const topicGridClass =
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr items-stretch";
   const showSkeleton =
     !simMode && !dataReady && typeof window !== "undefined" && !window.dashboardData;
 
-  const scrollToSection = (id: string) => {
-    if (typeof document === "undefined") return;
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollCarousel = (dir: -1 | 1) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const step = Math.min(el.clientWidth * 0.85, 320);
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
-  const renderTopicCard = (t: FeatureTopic, i: number, archived = false) => {
+  const renderTopicCard = (t: FeatureTopic, i: number, archived = false, carousel = false) => {
     const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
     const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
     const wow = liveKey && !simMode ? readWowTrend(liveKey) : null;
     return (
-      <TopicCard
+      <div
         key={t.id}
-        topic={t}
-        delay={Math.min(i * 0.025, 0.25)}
-        cadence={archived ? "archived" : topicCadence(t.id)}
-        snapshot={snap}
-        wowTrend={wow}
-        isNew={!archived && isNewTopicBadge(t.id)}
-        archived={archived}
-        onOpen={() => onOpen(t.id)}
-      />
+        className={
+          carousel
+            ? "snap-start shrink-0 w-[min(78vw,15.5rem)] sm:w-[16.25rem] md:w-[17rem] h-full"
+            : "h-full min-w-0"
+        }
+      >
+        <TopicCard
+          topic={t}
+          delay={Math.min(i * 0.025, 0.25)}
+          cadence={archived ? "archived" : topicCadence(t.id)}
+          snapshot={snap}
+          wowTrend={wow}
+          isNew={!archived && isNewTopicBadge(t.id)}
+          archived={archived}
+          onOpen={() => onOpen(t.id)}
+        />
+      </div>
     );
   };
 
-  const jumpItems = [
-    {
-      id: "topics-active",
-      label: "Active",
-      count: activeTopics.length,
-      icon: Zap,
-      tone: "cyan" as const,
-    },
-    {
-      id: "topics-commissioned",
-      label: "Commissioned",
-      count: commissioned.length,
-      icon: FilePenLine,
-      tone: "amber" as const,
-    },
-    {
-      id: "topics-archived",
-      label: "Archived",
-      count: archivedTopics.length,
-      icon: Archive,
-      tone: "muted" as const,
-    },
-  ];
-
   return (
-    <div className="space-y-5 sm:space-y-7">
-      {/* Jump nav — three desks */}
-      <nav
-        aria-label="Topic collections"
-        className="sticky top-[3.25rem] md:top-[3.75rem] z-20 -mx-0.5"
-      >
-        <div className="topics-jump-nav flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-none">
-          {jumpItems.map((item) => {
-            const Icon = item.icon;
-            const toneClass =
-              item.tone === "cyan"
-                ? "hover:border-cyan/50 hover:bg-cyan/10 hover:text-cyan data-[active]:border-cyan/50 data-[active]:bg-cyan/12 data-[active]:text-cyan"
-                : item.tone === "amber"
-                  ? "hover:border-amber-signal/45 hover:bg-amber-signal/10 hover:text-amber-signal data-[active]:border-amber-signal/45 data-[active]:bg-amber-signal/12 data-[active]:text-amber-signal"
-                  : "hover:border-border hover:bg-secondary/60 hover:text-foreground data-[active]:border-border data-[active]:bg-secondary/50";
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => scrollToSection(item.id)}
-                className={`topics-jump-btn shrink-0 inline-flex items-center gap-1.5 min-h-[42px] px-3 sm:px-3.5 rounded-lg border border-transparent text-[12px] sm:text-[13px] font-display font-semibold touch-manipulation transition-colors ${toneClass}`}
-              >
-                <Icon className="w-3.5 h-3.5 shrink-0 opacity-90" aria-hidden />
-                {item.label}
-                <span className="tabular-nums text-[11px] font-mono opacity-80">{item.count}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-
+    <div className="space-y-6 sm:space-y-8">
       {showSkeleton && (
         <div
           className="rounded-xl border border-cyan/25 bg-cyan/[0.04] px-3.5 py-3 text-[12px] font-mono text-muted-foreground flex items-center gap-2"
@@ -618,282 +488,83 @@ function TopicsFilterableGrid({
         </div>
       )}
 
-      {/* ─── 1. ACTIVE ─── */}
-      <section
-        id="topics-active"
-        className="topics-section topics-section-active scroll-mt-28 space-y-3.5 sm:space-y-4"
-        aria-labelledby="topics-active-heading"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="w-2 h-2 rounded-full bg-cyan pulse-dot shrink-0" aria-hidden />
-              <h2
-                id="topics-active-heading"
-                className="text-[13px] sm:text-[14px] font-display font-semibold text-cyan tracking-tight"
-              >
-                Active topics
-              </h2>
-              <span className="text-[11px] font-mono tabular-nums text-cyan/80 border border-cyan/30 rounded-full px-2 py-0.5 bg-cyan/10">
-                {filteredActive.length}
-                {filteredActive.length !== activeTopics.length
-                  ? ` / ${activeTopics.length}`
-                  : ""}
-              </span>
-            </div>
-            <p className="text-[12px] text-muted-foreground mt-1 max-w-xl leading-snug">
-              Live monitors — citizen discourse samples on X vs official frames. Search, filter, or
-              open a report.
-            </p>
-          </div>
-        </div>
-
-        {/* Interactive controls */}
-        <div className="rounded-xl border border-cyan/25 bg-card/50 p-2.5 sm:p-3 space-y-2.5">
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <div className="relative flex-1 min-w-0">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
-                aria-hidden
-              />
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search active topics…"
-                className="w-full min-h-[42px] pl-10 pr-3 rounded-lg border border-border/80 bg-background/80 text-[13px] focus:outline-none focus:ring-1 focus:ring-cyan/50 focus:border-cyan/40"
-                aria-label="Search topics"
-              />
-            </div>
-            <div
-              className="inline-flex rounded-lg border border-border/80 bg-background/50 p-0.5 shrink-0"
-              role="group"
-              aria-label="View mode"
-            >
+      {/* 1 · Active — carousel */}
+      <section className="space-y-3" aria-labelledby="topics-active-heading">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot shrink-0" aria-hidden />
+          <h2
+            id="topics-active-heading"
+            className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan"
+          >
+            Active topics
+          </h2>
+          <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+            {activeTopics.length}
+          </span>
+          <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground">
+            · Live monitors · swipe or use arrows
+          </span>
+          {activeTopics.length > 1 && (
+            <div className="flex items-center gap-1 sm:ml-auto">
               <button
                 type="button"
-                onClick={() => setView("list")}
-                aria-pressed={view === "list"}
-                className={`inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-md text-[12px] font-medium touch-manipulation transition-colors ${
-                  view === "list"
-                    ? "bg-cyan/15 text-cyan border border-cyan/35"
-                    : "text-muted-foreground hover:text-foreground border border-transparent"
-                }`}
+                onClick={() => scrollCarousel(-1)}
+                className="w-9 h-9 rounded-full border border-cyan/35 bg-cyan/10 text-cyan hover:bg-cyan/20 grid place-items-center touch-manipulation"
+                aria-label="Previous active topics"
               >
-                <List className="w-3.5 h-3.5" aria-hidden />
-                List
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                onClick={() => setView("grid")}
-                aria-pressed={view === "grid"}
-                className={`inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-md text-[12px] font-medium touch-manipulation transition-colors ${
-                  view === "grid"
-                    ? "bg-cyan/15 text-cyan border border-cyan/35"
-                    : "text-muted-foreground hover:text-foreground border border-transparent"
-                }`}
+                onClick={() => scrollCarousel(1)}
+                className="w-9 h-9 rounded-full border border-cyan/35 bg-cyan/10 text-cyan hover:bg-cyan/20 grid place-items-center touch-manipulation"
+                aria-label="Next active topics"
               >
-                <LayoutGrid className="w-3.5 h-3.5" aria-hidden />
-                Grid
+                <ChevronRight className="w-4 h-4" />
               </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="overflow-x-auto scrollbar-none -mx-0.5 px-0.5">
-              <div
-                className="inline-flex gap-1 min-w-max"
-                role="tablist"
-                aria-label="Filter by category"
-              >
-                {cats.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    role="tab"
-                    aria-selected={category === c}
-                    onClick={() => setCategory(c)}
-                    className={`chip-touch px-3 py-1.5 rounded-full text-[11.5px] sm:text-[12px] font-display font-semibold tracking-wide transition-colors whitespace-nowrap min-h-[40px] sm:min-h-[36px] touch-manipulation ${
-                      category === c
-                        ? "bg-cyan/15 text-cyan border border-cyan/40"
-                        : "text-muted-foreground border border-border/70 hover:text-foreground hover:border-border"
-                    }`}
-                  >
-                    {c === "all" ? "All categories" : c}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="overflow-x-auto scrollbar-none -mx-0.5 px-0.5">
-              <div
-                className="inline-flex gap-1 min-w-max"
-                role="tablist"
-                aria-label="Filter by sample cadence"
-              >
-                {cadenceOpts.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={cadenceFilter === c.id}
-                    onClick={() => setCadenceFilter(c.id)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-mono tracking-wide transition-colors whitespace-nowrap min-h-[36px] touch-manipulation ${
-                      cadenceFilter === c.id
-                        ? "bg-cyan/12 text-cyan border border-cyan/35"
-                        : "text-muted-foreground border border-transparent hover:border-border/80 hover:text-foreground"
-                    }`}
-                  >
-                    {c.id === "realtime" && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan pulse-dot" aria-hidden />
-                    )}
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick-jump chips for active set */}
-          {filteredActive.length > 0 && (
-            <div className="pt-0.5">
-              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1.5">
-                Jump to topic
-              </p>
-              <div className="flex flex-wrap gap-1.5 max-h-[5.5rem] overflow-y-auto custom-scroll pr-0.5">
-                {filteredActive.map((t) => {
-                  const active = focusId === t.id;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => {
-                        setFocusId(t.id);
-                        if (view === "list") {
-                          document
-                            .getElementById(`topic-row-${t.id}`)
-                            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                        }
-                        onOpen(t.id);
-                      }}
-                      onMouseEnter={() => setFocusId(t.id)}
-                      className={`inline-flex items-center gap-1 max-w-[14rem] px-2.5 py-1 rounded-full text-[11px] font-medium touch-manipulation transition-colors border min-h-[32px] ${
-                        active
-                          ? "border-cyan/50 bg-cyan/15 text-cyan"
-                          : "border-border/70 bg-background/40 text-muted-foreground hover:text-foreground hover:border-cyan/35"
-                      }`}
-                    >
-                      {isNewTopicBadge(t.id) && (
-                        <span className="text-[8px] font-mono font-bold uppercase text-background bg-cyan rounded px-1 leading-none py-0.5">
-                          New
-                        </span>
-                      )}
-                      <span className="truncate">{shortTitle(t.shortTitle || t.title)}</span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           )}
         </div>
 
-        {/* Spotlight rail — horizontal interactive cards */}
-        {spotlight.length > 0 && view === "list" && (
-          <div className="space-y-2">
-            <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan/90 px-0.5">
-              Spotlight
-            </p>
-            <div className="flex gap-2.5 overflow-x-auto pb-1 custom-scroll snap-x snap-mandatory -mx-0.5 px-0.5">
-              {spotlight.map((t, i) => {
-                const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
-                const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
-                const wow = liveKey && !simMode ? readWowTrend(liveKey) : null;
-                return (
-                  <ActiveTopicSpotlight
-                    key={t.id}
-                    topic={t}
-                    delay={i * 0.04}
-                    snapshot={snap}
-                    wowTrend={wow}
-                    isNew={isNewTopicBadge(t.id)}
-                    focused={focusId === t.id}
-                    onOpen={() => {
-                      setFocusId(t.id);
-                      onOpen(t.id);
-                    }}
-                    onFocus={() => setFocusId(t.id)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {filteredActive.length === 0 && !showSkeleton ? (
-          <div className="text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-cyan/25 rounded-xl bg-cyan/[0.03]">
-            No active topics match these filters.
-          </div>
-        ) : view === "list" ? (
-          <div className="flex flex-col gap-1.5" role="list">
-            <AnimatePresence initial={false}>
-              {filteredActive.map((t, i) => {
-                const liveKey = LIVE_TOPIC_KEYS[t.id]?.rootKey;
-                const snap = liveKey && !simMode ? readSnapshot(liveKey) : null;
-                const wow = liveKey && !simMode ? readWowTrend(liveKey) : null;
-                return (
-                  <ActiveTopicRow
-                    key={t.id}
-                    topic={t}
-                    index={i + 1}
-                    snapshot={snap}
-                    wowTrend={wow}
-                    isNew={isNewTopicBadge(t.id)}
-                    focused={focusId === t.id}
-                    onOpen={() => {
-                      setFocusId(t.id);
-                      onOpen(t.id);
-                    }}
-                    onFocus={() => setFocusId(t.id)}
-                  />
-                );
-              })}
-            </AnimatePresence>
+        {activeTopics.length === 0 && !showSkeleton ? (
+          <div className="text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
+            No active topics yet.
           </div>
         ) : (
-          <div className={topicGridClass}>
-            {filteredActive.map((t, i) => renderTopicCard(t, i, false))}
+          <div className="relative">
+            <div
+              ref={carouselRef}
+              className="topics-active-carousel flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 snap-x snap-mandatory custom-scroll overscroll-x-contain"
+              style={{ scrollbarWidth: "thin" }}
+            >
+              {activeTopics.map((t, i) => renderTopicCard(t, i, false, true))}
+            </div>
           </div>
         )}
       </section>
 
-      {/* ─── 2. COMMISSIONED ─── */}
-      <section
-        id="topics-commissioned"
-        className="topics-section topics-section-commissioned scroll-mt-28 space-y-3"
-        aria-labelledby="topics-commissioned-heading"
-      >
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <FilePenLine className="w-4 h-4 text-amber-signal shrink-0" aria-hidden />
-            <h2
-              id="topics-commissioned-heading"
-              className="text-[13px] sm:text-[14px] font-display font-semibold text-amber-signal tracking-tight"
-            >
-              Commissioned topics
-            </h2>
-            <span className="text-[11px] font-mono tabular-nums text-amber-signal/90 border border-amber-signal/35 rounded-full px-2 py-0.5 bg-amber-signal/10">
-              {filteredCommissioned.length}
-            </span>
-          </div>
-          <p className="text-[12px] text-muted-foreground mt-1 max-w-xl leading-snug">
-            Independently commissioned topic analyses — private briefs shared here. Not part of the
-            live monitoring desk.
-          </p>
+      {/* 2 · Commissioned */}
+      <section className="space-y-3 pt-1" aria-labelledby="topics-commissioned-heading">
+        <div className="flex items-center gap-2 flex-wrap border-t border-amber-signal/25 pt-5">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-signal shrink-0" aria-hidden />
+          <h2
+            id="topics-commissioned-heading"
+            className="text-[11px] font-mono uppercase tracking-[0.22em] text-amber-signal"
+          >
+            Commissioned topics
+          </h2>
+          <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+            {commissioned.length}
+          </span>
+          <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground">
+            · Independent reports · not live monitors
+          </span>
         </div>
 
-        {filteredCommissioned.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-amber-signal/25 bg-amber-signal/[0.03] px-4 py-8 text-center space-y-3">
-            <p className="text-[13px] text-muted-foreground">
-              No commissioned topic reports in this view yet.
+        {commissioned.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-amber-signal/25 px-4 py-8 text-center">
+            <p className="text-[13px] text-muted-foreground mb-3">
+              No commissioned topic reports yet.
             </p>
             <a
               href="/research/commission?pkg=topic-analysis"
@@ -905,71 +576,40 @@ function TopicsFilterableGrid({
           </div>
         ) : (
           <div className={topicGridClass}>
-            {filteredCommissioned.map((c) => (
+            {commissioned.map((c) => (
               <CommissionedTopicCard key={c.token} item={c} />
             ))}
           </div>
         )}
       </section>
 
-      {/* ─── 3. ARCHIVED ─── */}
-      <section
-        id="topics-archived"
-        className="topics-section topics-section-archived scroll-mt-28 space-y-3"
-        aria-labelledby="topics-archived-heading"
-      >
-        <button
-          type="button"
-          onClick={() => setArchivedOpen((v) => !v)}
-          className="w-full flex items-start sm:items-center justify-between gap-3 text-left touch-manipulation min-h-[44px] group"
-          aria-expanded={archivedOpen}
-        >
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Archive className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
-              <h2
-                id="topics-archived-heading"
-                className="text-[13px] sm:text-[14px] font-display font-semibold text-muted-foreground tracking-tight group-hover:text-foreground transition-colors"
-              >
-                Archived topics
-              </h2>
-              <span className="text-[11px] font-mono tabular-nums text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-secondary/40">
-                {filteredArchived.length}
-              </span>
-            </div>
-            <p className="text-[12px] text-muted-foreground/90 mt-1 max-w-xl leading-snug">
-              Historical monitors — read-only. Retired from the active desk.
-            </p>
-          </div>
-          <ChevronDown
-            className={`w-5 h-5 text-muted-foreground shrink-0 mt-0.5 transition-transform ${
-              archivedOpen ? "rotate-180" : ""
-            }`}
-            aria-hidden
-          />
-        </button>
+      {/* 3 · Archived */}
+      <section className="space-y-3 pt-1" aria-labelledby="topics-archived-heading">
+        <div className="flex items-center gap-2 flex-wrap border-t border-border/80 pt-5">
+          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 shrink-0" aria-hidden />
+          <h2
+            id="topics-archived-heading"
+            className="text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground"
+          >
+            Archived topics
+          </h2>
+          <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+            {archivedTopics.length}
+          </span>
+          <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground">
+            · Historical · not live monitors
+          </span>
+        </div>
 
-        <AnimatePresence initial={false}>
-          {archivedOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden"
-            >
-              {filteredArchived.length === 0 ? (
-                <div className="text-center text-xs font-mono text-muted-foreground py-8 border border-dashed border-border rounded-xl">
-                  No archived topics match these filters.
-                </div>
-              ) : (
-                <div className={`${topicGridClass} opacity-[0.88]`}>
-                  {filteredArchived.map((t, i) => renderTopicCard(t, i, true))}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {archivedTopics.length === 0 ? (
+          <div className="text-center text-xs font-mono text-muted-foreground py-8 border border-dashed border-border rounded-lg">
+            No archived topics.
+          </div>
+        ) : (
+          <div className={`${topicGridClass} opacity-90`}>
+            {archivedTopics.map((t, i) => renderTopicCard(t, i, true, false))}
+          </div>
+        )}
       </section>
     </div>
   );
@@ -1008,192 +648,6 @@ function resolveTopicScores(
     }
   }
   return { sentiment, divergence, sentimentTone, divergenceTone, resolvedWow };
-}
-
-/** Horizontal spotlight tile for active monitors. */
-function ActiveTopicSpotlight({
-  topic,
-  delay,
-  snapshot,
-  wowTrend,
-  isNew,
-  focused,
-  onOpen,
-  onFocus,
-}: {
-  topic: FeatureTopic;
-  delay: number;
-  snapshot?: TopicSnapshot | null;
-  wowTrend?: WowTrend | null;
-  isNew?: boolean;
-  focused?: boolean;
-  onOpen: () => void;
-  onFocus: () => void;
-}) {
-  const { sentiment, divergence, sentimentTone, divergenceTone, resolvedWow } =
-    resolveTopicScores(snapshot, wowTrend, topic);
-  const cadence = topicCadence(topic.id);
-
-  return (
-    <motion.button
-      type="button"
-      initial={{ opacity: 0, x: 12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay, duration: 0.3 }}
-      onClick={onOpen}
-      onFocus={onFocus}
-      onMouseEnter={onFocus}
-      className={`snap-start shrink-0 w-[min(72vw,16.5rem)] sm:w-[17.5rem] text-left rounded-2xl border p-3.5 flex flex-col gap-2.5 min-h-[168px] touch-manipulation transition-all ${
-        focused
-          ? "border-cyan/55 bg-cyan/10 shadow-[0_0_28px_-12px_var(--cyan-glow)]"
-          : "border-cyan/30 bg-card/70 hover:border-cyan/50 hover:bg-cyan/[0.07]"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <TopicCardCadence cadence={cadence} />
-        {isNew && (
-          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-background bg-cyan px-1.5 py-0.5 rounded">
-            New
-          </span>
-        )}
-      </div>
-      <h3 className="text-[15px] font-display font-semibold leading-snug line-clamp-2 group-hover:text-cyan">
-        {shortTitle(topic.shortTitle || topic.title)}
-      </h3>
-      <div className="flex items-center gap-3 mt-auto">
-        <div className="flex flex-col min-w-0">
-          <span className="text-[9px] font-mono uppercase text-muted-foreground">Sent.</span>
-          <span className="text-lg font-display font-semibold tabular-nums" style={{ color: sentimentTone }}>
-            {typeof sentiment === "number" ? sentiment : "—"}
-          </span>
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="text-[9px] font-mono uppercase text-muted-foreground">Div.</span>
-          <span className="text-lg font-display font-semibold tabular-nums" style={{ color: divergenceTone }}>
-            {typeof divergence === "number" ? divergence : "—"}
-          </span>
-        </div>
-        <div className="ml-auto">
-          <TopicCardWowTrend trend={resolvedWow} />
-        </div>
-      </div>
-      <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-cyan font-semibold inline-flex items-center gap-1">
-        Open report <ArrowRight className="w-3.5 h-3.5" />
-      </span>
-    </motion.button>
-  );
-}
-
-/** Interactive list row for active topics. */
-function ActiveTopicRow({
-  topic,
-  index,
-  snapshot,
-  wowTrend,
-  isNew,
-  focused,
-  onOpen,
-  onFocus,
-}: {
-  topic: FeatureTopic;
-  index: number;
-  snapshot?: TopicSnapshot | null;
-  wowTrend?: WowTrend | null;
-  isNew?: boolean;
-  focused?: boolean;
-  onOpen: () => void;
-  onFocus: () => void;
-}) {
-  const { sentiment, divergence, sentimentTone, divergenceTone, resolvedWow } =
-    resolveTopicScores(snapshot, wowTrend, topic);
-  const cadence = topicCadence(topic.id);
-  const category = topicCategory(topic.id);
-  const sentPct = typeof sentiment === "number" ? Math.max(0, Math.min(100, sentiment)) : null;
-
-  return (
-    <motion.button
-      id={`topic-row-${topic.id}`}
-      type="button"
-      role="listitem"
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      onClick={onOpen}
-      onFocus={onFocus}
-      onMouseEnter={onFocus}
-      className={`topics-active-row group w-full text-left rounded-xl border px-2.5 sm:px-3.5 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-h-[56px] touch-manipulation transition-all ${
-        focused
-          ? "border-cyan/50 bg-cyan/[0.09] shadow-[0_0_24px_-14px_var(--cyan-glow)]"
-          : "border-border/80 bg-card/55 hover:border-cyan/40 hover:bg-card/80"
-      }`}
-    >
-      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-        <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 shrink-0 text-right pt-0.5 sm:pt-0">
-          {String(index).padStart(2, "0")}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan/85">
-              {category}
-            </span>
-            <TopicCardCadence cadence={cadence} />
-            {isNew && (
-              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-background bg-cyan px-1.5 py-0.5 rounded">
-                New
-              </span>
-            )}
-          </div>
-          <h3 className="text-[14px] sm:text-[15px] font-display font-semibold leading-snug text-foreground group-hover:text-cyan transition-colors line-clamp-2 sm:line-clamp-1 break-words">
-            {shortTitle(topic.shortTitle || topic.title)}
-          </h3>
-          {sentPct != null && (
-            <div className="mt-1.5 h-1 max-w-[12rem] rounded-full bg-border/70 overflow-hidden hidden sm:block">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${sentPct}%`,
-                  background: sentimentTone,
-                  boxShadow: `0 0 8px ${sentimentTone}55`,
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pl-7 sm:pl-0 shrink-0">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="text-center min-w-[2.5rem]">
-            <div className="text-[9px] font-mono uppercase text-muted-foreground">Sent.</div>
-            <div
-              className="text-[1.15rem] sm:text-[1.25rem] font-display font-semibold tabular-nums leading-none"
-              style={{ color: sentimentTone }}
-            >
-              {typeof sentiment === "number" ? sentiment : "—"}
-            </div>
-          </div>
-          <div className="text-center min-w-[2.5rem]">
-            <div className="text-[9px] font-mono uppercase text-muted-foreground">Div.</div>
-            <div
-              className="text-[1.15rem] sm:text-[1.25rem] font-display font-semibold tabular-nums leading-none"
-              style={{ color: divergenceTone }}
-            >
-              {typeof divergence === "number" ? divergence : "—"}
-            </div>
-          </div>
-          <div className="w-10 flex justify-center">
-            <TopicCardWowTrend trend={resolvedWow} />
-          </div>
-        </div>
-        <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold uppercase tracking-[0.1em] text-cyan opacity-80 group-hover:opacity-100 shrink-0">
-          Open
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-        </span>
-      </div>
-    </motion.button>
-  );
 }
 
 function shortTitle(t: string): string {
