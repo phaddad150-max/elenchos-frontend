@@ -2,8 +2,11 @@ import raw from "./data.json";
 import type {
   ActionType,
   LedgerEntry,
+  LinkedActor,
+  LinkedActorKind,
   NetworkTag,
   NetworksLedgerData,
+  RegionFocus,
 } from "./types";
 
 export type {
@@ -12,8 +15,12 @@ export type {
   LedgerEntry,
   LedgerLocation,
   LedgerSource,
+  LinkedActor,
+  LinkedActorKind,
+  LinkedActorRole,
   NetworkTag,
   NetworksLedgerData,
+  RegionFocus,
 } from "./types";
 
 export const NETWORKS_LEDGER_DISCLAIMER =
@@ -40,6 +47,34 @@ export const NETWORK_OPTIONS: NetworkTag[] = [
   "Mixed / Axis",
 ];
 
+export const REGION_OPTIONS: { value: RegionFocus | "all"; label: string }[] = [
+  { value: "all", label: "All regions" },
+  { value: "US", label: "United States" },
+  { value: "Gulf", label: "Gulf / TFTC" },
+  { value: "Europe", label: "Europe" },
+  { value: "Lebanon", label: "Lebanon" },
+  { value: "Africa", label: "Africa" },
+  { value: "Other", label: "Other" },
+];
+
+export const LINKED_KIND_LABELS: Record<LinkedActorKind, string> = {
+  organization: "Organization",
+  country: "Country",
+  institution: "Institution",
+  ngo: "NGO",
+  person: "Person",
+  company: "Company",
+};
+
+/** Marker colors by primary network tag */
+export const NETWORK_MARKER_COLORS: Record<NetworkTag, string> = {
+  IRGC: "#f43f5e",
+  Hezbollah: "#f59e0b",
+  "Muslim Brotherhood": "#22d3ee",
+  Hamas: "#a78bfa",
+  "Mixed / Axis": "#94a3b8",
+};
+
 const SINCE_2025 = "2025-01-01";
 
 export function computeMetrics(entries: LedgerEntry[] = ALL_ENTRIES) {
@@ -52,7 +87,6 @@ export function computeMetrics(entries: LedgerEntry[] = ALL_ENTRIES) {
   const quantified = entries
     .filter((e) => typeof e.amountUsd === "number" && e.amountUsd > 0)
     .reduce((sum, e) => sum + (e.amountUsd ?? 0), 0);
-  // Prefer unique quantified packages (avoid double-count companion rows)
   const seenAmounts = new Set<string>();
   let quantifiedUnique = 0;
   for (const e of entries) {
@@ -109,6 +143,7 @@ export function filterEntries(
     network?: string;
     type?: string;
     country?: string;
+    region?: string;
   },
 ): LedgerEntry[] {
   const q = (opts.q ?? "").trim().toLowerCase();
@@ -123,7 +158,13 @@ export function filterEntries(
       if (opts.country && opts.country !== "all") {
         if (e.location.country !== opts.country) return false;
       }
+      if (opts.region && opts.region !== "all") {
+        if (!e.regionFocus.includes(opts.region as RegionFocus)) return false;
+      }
       if (!q) return true;
+      const linked = (e.linkedActors ?? [])
+        .map((a) => `${a.name} ${a.relation} ${a.kind} ${a.role}`)
+        .join(" ");
       const hay = [
         e.title,
         e.summary,
@@ -132,6 +173,7 @@ export function filterEntries(
         e.location.label,
         e.source.agency,
         e.id,
+        linked,
       ]
         .join(" ")
         .toLowerCase();
@@ -142,7 +184,10 @@ export function filterEntries(
 
 /** Collapse map pins by rounded lat/lng so click shows stacked actions. */
 export function groupEntriesByLocation(entries: LedgerEntry[]) {
-  const map = new Map<string, { lat: number; lng: number; label: string; entries: LedgerEntry[] }>();
+  const map = new Map<
+    string,
+    { lat: number; lng: number; label: string; entries: LedgerEntry[]; primaryNetwork: NetworkTag }
+  >();
   for (const e of entries) {
     const key = `${e.location.lat.toFixed(2)},${e.location.lng.toFixed(2)}`;
     const existing = map.get(key);
@@ -154,8 +199,17 @@ export function groupEntriesByLocation(entries: LedgerEntry[]) {
         lng: e.location.lng,
         label: e.location.label,
         entries: [e],
+        primaryNetwork: e.networks[0] ?? "Mixed / Axis",
       });
     }
   }
   return [...map.values()];
+}
+
+export function primaryNetwork(entry: LedgerEntry): NetworkTag {
+  return entry.networks[0] ?? "Mixed / Axis";
+}
+
+export function linkedActorsOf(entry: LedgerEntry): LinkedActor[] {
+  return entry.linkedActors ?? [];
 }

@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
-import type { LedgerEntry } from "@/lib/networks-ledger";
-import { formatDate, groupEntriesByLocation } from "@/lib/networks-ledger";
+import type { LedgerEntry, NetworkTag } from "@/lib/networks-ledger";
+import {
+  formatDate,
+  groupEntriesByLocation,
+  NETWORK_MARKER_COLORS,
+  primaryNetwork,
+} from "@/lib/networks-ledger";
 import "leaflet/dist/leaflet.css";
 
 type Props = {
@@ -9,7 +14,7 @@ type Props = {
 };
 
 /**
- * Client-only Leaflet map (dark basemap). Pins open popup with summary + source link.
+ * Premium Leaflet map — light high-contrast basemap, glow markers, polished popups.
  */
 export function NetworksMap({ entries, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,7 +29,6 @@ export function NetworksMap({ entries, onSelect }: Props) {
       const L = await import("leaflet");
       if (cancelled || !containerRef.current) return;
 
-      // Fix default marker icons under Vite bundling
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -44,14 +48,25 @@ export function NetworksMap({ entries, onSelect }: Props) {
       map = L.map(containerRef.current, {
         scrollWheelZoom: false,
         worldCopyJump: true,
-      }).setView([28, 25], 3);
+        zoomControl: false,
+        preferCanvas: true,
+        attributionControl: true,
+      }).setView([28, 15], 2.4);
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 18,
-      }).addTo(map);
+      L.control.zoom({ position: "topright" }).addTo(map);
+      L.control.scale({ imperial: false, metric: true, position: "bottomleft" }).addTo(map);
+
+      // Premium light basemap: Carto Voyager (labels under roads) + crisp retina tiles
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> · <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 18,
+          minZoom: 2,
+        },
+      ).addTo(map);
 
       const groups = groupEntriesByLocation(entries);
       const bounds: [number, number][] = [];
@@ -61,28 +76,75 @@ export function NetworksMap({ entries, onSelect }: Props) {
         const items = g.entries
           .slice()
           .sort((a, b) => b.date.localeCompare(a.date))
-          .slice(0, 6);
+          .slice(0, 5);
+
+        const counts = new Map<NetworkTag, number>();
+        for (const e of g.entries) {
+          const n = primaryNetwork(e);
+          counts.set(n, (counts.get(n) ?? 0) + 1);
+        }
+        let topNet: NetworkTag = "Mixed / Axis";
+        let topN = 0;
+        for (const [n, c] of counts) {
+          if (c > topN) {
+            topN = c;
+            topNet = n;
+          }
+        }
+        const color = NETWORK_MARKER_COLORS[topNet] ?? "#22d3ee";
+        const count = g.entries.length;
+        const size = count > 3 ? 36 : count > 1 ? 32 : 28;
 
         const html = `
-          <div style="min-width:200px;max-width:280px;font:12px/1.4 system-ui,sans-serif;color:#0f172a">
-            <div style="font-weight:700;margin-bottom:6px;color:#0e7490">${escapeHtml(g.label)}</div>
+          <div class="nl-map-popup">
+            <div class="nl-map-popup-place">${escapeHtml(g.label)}
+              <span class="nl-map-popup-count">${count} action${count > 1 ? "s" : ""}</span>
+            </div>
             ${items
               .map(
                 (e) => `
-              <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #e2e8f0">
-                <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.06em">${escapeHtml(formatDate(e.date))} · ${escapeHtml(e.type)}</div>
-                <div style="font-weight:600;margin:2px 0 4px">${escapeHtml(e.title)}</div>
-                <div style="color:#334155;margin-bottom:4px">${escapeHtml(e.summary.slice(0, 160))}${e.summary.length > 160 ? "…" : ""}</div>
-                <a href="${escapeAttr(e.source.url)}" target="_blank" rel="noopener noreferrer" style="color:#0891b2;font-weight:600">Primary source ↗</a>
+              <div class="nl-map-popup-item">
+                <div class="nl-map-popup-meta">${escapeHtml(formatDate(e.date))} · ${escapeHtml(e.type)}</div>
+                <div class="nl-map-popup-title">${escapeHtml(e.title)}</div>
+                <div class="nl-map-popup-summary">${escapeHtml(e.summary)}</div>
+                <a class="nl-map-popup-link" href="${escapeAttr(e.source.url)}" target="_blank" rel="noopener noreferrer">Primary source ↗</a>
               </div>`,
               )
               .join("")}
-            ${g.entries.length > 6 ? `<div style="color:#64748b;font-size:11px">+${g.entries.length - 6} more at this pin (see ledger table)</div>` : ""}
+            ${
+              g.entries.length > 5
+                ? `<div class="nl-map-popup-more">+${g.entries.length - 5} more at this pin — use ledger filters</div>`
+                : ""
+            }
           </div>
         `;
 
-        const marker = L.marker([g.lat, g.lng]).addTo(map!);
-        marker.bindPopup(html, { maxWidth: 300 });
+        const icon = L.divIcon({
+          className: "nl-map-marker",
+          html: `
+            <span class="nl-map-marker-inner" style="--pin:${color};width:${size}px;height:${size}px">
+              <span class="nl-map-marker-glow"></span>
+              <span class="nl-map-marker-core"></span>
+              ${count > 1 ? `<span class="nl-map-marker-badge">${count}</span>` : ""}
+            </span>
+          `,
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
+          popupAnchor: [0, -size / 2],
+        });
+
+        const marker = L.marker([g.lat, g.lng], {
+          icon,
+          riseOnHover: true,
+          keyboard: true,
+          title: `${g.label} · ${count} action${count > 1 ? "s" : ""}`,
+        }).addTo(map!);
+
+        marker.bindPopup(html, {
+          maxWidth: 340,
+          className: "nl-map-popup-wrap",
+          autoPanPadding: [48, 48],
+        });
         marker.on("click", () => {
           const top = g.entries.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
           if (top && onSelect) onSelect(top);
@@ -90,7 +152,7 @@ export function NetworksMap({ entries, onSelect }: Props) {
       }
 
       if (bounds.length > 1) {
-        map.fitBounds(bounds, { padding: [36, 36], maxZoom: 5 });
+        map.fitBounds(bounds, { padding: [48, 48], maxZoom: 5 });
       } else if (bounds.length === 1) {
         map.setView(bounds[0], 4);
       }
@@ -108,12 +170,16 @@ export function NetworksMap({ entries, onSelect }: Props) {
   }, [entries, onSelect]);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-[280px] sm:h-[340px] md:h-[400px] rounded-xl overflow-hidden border border-cyan/25 bg-secondary/40 z-0"
-      role="img"
-      aria-label="Interactive map of network enforcement actions"
-    />
+    <div className="networks-map-shell relative rounded-xl overflow-hidden border border-cyan/35 bg-card/50 shadow-[0_0_0_1px_rgba(34,211,238,0.08),0_20px_50px_-28px_rgba(0,0,0,0.65)]">
+      <div
+        ref={containerRef}
+        className="networks-map-stage w-full h-[340px] sm:h-[420px] md:h-[480px] z-0"
+        role="img"
+        aria-label="Interactive map of network enforcement actions"
+      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-background/25 to-transparent z-[400]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background/20 to-transparent z-[400]" />
+    </div>
   );
 }
 

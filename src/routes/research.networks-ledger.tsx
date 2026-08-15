@@ -24,16 +24,21 @@ import {
 import {
   ACTION_TYPE_LABELS,
   ALL_ENTRIES,
+  LINKED_KIND_LABELS,
   NETWORKS_LEDGER_DATA,
   NETWORKS_LEDGER_DISCLAIMER,
+  NETWORK_MARKER_COLORS,
   NETWORK_OPTIONS,
+  REGION_OPTIONS,
   computeMetrics,
   filterEntries,
   flagshipEntries,
   formatDate,
   formatUsd,
+  linkedActorsOf,
   type ActionType,
   type LedgerEntry,
+  type LinkedActor,
 } from "@/lib/networks-ledger";
 
 const NetworksMap = lazy(() =>
@@ -46,21 +51,21 @@ export const Route = createFileRoute("/research/networks-ledger")({
   head: () => ({
     meta: [
       {
-        title: "Designations ledger · Library · Elenchos",
+        title: "Networks Ledger · Official actions · Library · Elenchos",
       },
       {
         name: "description",
         content:
-          "Elenchos designations ledger: official terror-finance and financial-crime designations, freezes, leadership board, peace index, and citizen trackers.",
+          "Elenchos Networks Ledger: official terror-finance designations, freezes, arrests and charges from primary government sources — US, Gulf/TFTC, Europe. Linked orgs and jurisdictions when named in source.",
       },
       {
         property: "og:title",
-        content: "Designations ledger · Library · Elenchos Research Desk",
+        content: "Networks Ledger · Elenchos Research Desk",
       },
       {
         property: "og:description",
         content:
-          "Official-source designations and freezes, plus citizen-scored indexes. Leadership trust, peace, and more.",
+          "Phase 2 official actions map and ledger. Designations, freezes, charges — primary sources only.",
       },
       {
         property: "og:url",
@@ -79,13 +84,14 @@ function NetworksLedgerPage() {
   const [network, setNetwork] = useState("all");
   const [type, setType] = useState("all");
   const [country, setCountry] = useState("all");
+  const [region, setRegion] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const metrics = useMemo(() => computeMetrics(ALL_ENTRIES), []);
-  const flagships = useMemo(() => flagshipEntries(ALL_ENTRIES).slice(0, 8), []);
+  const flagships = useMemo(() => flagshipEntries(ALL_ENTRIES).slice(0, 12), []);
   const filtered = useMemo(
-    () => filterEntries(ALL_ENTRIES, { q, network, type, country }),
-    [q, network, type, country],
+    () => filterEntries(ALL_ENTRIES, { q, network, type, country, region }),
+    [q, network, type, country, region],
   );
 
   const countries = useMemo(() => {
@@ -119,15 +125,20 @@ function NetworksLedgerPage() {
           <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5 min-w-0">
             <div className="page-hero-kicker">
               <Brain className="w-3.5 h-3.5" aria-hidden />
-              Library · Trackers
+              Library · Official actions tracker
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Designations ledger &amp; citizen indexes
+              Networks Ledger
             </h1>
+            <p className="text-[12px] font-mono text-cyan/90 tracking-wide">
+              Official designations · freezes · arrests · charges
+            </p>
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed break-words">
-              One official-source ledger for terror-finance and financial-crime designations,
-              freezes, and related public actions — plus leadership board, peace index, and other
-              free trackers.{" "}
+              Who governments have designated, frozen, arrested, or charged in connection with
+              IRGC, Hezbollah, Muslim Brotherhood, Hamas financing, and overlapping networks —
+              drawn only from primary government sources. Interactive map, major packages with full
+              descriptions, linked orgs/countries/institutions/NGOs when named in the source, and a
+              filterable chronological ledger. Phase 2: US · Gulf/TFTC · Europe · Lebanon.{" "}
               <Link to="/research/library" className="text-cyan hover:underline">
                 Back to full library
               </Link>
@@ -147,8 +158,8 @@ function NetworksLedgerPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             <ToolCard
               href="#designations-ledger"
-              title="Designations ledger"
-              body="One tracker for official designations, freezes, and financial-crime public actions — OFAC, DOJ, State, UAE, TFTC."
+              title="Networks Ledger"
+              body="Map + ledger of official terror-finance designations, freezes, arrests, and charges — primary sources only."
               icon={<Shield className="w-5 h-5" />}
               badge="On this page"
               tone="cyan"
@@ -191,12 +202,13 @@ function NetworksLedgerPage() {
           <div className="flex flex-wrap items-end justify-between gap-2 px-0.5">
             <div className="min-w-0">
               <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground">
-                Designations ledger
+                Official actions on terror-finance networks
               </h2>
               <p className="text-[12.5px] text-muted-foreground mt-0.5 max-w-2xl leading-snug">
-                One official-source tracker: terror-finance designations, freezes, arrests/charges,
-                and high-confidence financial-crime public actions (OFAC, DOJ, State, UAE, TFTC).
-                Allegations until adjudicated — US + US-allied Gulf focus.
+                Designations, freezes, arrests, and charges from OFAC, DOJ, State, UAE/TFTC, and
+                EU/member-state primary acts. Allegations until adjudicated. Linked organizations,
+                countries, institutions, and NGOs appear only when named in the primary source —
+                not collective guilt.
               </p>
               <p className="text-[11px] font-mono text-cyan/90 mt-1">
                 {NETWORKS_LEDGER_DATA.meta.version} · {ALL_ENTRIES.length} entries ·{" "}
@@ -240,24 +252,39 @@ function NetworksLedgerPage() {
 
         {/* Map */}
         <section className="mb-7 sm:mb-8" aria-labelledby="map-heading">
-          <div className="flex items-center gap-2 mb-2.5">
+          <div className="flex flex-wrap items-center gap-2 mb-2.5">
             <MapPin className="w-4 h-4 text-cyan" aria-hidden />
             <h2 id="map-heading" className="text-[13px] font-display font-semibold">
-              Interactive map
+              Action map
             </h2>
             <span className="text-[11px] text-muted-foreground hidden sm:inline">
-              Click a pin for summary + primary source
+              Color = network · badge = stacked actions · click for full summary + source
             </span>
+          </div>
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 mb-2.5 px-0.5">
+            {NETWORK_OPTIONS.map((n) => (
+              <span
+                key={n}
+                className="inline-flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground"
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full border border-foreground/25 shadow-[0_0_8px_currentColor]"
+                  style={{ background: NETWORK_MARKER_COLORS[n], color: NETWORK_MARKER_COLORS[n] }}
+                  aria-hidden
+                />
+                {n}
+              </span>
+            ))}
           </div>
           <Suspense
             fallback={
-              <div className="h-[280px] sm:h-[340px] rounded-xl border border-border/80 bg-secondary/30 animate-pulse grid place-items-center text-[12px] text-muted-foreground">
+              <div className="h-[320px] sm:h-[400px] md:h-[460px] rounded-xl border border-border/80 bg-secondary/30 animate-pulse grid place-items-center text-[12px] text-muted-foreground">
                 Loading map…
               </div>
             }
           >
             <NetworksMap
-              entries={ALL_ENTRIES}
+              entries={filtered.length ? filtered : ALL_ENTRIES}
               onSelect={(e) => setSelectedId(e.id)}
             />
           </Suspense>
@@ -269,18 +296,18 @@ function NetworksLedgerPage() {
           )}
         </section>
 
-        {/* Flagship */}
+        {/* Major packages */}
         <section className="mb-7 sm:mb-8" aria-labelledby="flagship-heading">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-cyan" aria-hidden />
             <h2 id="flagship-heading" className="text-[13px] font-display font-semibold">
-              Flagship actions
+              Major packages
             </h2>
             <span className="text-[11px] text-muted-foreground">
-              Highest-impact packages
+              Highest-impact official actions · full description + linked actors
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3.5 sm:gap-4">
             {flagships.map((e, i) => (
               <FlagshipCard key={e.id} entry={e} delay={i * 0.03} />
             ))}
@@ -306,11 +333,11 @@ function NetworksLedgerPage() {
                 type="search"
                 value={q}
                 onChange={(ev) => setQ(ev.target.value)}
-                placeholder="Search entities, networks, summary…"
+                placeholder="Search entities, networks, linked orgs, summary…"
                 className="w-full min-h-[44px] pl-10 pr-3 rounded-lg border border-border/80 bg-background/80 text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-cyan/50"
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <SelectFilter
                 label="Network"
                 value={network}
@@ -330,6 +357,15 @@ function NetworksLedgerPage() {
                     Object.entries(ACTION_TYPE_LABELS) as [ActionType, string][]
                   ).map(([value, label]) => ({ value, label })),
                 ]}
+              />
+              <SelectFilter
+                label="Region"
+                value={region}
+                onChange={setRegion}
+                options={REGION_OPTIONS.map((r) => ({
+                  value: r.value,
+                  label: r.label,
+                }))}
               />
               <SelectFilter
                 label="Country"
@@ -392,13 +428,25 @@ function NetworksLedgerPage() {
                       <td className="px-3 py-2.5 whitespace-nowrap font-mono text-[11px]">
                         {formatUsd(e.amountUsd)}
                       </td>
-                      <td className="px-3 py-2.5 max-w-[240px] text-muted-foreground leading-snug">
+                      <td className="px-3 py-2.5 max-w-[280px] text-muted-foreground leading-snug">
                         <span className="text-foreground/90 font-medium block mb-0.5">
                           {e.title}
                         </span>
-                        {e.summary.length > 140
-                          ? `${e.summary.slice(0, 140)}…`
-                          : e.summary}
+                        <span className="block whitespace-pre-wrap">{e.summary}</span>
+                        {linkedActorsOf(e).length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {linkedActorsOf(e)
+                              .slice(0, 4)
+                              .map((a) => (
+                                <LinkedChip key={`${e.id}-${a.name}`} actor={a} compact />
+                              ))}
+                            {linkedActorsOf(e).length > 4 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                +{linkedActorsOf(e).length - 4}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-3 py-2.5">
                         <a
@@ -434,15 +482,18 @@ function NetworksLedgerPage() {
           <p className="flex items-start gap-2">
             <FlaskConical className="w-4 h-4 text-cyan shrink-0 mt-0.5" />
             <span>
-              <strong className="text-foreground/90 font-medium">Phase 1 scope:</strong>{" "}
+              <strong className="text-foreground/90 font-medium">
+                {NETWORKS_LEDGER_DATA.meta.phase}:
+              </strong>{" "}
               {NETWORKS_LEDGER_DATA.meta.scope}
             </span>
           </p>
           <p className="flex items-start gap-2">
             <Shield className="w-4 h-4 text-cyan shrink-0 mt-0.5" />
             <span>
-              Not included yet (Phase 2+): detailed European trials, African operations, general
-              Lebanese post-2019 capital-flight / elite real-estate cases.
+              Still out of scope: journalism-only capital-flight narratives without an official
+              designation/freeze/charge; speculative NGO guilt-by-association; invented dollar
+              amounts.
             </span>
           </p>
         </section>
@@ -568,24 +619,25 @@ function MetricCard({
 }
 
 function FlagshipCard({ entry, delay }: { entry: LedgerEntry; delay: number }) {
+  const linked = linkedActorsOf(entry);
   return (
     <motion.article
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
-      className="rounded-xl border border-border/90 bg-card/50 p-3 sm:p-3.5 flex flex-col h-full hover:border-cyan/45 transition-colors"
+      className="rounded-xl border border-border/90 bg-card/50 p-4 sm:p-5 flex flex-col h-full hover:border-cyan/45 transition-colors min-w-0"
     >
       <div className="flex items-center justify-between gap-2 mb-1.5">
         <span className="text-[10px] font-mono text-cyan/90">{formatDate(entry.date)}</span>
         <TypePill type={entry.type} />
       </div>
-      <h3 className="text-[13px] font-display font-semibold leading-snug text-foreground mb-1.5">
+      <h3 className="text-[14px] sm:text-[15px] font-display font-semibold leading-snug text-foreground mb-2.5">
         {entry.title}
       </h3>
-      <p className="text-[11.5px] text-muted-foreground leading-snug flex-1 mb-2">
-        {entry.summary.length > 160 ? `${entry.summary.slice(0, 160)}…` : entry.summary}
+      <p className="text-[13px] text-muted-foreground leading-relaxed flex-1 mb-3.5">
+        {entry.summary}
       </p>
-      <div className="flex flex-wrap gap-1 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2.5">
         {entry.networks.map((n) => (
           <span
             key={n}
@@ -594,7 +646,27 @@ function FlagshipCard({ entry, delay }: { entry: LedgerEntry; delay: number }) {
             {n}
           </span>
         ))}
+        {entry.regionFocus.map((r) => (
+          <span
+            key={r}
+            className="text-[9.5px] px-1.5 py-0.5 rounded-full border border-border/70 text-muted-foreground"
+          >
+            {r}
+          </span>
+        ))}
       </div>
+      {linked.length > 0 && (
+        <div className="mb-3 space-y-1.5">
+          <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            Linked actors (named in primary source)
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {linked.map((a) => (
+              <LinkedChip key={`${entry.id}-${a.kind}-${a.name}`} actor={a} />
+            ))}
+          </div>
+        </div>
+      )}
       {entry.amountUsd != null && (
         <p className="text-[11px] font-mono text-emerald-400/90 mb-2">
           {formatUsd(entry.amountUsd)}
@@ -609,12 +681,42 @@ function FlagshipCard({ entry, delay }: { entry: LedgerEntry; delay: number }) {
         href={entry.source.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[11.5px] text-cyan font-medium hover:underline min-h-[36px]"
+        className="inline-flex items-center gap-1 text-[12px] text-cyan font-medium hover:underline min-h-[36px] mt-auto"
       >
         {entry.source.label}
-        <ExternalLink className="w-3 h-3" />
+        <ExternalLink className="w-3.5 h-3.5" />
       </a>
     </motion.article>
+  );
+}
+
+const KIND_ABBR: Record<LinkedActor["kind"], string> = {
+  organization: "org",
+  country: "country",
+  institution: "inst",
+  ngo: "ngo",
+  person: "person",
+  company: "co",
+};
+
+function LinkedChip({ actor, compact }: { actor: LinkedActor; compact?: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/50 text-foreground/85 ${
+        compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
+      }`}
+      title={`${LINKED_KIND_LABELS[actor.kind]} · ${actor.role} · ${actor.relation}${
+        actor.direct ? "" : " (explicit source link)"
+      }`}
+    >
+      <span className="text-muted-foreground font-mono uppercase tracking-wider text-[8px]">
+        {KIND_ABBR[actor.kind]}
+      </span>
+      {actor.name}
+      {!compact && !actor.direct && (
+        <span className="text-muted-foreground/80 text-[8px]">indirect</span>
+      )}
+    </span>
   );
 }
 
@@ -663,6 +765,7 @@ function SelectedPinDetail({
   onClose: () => void;
 }) {
   if (!entry) return null;
+  const linked = linkedActorsOf(entry);
   return (
     <div className="mt-2.5 rounded-xl border border-cyan/35 bg-card/70 p-3 sm:p-4">
       <div className="flex items-start justify-between gap-2 mb-1">
@@ -678,7 +781,16 @@ function SelectedPinDetail({
         </button>
       </div>
       <h3 className="text-[14px] font-display font-semibold mb-1">{entry.title}</h3>
-      <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-2">{entry.summary}</p>
+      <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-2 whitespace-pre-wrap">
+        {entry.summary}
+      </p>
+      {linked.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {linked.map((a) => (
+            <LinkedChip key={`${entry.id}-sel-${a.name}`} actor={a} />
+          ))}
+        </div>
+      )}
       <a
         href={entry.source.url}
         target="_blank"

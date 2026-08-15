@@ -50,7 +50,7 @@ export const Route = createFileRoute("/research/library")({
       {
         name: "description",
         content:
-          "Free Elenchos library: public discourse topic analysis on X, multi-source case studies, leadership boards, peace index, and official designations ledger.",
+          "Free Elenchos library: public discourse topic analysis on X, multi-source case studies, leadership boards, peace index, and the Networks Ledger.",
       },
       {
         property: "og:title",
@@ -150,7 +150,7 @@ const DOORS = [
     title: "Trackers",
     kicker: "Indexes & ledgers",
     description:
-      "Leadership board, peace index, football player index, and the designations ledger (official terror-finance and financial-crime actions).",
+      "Leadership board, peace index, football player index, and the Networks Ledger (official terror-finance designations, freezes, arrests, charges).",
     leadsTo: "Opens free indexes and the networks ledger from this library.",
     cta: "Browse trackers",
     href: "#trackers",
@@ -384,7 +384,7 @@ function ResearchLibraryPage() {
                   Trackers
                 </h2>
                 <p className="text-[12.5px] text-muted-foreground mt-1 max-w-2xl leading-snug">
-                  Indexes, leadership board, and the designations ledger — free to explore.
+                  Indexes, leadership board, and the Networks Ledger — free to explore.
                 </p>
               </div>
               <button
@@ -401,10 +401,10 @@ function ResearchLibraryPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               <ToolCard
                 href="/research/networks-ledger"
-                title="Designations ledger"
-                body="Official terror-finance and financial-crime designations, freezes, and related public actions (OFAC, DOJ, State, UAE, TFTC) in one ledger."
+                title="Networks Ledger"
+                body="Official designations, freezes, arrests, and charges on terror-finance networks — map, major packages, linked orgs/countries when named in primary sources."
                 icon={<Shield className="w-5 h-5" />}
-                badge="Ledger"
+                badge="Phase 2"
               />
               <ToolCard
                 href="/trackers/leaders"

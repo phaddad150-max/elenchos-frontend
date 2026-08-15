@@ -1,4 +1,4 @@
-/** Networks Ledger — Phase 1 types (public official actions only). */
+/** Networks Ledger — Phase 2 types (public official actions only). */
 
 export type NetworkTag =
   | "IRGC"
@@ -32,7 +32,44 @@ export type CountryCode =
   | "QA"
   | "PL"
   | "SI"
+  | "DE"
+  | "FR"
+  | "BE"
+  | "NL"
+  | "AT"
+  | "CA"
   | "MULTI";
+
+export type RegionFocus = "US" | "Gulf" | "Lebanon" | "Europe" | "Africa" | "Other";
+
+export type LinkedActorKind =
+  | "organization"
+  | "country"
+  | "institution"
+  | "ngo"
+  | "person"
+  | "company";
+
+export type LinkedActorRole =
+  | "designated"
+  | "charged"
+  | "arrested"
+  | "funder"
+  | "front"
+  | "jurisdiction"
+  | "beneficiary"
+  | "other";
+
+/** Actor named or clearly identified in the primary government source. */
+export interface LinkedActor {
+  kind: LinkedActorKind;
+  name: string;
+  role: LinkedActorRole;
+  /** Short relation grounded in source language */
+  relation: string;
+  /** true = listed SDN/defendant/named party; false only if source explicitly links */
+  direct: boolean;
+}
 
 export interface LedgerSource {
   label: string;
@@ -63,10 +100,12 @@ export interface LedgerEntry {
   title: string;
   summary: string;
   source: LedgerSource;
-  /** Highlight on Flagship Actions strip */
+  /** Highlight on Major packages strip */
   flagship?: boolean;
-  /** Phase-1 geography focus tags for filters */
-  regionFocus: ("US" | "Gulf" | "Lebanon" | "Other")[];
+  /** Geography focus tags for filters */
+  regionFocus: RegionFocus[];
+  /** Orgs / countries / institutions / NGOs named in primary source */
+  linkedActors?: LinkedActor[];
 }
 
 export interface NetworksLedgerData {

@@ -1,4 +1,4 @@
-# Networks Ledger (Phase 1)
+# Networks Ledger (Phase 2)
 
 Public tracker of **official government designations, arrests/charges, and quantified freezes** involving:
 
@@ -8,19 +8,20 @@ Public tracker of **official government designations, arrests/charges, and quant
 - Hamas-linked financing  
 - Mixed / Axis (clear overlaps only)
 
-**Geography (Phase 1):** United States + US-allied Gulf (primarily UAE + TFTC partners).
+**Geography (Phase 2):** United States · US-allied Gulf (UAE + TFTC partners) · Europe (primary government/court sources) · Lebanon when the official act is a designation, freeze, or charge.
 
-**Live URL:** `/research/networks-ledger` (Research Desk → **Intelligence** tab).  
-The Intelligence hub also links Leadership, Peace, Media, Football trackers and the Fraud Ledger shell.
+**Live URL:** `/research/networks-ledger` (Research Desk → **Library**).  
+Also linked from Library → Trackers.
 
 ---
 
 ## Golden data rule
 
-- Only **primary public government** sources (Treasury/OFAC, DOJ, State, UAE Cabinet/WAM, TFTC).  
+- Only **primary public government** sources (Treasury/OFAC, DOJ, State, UAE Cabinet/WAM, TFTC, EU/member-state justice where primary).  
 - Every row must have a working **`source.url`**.  
 - Charges are **allegations until adjudicated** (stated in UI disclaimer).  
-- Do **not** invent dollar amounts; use official figures or `null`.
+- Do **not** invent dollar amounts; use official figures or `null`.  
+- **`linkedActors`** (organizations, countries, institutions, NGOs, persons, companies) only when **named or clearly identified** in the primary source — not guilt by association.
 
 ---
 
@@ -46,18 +47,27 @@ The Intelligence hub also links Leadership, Peace, Media, Football trackers and 
   "amountUsd": null,
   "amountNote": "Optional context if amountUsd is set",
   "title": "Short official action title",
-  "summary": "2–4 sentences grounded only in the source release.",
+  "summary": "Full multi-sentence description grounded only in the source release.",
   "source": {
     "label": "Treasury press release CODE",
     "url": "https://home.treasury.gov/...",
     "agency": "US Treasury / OFAC"
   },
   "flagship": false,
-  "regionFocus": ["US"]
+  "regionFocus": ["US"],
+  "linkedActors": [
+    {
+      "kind": "organization",
+      "name": "Named org",
+      "role": "designated",
+      "relation": "As stated in source",
+      "direct": true
+    }
+  ]
 }
 ```
 
-3. Set `"flagship": true` only for high-impact multi-entity or large-$ packages (max ~8).
+3. Set `"flagship": true` only for high-impact multi-entity or large-$ packages (target ~10–14).
 4. Bump `meta.lastReviewed` (YYYY-MM-DD).
 5. Run the app and confirm the row appears in metrics, map, and ledger table.
 
@@ -66,9 +76,12 @@ The Intelligence hub also links Leadership, Peace, Media, Football trackers and 
 | Field | Notes |
 |-------|--------|
 | `networks` | One or more of: `IRGC`, `Hezbollah`, `Muslim Brotherhood`, `Hamas`, `Mixed / Axis` |
-| `country` | `US`, `UAE`, `SA`, `BH`, `LB`, `TR`, `UK`, `MULTI`, etc. |
+| `country` | `US`, `UAE`, `SA`, `BH`, `LB`, `TR`, `UK`, `DE`, `MULTI`, etc. |
 | `amountUsd` | Integer USD or `null`. Prefer unique packages to avoid double-counting in metrics. |
-| `regionFocus` | `US` \| `Gulf` \| `Lebanon` \| `Other` (filter/analytics helper) |
+| `regionFocus` | `US` \| `Gulf` \| `Lebanon` \| `Europe` \| `Africa` \| `Other` |
+| `linkedActors[].kind` | `organization` \| `country` \| `institution` \| `ngo` \| `person` \| `company` |
+| `linkedActors[].role` | `designated` \| `charged` \| `arrested` \| `funder` \| `front` \| `jurisdiction` \| `beneficiary` \| `other` |
+| `linkedActors[].direct` | `true` if listed SDN/defendant/named party; `false` only if source explicitly links |
 
 Types live in `types.ts`. Aggregations live in `index.ts`.
 
@@ -85,23 +98,23 @@ npm run dev          # local: http://localhost:…/research/networks-ledger
 npm run build        # production bundle
 ```
 
-Ship via your normal Vercel (or host) pipeline for `elenchos.live`. No Supabase tables required for Phase 1 — data is local JSON.
+Ship via the normal Vercel pipeline for `elenchos.live`. No Supabase tables required — data is local JSON.
 
 ### Embed / deep link
 
 - Full page: `https://elenchos.live/research/networks-ledger`  
-- Research Desk card also links from `/research`.
+- Legacy anchors `#designations-ledger`, `#fraud-ledger`, `#ledger` still scroll to the tracker.
 
 ---
 
-## Phase 2+ (do not add yet)
+## Phase 3+ (later)
 
-- Detailed European arrests/trials (Germany, UK, etc.)  
-- African operations  
-- General Lebanese post-2019 capital-flight / elite real-estate cases  
+- Broader European prosecutions with court primary sources  
+- African operations where primary government releases exist  
+- Deeper Lebanese capital-flight cases **only** when tied to an official designation/freeze/charge  
 
 ---
 
 ## Disclaimer (always on page)
 
-> Independent aggregation of public official announcements only (US Treasury/OFAC, DOJ, State, UAE Cabinet/TFTC). Charges and designations are allegations until adjudicated. Not affiliated with any government.
+> Independent aggregation of public official announcements only (US Treasury/OFAC, DOJ, State, EU/member-state justice where primary, UAE Cabinet/TFTC). Charges and designations are allegations until adjudicated. Linked organizations, NGOs, institutions, and countries appear only when named or clearly identified in the primary source — not collective guilt. Not affiliated with any government.

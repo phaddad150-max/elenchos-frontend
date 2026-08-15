@@ -132,7 +132,7 @@ export function GlobalSearch() {
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
             <CommandItem
-              value="library case studies trackers topics discourse designations ledger leaders peace"
+              value="library case studies trackers topics discourse networks ledger designations leaders peace"
               onSelect={() => go("/research/library")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
