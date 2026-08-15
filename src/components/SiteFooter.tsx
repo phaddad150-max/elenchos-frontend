@@ -5,11 +5,11 @@ import { ELENCHOS_TAGLINE } from "@/lib/brand";
 /** Site footer: nav CTAs + legal. Keep short; story lives on About. */
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border mt-6 pb-20 md:pb-0">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-2.5 text-muted-foreground">
+    <footer className="border-t border-border/80 mt-8 pb-20 md:pb-0 bg-gradient-to-t from-card/40 to-transparent">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-5 space-y-3 text-muted-foreground">
         <nav
           aria-label="Footer"
-          className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-[12px] font-mono"
+          className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[11px] sm:text-[12px] font-mono"
         >
           <Link to="/" className="text-cyan hover:underline">
             Dashboard

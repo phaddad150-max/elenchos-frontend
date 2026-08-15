@@ -659,7 +659,7 @@ const CARD_CTA =
 
 /** Fixed card height was clipping the CTA — use min-height only so Open/View always shows. */
 const TOPIC_CARD_SHELL =
-  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/30 bg-gradient-to-br from-secondary/30 via-secondary/10 to-cyan/[0.04] p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/60 md:hover:shadow-[0_0_24px_-12px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] sm:min-h-[260px]";
+  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/35 p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/65 md:hover:shadow-[0_0_32px_-10px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] sm:min-h-[260px]";
 
 function TopicCardCadence({
   cadence,

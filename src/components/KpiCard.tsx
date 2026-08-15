@@ -65,18 +65,20 @@ export function KpiCard({
         setExpanded((v) => !v);
         onClick?.();
       }}
-      className={`kpi-card kpi-cyan glass rounded-2xl p-3 sm:p-4 cursor-pointer group touch-manipulation min-h-[44px]`}
+      className={`kpi-card kpi-cyan glass rounded-2xl p-3.5 sm:p-4 cursor-pointer group touch-manipulation min-h-[44px]`}
       whileTap={{ scale: 0.985 }}
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
-          <Icon className="w-3 h-3" style={{ color: accentColor[variant] }} strokeWidth={2.4} />
+      <div className="flex items-center justify-between mb-2.5">
+        <div className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground font-mono">
+          <span className="w-6 h-6 rounded-md grid place-items-center border border-cyan/35 bg-cyan/10">
+            <Icon className="w-3 h-3" style={{ color: accentColor[variant] }} strokeWidth={2.4} />
+          </span>
           {label}
         </div>
       </div>
       <div
-        className={`text-3xl md:text-4xl font-display font-semibold tabular-nums leading-none ${flash ? "ticker-flash" : ""}`}
-        style={{ color: numberColor, textShadow: `0 0 18px ${numberColor}55` }}
+        className={`text-3xl md:text-[2.35rem] font-display font-semibold tabular-nums leading-none tracking-tight ${flash ? "ticker-flash" : ""}`}
+        style={{ color: numberColor, textShadow: `0 0 22px ${numberColor}66, 0 0 40px ${numberColor}33` }}
       >
         {displayValue}
         {unit && typeof value === "number" && (

@@ -83,7 +83,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
               href="https://x.com/elenchospulse"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 text-[11px] font-mono uppercase tracking-[0.16em]"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan/45 bg-cyan/12 text-cyan hover:bg-cyan/22 hover:shadow-[0_0_20px_-6px_var(--cyan-glow)] text-[11px] font-mono uppercase tracking-[0.16em] transition-all"
               aria-label="Follow Elenchos on X"
             >
               <XLogo className="w-3.5 h-3.5" />

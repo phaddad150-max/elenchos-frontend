@@ -46,7 +46,7 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
       className={`sticky top-[3.25rem] md:top-[3.75rem] z-20 -mx-0.5 mb-4 sm:mb-5 ${className}`}
     >
       <div className="overflow-x-auto scrollbar-none -mx-1 px-1">
-        <ul className="flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-full rounded-xl border border-border/80 bg-card/85 backdrop-blur-md p-1 shadow-sm">
+        <ul className="rd-nav-shell flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-full rounded-xl p-1">
           {ITEMS.map((item) => {
             const active = item.match(pathname);
             const Icon = item.icon;
@@ -54,9 +54,9 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
               <li key={item.to} className="shrink-0 sm:flex-1 min-w-0">
                 <Link
                   to={item.to}
-                  className={`flex items-center justify-center gap-1.5 min-h-[42px] sm:min-h-[44px] px-2.5 sm:px-3 rounded-lg text-[11.5px] sm:text-[12.5px] font-medium touch-manipulation transition-colors whitespace-nowrap ${
+                  className={`rd-nav-item flex items-center justify-center gap-1.5 min-h-[42px] sm:min-h-[44px] px-2.5 sm:px-3 rounded-lg text-[11.5px] sm:text-[12.5px] font-medium touch-manipulation whitespace-nowrap ${
                     active
-                      ? "bg-cyan/15 text-cyan border border-cyan/40 shadow-[0_0_0_1px_color-mix(in_oklab,var(--cyan)_20%,transparent)]"
+                      ? "rd-nav-item-active"
                       : "text-muted-foreground border border-transparent hover:text-foreground hover:bg-secondary/50"
                   }`}
                   aria-current={active ? "page" : undefined}

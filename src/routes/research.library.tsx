@@ -254,7 +254,7 @@ function ResearchLibraryPage() {
                   <Link
                     to="/topics/$topicId"
                     params={{ topicId: t.id }}
-                    className="group flex flex-col h-full min-h-[140px] rounded-2xl border border-border/80 bg-card/50 hover:border-cyan/45 p-3.5 transition-colors touch-manipulation"
+                    className="rd-card group flex flex-col h-full min-h-[140px] rounded-2xl border border-border/80 bg-card/60 hover:border-cyan/50 p-3.5 transition-colors touch-manipulation"
                   >
                     <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
                       Topic analysis
@@ -396,7 +396,7 @@ function ResearchLibraryPage() {
           </p>
           <Link
             to="/research/commission"
-            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full bg-cyan text-background text-[13px] font-semibold touch-manipulation shrink-0"
+            className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] touch-manipulation shrink-0"
           >
             Commission report · $10 / $20 <ArrowRight className="w-4 h-4" />
           </Link>
@@ -447,7 +447,7 @@ function CaseCard({ item, delay }: { item: CaseStudy; delay: number }) {
       <Link
         to={item.href}
         params={item.params as never}
-        className="group flex gap-3 rounded-2xl border border-border/90 bg-card/50 hover:border-cyan/45 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0"
+        className="rd-lib-row group flex gap-3 rounded-2xl border border-border/90 bg-card/55 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0"
       >
         <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
           <FileText className="w-4 h-4" />
@@ -488,7 +488,7 @@ function ToolCard({
     href.startsWith("/research") ||
     href.startsWith("/topics");
   const className =
-    "group flex flex-col h-full min-h-[148px] rounded-2xl border border-border/80 bg-card/50 hover:border-cyan/45 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
+    "rd-card group flex flex-col h-full min-h-[148px] rounded-2xl border border-border/80 bg-card/55 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
 
   const inner = (
     <>

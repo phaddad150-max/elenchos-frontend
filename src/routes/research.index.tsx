@@ -109,7 +109,7 @@ function ResearchDeskLanding() {
               >
                 <Link
                   to={p.to}
-                  className={`group relative flex flex-col h-full min-h-[220px] sm:min-h-[240px] rounded-2xl border bg-gradient-to-b ${p.accent} bg-card/60 p-4 sm:p-5 overflow-hidden transition-all touch-manipulation ${p.glow} hover:shadow-[0_0_32px_-12px_var(--cyan-glow)]`}
+                  className={`rd-path-card rd-card group relative flex flex-col h-full min-h-[220px] sm:min-h-[240px] rounded-2xl border bg-gradient-to-b ${p.accent} bg-card/70 p-4 sm:p-5 overflow-hidden transition-all touch-manipulation ${p.glow} hover:shadow-[0_0_40px_-10px_var(--cyan-glow)]`}
                 >
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--cyan)_12%,transparent),transparent_70%)]" />
                   <div className="relative flex items-start justify-between gap-2 mb-4">
