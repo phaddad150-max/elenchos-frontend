@@ -10,7 +10,7 @@ const BRANCHES = [
     to: "/research/networks-ledger",
     label: "Terror & Finance",
     short: "Terror & Finance",
-    description: "Designations, freezes, arrests, charges",
+    description: "Aggregate official actions · names on source lists",
     icon: Shield,
     match: (p: string) =>
       p === "/research/networks-ledger" ||

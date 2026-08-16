@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "title": "Terror & Finance Networks",
+    "version": "3.0.0-privacy",
+    "phase": "Privacy-first aggregates · official sources only",
+    "lastReviewed": "2026-08-16",
+    "framing": "All information in this branch is drawn from already-public official sources. Individual and organisational names are not published on elenchos.live. Users who need the exact names can find them in the official public lists linked below.",
+    "privacyCore": "Individual and organisational names are never published on this page. Exact identifiers remain available only in the original official public sources. This ledger tracks aggregate patterns in official designations, freezes, arrests and charges.",
+    "scope": "Aggregate patterns of official terror-finance enforcement: designations, freezes, arrests, and charges. High-level financing-network categories and geography only — never party-level identifiers.",
+    "methodology": [
+      "All counts are derived from already-public official announcements (Treasury/OFAC, DOJ, State, TFTC, UAE Cabinet/WAM where official, EU/member-state primary acts where applicable).",
+      "elenchos.live does not republish personal or organisational identifiers. Users verify exact names only on the official public lists linked on this page.",
+      "Action types and category tags are system-level classifications used for trend analysis, not findings of guilt.",
+      "Quantified fund figures appear only when officials published dollar amounts; they are directional and may overlap across related packages.",
+      "Refresh cadence follows the quality and timing of official source releases (typically weekly review)."
+    ],
+    "limitations": [
+      "Not a complete map of all global counter-terror finance activity.",
+      "Not a list of sanctioned parties — those live only on official lists.",
+      "Charges and designations are allegations or administrative acts until adjudicated as each source’s law provides.",
+      "Category and geography breakdowns are high-level; they do not identify specific persons or entities.",
+      "Corpus coverage is curated (US · Gulf/TFTC · Europe · Lebanon when the official act is a designation, freeze, or charge) — not exhaustive worldwide."
+    ]
+  },
+  "period": {
+    "label": "Latest window (May–Aug 2026)",
+    "from": "2026-05-01",
+    "to": "2026-08-16",
+    "corpusLabel": "Curated official-action corpus"
+  },
+  "metrics": {
+    "totalActions": 31,
+    "designationsAndJoint": 24,
+    "designations": 20,
+    "jointActions": 4,
+    "assetFreezes": 2,
+    "arrestsCharges": 5,
+    "actionsSince2025": 28,
+    "actionsLatestPeriod": 12,
+    "quantifiedFundsUsdApprox": 210000000,
+    "quantifiedFundsNote": "Where officials published figures, related packages in this corpus reference on the order of ~$210M in stated diversion/network estimates. Directional only; not a unique sum of all freezes worldwide."
+  },
+  "byActionType": [
+    { "id": "designation", "label": "Designations", "count": 20 },
+    { "id": "joint_action", "label": "Joint / multilateral packages", "count": 4 },
+    { "id": "charges", "label": "Charges / cases", "count": 4 },
+    { "id": "asset_freeze", "label": "Asset freezes / blocks", "count": 2 },
+    { "id": "arrest", "label": "Arrests (official report)", "count": 1 }
+  ],
+  "byNetworkCategory": [
+    {
+      "id": "hezbollah_finance",
+      "label": "Hezbollah-linked financing channels",
+      "count": 18,
+      "note": "Category tag — not a list of parties"
+    },
+    {
+      "id": "hamas_finance",
+      "label": "Hamas-linked financing channels",
+      "count": 12,
+      "note": "Category tag — not a list of parties"
+    },
+    {
+      "id": "mb_finance",
+      "label": "Muslim Brotherhood chapter-related actions",
+      "count": 10,
+      "note": "Category tag — not a list of parties"
+    },
+    {
+      "id": "mixed_axis",
+      "label": "Mixed / overlapping axis packages",
+      "count": 4,
+      "note": "Category tag — not a list of parties"
+    },
+    {
+      "id": "irgc_axis",
+      "label": "IRGC-linked enforcement actions",
+      "count": 2,
+      "note": "Category tag — not a list of parties"
+    }
+  ],
+  "byRegion": [
+    { "id": "US", "label": "United States", "count": 20 },
+    { "id": "Gulf", "label": "Gulf / TFTC", "count": 9 },
+    { "id": "Lebanon", "label": "Lebanon (entity context)", "count": 9 },
+    { "id": "Other", "label": "Other / multi", "count": 6 },
+    { "id": "Europe", "label": "Europe", "count": 5 },
+    { "id": "Africa", "label": "Africa", "count": 1 }
+  ],
+  "series": [
+    { "date": "2025-03", "actions": 1 },
+    { "date": "2025-07", "actions": 1 },
+    { "date": "2026-01", "actions": 6 },
+    { "date": "2026-03", "actions": 8 },
+    { "date": "2026-05", "actions": 3 },
+    { "date": "2026-06", "actions": 6 },
+    { "date": "2026-07", "actions": 2 },
+    { "date": "2026-08", "actions": 1 }
+  ],
+  "observations": [
+    {
+      "id": "obs-channels",
+      "text": "Official actions in this corpus continue to concentrate on financing channels and institutional infrastructure rather than isolated one-off conduct alone.",
+      "updatedAt": "2026-08-16"
+    },
+    {
+      "id": "obs-latest",
+      "text": "In the latest window (May–Aug 2026), new official actions remain weighted toward designations and joint/multilateral packages, with a smaller share of arrests and charges reported in primary sources.",
+      "updatedAt": "2026-08-16"
+    },
+    {
+      "id": "obs-geo",
+      "text": "Enforcement geography in the curated set is still led by United States instruments, with material Gulf/TFTC joint packages and a smaller European baseline of proscription/listing acts.",
+      "updatedAt": "2026-08-16"
+    },
+    {
+      "id": "obs-privacy",
+      "text": "Party-level identifiers are not republished here. Exact names of designated, frozen, arrested, or charged parties remain only on the official public lists linked below.",
+      "updatedAt": "2026-08-16"
+    }
+  ],
+  "sources": [
+    {
+      "id": "ofac-recent",
+      "label": "OFAC Recent Actions",
+      "agency": "US Treasury / OFAC",
+      "url": "https://ofac.treasury.gov/recent-actions",
+      "kind": "official_list"
+    },
+    {
+      "id": "ofac-sdn",
+      "label": "OFAC Sanctions List Search (SDN and programs)",
+      "agency": "US Treasury / OFAC",
+      "url": "https://sanctionssearch.ofac.treas.gov/",
+      "kind": "official_list"
+    },
+    {
+      "id": "treasury-sanctions",
+      "label": "Treasury — Financial sanctions policy hub",
+      "agency": "US Treasury",
+      "url": "https://home.treasury.gov/policy-issues/financial-sanctions",
+      "kind": "official_hub"
+    },
+    {
+      "id": "treasury-press",
+      "label": "Treasury press releases",
+      "agency": "US Treasury",
+      "url": "https://home.treasury.gov/news/press-releases",
+      "kind": "official_hub"
+    },
+    {
+      "id": "state-fto",
+      "label": "Foreign Terrorist Organizations (State)",
+      "agency": "US Department of State",
+      "url": "https://www.state.gov/foreign-terrorist-organizations/",
+      "kind": "official_list"
+    },
+    {
+      "id": "doj-ns",
+      "label": "DOJ National Security",
+      "agency": "US Department of Justice",
+      "url": "https://www.justice.gov/nsd",
+      "kind": "official_hub"
+    },
+    {
+      "id": "tftc",
+      "label": "TFTC designations index",
+      "agency": "Terrorist Financing Targeting Center",
+      "url": "https://www.tftc-istehdaf.org/designations",
+      "kind": "official_list"
+    },
+    {
+      "id": "uk-proscribed",
+      "label": "UK proscribed terrorist groups",
+      "agency": "UK Home Office",
+      "url": "https://www.gov.uk/government/publications/proscribed-terror-groups-or-organisations--2",
+      "kind": "official_list"
+    },
+    {
+      "id": "eu-sanctions",
+      "label": "EU sanctions map / restrictive measures",
+      "agency": "European Union",
+      "url": "https://www.sanctionsmap.eu/",
+      "kind": "official_list"
+    },
+    {
+      "id": "uae-wam",
+      "label": "UAE official news (WAM) — Cabinet / security announcements",
+      "agency": "UAE / WAM",
+      "url": "https://www.wam.ae/en",
+      "kind": "official_hub"
+    }
+  ]
+}

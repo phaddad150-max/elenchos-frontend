@@ -402,7 +402,7 @@ function ResearchLibraryPage() {
               <ToolCard
                 href="/research/networks-ledger"
                 title="Networks Ledger"
-                body="Two branches: Terror & Finance (designations, freezes, charges) and Speech Reach (how public speech travels in X’s For You feed)."
+                body="Two privacy-first branches: Terror & Finance (aggregate official actions; names only on official lists) and Speech Reach (For You distribution rules)."
                 icon={<Shield className="w-5 h-5" />}
                 badge="Live"
               />

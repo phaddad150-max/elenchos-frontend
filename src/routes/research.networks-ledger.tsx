@@ -1,20 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState, lazy, Suspense, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
+  Activity,
   ArrowRight,
+  BookOpen,
   Brain,
   ExternalLink,
-  Filter,
   FlaskConical,
-  MapPin,
+  Info,
+  Link2,
   MessageSquareShare,
-  Search,
+  Radio,
   Shield,
   Trophy,
   Users,
-  Zap,
 } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  Area,
+  AreaChart,
+} from "recharts";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
@@ -23,50 +35,36 @@ import {
 } from "@/components/research/ResearchDeskNav";
 import { LedgerBranchNav } from "@/components/networks-ledger/LedgerBranchNav";
 import {
-  ACTION_TYPE_LABELS,
-  ALL_ENTRIES,
-  LINKED_KIND_LABELS,
-  NETWORKS_LEDGER_DATA,
-  NETWORKS_LEDGER_DISCLAIMER,
-  NETWORK_MARKER_COLORS,
-  NETWORK_OPTIONS,
-  REGION_OPTIONS,
-  computeMetrics,
-  filterEntries,
-  flagshipEntries,
-  formatDate,
-  formatUsd,
-  linkedActorsOf,
-  type ActionType,
-  type LedgerEntry,
-  type LinkedActor,
+  TERROR_FINANCE_DATA,
+  TERROR_FINANCE_META,
+  TERROR_FINANCE_METRICS,
+  TERROR_FINANCE_OBSERVATIONS,
+  TERROR_FINANCE_SOURCES,
+  formatMonthLabel,
+  formatUsdApprox,
+  sortedSlices,
+  type OfficialSource,
 } from "@/lib/networks-ledger";
-
-const NetworksMap = lazy(() =>
-  import("@/components/networks-ledger/NetworksMap").then((m) => ({
-    default: m.NetworksMap,
-  })),
-);
 
 export const Route = createFileRoute("/research/networks-ledger")({
   head: () => ({
     meta: [
       {
-        title: "Networks Ledger · Terror & Finance · Library · Elenchos",
+        title: "Terror & Finance Networks · Networks Ledger · Elenchos",
       },
       {
         name: "description",
         content:
-          "Elenchos Networks Ledger: Terror & Finance Networks (official designations, freezes, arrests, charges) and Speech Reach (algorithmic distribution of already-public speech on X).",
+          "Terror & Finance Networks: aggregate patterns in official designations, freezes, arrests and charges. No individual or organisational names — verify on official public lists.",
       },
       {
         property: "og:title",
-        content: "Networks Ledger · Elenchos Research Desk",
+        content: "Terror & Finance Networks · Networks Ledger · Elenchos",
       },
       {
         property: "og:description",
         content:
-          "Two branches: Terror & Finance Networks · Speech Reach. Primary sources and privacy-safe metrics.",
+          "Privacy-first tracker of official terror-finance actions. Aggregates only; names live on official source lists.",
       },
       {
         property: "og:url",
@@ -77,39 +75,28 @@ export const Route = createFileRoute("/research/networks-ledger")({
       { rel: "canonical", href: "https://elenchos.live/research/networks-ledger" },
     ],
   }),
-  component: NetworksLedgerPage,
+  component: TerrorFinancePage,
 });
 
-function NetworksLedgerPage() {
-  const [q, setQ] = useState("");
-  const [network, setNetwork] = useState("all");
-  const [type, setType] = useState("all");
-  const [country, setCountry] = useState("all");
-  const [region, setRegion] = useState("all");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+const CHART_COLORS = [
+  "var(--cyan)",
+  "var(--amber-signal)",
+  "var(--emerald-signal)",
+  "var(--magenta)",
+  "var(--rose-signal)",
+  "#94a3b8",
+];
 
-  const metrics = useMemo(() => computeMetrics(ALL_ENTRIES), []);
-  const flagships = useMemo(() => flagshipEntries(ALL_ENTRIES).slice(0, 12), []);
-  const filtered = useMemo(
-    () => filterEntries(ALL_ENTRIES, { q, network, type, country, region }),
-    [q, network, type, country, region],
-  );
-
-  const countries = useMemo(() => {
-    const set = new Set(ALL_ENTRIES.map((e) => e.location.country));
-    return [...set].sort();
-  }, []);
-
-  // Deep-link #designations-ledger from hub cards (legacy #fraud-ledger aliases here)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const h = window.location.hash;
-    if (h === "#designations-ledger" || h === "#fraud-ledger" || h === "#ledger") {
-      document
-        .getElementById("designations-ledger")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
+function TerrorFinancePage() {
+  const m = TERROR_FINANCE_METRICS;
+  const period = TERROR_FINANCE_DATA.period;
+  const byType = sortedSlices(TERROR_FINANCE_DATA.byActionType);
+  const byCategory = sortedSlices(TERROR_FINANCE_DATA.byNetworkCategory);
+  const byRegion = sortedSlices(TERROR_FINANCE_DATA.byRegion);
+  const series = TERROR_FINANCE_DATA.series.map((p) => ({
+    ...p,
+    label: formatMonthLabel(p.date),
+  }));
 
   return (
     <div className="page-shell dash-landing">
@@ -117,38 +104,104 @@ function NetworksLedgerPage() {
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <ResearchBreadcrumb current="Library · Trackers" />
+        <ResearchBreadcrumb current="Library · Terror & Finance" />
         <ResearchDeskNav />
+        <LedgerBranchNav />
 
         {/* Hero */}
         <header className="page-hero-banner mb-5 sm:mb-6 overflow-hidden relative min-w-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-violet-500/8 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-amber-signal/8 pointer-events-none" />
           <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5 min-w-0">
             <div className="page-hero-kicker">
-              <Brain className="w-3.5 h-3.5" aria-hidden />
-              Library · Networks Ledger
+              <Shield className="w-3.5 h-3.5" aria-hidden />
+              Networks Ledger · Terror & Finance
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] break-words">
-              Networks Ledger
+              Terror & Finance Networks
             </h1>
-            <p className="text-[12px] font-mono text-cyan/90 tracking-wide">
-              Terror & Finance · Speech Reach
+            <p className="text-[13px] sm:text-[14px] font-medium text-foreground/90 max-w-3xl leading-snug">
+              Tracking official designations, freezes, arrests and charges related to terror-finance
+              activity
             </p>
-            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed break-words">
-              Two public ledgers under one roof: official terror-finance enforcement actions, and
-              code-visible rules that limit how already-public speech travels in X’s algorithmic
-              feed.{" "}
-              <Link to="/research/library" className="text-cyan hover:underline">
-                Back to full library
-              </Link>
-              .
+            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed">
+              {TERROR_FINANCE_META.framing}
+            </p>
+            <p className="text-[11px] font-mono text-cyan/90">
+              {TERROR_FINANCE_META.version} · last reviewed {TERROR_FINANCE_META.lastReviewed}
             </p>
           </div>
         </header>
 
-        <LedgerBranchNav />
+        {/* Privacy strip */}
+        <aside
+          role="note"
+          className="mb-5 rounded-xl border border-cyan/30 bg-cyan/[0.06] px-3.5 py-3 text-[12px] sm:text-[12.5px] leading-relaxed text-foreground/90"
+        >
+          <p className="flex items-start gap-2">
+            <Shield className="w-4 h-4 text-cyan shrink-0 mt-0.5" aria-hidden />
+            <span>
+              <strong className="font-semibold text-foreground">Privacy — </strong>
+              {TERROR_FINANCE_META.privacyCore}
+            </span>
+          </p>
+        </aside>
 
-        {/* Tool hub */}
+        {/* Status / overview */}
+        <section
+          className="mb-7 sm:mb-8 rounded-2xl border border-cyan/30 bg-gradient-to-br from-card/80 via-card/50 to-cyan/[0.04] overflow-hidden"
+          aria-labelledby="tf-overview"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-border/70 bg-secondary/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <Brain className="w-4 h-4 text-cyan shrink-0" aria-hidden />
+              <h2
+                id="tf-overview"
+                className="text-[14px] sm:text-[15px] font-display font-semibold"
+              >
+                Overview · {period.label}
+              </h2>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.14em] px-2 py-1 rounded-full border border-emerald-signal/45 text-emerald-signal bg-emerald-signal/10">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-signal animate-pulse" />
+              Aggregates only
+            </span>
+          </div>
+          <div className="p-4 sm:p-5 space-y-4">
+            <p className="text-[13px] text-foreground/90 leading-relaxed max-w-3xl">
+              High-level summary of official activity in the curated corpus.{" "}
+              <strong className="font-semibold text-foreground">
+                Names of individuals and organisations are not published on this site.
+              </strong>{" "}
+              Use the official public lists below to look up exact identifiers.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <OverviewStat
+                label="Actions (latest window)"
+                value={String(m.actionsLatestPeriod)}
+              />
+              <OverviewStat
+                label="Designations + joint"
+                value={String(m.designationsAndJoint)}
+              />
+              <OverviewStat label="Arrests / charges" value={String(m.arrestsCharges)} />
+              <OverviewStat label="Corpus total" value={String(m.totalActions)} />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:items-center pt-1">
+              <a
+                href="#official-sources"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-xl border border-cyan/45 bg-cyan/10 text-cyan text-[13px] font-medium hover:bg-cyan/15 transition-colors"
+              >
+                <Link2 className="w-4 h-4" />
+                Official public lists
+              </a>
+              <span className="text-[11px] text-muted-foreground sm:ml-1">
+                Names live only on those sources — not here.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Related tools */}
         <section className="mb-7 sm:mb-8" aria-labelledby="intel-tools">
           <h2
             id="intel-tools"
@@ -158,19 +211,11 @@ function NetworksLedgerPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             <ToolCard
-              href="#designations-ledger"
-              title="Terror & Finance"
-              body="Map + ledger of official designations, freezes, arrests, and charges — primary government sources only."
-              icon={<Shield className="w-5 h-5" />}
-              badge="On this page"
-              tone="cyan"
-            />
-            <ToolCard
               href="/research/networks-ledger/speech-reach"
               title="Speech Reach"
-              body="How already-public speech is distributed — or limited — in X’s For You feed. Brazil 2026 filter first."
+              body="How already-public speech is distributed — or limited — in X’s For You feed."
               icon={<MessageSquareShare className="w-5 h-5" />}
-              badge="New"
+              badge="Sibling"
               tone="violet"
             />
             <ToolCard
@@ -190,324 +235,395 @@ function NetworksLedgerPage() {
               tone="cyan"
             />
           </div>
-          <Link
-            to="/trackers"
-            className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-mono text-cyan hover:underline min-h-[40px] px-0.5"
-          >
-            Open full trackers hub <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </section>
-
-        {/* Terror & Finance branch content */}
-        <div id="designations-ledger" className="scroll-mt-28 space-y-5 sm:space-y-6">
-          <div className="flex flex-wrap items-end justify-between gap-2 px-0.5">
-            <div className="min-w-0">
-              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan/90 mb-1">
-                Branch · Terror & Finance Networks
-              </p>
-              <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground">
-                Official actions on terror-finance networks
-              </h2>
-              <p className="text-[12.5px] text-muted-foreground mt-0.5 max-w-2xl leading-snug">
-                Designations, freezes, arrests, and charges from OFAC, DOJ, State, UAE/TFTC, and
-                EU/member-state primary acts. Allegations until adjudicated. Linked organizations,
-                countries, institutions, and NGOs appear only when named in the primary source —
-                not collective guilt.
-              </p>
-              <p className="text-[11px] font-mono text-cyan/90 mt-1">
-                {NETWORKS_LEDGER_DATA.meta.version} · {ALL_ENTRIES.length} entries ·{" "}
-                {NETWORKS_LEDGER_DATA.meta.lastReviewed}
-              </p>
-            </div>
-          </div>
-
-        <DisclaimerBanner />
 
         {/* Metrics */}
-        <section
-          aria-label="Top metrics"
-          className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-6"
-        >
-          <MetricCard
-            label="Total designations"
-            value={String(metrics.totalDesignations)}
-            hint="Incl. joint TFTC packages"
-            delay={0}
-          />
-          <MetricCard
-            label="Arrests / charges"
-            value={String(metrics.totalArrestsCharges)}
-            hint="Allegations until adjudicated"
-            delay={0.04}
-          />
-          <MetricCard
-            label="Quantified funds"
-            value={formatUsd(metrics.quantifiedFundsUsd)}
-            hint="Where officials published $ figures"
-            delay={0.08}
-          />
-          <MetricCard
-            label="Since Jan 2025"
-            value={String(metrics.actionsSince2025)}
-            hint={`Of ${metrics.totalEntries} ledger rows`}
-            delay={0.12}
-          />
-        </section>
-
-        {/* Map */}
-        <section className="mb-7 sm:mb-8" aria-labelledby="map-heading">
-          <div className="flex flex-wrap items-center gap-2 mb-2.5">
-            <MapPin className="w-4 h-4 text-cyan" aria-hidden />
-            <h2 id="map-heading" className="text-[13px] font-display font-semibold">
-              Action map
+        <section className="mb-7 sm:mb-8" aria-labelledby="tf-metrics">
+          <div className="flex flex-wrap items-center gap-2 mb-3 px-0.5">
+            <Activity className="w-4 h-4 text-cyan" aria-hidden />
+            <h2 id="tf-metrics" className="text-[13px] font-display font-semibold">
+              Aggregate metrics
             </h2>
-            <span className="text-[11px] text-muted-foreground hidden sm:inline">
-              Color = network · badge = stacked actions · click for full summary + source
+            <span className="text-[10px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full border border-amber-signal/40 text-amber-signal bg-amber-signal/10">
+              No party names
             </span>
           </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1.5 mb-2.5 px-0.5">
-            {NETWORK_OPTIONS.map((n) => (
-              <span
-                key={n}
-                className="inline-flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground"
-              >
-                <span
-                  className="w-2.5 h-2.5 rounded-full border border-foreground/25 shadow-[0_0_8px_currentColor]"
-                  style={{ background: NETWORK_MARKER_COLORS[n], color: NETWORK_MARKER_COLORS[n] }}
-                  aria-hidden
-                />
-                {n}
-              </span>
-            ))}
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
+            <MetricCard
+              label="New designations (corpus)"
+              value={String(m.designations)}
+              hint="Official designation actions in the curated set"
+              delay={0}
+            />
+            <MetricCard
+              label="Freezes / asset actions"
+              value={String(m.assetFreezes)}
+              hint="Asset freeze or blocking instruments counted"
+              delay={0.04}
+            />
+            <MetricCard
+              label="Arrests / charges"
+              value={String(m.arrestsCharges)}
+              hint="Official arrest or charge reports — allegations until adjudicated"
+              delay={0.08}
+            />
+            <MetricCard
+              label="Stated $ (directional)"
+              value={formatUsdApprox(m.quantifiedFundsUsdApprox)}
+              hint={m.quantifiedFundsNote}
+              delay={0.12}
+            />
           </div>
-          <Suspense
-            fallback={
-              <div className="h-[320px] sm:h-[400px] md:h-[460px] rounded-xl border border-border/80 bg-secondary/30 animate-pulse grid place-items-center text-[12px] text-muted-foreground">
-                Loading map…
+
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-3.5">
+            <div className="lg:col-span-3 rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h3 className="text-[12.5px] font-display font-semibold">
+                  Official actions over time
+                </h3>
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  Count of curated actions by month
+                </span>
               </div>
-            }
-          >
-            <NetworksMap
-              entries={filtered.length ? filtered : ALL_ENTRIES}
-              onSelect={(e) => setSelectedId(e.id)}
+              <div className="h-[240px] sm:h-[280px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="tfActFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--cyan)" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="var(--cyan)" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" opacity={0.6} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                      axisLine={{ stroke: "var(--border)" }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={28}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 10,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="actions"
+                      name="Actions"
+                      stroke="var(--cyan)"
+                      strokeWidth={2.2}
+                      fill="url(#tfActFill)"
+                      dot={{ r: 3, fill: "var(--cyan)" }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4 min-w-0">
+              <h3 className="text-[12.5px] font-display font-semibold mb-1">By action type</h3>
+              <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
+                System-level classification — not a party list.
+              </p>
+              <div className="h-[220px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={byType}
+                    layout="vertical"
+                    margin={{ top: 0, right: 12, left: 4, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      stroke="var(--border)"
+                      strokeDasharray="3 3"
+                      horizontal={false}
+                      opacity={0.5}
+                    />
+                    <XAxis
+                      type="number"
+                      allowDecimals={false}
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="label"
+                      width={120}
+                      tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 10,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={16}>
+                      {byType.map((_, i) => (
+                        <Cell key={byType[i]!.id} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5 mt-3.5">
+            <CategoryPanel
+              title="Financing-network categories"
+              subtitle="High-level tags only — never a list of designated parties"
+              slices={byCategory}
             />
-          </Suspense>
-          {selectedId && (
-            <SelectedPinDetail
-              entry={ALL_ENTRIES.find((e) => e.id === selectedId) ?? null}
-              onClose={() => setSelectedId(null)}
+            <CategoryPanel
+              title="Geographic focus"
+              subtitle="Where official instruments in this corpus were issued or focused"
+              slices={byRegion}
             />
-          )}
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted-foreground px-0.5 leading-snug">
+            Since Jan 2025: <span className="text-cyan font-mono">{m.actionsSince2025}</span> curated
+            actions · {period.corpusLabel} · joint packages counted separately from pure
+            designations where applicable.
+          </p>
         </section>
 
-        {/* Major packages */}
-        <section className="mb-7 sm:mb-8" aria-labelledby="flagship-heading">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-4 h-4 text-cyan" aria-hidden />
-            <h2 id="flagship-heading" className="text-[13px] font-display font-semibold">
-              Major packages
+        {/* Observations */}
+        <section className="mb-7 sm:mb-8" aria-labelledby="tf-obs">
+          <div className="flex items-center gap-2 mb-3 px-0.5">
+            <Radio className="w-4 h-4 text-cyan" aria-hidden />
+            <h2 id="tf-obs" className="text-[13px] font-display font-semibold">
+              Observations
             </h2>
-            <span className="text-[11px] text-muted-foreground">
-              Highest-impact official actions · full description + linked actors
-            </span>
+            <span className="text-[11px] text-muted-foreground">Trends without naming parties</span>
           </div>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3.5 sm:gap-4">
-            {flagships.map((e, i) => (
-              <FlagshipCard key={e.id} entry={e} delay={i * 0.03} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+            {TERROR_FINANCE_OBSERVATIONS.map((o, i) => (
+              <motion.article
+                key={o.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.3 }}
+                className="rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4"
+              >
+                <p className="text-[13px] text-foreground/90 leading-relaxed">{o.text}</p>
+                <p className="text-[10px] font-mono text-muted-foreground mt-2.5">
+                  Updated {o.updatedAt}
+                </p>
+              </motion.article>
             ))}
           </div>
         </section>
 
-        {/* Ledger table */}
-        <section className="mb-8" aria-labelledby="ledger-heading">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <Filter className="w-4 h-4 text-cyan" aria-hidden />
-            <h2 id="ledger-heading" className="text-[13px] font-display font-semibold">
-              Chronological ledger
+        {/* Official sources — permanent */}
+        <section
+          id="official-sources"
+          className="mb-7 sm:mb-8 scroll-mt-28"
+          aria-labelledby="tf-sources"
+        >
+          <div className="flex items-center gap-2 mb-3 px-0.5">
+            <Link2 className="w-4 h-4 text-cyan" aria-hidden />
+            <h2 id="tf-sources" className="text-[13px] font-display font-semibold">
+              Official public source lists
             </h2>
-            <span className="text-[11px] font-mono text-muted-foreground">
-              {filtered.length} shown
-            </span>
           </div>
-
-          <div className="rounded-xl border border-border/90 bg-card/40 p-3 sm:p-4 mb-3 space-y-2.5">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="search"
-                value={q}
-                onChange={(ev) => setQ(ev.target.value)}
-                placeholder="Search entities, networks, linked orgs, summary…"
-                className="w-full min-h-[44px] pl-10 pr-3 rounded-lg border border-border/80 bg-background/80 text-[13px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-cyan/50"
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectFilter
-                label="Network"
-                value={network}
-                onChange={setNetwork}
-                options={[
-                  { value: "all", label: "All networks" },
-                  ...NETWORK_OPTIONS.map((n) => ({ value: n, label: n })),
-                ]}
-              />
-              <SelectFilter
-                label="Type"
-                value={type}
-                onChange={setType}
-                options={[
-                  { value: "all", label: "All types" },
-                  ...(
-                    Object.entries(ACTION_TYPE_LABELS) as [ActionType, string][]
-                  ).map(([value, label]) => ({ value, label })),
-                ]}
-              />
-              <SelectFilter
-                label="Region"
-                value={region}
-                onChange={setRegion}
-                options={REGION_OPTIONS.map((r) => ({
-                  value: r.value,
-                  label: r.label,
-                }))}
-              />
-              <SelectFilter
-                label="Country"
-                value={country}
-                onChange={setCountry}
-                options={[
-                  { value: "all", label: "All countries" },
-                  ...countries.map((c) => ({ value: c, label: c })),
-                ]}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border/90 overflow-hidden bg-card/30">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[920px] text-left text-[12px]">
-                <thead className="bg-secondary/50 border-b border-border/80">
-                  <tr className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-                    <th className="px-3 py-2.5 font-medium">Date</th>
-                    <th className="px-3 py-2.5 font-medium">Type</th>
-                    <th className="px-3 py-2.5 font-medium">Network</th>
-                    <th className="px-3 py-2.5 font-medium">Entities</th>
-                    <th className="px-3 py-2.5 font-medium">Location</th>
-                    <th className="px-3 py-2.5 font-medium">Amount</th>
-                    <th className="px-3 py-2.5 font-medium">Summary</th>
-                    <th className="px-3 py-2.5 font-medium">Source</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((e) => (
-                    <tr
-                      key={e.id}
-                      className="border-b border-border/50 hover:bg-cyan/[0.04] align-top"
-                    >
-                      <td className="px-3 py-2.5 whitespace-nowrap font-mono text-[11px] text-cyan/90">
-                        {formatDate(e.date)}
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <TypePill type={e.type} />
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <div className="flex flex-wrap gap-1 max-w-[140px]">
-                          {e.networks.map((n) => (
-                            <span
-                              key={n}
-                              className="text-[10px] px-1.5 py-0.5 rounded border border-border/80 text-muted-foreground"
-                            >
-                              {n}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 max-w-[160px] text-foreground/90">
-                        {e.entities.slice(0, 3).join("; ")}
-                        {e.entities.length > 3 ? ` +${e.entities.length - 3}` : ""}
-                      </td>
-                      <td className="px-3 py-2.5 max-w-[120px] text-muted-foreground">
-                        {e.location.label}
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap font-mono text-[11px]">
-                        {formatUsd(e.amountUsd)}
-                      </td>
-                      <td className="px-3 py-2.5 max-w-[280px] text-muted-foreground leading-snug">
-                        <span className="text-foreground/90 font-medium block mb-0.5">
-                          {e.title}
-                        </span>
-                        <span className="block whitespace-pre-wrap">{e.summary}</span>
-                        {linkedActorsOf(e).length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1.5">
-                            {linkedActorsOf(e)
-                              .slice(0, 4)
-                              .map((a) => (
-                                <LinkedChip key={`${e.id}-${a.name}`} actor={a} compact />
-                              ))}
-                            {linkedActorsOf(e).length > 4 && (
-                              <span className="text-[10px] text-muted-foreground">
-                                +{linkedActorsOf(e).length - 4}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <a
-                          href={e.source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-cyan hover:underline min-h-[36px]"
-                        >
-                          {e.source.agency}
-                          <ExternalLink className="w-3 h-3 shrink-0" />
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                  {filtered.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={8}
-                        className="px-4 py-10 text-center text-muted-foreground"
-                      >
-                        No rows match these filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <p className="text-[12.5px] text-muted-foreground mb-3 px-0.5 max-w-3xl leading-relaxed">
+            Exact names of designated, frozen, arrested, or charged parties appear only on these
+            authoritative public sources. elenchos.live is not the original publisher of those
+            identifiers.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {TERROR_FINANCE_SOURCES.map((s) => (
+              <SourceCard key={s.id} source={s} />
+            ))}
           </div>
         </section>
 
-        {/* Scope / phase note */}
-        <section className="rounded-xl border border-border/80 bg-secondary/20 p-4 sm:p-5 mb-6 text-[12.5px] text-muted-foreground leading-relaxed space-y-2">
-          <p className="flex items-start gap-2">
-            <FlaskConical className="w-4 h-4 text-cyan shrink-0 mt-0.5" />
-            <span>
-              <strong className="text-foreground/90 font-medium">
-                {NETWORKS_LEDGER_DATA.meta.phase}:
-              </strong>{" "}
-              {NETWORKS_LEDGER_DATA.meta.scope}
-            </span>
+        {/* Methodology */}
+        <section
+          className="mb-7 sm:mb-8 rounded-xl border border-border/90 bg-card/40 p-4 sm:p-5 space-y-4"
+          aria-labelledby="tf-method"
+        >
+          <div className="flex items-center gap-2">
+            <FlaskConical className="w-4 h-4 text-cyan" aria-hidden />
+            <h2 id="tf-method" className="text-[13px] font-display font-semibold">
+              Methodology & privacy
+            </h2>
+          </div>
+          <p className="text-[12.5px] text-foreground/90 leading-relaxed border-l-2 border-cyan/40 pl-3">
+            {TERROR_FINANCE_META.privacyCore}
           </p>
-          <p className="flex items-start gap-2">
-            <Shield className="w-4 h-4 text-cyan shrink-0 mt-0.5" />
-            <span>
-              Still out of scope: journalism-only capital-flight narratives without an official
-              designation/freeze/charge; speculative NGO guilt-by-association; invented dollar
-              amounts.
-            </span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                How we measure
+              </h3>
+              <ul className="space-y-2">
+                {TERROR_FINANCE_META.methodology.map((line) => (
+                  <li
+                    key={line}
+                    className="text-[12.5px] text-muted-foreground leading-relaxed flex gap-2"
+                  >
+                    <Info className="w-3.5 h-3.5 text-cyan/80 shrink-0 mt-0.5" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                Limitations
+              </h3>
+              <ul className="space-y-2">
+                {TERROR_FINANCE_META.limitations.map((line) => (
+                  <li
+                    key={line}
+                    className="text-[12.5px] text-muted-foreground leading-relaxed flex gap-2"
+                  >
+                    <span className="text-amber-signal/90 shrink-0">·</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p className="text-[12px] text-muted-foreground leading-relaxed">
+            {TERROR_FINANCE_META.scope}
           </p>
         </section>
 
-        <DisclaimerBanner />
+        <div className="flex flex-wrap gap-3 text-[12.5px]">
+          <Link
+            to="/research/networks-ledger/speech-reach"
+            className="inline-flex items-center gap-1.5 text-cyan hover:underline min-h-[40px]"
+          >
+            <MessageSquareShare className="w-3.5 h-3.5" />
+            Speech Reach
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <Link
+            to="/research/library"
+            className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-cyan min-h-[40px]"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            Full library
+          </Link>
         </div>
       </main>
 
       <SiteFooter />
     </div>
+  );
+}
+
+function OverviewStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border/80 bg-background/40 p-3">
+      <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mb-1">
+        {label}
+      </p>
+      <p className="text-xl font-display font-semibold text-cyan tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  hint,
+  delay,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      className="rounded-xl border border-cyan/25 bg-gradient-to-br from-secondary/40 via-card/30 to-cyan/[0.04] p-3 sm:p-3.5 min-w-0"
+      title={hint}
+    >
+      <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mb-1 leading-tight">
+        {label}
+      </p>
+      <p className="text-xl sm:text-2xl font-display font-semibold text-cyan tabular-nums">
+        {value}
+      </p>
+      <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-snug line-clamp-3">{hint}</p>
+    </motion.div>
+  );
+}
+
+function CategoryPanel({
+  title,
+  subtitle,
+  slices,
+}: {
+  title: string;
+  subtitle: string;
+  slices: { id: string; label: string; count: number }[];
+}) {
+  const max = Math.max(1, ...slices.map((s) => s.count));
+  return (
+    <div className="rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4">
+      <h3 className="text-[12.5px] font-display font-semibold mb-0.5">{title}</h3>
+      <p className="text-[11px] text-muted-foreground mb-3 leading-snug">{subtitle}</p>
+      <ul className="space-y-2.5">
+        {slices.map((s, i) => (
+          <li key={s.id}>
+            <div className="flex items-center justify-between gap-2 text-[12px] mb-1">
+              <span className="text-foreground/90 leading-snug">{s.label}</span>
+              <span className="font-mono text-cyan tabular-nums shrink-0">{s.count}</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-secondary/80 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${(s.count / max) * 100}%`,
+                  background: CHART_COLORS[i % CHART_COLORS.length],
+                }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SourceCard({ source }: { source: OfficialSource }) {
+  return (
+    <a
+      href={source.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-col rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4 hover:border-cyan/45 transition-colors min-h-[88px]"
+    >
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90">
+          {source.kind === "official_list" ? "Official list" : "Official hub"}
+        </span>
+        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-cyan shrink-0" />
+      </div>
+      <span className="text-[13.5px] font-display font-semibold text-foreground group-hover:text-cyan leading-snug">
+        {source.label}
+      </span>
+      <span className="text-[11.5px] text-muted-foreground mt-1">{source.agency}</span>
+    </a>
   );
 }
 
@@ -543,8 +659,11 @@ function ToolCard({
           ? "text-emerald-signal bg-emerald-signal/10 border-emerald-signal/35"
           : "text-cyan bg-cyan/10 border-cyan/35";
 
-  const inner = (
-    <>
+  return (
+    <Link
+      to={href}
+      className={`group flex flex-col h-full min-h-[132px] rounded-2xl border bg-card/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0 overflow-hidden ${toneCls}`}
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="w-10 h-10 rounded-xl border border-border/80 bg-secondary/40 text-cyan grid place-items-center shrink-0">
           {icon}
@@ -555,255 +674,13 @@ function ToolCard({
           {badge}
         </span>
       </div>
-      <h3 className="text-[14px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors break-words">
+      <h3 className="text-[14px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors">
         {title}
       </h3>
-      <p className="text-[12px] text-muted-foreground leading-snug mt-1 break-words flex-1">{body}</p>
+      <p className="text-[12px] text-muted-foreground leading-snug mt-1 flex-1">{body}</p>
       <span className="mt-2.5 inline-flex items-center gap-1 text-[11.5px] font-medium text-cyan">
         Open <ArrowRight className="w-3.5 h-3.5" />
       </span>
-    </>
-  );
-
-  const className = `group flex flex-col h-full min-h-[148px] rounded-2xl border bg-card/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0 overflow-hidden ${toneCls}`;
-
-  if (href.startsWith("#")) {
-    return (
-      <a href={href} className={className}>
-        {inner}
-      </a>
-    );
-  }
-  return (
-    <Link to={href} className={className}>
-      {inner}
     </Link>
-  );
-}
-
-function DisclaimerBanner() {
-  return (
-    <aside
-      role="note"
-      className="mb-5 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2.5 text-[11.5px] sm:text-[12px] leading-snug text-foreground/85"
-    >
-      <strong className="font-semibold text-foreground">Disclaimer — </strong>
-      {NETWORKS_LEDGER_DISCLAIMER}
-    </aside>
-  );
-}
-
-function MetricCard({
-  label,
-  value,
-  hint,
-  delay,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      className="rounded-xl border border-cyan/25 bg-gradient-to-br from-secondary/40 via-card/30 to-cyan/[0.04] p-3 sm:p-3.5"
-    >
-      <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
-        {label}
-      </p>
-      <p className="text-xl sm:text-2xl font-display font-semibold text-cyan tabular-nums">
-        {value}
-      </p>
-      <p className="text-[10.5px] text-muted-foreground mt-1 leading-snug">{hint}</p>
-    </motion.div>
-  );
-}
-
-function FlagshipCard({ entry, delay }: { entry: LedgerEntry; delay: number }) {
-  const linked = linkedActorsOf(entry);
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35 }}
-      className="rounded-xl border border-border/90 bg-card/50 p-4 sm:p-5 flex flex-col h-full hover:border-cyan/45 transition-colors min-w-0"
-    >
-      <div className="flex items-center justify-between gap-2 mb-1.5">
-        <span className="text-[10px] font-mono text-cyan/90">{formatDate(entry.date)}</span>
-        <TypePill type={entry.type} />
-      </div>
-      <h3 className="text-[14px] sm:text-[15px] font-display font-semibold leading-snug text-foreground mb-2.5">
-        {entry.title}
-      </h3>
-      <p className="text-[13px] text-muted-foreground leading-relaxed flex-1 mb-3.5">
-        {entry.summary}
-      </p>
-      <div className="flex flex-wrap gap-1 mb-2.5">
-        {entry.networks.map((n) => (
-          <span
-            key={n}
-            className="text-[9.5px] px-1.5 py-0.5 rounded-full border border-cyan/25 text-cyan/90"
-          >
-            {n}
-          </span>
-        ))}
-        {entry.regionFocus.map((r) => (
-          <span
-            key={r}
-            className="text-[9.5px] px-1.5 py-0.5 rounded-full border border-border/70 text-muted-foreground"
-          >
-            {r}
-          </span>
-        ))}
-      </div>
-      {linked.length > 0 && (
-        <div className="mb-3 space-y-1.5">
-          <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-            Linked actors (named in primary source)
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {linked.map((a) => (
-              <LinkedChip key={`${entry.id}-${a.kind}-${a.name}`} actor={a} />
-            ))}
-          </div>
-        </div>
-      )}
-      {entry.amountUsd != null && (
-        <p className="text-[11px] font-mono text-emerald-400/90 mb-2">
-          {formatUsd(entry.amountUsd)}
-          {entry.amountNote ? (
-            <span className="block text-[10px] text-muted-foreground font-sans mt-0.5 normal-case tracking-normal">
-              {entry.amountNote}
-            </span>
-          ) : null}
-        </p>
-      )}
-      <a
-        href={entry.source.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[12px] text-cyan font-medium hover:underline min-h-[36px] mt-auto"
-      >
-        {entry.source.label}
-        <ExternalLink className="w-3.5 h-3.5" />
-      </a>
-    </motion.article>
-  );
-}
-
-const KIND_ABBR: Record<LinkedActor["kind"], string> = {
-  organization: "org",
-  country: "country",
-  institution: "inst",
-  ngo: "ngo",
-  person: "person",
-  company: "co",
-};
-
-function LinkedChip({ actor, compact }: { actor: LinkedActor; compact?: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/50 text-foreground/85 ${
-        compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
-      }`}
-      title={`${LINKED_KIND_LABELS[actor.kind]} · ${actor.role} · ${actor.relation}${
-        actor.direct ? "" : " (explicit source link)"
-      }`}
-    >
-      <span className="text-muted-foreground font-mono uppercase tracking-wider text-[8px]">
-        {KIND_ABBR[actor.kind]}
-      </span>
-      {actor.name}
-      {!compact && !actor.direct && (
-        <span className="text-muted-foreground/80 text-[8px]">indirect</span>
-      )}
-    </span>
-  );
-}
-
-function TypePill({ type }: { type: ActionType }) {
-  return (
-    <span className="inline-flex text-[10px] px-1.5 py-0.5 rounded bg-secondary/80 border border-border/70 text-foreground/80 whitespace-nowrap">
-      {ACTION_TYPE_LABELS[type]}
-    </span>
-  );
-}
-
-function SelectFilter({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-      {label}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full min-h-[42px] rounded-lg border border-border/80 bg-background/80 px-2.5 text-[12.5px] text-foreground focus:outline-none focus:ring-1 focus:ring-cyan/50"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function SelectedPinDetail({
-  entry,
-  onClose,
-}: {
-  entry: LedgerEntry | null;
-  onClose: () => void;
-}) {
-  if (!entry) return null;
-  const linked = linkedActorsOf(entry);
-  return (
-    <div className="mt-2.5 rounded-xl border border-cyan/35 bg-card/70 p-3 sm:p-4">
-      <div className="flex items-start justify-between gap-2 mb-1">
-        <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan">
-          Selected pin · {formatDate(entry.date)}
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-[11px] text-muted-foreground hover:text-foreground min-h-[32px] px-2"
-        >
-          Close
-        </button>
-      </div>
-      <h3 className="text-[14px] font-display font-semibold mb-1">{entry.title}</h3>
-      <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-2 whitespace-pre-wrap">
-        {entry.summary}
-      </p>
-      {linked.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {linked.map((a) => (
-            <LinkedChip key={`${entry.id}-sel-${a.name}`} actor={a} />
-          ))}
-        </div>
-      )}
-      <a
-        href={entry.source.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[12.5px] text-cyan font-medium hover:underline"
-      >
-        Primary source — {entry.source.agency}
-        <ExternalLink className="w-3.5 h-3.5" />
-      </a>
-    </div>
   );
 }
