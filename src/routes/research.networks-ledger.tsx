@@ -12,8 +12,6 @@ import {
   MessageSquareShare,
   Radio,
   Shield,
-  Trophy,
-  Users,
 } from "lucide-react";
 import {
   Bar,
@@ -198,42 +196,6 @@ function TerrorFinancePage() {
                 Names live only on those sources — not here.
               </span>
             </div>
-          </div>
-        </section>
-
-        {/* Related tools */}
-        <section className="mb-7 sm:mb-8" aria-labelledby="intel-tools">
-          <h2
-            id="intel-tools"
-            className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-3 px-0.5"
-          >
-            Related tools
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-            <ToolCard
-              href="/research/networks-ledger/speech-reach"
-              title="Speech Reach"
-              body="How already-public speech is distributed — or limited — in X’s For You feed."
-              icon={<MessageSquareShare className="w-5 h-5" />}
-              badge="Sibling"
-              tone="violet"
-            />
-            <ToolCard
-              href="/trackers/leaders"
-              title="Leadership board"
-              body="Citizen trust rankings for world leaders vs official narratives."
-              icon={<Users className="w-5 h-5" />}
-              badge="Live"
-              tone="amber"
-            />
-            <ToolCard
-              href="/trackers/peace"
-              title="Peace index"
-              body="Normalization & peace diagnostics — support, momentum, official gap."
-              icon={<Trophy className="w-5 h-5" />}
-              badge="Live"
-              tone="cyan"
-            />
           </div>
         </section>
 
@@ -505,7 +467,7 @@ function TerrorFinancePage() {
 
         <div className="flex flex-wrap gap-3 text-[12.5px]">
           <Link
-            to="/research/networks-ledger/speech-reach"
+            to="/research/speech-reach"
             className="inline-flex items-center gap-1.5 text-cyan hover:underline min-h-[40px]"
           >
             <MessageSquareShare className="w-3.5 h-3.5" />
@@ -627,60 +589,3 @@ function SourceCard({ source }: { source: OfficialSource }) {
   );
 }
 
-function ToolCard({
-  href,
-  title,
-  body,
-  icon,
-  badge,
-  tone,
-}: {
-  href: string;
-  title: string;
-  body: string;
-  icon: React.ReactNode;
-  badge: string;
-  tone: "cyan" | "amber" | "violet" | "emerald";
-}) {
-  const toneCls =
-    tone === "amber"
-      ? "border-amber-signal/35 hover:border-amber-signal/55"
-      : tone === "violet"
-        ? "border-violet-400/35 hover:border-violet-400/55"
-        : tone === "emerald"
-          ? "border-emerald-signal/35 hover:border-emerald-signal/55"
-          : "border-cyan/35 hover:border-cyan/55";
-  const badgeCls =
-    tone === "amber"
-      ? "text-amber-signal bg-amber-signal/10 border-amber-signal/35"
-      : tone === "violet"
-        ? "text-violet-300 bg-violet-500/10 border-violet-400/35"
-        : tone === "emerald"
-          ? "text-emerald-signal bg-emerald-signal/10 border-emerald-signal/35"
-          : "text-cyan bg-cyan/10 border-cyan/35";
-
-  return (
-    <Link
-      to={href}
-      className={`group flex flex-col h-full min-h-[132px] rounded-2xl border bg-card/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0 overflow-hidden ${toneCls}`}
-    >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="w-10 h-10 rounded-xl border border-border/80 bg-secondary/40 text-cyan grid place-items-center shrink-0">
-          {icon}
-        </span>
-        <span
-          className={`text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full border ${badgeCls}`}
-        >
-          {badge}
-        </span>
-      </div>
-      <h3 className="text-[14px] font-display font-semibold text-foreground group-hover:text-cyan transition-colors">
-        {title}
-      </h3>
-      <p className="text-[12px] text-muted-foreground leading-snug mt-1 flex-1">{body}</p>
-      <span className="mt-2.5 inline-flex items-center gap-1 text-[11.5px] font-medium text-cyan">
-        Open <ArrowRight className="w-3.5 h-3.5" />
-      </span>
-    </Link>
-  );
-}

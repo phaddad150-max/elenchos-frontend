@@ -25,6 +25,7 @@ import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
 import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.networks-ledger'
 import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
+import { Route as ResearchSpeechReachRouteImport } from './routes/research.speech-reach'
 import { Route as ResearchLibraryRouteImport } from './routes/research.library'
 import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
@@ -123,6 +124,11 @@ const ResearchNetworksLedgerSpeechReachRoute =
     path: '/research/networks-ledger/speech-reach',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ResearchSpeechReachRoute = ResearchSpeechReachRouteImport.update({
+  id: '/research/speech-reach',
+  path: '/research/speech-reach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
   id: '/research/library',
   path: '/research/library',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/research/library': typeof ResearchLibraryRoute
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
+  '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/research/library': typeof ResearchLibraryRoute
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
+  '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/research/library': typeof ResearchLibraryRoute
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
+  '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/research/library'
     | '/research/networks-ledger'
     | '/research/networks-ledger/speech-reach'
+    | '/research/speech-reach'
     | '/topics/$topicId'
     | '/trackers/leaders'
     | '/trackers/peace'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/research/library'
     | '/research/networks-ledger'
     | '/research/networks-ledger/speech-reach'
+    | '/research/speech-reach'
     | '/topics/$topicId'
     | '/trackers/leaders'
     | '/trackers/peace'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/research/library'
     | '/research/networks-ledger'
     | '/research/networks-ledger/speech-reach'
+    | '/research/speech-reach'
     | '/topics/$topicId'
     | '/trackers/leaders'
     | '/trackers/peace'
@@ -428,6 +440,7 @@ export interface RootRouteChildren {
   ResearchLibraryRoute: typeof ResearchLibraryRoute
   ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRoute
   ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
+  ResearchSpeechReachRoute: typeof ResearchSpeechReachRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
@@ -562,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchNetworksLedgerSpeechReachRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research/speech-reach': {
+      id: '/research/speech-reach'
+      path: '/research/speech-reach'
+      fullPath: '/research/speech-reach'
+      preLoaderRoute: typeof ResearchSpeechReachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/library': {
       id: '/research/library'
       path: '/research/library'
@@ -692,6 +712,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchLibraryRoute: ResearchLibraryRoute,
   ResearchNetworksLedgerRoute: ResearchNetworksLedgerRoute,
   ResearchNetworksLedgerSpeechReachRoute: ResearchNetworksLedgerSpeechReachRoute,
+  ResearchSpeechReachRoute: ResearchSpeechReachRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,

@@ -2,8 +2,9 @@
 
 Tracks **code-visible legal and platform rules** that limit the algorithmic distribution of **already-public** speech on X (primarily For You).
 
-**Live URL:** `/research/networks-ledger/speech-reach`  
-**Parent hub:** `/research/networks-ledger`
+**Live URL:** `/research/speech-reach`  
+**Parent hub:** `/research/networks-ledger`  
+**Legacy URL** `/research/networks-ledger/speech-reach` redirects here.
 
 ## Privacy rules (non-negotiable)
 

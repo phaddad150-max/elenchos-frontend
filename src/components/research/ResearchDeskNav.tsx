@@ -24,6 +24,7 @@ const ITEMS = [
       p.startsWith("/research/report") ||
       p.startsWith("/research-migration") ||
       p.startsWith("/research/networks-ledger") ||
+      p.startsWith("/research/speech-reach") ||
       p.startsWith("/research/intelligence") ||
       p.startsWith("/research/fraud-ledger") ||
       p.startsWith("/trackers"),

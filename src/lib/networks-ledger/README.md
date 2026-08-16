@@ -3,7 +3,7 @@
 | Branch | URL | Privacy |
 |--------|-----|---------|
 | **Terror & Finance Networks** | `/research/networks-ledger` | Aggregate only — no party names |
-| **Speech Reach** | `/research/networks-ledger/speech-reach` | System metrics — no account names |
+| **Speech Reach** | `/research/speech-reach` | System metrics — no account names |
 
 ## Terror & Finance (privacy-first)
 

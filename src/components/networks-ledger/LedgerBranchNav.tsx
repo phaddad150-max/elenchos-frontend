@@ -4,27 +4,28 @@ import { MessageSquareShare, Shield } from "lucide-react";
 /**
  * Sibling branches under Networks Ledger:
  * Terror & Finance · Speech Reach
+ *
+ * Speech Reach uses /research/speech-reach (not nested under networks-ledger)
+ * so TanStack never keeps the parent ledger page mounted.
  */
 const BRANCHES = [
   {
-    to: "/research/networks-ledger",
+    to: "/research/networks-ledger" as const,
     label: "Terror & Finance",
-    short: "Terror & Finance",
     description: "Aggregate official actions · names on source lists",
     icon: Shield,
     match: (p: string) =>
-      p === "/research/networks-ledger" ||
-      p === "/research/networks-ledger/" ||
-      (p.startsWith("/research/networks-ledger") &&
-        !p.includes("speech-reach")),
+      p === "/research/networks-ledger" || p === "/research/networks-ledger/",
   },
   {
-    to: "/research/networks-ledger/speech-reach",
+    to: "/research/speech-reach" as const,
     label: "Speech Reach",
-    short: "Speech Reach",
     description: "Algorithmic distribution of public speech",
     icon: MessageSquareShare,
-    match: (p: string) => p.includes("speech-reach"),
+    match: (p: string) =>
+      p === "/research/speech-reach" ||
+      p === "/research/speech-reach/" ||
+      p.includes("speech-reach"),
   },
 ] as const;
 
@@ -47,11 +48,13 @@ export function LedgerBranchNav({ className = "" }: { className?: string }) {
             <Link
               key={b.to}
               to={b.to}
+              preload="intent"
               className={`group relative flex items-start gap-3 rounded-xl border p-3 sm:p-3.5 transition-colors min-h-[72px] touch-manipulation ${
                 active
                   ? "border-cyan/50 bg-cyan/[0.08] shadow-[0_0_24px_-12px_var(--cyan-glow)]"
                   : "border-border/80 bg-card/40 hover:border-cyan/35 hover:bg-card/60"
               }`}
+              aria-current={active ? "page" : undefined}
             >
               <span
                 className={`w-10 h-10 rounded-xl border grid place-items-center shrink-0 ${
