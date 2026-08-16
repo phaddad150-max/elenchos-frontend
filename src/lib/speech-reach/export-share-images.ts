@@ -17,23 +17,112 @@ const MUTED = "#94a3b8";
 const TEXT = "#f1f5f9";
 const BORDER = "#1e293b";
 
-function downloadBlob(blob: Blob, filename: string) {
+/**
+ * Mobile-safe image save:
+ * 1) Web Share API with file (iOS/Android when available)
+ * 2) <a download> (desktop + Android Chrome)
+ * 3) Open image in new tab so the user can long-press / Save Image
+ * 4) data-URL navigation fallback
+ */
+async function saveImageBlob(blob: Blob, filename: string): Promise<"shared" | "downloaded" | "opened"> {
+  const file = new File([blob], filename, { type: blob.type || "image/png" });
+
+  // Prefer native share sheet on phones (works inside the user-gesture chain).
+  try {
+    const nav = navigator as Navigator & {
+      canShare?: (data: ShareData) => boolean;
+      share?: (data: ShareData) => Promise<void>;
+    };
+    if (typeof nav.share === "function") {
+      const data: ShareData = { files: [file], title: filename };
+      if (!nav.canShare || nav.canShare(data)) {
+        await nav.share(data);
+        return "shared";
+      }
+    }
+  } catch (err) {
+    // AbortError = user cancelled share — treat as done, don't force download.
+    if (err instanceof DOMException && err.name === "AbortError") {
+      return "shared";
+    }
+  }
+
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+  const isIos =
+    typeof navigator !== "undefined" &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
+  // iOS Safari often ignores the download attribute — open the image instead.
+  if (isIos) {
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      // Popup blocked: navigate current tab (user can back out).
+      window.location.href = url;
+    }
+    // Revoke later so the new tab can still load the blob.
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    return "opened";
+  }
+
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 2_000);
+    return "downloaded";
+  } catch {
+    // Last resort: data URL in same/new window
+    const reader = new FileReader();
+    return new Promise((resolve) => {
+      reader.onload = () => {
+        const dataUrl = String(reader.result || "");
+        const opened = window.open(dataUrl, "_blank", "noopener,noreferrer");
+        if (!opened) window.location.href = dataUrl;
+        URL.revokeObjectURL(url);
+        resolve("opened");
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
 }
 
-function canvasToPng(canvas: HTMLCanvasElement, filename: string) {
-  canvas.toBlob(
-    (blob) => {
-      if (blob) downloadBlob(blob, filename);
-    },
-    "image/png",
-    0.95,
-  );
+function canvasToPng(
+  canvas: HTMLCanvasElement,
+  filename: string,
+): Promise<"shared" | "downloaded" | "opened" | "failed"> {
+  return new Promise((resolve) => {
+    // toBlob is async and can break iOS user-gesture — also try toDataURL path.
+    const finish = async (blob: Blob | null) => {
+      if (!blob) {
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const res = await fetch(dataUrl);
+          const b = await res.blob();
+          resolve(await saveImageBlob(b, filename));
+        } catch {
+          resolve("failed");
+        }
+        return;
+      }
+      try {
+        resolve(await saveImageBlob(blob, filename));
+      } catch {
+        resolve("failed");
+      }
+    };
+
+    try {
+      canvas.toBlob((blob) => void finish(blob), "image/png", 0.95);
+    } catch {
+      void finish(null);
+    }
+  });
 }
 
 function roundRect(
@@ -84,12 +173,14 @@ function drawFooter(ctx: CanvasRenderingContext2D) {
 }
 
 /** Key metrics summary card (privacy-safe). */
-export function downloadMetricsSummaryImage(entry: SpeechReachEntry) {
+export async function downloadMetricsSummaryImage(
+  entry: SpeechReachEntry,
+): Promise<"shared" | "downloaded" | "opened" | "failed"> {
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  if (!ctx) return "failed";
 
   drawHeader(
     ctx,
@@ -155,19 +246,19 @@ export function downloadMetricsSummaryImage(entry: SpeechReachEntry) {
   });
 
   drawFooter(ctx);
-  canvasToPng(canvas, "elenchos-speech-reach-metrics.png");
+  return canvasToPng(canvas, "elenchos-speech-reach-metrics.png");
 }
 
 /** Volume / other-voices time series as a shareable chart image. */
-export function downloadVolumeChartImage(
+export async function downloadVolumeChartImage(
   series: TimeSeriesPoint[],
   labels: string[],
-) {
+): Promise<"shared" | "downloaded" | "opened" | "failed"> {
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  if (!ctx) return "failed";
 
   drawHeader(
     ctx,
@@ -282,16 +373,18 @@ export function downloadVolumeChartImage(
   });
 
   drawFooter(ctx);
-  canvasToPng(canvas, "elenchos-speech-reach-volume-chart.png");
+  return canvasToPng(canvas, "elenchos-speech-reach-volume-chart.png");
 }
 
 /** Spectrum horizontal bar chart image. */
-export function downloadSpectrumChartImage(spectrum: SpectrumSlice[]) {
+export async function downloadSpectrumChartImage(
+  spectrum: SpectrumSlice[],
+): Promise<"shared" | "downloaded" | "opened" | "failed"> {
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  if (!ctx) return "failed";
 
   drawHeader(
     ctx,
@@ -330,7 +423,7 @@ export function downloadSpectrumChartImage(spectrum: SpectrumSlice[]) {
   );
 
   drawFooter(ctx);
-  canvasToPng(canvas, "elenchos-speech-reach-spectrum.png");
+  return canvasToPng(canvas, "elenchos-speech-reach-spectrum.png");
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
