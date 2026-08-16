@@ -6,7 +6,6 @@ import {
   ArrowUpRight,
   ChevronDown,
   Lightbulb,
-  Lock,
   Radio,
   Sparkles,
   Trophy,
@@ -24,7 +23,6 @@ import {
   TRACKER_CATALOG,
   bucketForCountry,
   extractLeadersByRegion,
-  extractFootballPlayers,
   extractPeaceCountries,
   extractRankedLeaders,
   fetchLatestTrackers,
@@ -43,17 +41,17 @@ import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Q
 export const Route = createFileRoute("/trackers/")({
   head: () => ({
     meta: [
-      { title: "Performance Trackers: Leaders, Peace & Global Issues Ranked by Citizens — Elenchos" },
+      { title: "Trackers: Leadership & Peace — Elenchos" },
       {
         name: "description",
         content:
-          "Leader trust rankings, Middle East peace tracker and citizen-scored performance indices on crime, immigration and governance — built from real public discourse on X.",
+          "Citizen trackers for world-leader trust and Middle East peace & normalization — built from real public discourse on X. Networks Ledger under Research.",
       },
-      { property: "og:title", content: "Performance Trackers: Leaders, Peace & Global Issues Ranked by Citizens" },
+      { property: "og:title", content: "Trackers: Leadership & Peace — Elenchos" },
       {
         property: "og:description",
         content:
-          "Citizen sentiment analysis on world leaders and countries. Trust rankings, peace tracker and narrative gaps — refreshed continuously.",
+          "Citizen sentiment on world leaders and peace & normalization. Leadership board and peace index — refreshed continuously.",
       },
       { property: "og:url", content: "https://elenchos.live/trackers" },
     ],
@@ -684,43 +682,6 @@ function GapBar({ gap }: { gap: number }) {
         />
       </div>
     </div>
-  );
-}
-
-function ComingSoonOverviewCard({ def, index }: { def: TrackerDefinition; index: number }) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: index * 0.05 }}
-      className="tracker-card rounded-2xl border border-border/60 overflow-hidden"
-      style={
-        {
-          "--card-accent": "hsl(var(--muted-foreground))",
-          "--card-glow": "oklch(0.5 0 0 / 0.08)",
-        } as React.CSSProperties
-      }
-    >
-      <div className="relative p-5 md:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <span className="px-2 py-0.5 rounded-full border border-border bg-secondary/60 text-muted-foreground text-[10px] font-mono uppercase tracking-[0.18em] inline-flex items-center gap-1">
-            <Lock className="w-2.5 h-2.5" /> Coming soon
-          </span>
-        </div>
-        <h3 className="text-lg md:text-xl font-display font-semibold text-foreground/90 leading-tight">
-          {def.title}
-        </h3>
-        <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{def.tagline}</p>
-        <div className="mt-5 h-1.5 rounded-full bg-secondary overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-cyan/40 via-cyan/70 to-cyan/40 tracker-shimmer"
-            initial={{ width: "12%" }}
-            animate={{ width: ["12%", "28%", "18%", "32%"] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-      </div>
-    </motion.article>
   );
 }
 
@@ -1418,73 +1379,6 @@ function PeaceDetail({ row }: { row?: TrackerRow }) {
 }
 
 
-function FootballOverviewCard({
-  def,
-  row,
-}: {
-  def: TrackerDefinition;
-  row?: TrackerRow;
-}) {
-  const players = useMemo(() => extractFootballPlayers(row), [row]);
-  const top = players.filter((p) => p.status !== "waiting").slice(0, 3);
-  const snapshotDate = formatDate(row?.created_at);
-
-  return (
-    <Link
-      to="/trackers/football"
-      className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-emerald-signal/45 hover:shadow-[0_28px_64px_-28px_rgba(16,185,129,0.35)] overflow-hidden block cursor-pointer"
-    >
-      <div className="tracker-shimmer absolute top-0 left-0 right-0 h-px opacity-50 pointer-events-none" />
-      <div className="relative p-5 md:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-emerald-signal" />
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-emerald-signal/40 bg-emerald-signal/10 text-emerald-signal text-[10px] font-mono uppercase tracking-[0.16em]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-signal animate-pulse" />
-              Player Index
-            </span>
-          </div>
-          <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-signal transition-colors" />
-        </div>
-        <h3 className="text-xl md:text-2xl font-display font-semibold leading-tight group-hover:text-emerald-signal/95 transition-colors">
-          {def.title}
-        </h3>
-        <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">{def.tagline}</p>
-        {top.length > 0 ? (
-          <div className="mt-5 space-y-2">
-            <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2">
-              Top fan discourse
-            </div>
-            {top.map((p, i) => (
-              <TrackerOverviewRow key={p.player_name} index={i} score={p.sentiment_score}>
-                <div className="flex items-center gap-3 min-w-0">
-                  <RankBadge rank={p.rank ?? i + 1} highlight={i === 0} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-display font-semibold truncate">{p.player_name}</div>
-                    <div className="text-[10px] font-mono text-muted-foreground truncate">
-                      {p.fan_takeaway ?? p.team ?? ""}
-                    </div>
-                  </div>
-                </div>
-              </TrackerOverviewRow>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border text-[12px] font-mono text-muted-foreground">
-            Awaiting football_player_index sync
-          </div>
-        )}
-        <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4 text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-          <span>{snapshotDate ?? "—"}</span>
-          <span className="text-emerald-signal group-hover:gap-2 inline-flex items-center gap-1 transition-all">
-            Open index <ArrowUpRight className="w-3 h-3" />
-          </span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 /* ---------------- Page ---------------- */
 
 function TrackersPage() {
@@ -1518,7 +1412,6 @@ function TrackersPage() {
   }, [rows]);
 
   const live = TRACKER_CATALOG.filter((t) => t.status === "live");
-  const upcoming = TRACKER_CATALOG.filter((t) => t.status === "coming_soon");
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -1560,7 +1453,7 @@ function TrackersPage() {
               className="w-1 h-3.5 bg-cyan rounded-sm origin-center"
               style={{ boxShadow: "0 0 10px rgba(0,220,220,0.7)" }}
             />
-            Library · Performance Trackers
+            Library · Trackers
           </motion.div>
           <h1 className="text-[1.6rem] sm:text-3xl md:text-[2.4rem] lg:text-[2.85rem] font-display font-semibold tracking-tight leading-[1.08] break-words">
             Citizens Speak. AI Ranks.{" "}
@@ -1569,7 +1462,8 @@ function TrackersPage() {
             </span>
           </h1>
           <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Rankings and performance scores for leaders, peace efforts, immigration, crime, and more — based purely on real citizen discourse on X.
+            Three live surfaces: Leadership board, Peace index, and the Networks Ledger — citizen
+            discourse rankings plus official-action intelligence.
           </p>
           <div className="pt-1 flex flex-wrap items-center gap-3">
             <SimulatedDataBadge />
@@ -1590,8 +1484,6 @@ function TrackersPage() {
                 <LeaderOverviewCard def={def} row={row} href="/trackers/leaders" />
               ) : def.tracker_type === "peace_normalization" ? (
                 <PeaceOverviewCard def={def} row={row} href="/trackers/peace" />
-              ) : def.tracker_type === "football_player_index" ? (
-                <FootballOverviewCard def={def} row={row} />
               ) : null;
             if (!inner) return null;
             return (
@@ -1605,33 +1497,44 @@ function TrackersPage() {
               </motion.div>
             );
           })}
-        </section>
-
-        <div className="mt-10 mb-4 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border/60" />
-          <span className="text-[10.5px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            On the roadmap
-          </span>
-          <div className="h-px flex-1 bg-border/60" />
-        </div>
-
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {upcoming.map((def, i) => (
-            <motion.div
-              key={def.key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.06, duration: 0.5, ease: "easeOut" }}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.31, duration: 0.55, ease: "easeOut" }}
+            className="lg:col-span-2"
+          >
+            <Link
+              to="/research/networks-ledger"
+              className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-cyan/45 hover:shadow-[0_28px_64px_-28px_rgba(34,211,238,0.25)] overflow-hidden block cursor-pointer"
             >
-              <ComingSoonOverviewCard def={def} index={i} />
-            </motion.div>
-          ))}
+              <div className="tracker-shimmer absolute top-0 left-0 right-0 h-px opacity-50 pointer-events-none" />
+              <div className="relative p-5 md:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="w-4 h-4 text-cyan" />
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.16em]">
+                      Networks Ledger
+                    </span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-display font-semibold leading-tight group-hover:text-cyan transition-colors">
+                    Networks Ledger
+                  </h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed max-w-2xl">
+                    Terror & Finance (privacy-first aggregate official actions) and Speech Reach
+                    (algorithmic distribution of already-public speech on X).
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 text-cyan text-[12px] font-medium shrink-0">
+                  Open ledger <ArrowUpRight className="w-4 h-4" />
+                </span>
+              </div>
+            </Link>
+          </motion.div>
         </section>
-
 
         {loaded && rows.length === 0 && (
           <p className="mt-8 text-xs font-mono uppercase tracking-[0.16em] text-muted-foreground text-center">
-            Backend sync pending — tracker rows will appear here automatically.
+            Backend sync pending — leadership and peace rows will appear here automatically.
           </p>
         )}
       </main>

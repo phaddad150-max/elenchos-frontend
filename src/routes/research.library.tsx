@@ -6,7 +6,6 @@ import {
   BookOpen,
   FileText,
   MessageSquareQuote,
-  Radio,
   Share2,
   Shield,
   Trophy,
@@ -150,7 +149,7 @@ const DOORS = [
     title: "Trackers",
     kicker: "Indexes & ledgers",
     description:
-      "Leadership board, peace index, football player index, and the Networks Ledger (Terror & Finance + Speech Reach).",
+      "Leadership board, peace index, and the Networks Ledger (Terror & Finance + Speech Reach).",
     leadsTo: "Opens free indexes and the networks ledger from this library.",
     cta: "Browse trackers",
     href: "#trackers",
@@ -419,20 +418,6 @@ function ResearchLibraryPage() {
                 body="Normalization & peace diagnostics — support, momentum, official gap."
                 icon={<Trophy className="w-5 h-5" />}
                 badge="Index"
-              />
-              <ToolCard
-                href="/trackers/football"
-                title="Football player index"
-                body="Fan discourse rankings — form, legacy, post-match sentiment."
-                icon={<Trophy className="w-5 h-5" />}
-                badge="Index"
-              />
-              <ToolCard
-                href="/trackers"
-                title="All trackers hub"
-                body="Full citizen rankings hub — leaders, peace, football, and upcoming indexes."
-                icon={<Radio className="w-5 h-5" />}
-                badge="Hub"
               />
             </div>
           </section>

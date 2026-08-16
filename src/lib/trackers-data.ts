@@ -112,66 +112,6 @@ export function bucketForCountry(c: PeaceCountry): PeaceBucketKey | "other" {
   return "other";
 }
 
-export type FootballPlayerEntry = {
-  rank?: number;
-  player_name: string;
-  nationality?: string;
-  team?: string;
-  still_in_competition?: boolean;
-  sentiment_score?: number | null;
-  sentiment_label?: string;
-  mention_salience?: number | null;
-  trend?: "rising" | "falling" | "stable" | string;
-  fan_takeaway?: string;
-  evidence?: string[];
-  experience_tags?: string[];
-  status?: "active" | "waiting" | "eliminated" | string;
-};
-
-export type FootballPlayerIndexData = {
-  players?: FootballPlayerEntry[];
-  teams_eliminated?: string[];
-  golden_boot_race_summary?: string;
-  key_insights?: string[];
-  posts_analyzed?: number;
-  snapshot_date?: string;
-};
-
-function normalizeTeamName(name?: string): string {
-  return (name ?? "").toLowerCase().trim().replace(/national team/gi, "").trim();
-}
-
-function playerTeamLabel(p: FootballPlayerEntry): string {
-  return normalizeTeamName(p.team || p.nationality);
-}
-
-function teamMatchesEliminated(teamLabel: string, eliminated: string): boolean {
-  const a = normalizeTeamName(teamLabel);
-  const b = normalizeTeamName(eliminated);
-  if (!a || !b) return false;
-  return a === b || a.includes(b) || b.includes(a);
-}
-
-function isActiveCompetitionPlayer(p: FootballPlayerEntry, eliminated: string[]): boolean {
-  if (p.still_in_competition === false || p.status === "eliminated") return false;
-  const label = playerTeamLabel(p);
-  return !eliminated.some((e) => teamMatchesEliminated(label, e));
-}
-
-export function extractFootballPlayers(row?: TrackerRow): FootballPlayerEntry[] {
-  const data = (row?.data ?? {}) as FootballPlayerIndexData;
-  const eliminated = Array.isArray(data.teams_eliminated) ? data.teams_eliminated : [];
-  const players = Array.isArray(data.players) ? data.players : [];
-  return [...players]
-    .filter((p) => p?.player_name && isActiveCompetitionPlayer(p, eliminated))
-    .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
-    .map((p, i) => ({ ...p, rank: i + 1 }));
-}
-
-export function extractFootballIndexMeta(row?: TrackerRow): FootballPlayerIndexData {
-  return (row?.data ?? {}) as FootballPlayerIndexData;
-}
-
 export type TrackerRow = {
   id?: string;
   tracker_type: string;
@@ -245,13 +185,6 @@ function trackerRowQuality(row: TrackerRow): number {
   const data = (row.data ?? {}) as Record<string, unknown>;
   const itemCount = typeof row.item_count === "number" ? row.item_count : null;
 
-  if (row.tracker_type === "football_player_index") {
-    const players = Array.isArray(data.players) ? data.players.length : 0;
-    const posts = typeof data.posts_analyzed === "number" ? data.posts_analyzed : 0;
-    if (players <= 0) return -1;
-    return players * 1000 + posts;
-  }
-
   if (row.tracker_type === "global_leader_trust") {
     // Prefer explicit item_count when backend sets it; still validate payload.
     const active = countActiveScoredLeaders(data);
@@ -288,9 +221,8 @@ function trackerRecencyMs(row: TrackerRow): number {
 }
 
 /**
- * One row per tracker_type: never let an empty newer insert (e.g. football
- * item_count=0) hide a prior substantive snapshot. Among substantive rows,
- * prefer the freshest last_updated.
+ * One row per tracker_type: never let an empty newer insert hide a prior
+ * substantive snapshot. Among substantive rows, prefer the freshest last_updated.
  */
 function dedupeLatestTrackerRows(rows: TrackerRow[]): TrackerRow[] {
   const buckets = new Map<string, TrackerRow[]>();
@@ -661,6 +593,7 @@ export type TrackerDefinition = {
   accent: "cyan" | "amber" | "violet" | "emerald" | "rose";
 };
 
+/** Live trackers only: Leadership + Peace. Networks Ledger lives under Research. */
 export const TRACKER_CATALOG: TrackerDefinition[] = [
   {
     key: "global-leader-trust",
@@ -679,40 +612,6 @@ export const TRACKER_CATALOG: TrackerDefinition[] = [
       "Citizen vs. official sentiment on Abraham Accords expansion, ceasefires, and regional normalization.",
     status: "live",
     accent: "cyan",
-  },
-  {
-    key: "football-players",
-    tracker_type: "football_player_index",
-    title: "Gladiator Podium · Football Player Index",
-    tagline:
-      "Fan discourse rankings for World Cup players — form, legacy, golden-boot race and post-match sentiment from earned media on X.",
-    status: "live",
-    accent: "emerald",
-  },
-  {
-    key: "immigration-borders",
-    tracker_type: "immigration_borders",
-    title: "Immigration & Borders (EU + US)",
-    tagline: "Cross-Atlantic citizen sentiment on border policy, asylum, and enforcement.",
-    status: "coming_soon",
-    accent: "violet",
-  },
-  {
-    key: "crime-safety",
-    tracker_type: "crime_safety",
-    title: "Crime & Safety (EU + US)",
-    tagline: "Public perception of safety, policing, and crime trends across major cities.",
-    status: "coming_soon",
-    accent: "emerald",
-  },
-  {
-    key: "corruption-governance",
-    tracker_type: "corruption_governance",
-    title: "Corruption & Governance (EU + US)",
-    tagline:
-      "Citizen perception of institutional trust, transparency, and accountability vs. official narratives.",
-    status: "coming_soon",
-    accent: "rose",
   },
 ];
 

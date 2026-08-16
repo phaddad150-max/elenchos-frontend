@@ -22,7 +22,6 @@ import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as ResearchIndexRouteImport } from './routes/research.index'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
-import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
 import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.networks-ledger'
 import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
@@ -106,11 +105,6 @@ const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
 const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
   id: '/trackers/leaders',
   path: '/trackers/leaders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersFootballRoute = TrackersFootballRouteImport.update({
-  id: '/trackers/football',
-  path: '/trackers/football',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
@@ -227,7 +221,6 @@ export interface FileRoutesByFullPath {
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
-  '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research/': typeof ResearchIndexRoute
@@ -262,7 +255,6 @@ export interface FileRoutesByTo {
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
-  '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research': typeof ResearchIndexRoute
@@ -298,7 +290,6 @@ export interface FileRoutesById {
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
-  '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research/': typeof ResearchIndexRoute
@@ -335,7 +326,6 @@ export interface FileRouteTypes {
     | '/research/networks-ledger'
     | '/research/networks-ledger/speech-reach'
     | '/topics/$topicId'
-    | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/peace'
     | '/research/'
@@ -370,7 +360,6 @@ export interface FileRouteTypes {
     | '/research/networks-ledger'
     | '/research/networks-ledger/speech-reach'
     | '/topics/$topicId'
-    | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/peace'
     | '/research'
@@ -405,7 +394,6 @@ export interface FileRouteTypes {
     | '/research/networks-ledger'
     | '/research/networks-ledger/speech-reach'
     | '/topics/$topicId'
-    | '/trackers/football'
     | '/trackers/leaders'
     | '/trackers/peace'
     | '/research/'
@@ -441,7 +429,6 @@ export interface RootRouteChildren {
   ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRoute
   ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
-  TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
   ResearchIndexRoute: typeof ResearchIndexRoute
@@ -552,13 +539,6 @@ declare module '@tanstack/react-router' {
       path: '/trackers/leaders'
       fullPath: '/trackers/leaders'
       preLoaderRoute: typeof TrackersLeadersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers/football': {
-      id: '/trackers/football'
-      path: '/trackers/football'
-      fullPath: '/trackers/football'
-      preLoaderRoute: typeof TrackersFootballRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/topics/$topicId': {
@@ -713,7 +693,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchNetworksLedgerRoute: ResearchNetworksLedgerRoute,
   ResearchNetworksLedgerSpeechReachRoute: ResearchNetworksLedgerSpeechReachRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
-  TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
   ResearchIndexRoute: ResearchIndexRoute,
