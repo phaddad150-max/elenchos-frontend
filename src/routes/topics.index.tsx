@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { getTopic } from "@/lib/feature-topics";
+import { TOPICS_SOCIAL, socialMetaTags } from "@/lib/social-meta";
 import { TopicsListPage } from "./-topics.shared";
 
 export const Route = createFileRoute("/topics/")({
@@ -21,22 +22,8 @@ export const Route = createFileRoute("/topics/")({
     }
   },
   head: () => ({
-    meta: [
-      { title: "Topics · Public discourse analysis · Elenchos" },
-      {
-        name: "description",
-        content:
-          "Topics: Socratic public discourse analysis on X. Citizen sentiment and narrative gaps vs official and media frames. Sample sizes shown. Commission the same style from Research Desk.",
-      },
-      { property: "og:title", content: "Topics · Public discourse analysis · Elenchos" },
-      {
-        property: "og:description",
-        content:
-          "Open a topic for citizen vs official frames and scores. Then run the same method on your own topic from Research Desk.",
-      },
-      { property: "og:url", content: "https://elenchos.live/topics" },
-    ],
-    links: [{ rel: "canonical", href: "https://elenchos.live/topics" }],
+    meta: socialMetaTags(TOPICS_SOCIAL),
+    links: [{ rel: "canonical", href: TOPICS_SOCIAL.url }],
     scripts: [
       {
         type: "application/ld+json",

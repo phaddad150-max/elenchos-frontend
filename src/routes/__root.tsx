@@ -102,18 +102,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Citizen voices vs official frames. Live Topics, crisis briefings, thesis-style case studies, commission reports from $10, Enterprise contact.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: "https://elenchos.live/" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@elenchospulse" },
       {
         name: "twitter:title",
-        content: "Elenchos · Public Discourse Lens x Research Desk",
+        content: "Elenchos · Public Discourse Lens × Research Desk",
       },
       {
         name: "twitter:description",
         content:
-          "Public Discourse Lens x Research Desk. Topics analysis, case studies, privacy-first commission reports.",
+          "Citizen voices vs official frames. Topics, free library, Networks Ledger, privacy-first commission reports.",
       },
       { property: "og:image", content: "https://elenchos.live/elenchos-og.webp" },
+      { property: "og:image:alt", content: "Elenchos — public discourse and research desk" },
       { name: "twitter:image", content: "https://elenchos.live/elenchos-og.webp" },
     ],
     links: [

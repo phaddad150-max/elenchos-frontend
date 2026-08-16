@@ -16,6 +16,13 @@ import {
   Scale,
   Shield,
 } from "lucide-react";
+import { DownloadImageButton } from "@/components/networks-ledger/DownloadImageButton";
+import {
+  downloadMetricsSummaryImage,
+  downloadSpectrumChartImage,
+  downloadVolumeChartImage,
+} from "@/lib/speech-reach/export-share-images";
+import { socialMetaTags, SPEECH_REACH_SOCIAL } from "@/lib/social-meta";
 import {
   Area,
   CartesianGrid,
@@ -48,33 +55,11 @@ import {
 
 export const Route = createFileRoute("/research/speech-reach")({
   head: () => ({
-    meta: [
-      {
-        title: "Speech Reach · Networks Ledger · Library · Elenchos",
-      },
-      {
-        name: "description",
-        content:
-          "Speech Reach: how already-public posts travel in X’s For You feed. Brazil 2026 election recommendation filter — still public, not recommended for non-followers. No individual accounts listed here.",
-      },
-      {
-        property: "og:title",
-        content: "Speech Reach · Networks Ledger · Elenchos",
-      },
-      {
-        property: "og:description",
-        content:
-          "Still public, not recommended: how Brazil’s 2026 campaign accounts are limited in X’s For You feed. No individual names on this page.",
-      },
-      {
-        property: "og:url",
-        content: "https://elenchos.live/research/speech-reach",
-      },
-    ],
+    meta: socialMetaTags(SPEECH_REACH_SOCIAL),
     links: [
       {
         rel: "canonical",
-        href: "https://elenchos.live/research/speech-reach",
+        href: SPEECH_REACH_SOCIAL.url,
       },
     ],
   }),
@@ -119,7 +104,7 @@ function SpeechReachPage() {
               Speech Reach
             </h1>
             <p className="text-[13px] sm:text-[14px] font-medium text-foreground/90 max-w-3xl leading-snug">
-              How public posts travel in X’s For You feed — still public, sometimes not recommended
+              Still public. Only free For You recommendation is limited.
             </p>
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed">
               {SPEECH_REACH_META.framing}
@@ -130,6 +115,15 @@ function SpeechReachPage() {
             </p>
           </div>
         </header>
+
+        {/* Key takeaway — scannable in ~15s */}
+        <aside className="mb-4 rounded-xl border border-emerald-signal/35 bg-emerald-signal/[0.08] px-3.5 py-3 sm:px-4 sm:py-3.5">
+          <p className="text-[13px] sm:text-[14px] text-foreground leading-snug">
+            <strong className="text-emerald-signal font-semibold">Key point: </strong>
+            The speech is still fully public and accessible. What changed is only the free
+            algorithmic recommendation in For You — not bans, not deletions.
+          </p>
+        </aside>
 
         {/* Privacy strip — always visible early */}
         <aside
@@ -158,6 +152,11 @@ function SpeechReachPage() {
             <span className="text-[10px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full border border-amber-signal/40 text-amber-signal bg-amber-signal/10">
               Approximate · sample-based
             </span>
+            <DownloadImageButton
+              className="ml-auto"
+              label="Download summary image"
+              onDownload={() => downloadMetricsSummaryImage(entry)}
+            />
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
@@ -194,9 +193,19 @@ function SpeechReachPage() {
                 <h3 className="text-[12.5px] font-display font-semibold text-foreground">
                   Post volume & who is talking
                 </h3>
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  Index 100 = before the rule · mark ≈ when it started
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-mono text-muted-foreground hidden sm:inline">
+                    Index 100 = before the rule
+                  </span>
+                  <DownloadImageButton
+                    onDownload={() =>
+                      downloadVolumeChartImage(
+                        m.series,
+                        chartData.map((d) => d.label),
+                      )
+                    }
+                  />
+                </div>
               </div>
               <div className="h-[240px] sm:h-[280px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -287,11 +296,16 @@ function SpeechReachPage() {
 
             {/* Spectrum */}
             <div className="lg:col-span-2 rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <Scale className="w-3.5 h-3.5 text-cyan" aria-hidden />
-                <h3 className="text-[12.5px] font-display font-semibold">
-                  Across the political spectrum
-                </h3>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Scale className="w-3.5 h-3.5 text-cyan shrink-0" aria-hidden />
+                  <h3 className="text-[12.5px] font-display font-semibold">
+                    Across the political spectrum
+                  </h3>
+                </div>
+                <DownloadImageButton
+                  onDownload={() => downloadSpectrumChartImage(m.spectrum)}
+                />
               </div>
               <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
                 Rough share of sampled talk about major candidacies by high-level groups — not
@@ -389,19 +403,21 @@ function SpeechReachPage() {
           </div>
         </section>
 
-        {/* What it does not do */}
-        <section className="mb-7 sm:mb-8 rounded-xl border border-border/80 bg-secondary/20 p-4 sm:p-5">
+        {/* What it does not do — keep highly visible */}
+        <section className="mb-7 sm:mb-8 rounded-xl border border-emerald-signal/40 bg-emerald-signal/[0.07] p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Eye className="w-4 h-4 text-cyan" aria-hidden />
-            <h2 className="text-[13px] font-display font-semibold">What this does not do</h2>
+            <Eye className="w-4 h-4 text-emerald-signal" aria-hidden />
+            <h2 className="text-[13px] sm:text-[14px] font-display font-semibold">
+              What this does not do
+            </h2>
           </div>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {entry.doesNot.map((d) => (
               <li
                 key={d}
-                className="flex items-start gap-2 text-[12.5px] text-muted-foreground leading-snug"
+                className="flex items-start gap-2 text-[13px] text-foreground/90 leading-snug"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-signal shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-signal shrink-0 mt-0.5" />
                 <span>{d}</span>
               </li>
             ))}
@@ -547,17 +563,17 @@ function BrazilStatusBlock({ entry }: { entry: SpeechReachEntry }) {
         </div>
 
         {simpleWords.length > 0 && (
-          <div className="rounded-xl border border-cyan/25 bg-cyan/[0.05] p-3.5 sm:p-4">
-            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan mb-2">
+          <div className="rounded-xl border-2 border-cyan/40 bg-cyan/[0.07] p-3.5 sm:p-4">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan mb-2.5">
               In simple words
             </p>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {simpleWords.map((line) => (
                 <li
                   key={line}
-                  className="flex items-start gap-2 text-[13px] text-foreground/90 leading-snug"
+                  className="flex items-start gap-2 text-[13px] sm:text-[14px] text-foreground leading-snug"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan shrink-0 mt-0.5" aria-hidden />
+                  <CheckCircle2 className="w-4 h-4 text-cyan shrink-0 mt-0.5" aria-hidden />
                   <span>{line}</span>
                 </li>
               ))}
@@ -566,17 +582,17 @@ function BrazilStatusBlock({ entry }: { entry: SpeechReachEntry }) {
         )}
 
         {whoIsOnList.length > 0 && (
-          <div className="rounded-xl border border-border/80 bg-background/30 p-3.5 sm:p-4">
-            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+          <div className="rounded-xl border-2 border-border/90 bg-background/40 p-3.5 sm:p-4">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2.5">
               Who is on this list?
             </p>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {whoIsOnList.map((line) => (
                 <li
                   key={line}
-                  className="flex items-start gap-2 text-[13px] text-foreground/90 leading-snug"
+                  className="flex items-start gap-2 text-[13px] sm:text-[14px] text-foreground/90 leading-snug"
                 >
-                  <span className="text-cyan shrink-0 mt-1.5" aria-hidden>
+                  <span className="text-cyan shrink-0 mt-1.5 font-bold" aria-hidden>
                     ·
                   </span>
                   <span>{line}</span>

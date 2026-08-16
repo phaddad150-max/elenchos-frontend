@@ -1,10 +1,10 @@
 {
   "meta": {
     "title": "Speech Reach",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "lastReviewed": "2026-08-16",
-    "framing": "Everything we look at here is already public. We track rules that change how far that speech travels in X’s For You feed — not whether it can be posted or read.",
-    "privacyCore": "We never publish individual account names or specific posts on this page. Full lists stay in the original public sources. This page only tracks public, code-visible limits on how speech is recommended in the feed.",
+    "framing": "The posts stay public. Anyone can still find and read them. What we track is only the free For You recommendation — not bans, not deletions.",
+    "privacyCore": "We never put individual account names or posts on this page. Exact names stay only in the original public sources (GitHub and TSE). We only show system-level patterns.",
     "methodology": [
       "The main source for each entry is the public open-source filter in the xai-org/x-algorithm repository (and any official dataset the filter cites).",
       "Account counts come from the published code (for example, the Brazil filter’s own test checks list size).",
@@ -30,15 +30,15 @@
       "whatItDoes": "Campaign accounts on Brazil’s election list are kept out of For You recommendations unless you already follow them. Their profiles and posts stay fully public and readable.",
       "simpleWords": [
         "The accounts can still post.",
-        "Anyone can still find and read their posts.",
-        "What changed: X will no longer automatically show those posts to people who do not already follow them.",
-        "This is “not recommended,” not “banned” or “deleted.”"
+        "Anyone can still find and read the posts.",
+        "Only the free “For You” recommendation is limited (not shown automatically to people who do not already follow them).",
+        "This is “not recommended,” not banned or deleted."
       ],
       "whoIsOnList": [
-        "These are roughly 665 official candidate and campaign accounts that registered their X profiles with Brazil’s Electoral Court (TSE) for the 2026 elections.",
-        "The list includes accounts from the full political spectrum — left, center, right, and smaller parties.",
+        "Roughly 665 official candidate and campaign accounts registered their X profiles with Brazil’s Electoral Court (TSE) for the 2026 elections.",
+        "The list covers the full political spectrum — left, center, right, and smaller parties.",
         "The rule applies equally to all of them. It is not aimed at one ideology.",
-        "Exact names remain only in the original public sources (link below)."
+        "Exact names stay only in the original public sources (GitHub link below)."
       ],
       "approximateScale": 665,
       "scaleLabel": "About 665 campaign accounts on the public list",

@@ -6,6 +6,7 @@ import {
   BookOpen,
   FileText,
   MessageSquareQuote,
+  MessageSquareShare,
   Share2,
   Shield,
   Trophy,
@@ -18,6 +19,7 @@ import {
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
+import { LIBRARY_SOCIAL, socialMetaTags } from "@/lib/social-meta";
 
 type SharedItem = {
   token: string;
@@ -42,27 +44,8 @@ type CaseStudy = {
 
 export const Route = createFileRoute("/research/library")({
   head: () => ({
-    meta: [
-      {
-        title: "Library · Topics, case studies & trackers · Elenchos",
-      },
-      {
-        name: "description",
-        content:
-          "Free Elenchos library: public discourse topic analysis on X, multi-source case studies, leadership boards, peace index, and the Networks Ledger.",
-      },
-      {
-        property: "og:title",
-        content: "Library · Elenchos Research Desk",
-      },
-      {
-        property: "og:description",
-        content:
-          "Three free doors: topic analysis on X, deep-dive case studies, and citizen trackers.",
-      },
-      { property: "og:url", content: "https://elenchos.live/research/library" },
-    ],
-    links: [{ rel: "canonical", href: "https://elenchos.live/research/library" }],
+    meta: socialMetaTags(LIBRARY_SOCIAL),
+    links: [{ rel: "canonical", href: LIBRARY_SOCIAL.url }],
   }),
   component: ResearchLibraryPage,
 });
@@ -400,9 +383,16 @@ function ResearchLibraryPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               <ToolCard
                 href="/research/networks-ledger"
-                title="Networks Ledger"
-                body="Two privacy-first branches: Terror & Finance (aggregate official actions; names only on official lists) and Speech Reach (For You distribution rules)."
+                title="Networks Ledger · Terror & Finance"
+                body="Aggregate official designations, freezes, arrests, and charges. Names only on official source lists."
                 icon={<Shield className="w-5 h-5" />}
+                badge="Live"
+              />
+              <ToolCard
+                href="/research/speech-reach"
+                title="Speech Reach"
+                body="Brazil 2026: campaign accounts stay public — only free For You recommendation is limited. No individual names here."
+                icon={<MessageSquareShare className="w-5 h-5" />}
                 badge="Live"
               />
               <ToolCard

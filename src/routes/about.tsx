@@ -13,28 +13,15 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
+import { ABOUT_SOCIAL, socialMetaTags } from "@/lib/social-meta";
 
 /** @deprecated import from `@/lib/brand` */
 export { ELENCHOS_TAGLINE };
 
 export const Route = createFileRoute("/about")({
   head: () => ({
-    meta: [
-      { title: "About Elenchos · Public Discourse Lens x Research Desk" },
-      {
-        name: "description",
-        content:
-          "Elenchos (ἔλεγχος): Public Discourse Lens x Research Desk. Socratic method on public discourse on X, case studies, commission reports. Safe place to check and generate research.",
-      },
-      { property: "og:title", content: "About Elenchos · Public Discourse Lens x Research Desk" },
-      {
-        property: "og:description",
-        content:
-          "Citizen voices vs official frames. Topics analysis on X. Research Desk for free library deep dives and commissioned reports. Privacy-first.",
-      },
-      { property: "og:url", content: "https://elenchos.live/about" },
-    ],
-    links: [{ rel: "canonical", href: "https://elenchos.live/about" }],
+    meta: socialMetaTags(ABOUT_SOCIAL),
+    links: [{ rel: "canonical", href: ABOUT_SOCIAL.url }],
   }),
   component: AboutPage,
 });
