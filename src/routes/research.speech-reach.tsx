@@ -55,7 +55,7 @@ export const Route = createFileRoute("/research/speech-reach")({
       {
         name: "description",
         content:
-          "Speech Reach tracks code-visible legal and platform rules that limit algorithmic distribution of already-public speech on X’s For You feed. Brazil 2026 Election Recommendation Filter — privacy-safe, system-level metrics only.",
+          "Speech Reach: how already-public posts travel in X’s For You feed. Brazil 2026 election recommendation filter — still public, not recommended for non-followers. No individual accounts listed here.",
       },
       {
         property: "og:title",
@@ -64,7 +64,7 @@ export const Route = createFileRoute("/research/speech-reach")({
       {
         property: "og:description",
         content:
-          "How already-public speech travels — or is limited — in X’s For You feed. Brazil 2026 filter. No individual accounts or posts published here.",
+          "Still public, not recommended: how Brazil’s 2026 campaign accounts are limited in X’s For You feed. No individual names on this page.",
       },
       {
         property: "og:url",
@@ -119,7 +119,7 @@ function SpeechReachPage() {
               Speech Reach
             </h1>
             <p className="text-[13px] sm:text-[14px] font-medium text-foreground/90 max-w-3xl leading-snug">
-              Tracking how already-public speech is distributed — or limited — in X’s For You feed
+              How public posts travel in X’s For You feed — still public, sometimes not recommended
             </p>
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed">
               {SPEECH_REACH_META.framing}
@@ -153,34 +153,34 @@ function SpeechReachPage() {
           <div className="flex flex-wrap items-center gap-2 mb-3 px-0.5">
             <Activity className="w-4 h-4 text-cyan" aria-hidden />
             <h2 id="sr-metrics" className="text-[13px] font-display font-semibold">
-              System metrics
+              Metrics at a glance
             </h2>
             <span className="text-[10px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-full border border-amber-signal/40 text-amber-signal bg-amber-signal/10">
-              Directional · approximate
+              Approximate · sample-based
             </span>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
             <MetricCard
-              label="Organic volume (constrained set)"
+              label="Change in post volume"
               value={formatPct(m.volumeChangePct, true)}
               hint={m.volumeChangeNote}
               delay={0}
             />
             <MetricCard
-              label="Non-listed voice share"
+              label="Share from other voices"
               value={formatPct(m.nonListedSharePct)}
               hint={m.nonListedShareNote}
               delay={0.04}
             />
             <MetricCard
-              label="Non-follower engagement"
+              label="Engagement from non-followers"
               value={formatPct(m.nonFollowerEngagementPct)}
               hint={m.nonFollowerNote}
               delay={0.08}
             />
             <MetricCard
-              label="Code-visible list scale"
+              label="Accounts on the list"
               value={`~${entry.approximateScale}`}
               hint={entry.scaleLabel}
               delay={0.12}
@@ -192,10 +192,10 @@ function SpeechReachPage() {
             <div className="lg:col-span-3 rounded-xl border border-border/90 bg-card/50 p-3.5 sm:p-4 min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h3 className="text-[12.5px] font-display font-semibold text-foreground">
-                  Volume & conversation composition
+                  Post volume & who is talking
                 </h3>
                 <span className="text-[10px] font-mono text-muted-foreground">
-                  Index 100 = baseline · activation ≈ Aug 2026
+                  Index 100 = before the rule · mark ≈ when it started
                 </span>
               </div>
               <div className="h-[240px] sm:h-[280px] w-full">
@@ -261,7 +261,7 @@ function SpeechReachPage() {
                       yAxisId="vol"
                       type="monotone"
                       dataKey="volumeIndex"
-                      name="Volume index"
+                      name="Post volume (index)"
                       stroke="var(--cyan)"
                       strokeWidth={2.2}
                       fill="url(#srVolFill)"
@@ -271,7 +271,7 @@ function SpeechReachPage() {
                       yAxisId="share"
                       type="monotone"
                       dataKey="nonListedSharePct"
-                      name="Non-listed share %"
+                      name="Other voices %"
                       stroke="var(--violet-300, #a78bfa)"
                       strokeWidth={2}
                       dot={{ r: 3 }}
@@ -280,8 +280,8 @@ function SpeechReachPage() {
                 </ResponsiveContainer>
               </div>
               <p className="text-[11px] text-muted-foreground mt-2 leading-snug">
-                Cyan: indexed organic volume from the constrained set. Violet: share of candidacy
-                discussion carried by non-listed / secondary voices. {m.sampleWindow}.
+                Cyan: post volume from listed campaign accounts. Violet: share of the conversation
+                from other voices. {m.sampleWindow}.
               </p>
             </div>
 
@@ -290,12 +290,12 @@ function SpeechReachPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Scale className="w-3.5 h-3.5 text-cyan" aria-hidden />
                 <h3 className="text-[12.5px] font-display font-semibold">
-                  Spectrum balance
+                  Across the political spectrum
                 </h3>
               </div>
               <p className="text-[11px] text-muted-foreground mb-3 leading-snug">
-                Aggregate share of sampled discussion about major candidacies — coarse buckets
-                only. Not an official party ranking.
+                Rough share of sampled talk about major candidacies by high-level groups — not
+                official party rankings or individual names.
               </p>
               <div className="h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -365,10 +365,10 @@ function SpeechReachPage() {
           <div className="flex items-center gap-2 mb-3 px-0.5">
             <Radio className="w-4 h-4 text-cyan" aria-hidden />
             <h2 id="sr-obs" className="text-[13px] font-display font-semibold">
-              Observations
+              What we are seeing
             </h2>
             <span className="text-[11px] text-muted-foreground">
-              Short · factual · updatable
+              Short · factual · updated regularly
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
@@ -393,7 +393,7 @@ function SpeechReachPage() {
         <section className="mb-7 sm:mb-8 rounded-xl border border-border/80 bg-secondary/20 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3">
             <Eye className="w-4 h-4 text-cyan" aria-hidden />
-            <h2 className="text-[13px] font-display font-semibold">What this filter does not do</h2>
+            <h2 className="text-[13px] font-display font-semibold">What this does not do</h2>
           </div>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {entry.doesNot.map((d) => (
@@ -416,7 +416,7 @@ function SpeechReachPage() {
           <div className="flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-cyan" aria-hidden />
             <h2 id="sr-method" className="text-[13px] font-display font-semibold">
-              Methodology & privacy
+              How we work & privacy
             </h2>
           </div>
           <p className="text-[12.5px] text-foreground/90 leading-relaxed border-l-2 border-cyan/40 pl-3">
@@ -499,6 +499,9 @@ function SpeechReachPage() {
 }
 
 function BrazilStatusBlock({ entry }: { entry: SpeechReachEntry }) {
+  const simpleWords = entry.simpleWords ?? [];
+  const whoIsOnList = entry.whoIsOnList ?? [];
+
   return (
     <section
       className="mb-7 sm:mb-8 rounded-2xl border border-cyan/30 bg-gradient-to-br from-card/80 via-card/50 to-cyan/[0.04] overflow-hidden"
@@ -536,12 +539,52 @@ function BrazilStatusBlock({ entry }: { entry: SpeechReachEntry }) {
             </p>
           </div>
           <div className="rounded-xl border border-border/80 bg-background/40 p-3.5 space-y-2.5">
-            <StatRow label="Jurisdiction" value={entry.jurisdiction} />
-            <StatRow label="Approx. scale" value={entry.scaleLabel} />
-            <StatRow label="Activation" value={formatDateLabel(entry.activationDate)} />
+            <StatRow label="Country" value={entry.jurisdiction} />
+            <StatRow label="About how many" value={entry.scaleLabel} />
+            <StatRow label="When" value={formatDateLabel(entry.activationDate)} />
             <StatRow label="Status" value={STATUS_LABELS[entry.status]} />
           </div>
         </div>
+
+        {simpleWords.length > 0 && (
+          <div className="rounded-xl border border-cyan/25 bg-cyan/[0.05] p-3.5 sm:p-4">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan mb-2">
+              In simple words
+            </p>
+            <ul className="space-y-1.5">
+              {simpleWords.map((line) => (
+                <li
+                  key={line}
+                  className="flex items-start gap-2 text-[13px] text-foreground/90 leading-snug"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan shrink-0 mt-0.5" aria-hidden />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {whoIsOnList.length > 0 && (
+          <div className="rounded-xl border border-border/80 bg-background/30 p-3.5 sm:p-4">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+              Who is on this list?
+            </p>
+            <ul className="space-y-1.5">
+              {whoIsOnList.map((line) => (
+                <li
+                  key={line}
+                  className="flex items-start gap-2 text-[13px] text-foreground/90 leading-snug"
+                >
+                  <span className="text-cyan shrink-0 mt-1.5" aria-hidden>
+                    ·
+                  </span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:items-center pt-1">
           <a
@@ -555,7 +598,7 @@ function BrazilStatusBlock({ entry }: { entry: SpeechReachEntry }) {
             <ExternalLink className="w-3.5 h-3.5 opacity-80" />
           </a>
           <span className="text-[11px] text-muted-foreground sm:ml-1">
-            Exact list lives only in the public source — never mirrored here.
+            Exact names stay only in the public source — never listed here.
           </span>
         </div>
 

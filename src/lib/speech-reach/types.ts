@@ -58,6 +58,10 @@ export interface SpeechReachEntry {
   status: SpeechReachStatus;
   /** Plain-language what the filter does */
   whatItDoes: string;
+  /** Short bullets: still public vs not recommended */
+  simpleWords?: string[];
+  /** Short bullets: who is on the list (no names) */
+  whoIsOnList?: string[];
   /** Approximate count of constrained accounts — never list them */
   approximateScale: number;
   scaleLabel: string;

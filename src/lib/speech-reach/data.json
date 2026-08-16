@@ -1,25 +1,25 @@
 {
   "meta": {
     "title": "Speech Reach",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lastReviewed": "2026-08-16",
-    "framing": "All speech analyzed here is already public. This tool measures legal and platform rules that affect how far it travels in X’s algorithmic feed.",
-    "privacyCore": "Individual account names and specific posts are never published on this page. Exact lists remain available in the original public sources. This ledger measures code-visible limits on the algorithmic distribution of already-public speech.",
+    "framing": "Everything we look at here is already public. We track rules that change how far that speech travels in X’s For You feed — not whether it can be posted or read.",
+    "privacyCore": "We never publish individual account names or specific posts on this page. Full lists stay in the original public sources. This page only tracks public, code-visible limits on how speech is recommended in the feed.",
     "methodology": [
-      "Primary source of truth for each entry is the public open-source filter in the xai-org/x-algorithm repository (and any official dataset the filter cites).",
-      "Account-scale counts come from the published code (for example, the Brazil filter’s own test asserts list size).",
-      "Outcome metrics use purposive public sampling of already-public posts — the same class of methods used elsewhere on Elenchos for topics and signals.",
-      "Metrics are system-level aggregates only. We do not publish handles, user IDs, or individual posts on this site.",
-      "Users who need the exact constrained list must open the original public GitHub source (and official TSE open data where cited)."
+      "The main source for each entry is the public open-source filter in the xai-org/x-algorithm repository (and any official dataset the filter cites).",
+      "Account counts come from the published code (for example, the Brazil filter’s own test checks list size).",
+      "Outcome metrics use the same kind of public sampling we use elsewhere on Elenchos for topics and signals.",
+      "All metrics are system-level totals only. We do not publish handles, user IDs, or individual posts here.",
+      "If you need the exact list of accounts, open the original public GitHub source (and official TSE open data where cited)."
     ],
     "limitations": [
-      "Not a full map of content moderation, visibility filtering, or account-level enforcement.",
-      "Not a national opinion poll or election forecast.",
-      "Reach and volume figures are directional / approximate — not a complete census of the feed.",
-      "For You behavior can vary by viewer graph, locale, and product experiments; we report system-level patterns only.",
-      "Paid boosting exceptions noted in the legal/code comments are outside this v1 measurement window."
+      "This is not a full map of every kind of content moderation on X.",
+      "This is not a national opinion poll or election forecast.",
+      "Reach and volume numbers are approximate directions — not a full count of the entire feed.",
+      "What you see in For You can still vary by who you follow, where you are, and product tests; we only report system-level patterns.",
+      "Paid boosting exceptions noted in the code comments are outside this first measurement window."
     ],
-    "futureNote": "Speech Reach is designed to add further jurisdiction-specific recommendation constraints as they appear in the public code, using the same privacy-safe, system-level approach — no individual accounts or posts on public pages."
+    "futureNote": "Speech Reach can add more country-specific recommendation rules as they show up in the public code, with the same privacy-safe approach — no individual accounts or posts on public pages."
   },
   "entries": [
     {
@@ -27,11 +27,23 @@
       "title": "Brazil 2026 Election Recommendation Filter",
       "jurisdiction": "Brazil",
       "status": "active",
-      "whatItDoes": "Official campaign accounts listed under Brazilian electoral rules are excluded from X’s For You recommendations unless the viewer already follows them. Profiles and content remain fully accessible to anyone.",
+      "whatItDoes": "Campaign accounts on Brazil’s election list are kept out of For You recommendations unless you already follow them. Their profiles and posts stay fully public and readable.",
+      "simpleWords": [
+        "The accounts can still post.",
+        "Anyone can still find and read their posts.",
+        "What changed: X will no longer automatically show those posts to people who do not already follow them.",
+        "This is “not recommended,” not “banned” or “deleted.”"
+      ],
+      "whoIsOnList": [
+        "These are roughly 665 official candidate and campaign accounts that registered their X profiles with Brazil’s Electoral Court (TSE) for the 2026 elections.",
+        "The list includes accounts from the full political spectrum — left, center, right, and smaller parties.",
+        "The rule applies equally to all of them. It is not aimed at one ideology.",
+        "Exact names remain only in the original public sources (link below)."
+      ],
       "approximateScale": 665,
-      "scaleLabel": "~665 accounts (code-visible list size)",
+      "scaleLabel": "About 665 campaign accounts on the public list",
       "activationDate": "2026-08",
-      "activationNote": "Active in the public For You pipeline (Brazil2026ElectionFilter). Activation marker is approximate to the public announcement/code window.",
+      "activationNote": "Live in X’s For You system for the Brazil 2026 elections. The chart’s “activation” mark is approximate to when the public code and announcement appeared.",
       "sources": [
         {
           "label": "brazil_2026_election_filter.rs (xai-org/x-algorithm)",
@@ -50,38 +62,38 @@
         }
       ],
       "verifyUrl": "https://github.com/xai-org/x-algorithm/blob/main/home-mixer/filters/brazil_2026_election_filter.rs",
-      "verifyLabel": "Verify on GitHub — public filter source",
+      "verifyLabel": "See the public list on GitHub",
       "metrics": {
         "volumeChangePct": -38,
-        "volumeChangeNote": "Sampled organic volume from the constrained set fell after activation vs a short pre-activation baseline (indexed; not a full census).",
+        "volumeChangeNote": "How much posting volume from these campaign accounts changed after the rule (sample estimate — not a full count).",
         "nonListedSharePct": 61,
-        "nonListedShareNote": "Share of sampled candidacy discussion carried by non-listed / secondary voices in the current window.",
+        "nonListedShareNote": "How much of the campaign conversation is now carried by accounts that are not on the list.",
         "nonFollowerEngagementPct": 72,
-        "nonFollowerNote": "Share of engagement on constrained-set posts from non-followers (public sample). Higher = more remaining reach depends on non–For You paths.",
+        "nonFollowerNote": "How much engagement on listed accounts still comes from people who do not follow them (outside pure For You push).",
         "spectrum": [
           {
             "id": "left",
             "label": "Left / progressive lists",
             "sharePct": 28,
-            "note": "Aggregate only — party family buckets, not individuals"
+            "note": "High-level groups only — not individual names"
           },
           {
             "id": "center",
             "label": "Center / coalition",
             "sharePct": 24,
-            "note": "Aggregate only"
+            "note": "High-level groups only"
           },
           {
             "id": "right",
             "label": "Right / conservative lists",
             "sharePct": 31,
-            "note": "Aggregate only"
+            "note": "High-level groups only"
           },
           {
             "id": "smaller",
             "label": "Smaller parties & others",
             "sharePct": 17,
-            "note": "Aggregate only"
+            "note": "High-level groups only"
           }
         ],
         "series": [
@@ -117,35 +129,35 @@
           }
         ],
         "confidence": "directional",
-        "sampleWindow": "Public purposive samples · pre-activation baseline vs current post-activation window",
+        "sampleWindow": "Public samples · before vs after the rule took effect",
         "lastSampled": "2026-08-16",
         "refreshCadence": "weekly",
         "caveats": [
-          "All figures are directional / approximate.",
-          "Not a ranking of countries or a censorship scoreboard.",
-          "Activation marker on the chart is approximate to the public announcement/code window.",
-          "Spectrum buckets are coarse aggregates for scannability — not official TSE party classifications."
+          "All figures are approximate directions, not exact census counts.",
+          "This is not a ranking of countries or a “censorship scoreboard.”",
+          "The activation mark on the chart is approximate.",
+          "Political spectrum buckets are rough groups for reading ease — not official TSE labels."
         ]
       },
       "observations": [
         {
           "id": "obs-follower-bases",
-          "text": "Official campaign messaging is more confined to existing follower bases in For You contexts, while profiles and posts remain fully accessible via follow, search, profile, and direct link.",
+          "text": "Campaign messages reach existing followers more than new people in For You. Profiles and posts are still easy to open via follow, search, profile, or a direct link.",
           "updatedAt": "2026-08-16"
         },
         {
           "id": "obs-secondary-voices",
-          "text": "Broader conversation in sampled public discourse about major candidacies is increasingly carried by non-listed accounts and ordinary users.",
+          "text": "In our samples, more of the public conversation about major candidacies is coming from accounts that are not on the list — including ordinary users.",
           "updatedAt": "2026-08-16"
         },
         {
           "id": "obs-spectrum",
-          "text": "The recommendation restriction is applied at system level across the political spectrum for accounts in the code-visible list — not as a single-party rule.",
+          "text": "The same recommendation rule applies across the political spectrum for every account on the public list — not only one party or ideology.",
           "updatedAt": "2026-08-16"
         },
         {
           "id": "obs-does-not",
-          "text": "The filter does not delete posts, suspend accounts, or remove content from the open web: it limits algorithmic distribution in For You for non-followers of listed accounts (and related retweet/quote/reply context as implemented in the public filter).",
+          "text": "The filter does not delete posts or close accounts. It only limits automatic For You recommendations for people who do not already follow those accounts (including some retweet, quote, and reply cases as written in the public code).",
           "updatedAt": "2026-08-16"
         }
       ],
