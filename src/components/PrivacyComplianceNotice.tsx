@@ -25,13 +25,12 @@ export function PrivacyComplianceNotice({ compact = false }: { compact?: boolean
         Privacy &amp; cookies (EU/GDPR)
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
-        We use a session cookie to keep you signed in and store your email and authentication
-        metadata on EU-region cloud infrastructure. Google Analytics runs only if you accept
-        cookies; we do not use it for ads or sell profiles. See our{" "}
+        Session cookie for sign-in; account data on EU-region cloud. Analytics only if you accept —
+        no ads, no selling profiles.{" "}
         <Link to="/privacy" className="text-cyan hover:underline">
           Privacy Notice
         </Link>{" "}
-        for lawful basis, your rights, and deletion requests. Contact:{" "}
+        for rights and deletion. Contact:{" "}
         <ContactEmailMe source="privacy-box" variant="inline" className="text-xs" />.
       </p>
     </div>

@@ -3,7 +3,7 @@
     "title": "Speech Reach",
     "version": "1.0.0",
     "lastReviewed": "2026-08-16",
-    "framing": "All speech analysed here is already public. This tool measures legal and platform rules that affect how far it travels in the algorithmic feed on X.",
+    "framing": "All speech analyzed here is already public. This tool measures legal and platform rules that affect how far it travels in X’s algorithmic feed.",
     "privacyCore": "Individual account names and specific posts are never published on this page. Exact lists remain available in the original public sources. This ledger measures code-visible limits on the algorithmic distribution of already-public speech.",
     "methodology": [
       "Primary source of truth for each entry is the public open-source filter in the xai-org/x-algorithm repository (and any official dataset the filter cites).",
@@ -16,7 +16,7 @@
       "Not a full map of content moderation, visibility filtering, or account-level enforcement.",
       "Not a national opinion poll or election forecast.",
       "Reach and volume figures are directional / approximate — not a complete census of the feed.",
-      "For You behaviour can vary by viewer graph, locale, and product experiments; we report system-level patterns only.",
+      "For You behavior can vary by viewer graph, locale, and product experiments; we report system-level patterns only.",
       "Paid boosting exceptions noted in the legal/code comments are outside this v1 measurement window."
     ],
     "futureNote": "Speech Reach is designed to add further jurisdiction-specific recommendation constraints as they appear in the public code, using the same privacy-safe, system-level approach — no individual accounts or posts on public pages."
@@ -31,7 +31,7 @@
       "approximateScale": 665,
       "scaleLabel": "~665 accounts (code-visible list size)",
       "activationDate": "2026-08",
-      "activationNote": "Active in the public For You pipeline as Brazil2026ElectionFilter; X announced the change in accordance with Brazilian electoral law. Exact calendar day of production rollout may differ from code publication — treat the series activation marker as approximate.",
+      "activationNote": "Active in the public For You pipeline (Brazil2026ElectionFilter). Activation marker is approximate to the public announcement/code window.",
       "sources": [
         {
           "label": "brazil_2026_election_filter.rs (xai-org/x-algorithm)",
@@ -53,11 +53,11 @@
       "verifyLabel": "Verify on GitHub — public filter source",
       "metrics": {
         "volumeChangePct": -38,
-        "volumeChangeNote": "Directional decline in sampled organic post volume from the constrained set after activation vs a short pre-activation baseline window (indexed; not a full census).",
+        "volumeChangeNote": "Sampled organic volume from the constrained set fell after activation vs a short pre-activation baseline (indexed; not a full census).",
         "nonListedSharePct": 61,
-        "nonListedShareNote": "Approximate share of sampled discussion about major candidacies carried by non-listed / secondary voices in the current window.",
+        "nonListedShareNote": "Share of sampled candidacy discussion carried by non-listed / secondary voices in the current window.",
         "nonFollowerEngagementPct": 72,
-        "nonFollowerNote": "Follower-dependence proxy: estimated share of engagement on constrained-set posts that still comes from non-followers (public sampling). Higher values mean more of the remaining reach depends on non-follower discovery paths outside pure For You recommendation.",
+        "nonFollowerNote": "Share of engagement on constrained-set posts from non-followers (public sample). Higher = more remaining reach depends on non–For You paths.",
         "spectrum": [
           {
             "id": "left",
@@ -66,8 +66,8 @@
             "note": "Aggregate only — party family buckets, not individuals"
           },
           {
-            "id": "centre",
-            "label": "Centre / coalition",
+            "id": "center",
+            "label": "Center / coalition",
             "sharePct": 24,
             "note": "Aggregate only"
           },
@@ -85,12 +85,36 @@
           }
         ],
         "series": [
-          { "date": "2026-07-20", "volumeIndex": 98, "nonListedSharePct": 44 },
-          { "date": "2026-07-27", "volumeIndex": 102, "nonListedSharePct": 45 },
-          { "date": "2026-08-03", "volumeIndex": 100, "nonListedSharePct": 46 },
-          { "date": "2026-08-10", "volumeIndex": 71, "nonListedSharePct": 54 },
-          { "date": "2026-08-13", "volumeIndex": 64, "nonListedSharePct": 58 },
-          { "date": "2026-08-16", "volumeIndex": 62, "nonListedSharePct": 61 }
+          {
+            "date": "2026-07-20",
+            "volumeIndex": 98,
+            "nonListedSharePct": 44
+          },
+          {
+            "date": "2026-07-27",
+            "volumeIndex": 102,
+            "nonListedSharePct": 45
+          },
+          {
+            "date": "2026-08-03",
+            "volumeIndex": 100,
+            "nonListedSharePct": 46
+          },
+          {
+            "date": "2026-08-10",
+            "volumeIndex": 71,
+            "nonListedSharePct": 54
+          },
+          {
+            "date": "2026-08-13",
+            "volumeIndex": 64,
+            "nonListedSharePct": 58
+          },
+          {
+            "date": "2026-08-16",
+            "volumeIndex": 62,
+            "nonListedSharePct": 61
+          }
         ],
         "confidence": "directional",
         "sampleWindow": "Public purposive samples · pre-activation baseline vs current post-activation window",

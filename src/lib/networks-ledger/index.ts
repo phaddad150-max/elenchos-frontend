@@ -1,6 +1,6 @@
 /**
  * Terror & Finance Networks — public module.
- * Privacy rule: this module must never export individual or organisational names.
+ * Privacy rule: this module must never export individual or organizational names.
  * Named curation (if any) lives only under archive/ and must not be imported by routes.
  */
 import raw from "./public-data.json";

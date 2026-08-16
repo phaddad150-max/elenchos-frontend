@@ -724,7 +724,7 @@ function MigrationIntelligencePage() {
             </ul>
             <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">
               Next: jurisdiction speech-case table · deeper origin series · X citizen sample
-              (authorised) · optional full free-speech/platform receipts module. Human-reviewed
+              (authorized) · optional full free-speech/platform receipts module. Human-reviewed
               claim list expands without inventing numbers.
             </p>
           </section>

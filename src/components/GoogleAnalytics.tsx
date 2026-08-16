@@ -1,25 +1,18 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import {
-  denyAnalyticsConsent,
-  grantAnalyticsConsent,
-  trackPageview,
-} from "@/lib/google-analytics";
+import { enableAnalyticsAndTrack } from "@/lib/google-analytics";
 import { readConsentChoice } from "@/lib/privacy-consent";
 
-/** Sends page views after cookie consent; covers client-side route changes. */
+/** Page views only after Accept — gtag is not loaded until then. */
 export function GoogleAnalytics() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
 
   useEffect(() => {
+    const path = `${pathname}${search ?? ""}`;
     const send = () => {
-      if (readConsentChoice() !== "accepted") {
-        denyAnalyticsConsent();
-        return;
-      }
-      grantAnalyticsConsent();
-      trackPageview(`${pathname}${search ?? ""}`);
+      if (readConsentChoice() !== "accepted") return;
+      void enableAnalyticsAndTrack(path);
     };
     send();
     window.addEventListener("consent-changed", send);

@@ -266,7 +266,7 @@ export const REMEDIES: { ask: string; feasibility: string; note: string }[] = [
     note: "Double standard: normalising illegal entry while policing speech is a legitimacy crisis.",
   },
   {
-    ask: "Target smuggling networks as organised crime",
+    ask: "Target smuggling networks as organized crime",
     feasibility: "High consensus, execution varies",
     note: "Cross-border police work; not a substitute for removal capacity.",
   },
@@ -385,7 +385,7 @@ export const LABELING_PATTERN: {
     "CEE barrier policies covered as xenophobia first, capacity/security second.",
     "Italian or Greek deterrence ops described as ‘far right’ even under centrist coalitions.",
     "UK small-boat policy fights moralised as cruelty; gang profits under-emphasised.",
-    "Citizens using ‘illegal’ face etiquette policing while unauthorised entry is ‘irregular migration’.",
+    "Citizens using ‘illegal’ face etiquette policing while unauthorized entry is ‘irregular migration’.",
   ],
   falsifier:
     "If major outlets consistently lead with smuggling economics, removal rates, and citizen security metrics alongside rights language, the ‘one-way moral frame’ claim weakens.",

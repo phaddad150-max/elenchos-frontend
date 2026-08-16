@@ -4,15 +4,15 @@
     "version": "3.0.0-privacy",
     "phase": "Privacy-first aggregates · official sources only",
     "lastReviewed": "2026-08-16",
-    "framing": "All information in this branch is drawn from already-public official sources. Individual and organisational names are not published on elenchos.live. Users who need the exact names can find them in the official public lists linked below.",
-    "privacyCore": "Individual and organisational names are never published on this page. Exact identifiers remain available only in the original official public sources. This ledger tracks aggregate patterns in official designations, freezes, arrests and charges.",
+    "framing": "Drawn only from already-public official sources. Individual and organizational names are not published on elenchos.live — find them in the official lists linked below.",
+    "privacyCore": "Individual and organizational names are never published here. Exact identifiers stay on the original official sources. This ledger tracks aggregate patterns in designations, freezes, arrests, and charges.",
     "scope": "Aggregate patterns of official terror-finance enforcement: designations, freezes, arrests, and charges. High-level financing-network categories and geography only — never party-level identifiers.",
     "methodology": [
-      "All counts are derived from already-public official announcements (Treasury/OFAC, DOJ, State, TFTC, UAE Cabinet/WAM where official, EU/member-state primary acts where applicable).",
-      "elenchos.live does not republish personal or organisational identifiers. Users verify exact names only on the official public lists linked on this page.",
-      "Action types and category tags are system-level classifications used for trend analysis, not findings of guilt.",
-      "Quantified fund figures appear only when officials published dollar amounts; they are directional and may overlap across related packages.",
-      "Refresh cadence follows the quality and timing of official source releases (typically weekly review)."
+      "Counts come from already-public official announcements (OFAC, DOJ, State, TFTC, UAE, EU/member-state primary acts where applicable).",
+      "elenchos.live does not republish personal or organizational identifiers. Verify names only on the official lists linked here.",
+      "Action types and category tags are system-level labels for trend analysis, not findings of guilt.",
+      "Dollar figures appear only when officials published them; they are directional and may overlap across packages.",
+      "Refresh follows official source release timing (typically weekly review)."
     ],
     "limitations": [
       "Not a complete map of all global counter-terror finance activity.",
@@ -38,14 +38,34 @@
     "actionsSince2025": 28,
     "actionsLatestPeriod": 12,
     "quantifiedFundsUsdApprox": 210000000,
-    "quantifiedFundsNote": "Where officials published figures, related packages in this corpus reference on the order of ~$210M in stated diversion/network estimates. Directional only; not a unique sum of all freezes worldwide."
+    "quantifiedFundsNote": "Official releases cite ~ in related diversion estimates. Directional only — not a global freeze total."
   },
   "byActionType": [
-    { "id": "designation", "label": "Designations", "count": 20 },
-    { "id": "joint_action", "label": "Joint / multilateral packages", "count": 4 },
-    { "id": "charges", "label": "Charges / cases", "count": 4 },
-    { "id": "asset_freeze", "label": "Asset freezes / blocks", "count": 2 },
-    { "id": "arrest", "label": "Arrests (official report)", "count": 1 }
+    {
+      "id": "designation",
+      "label": "Designations",
+      "count": 20
+    },
+    {
+      "id": "joint_action",
+      "label": "Joint / multilateral packages",
+      "count": 4
+    },
+    {
+      "id": "charges",
+      "label": "Charges / cases",
+      "count": 4
+    },
+    {
+      "id": "asset_freeze",
+      "label": "Asset freezes / blocks",
+      "count": 2
+    },
+    {
+      "id": "arrest",
+      "label": "Arrests (official report)",
+      "count": 1
+    }
   ],
   "byNetworkCategory": [
     {
@@ -80,22 +100,70 @@
     }
   ],
   "byRegion": [
-    { "id": "US", "label": "United States", "count": 20 },
-    { "id": "Gulf", "label": "Gulf / TFTC", "count": 9 },
-    { "id": "Lebanon", "label": "Lebanon (entity context)", "count": 9 },
-    { "id": "Other", "label": "Other / multi", "count": 6 },
-    { "id": "Europe", "label": "Europe", "count": 5 },
-    { "id": "Africa", "label": "Africa", "count": 1 }
+    {
+      "id": "US",
+      "label": "United States",
+      "count": 20
+    },
+    {
+      "id": "Gulf",
+      "label": "Gulf / TFTC",
+      "count": 9
+    },
+    {
+      "id": "Lebanon",
+      "label": "Lebanon (entity context)",
+      "count": 9
+    },
+    {
+      "id": "Other",
+      "label": "Other / multi",
+      "count": 6
+    },
+    {
+      "id": "Europe",
+      "label": "Europe",
+      "count": 5
+    },
+    {
+      "id": "Africa",
+      "label": "Africa",
+      "count": 1
+    }
   ],
   "series": [
-    { "date": "2025-03", "actions": 1 },
-    { "date": "2025-07", "actions": 1 },
-    { "date": "2026-01", "actions": 6 },
-    { "date": "2026-03", "actions": 8 },
-    { "date": "2026-05", "actions": 3 },
-    { "date": "2026-06", "actions": 6 },
-    { "date": "2026-07", "actions": 2 },
-    { "date": "2026-08", "actions": 1 }
+    {
+      "date": "2025-03",
+      "actions": 1
+    },
+    {
+      "date": "2025-07",
+      "actions": 1
+    },
+    {
+      "date": "2026-01",
+      "actions": 6
+    },
+    {
+      "date": "2026-03",
+      "actions": 8
+    },
+    {
+      "date": "2026-05",
+      "actions": 3
+    },
+    {
+      "date": "2026-06",
+      "actions": 6
+    },
+    {
+      "date": "2026-07",
+      "actions": 2
+    },
+    {
+      "date": "2026-08",
+      "actions": 1
+    }
   ],
   "observations": [
     {

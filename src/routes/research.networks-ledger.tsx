@@ -53,7 +53,7 @@ export const Route = createFileRoute("/research/networks-ledger")({
       {
         name: "description",
         content:
-          "Terror & Finance Networks: aggregate patterns in official designations, freezes, arrests and charges. No individual or organisational names — verify on official public lists.",
+          "Terror & Finance Networks: aggregate patterns in official designations, freezes, arrests and charges. No individual or organizational names — verify on official public lists.",
       },
       {
         property: "og:title",
@@ -168,7 +168,7 @@ function TerrorFinancePage() {
             <p className="text-[13px] text-foreground/90 leading-relaxed max-w-3xl">
               High-level summary of official activity in the curated corpus.{" "}
               <strong className="font-semibold text-foreground">
-                Names of individuals and organisations are not published on this site.
+                Names of individuals and organizations are not published on this site.
               </strong>{" "}
               Use the official public lists below to look up exact identifiers.
             </p>
@@ -215,19 +215,19 @@ function TerrorFinancePage() {
             <MetricCard
               label="New designations (corpus)"
               value={String(m.designations)}
-              hint="Official designation actions in the curated set"
+              hint="Designation actions in the curated set"
               delay={0}
             />
             <MetricCard
               label="Freezes / asset actions"
               value={String(m.assetFreezes)}
-              hint="Asset freeze or blocking instruments counted"
+              hint="Freeze or block instruments counted"
               delay={0.04}
             />
             <MetricCard
               label="Arrests / charges"
               value={String(m.arrestsCharges)}
-              hint="Official arrest or charge reports — allegations until adjudicated"
+              hint="Official arrests/charges — allegations until adjudicated"
               delay={0.08}
             />
             <MetricCard

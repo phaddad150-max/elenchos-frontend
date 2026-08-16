@@ -12,7 +12,6 @@ import appCss from "../styles.css?url";
 import { ThemeInit } from "@/components/ThemeInit";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import { GA_MEASUREMENT_ID } from "@/lib/google-analytics";
 
 const FONT_LINKS = [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -157,27 +156,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
+    <html lang="en-US" className="light" suppressHydrationWarning>
       <head>
-        {/* Google tag (gtag.js) — Consent Mode defaults to denied until Accept */}
-        <script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', {
-  analytics_storage: 'denied',
-  ad_storage: 'denied',
-  ad_user_data: 'denied',
-  ad_personalization: 'denied'
-});
-gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}', { anonymize_ip: true, send_page_view: false });`,
-          }}
-        />
+        {/* gtag.js loads only after cookie Accept — see GoogleAnalytics + google-analytics.ts */}
         <HeadContent />
         <script
           dangerouslySetInnerHTML={{
