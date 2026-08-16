@@ -150,7 +150,7 @@ const DOORS = [
     title: "Trackers",
     kicker: "Indexes & ledgers",
     description:
-      "Leadership board, peace index, football player index, and the Networks Ledger (official terror-finance designations, freezes, arrests, charges).",
+      "Leadership board, peace index, football player index, and the Networks Ledger (Terror & Finance + Speech Reach).",
     leadsTo: "Opens free indexes and the networks ledger from this library.",
     cta: "Browse trackers",
     href: "#trackers",
@@ -402,9 +402,9 @@ function ResearchLibraryPage() {
               <ToolCard
                 href="/research/networks-ledger"
                 title="Networks Ledger"
-                body="Official designations, freezes, arrests, and charges on terror-finance networks — map, major packages, linked orgs/countries when named in primary sources."
+                body="Two branches: Terror & Finance (designations, freezes, charges) and Speech Reach (how public speech travels in X’s For You feed)."
                 icon={<Shield className="w-5 h-5" />}
-                badge="Phase 2"
+                badge="Live"
               />
               <ToolCard
                 href="/trackers/leaders"

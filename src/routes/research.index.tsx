@@ -46,7 +46,7 @@ const PATHS = [
     to: "/research/library",
     title: "Library",
     subtitle: "Free — everything published",
-    body: "Public discourse on X, multi-source case studies, leadership boards, peace index, and the Networks Ledger.",
+    body: "Public discourse on X, multi-source case studies, leadership boards, peace index, Networks Ledger (Terror & Finance + Speech Reach).",
     icon: BookOpen,
     accent: "from-emerald-signal/20 to-transparent border-emerald-signal/35",
     glow: "group-hover:border-emerald-signal/55",

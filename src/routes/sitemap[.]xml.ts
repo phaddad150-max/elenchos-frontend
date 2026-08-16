@@ -28,6 +28,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/research/library", changefreq: "weekly", priority: "0.9" },
           { path: "/research/commission", changefreq: "weekly", priority: "0.85" },
           { path: "/research/networks-ledger", changefreq: "weekly", priority: "0.7" },
+          {
+            path: "/research/networks-ledger/speech-reach",
+            changefreq: "weekly",
+            priority: "0.7",
+          },
           // Shared community reports are token URLs (noindex private by default); library lists them.
           { path: "/research-migration", changefreq: "weekly", priority: "0.8" },
           { path: "/research-aviation", changefreq: "weekly", priority: "0.8" },

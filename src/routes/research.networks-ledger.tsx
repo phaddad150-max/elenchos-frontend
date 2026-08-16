@@ -8,7 +8,7 @@ import {
   Filter,
   FlaskConical,
   MapPin,
-
+  MessageSquareShare,
   Search,
   Shield,
   Trophy,
@@ -21,6 +21,7 @@ import {
   ResearchBreadcrumb,
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
+import { LedgerBranchNav } from "@/components/networks-ledger/LedgerBranchNav";
 import {
   ACTION_TYPE_LABELS,
   ALL_ENTRIES,
@@ -51,12 +52,12 @@ export const Route = createFileRoute("/research/networks-ledger")({
   head: () => ({
     meta: [
       {
-        title: "Networks Ledger · Official actions · Library · Elenchos",
+        title: "Networks Ledger · Terror & Finance · Library · Elenchos",
       },
       {
         name: "description",
         content:
-          "Elenchos Networks Ledger: official terror-finance designations, freezes, arrests and charges from primary government sources — US, Gulf/TFTC, Europe. Linked orgs and jurisdictions when named in source.",
+          "Elenchos Networks Ledger: Terror & Finance Networks (official designations, freezes, arrests, charges) and Speech Reach (algorithmic distribution of already-public speech on X).",
       },
       {
         property: "og:title",
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/research/networks-ledger")({
       {
         property: "og:description",
         content:
-          "Phase 2 official actions map and ledger. Designations, freezes, charges — primary sources only.",
+          "Two branches: Terror & Finance Networks · Speech Reach. Primary sources and privacy-safe metrics.",
       },
       {
         property: "og:url",
@@ -125,20 +126,18 @@ function NetworksLedgerPage() {
           <div className="relative p-4 sm:p-5 md:p-6 space-y-2.5 min-w-0">
             <div className="page-hero-kicker">
               <Brain className="w-3.5 h-3.5" aria-hidden />
-              Library · Official actions tracker
+              Library · Networks Ledger
             </div>
             <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem] break-words">
               Networks Ledger
             </h1>
             <p className="text-[12px] font-mono text-cyan/90 tracking-wide">
-              Official designations · freezes · arrests · charges
+              Terror & Finance · Speech Reach
             </p>
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-3xl leading-relaxed break-words">
-              Who governments have designated, frozen, arrested, or charged in connection with
-              IRGC, Hezbollah, Muslim Brotherhood, Hamas financing, and overlapping networks —
-              drawn only from primary government sources. Interactive map, major packages with full
-              descriptions, linked orgs/countries/institutions/NGOs when named in the source, and a
-              filterable chronological ledger. Phase 2: US · Gulf/TFTC · Europe · Lebanon.{" "}
+              Two public ledgers under one roof: official terror-finance enforcement actions, and
+              code-visible rules that limit how already-public speech travels in X’s algorithmic
+              feed.{" "}
               <Link to="/research/library" className="text-cyan hover:underline">
                 Back to full library
               </Link>
@@ -147,22 +146,32 @@ function NetworksLedgerPage() {
           </div>
         </header>
 
+        <LedgerBranchNav />
+
         {/* Tool hub */}
         <section className="mb-7 sm:mb-8" aria-labelledby="intel-tools">
           <h2
             id="intel-tools"
             className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-3 px-0.5"
           >
-            Tools
+            Related tools
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             <ToolCard
               href="#designations-ledger"
-              title="Networks Ledger"
-              body="Map + ledger of official terror-finance designations, freezes, arrests, and charges — primary sources only."
+              title="Terror & Finance"
+              body="Map + ledger of official designations, freezes, arrests, and charges — primary government sources only."
               icon={<Shield className="w-5 h-5" />}
               badge="On this page"
               tone="cyan"
+            />
+            <ToolCard
+              href="/research/networks-ledger/speech-reach"
+              title="Speech Reach"
+              body="How already-public speech is distributed — or limited — in X’s For You feed. Brazil 2026 filter first."
+              icon={<MessageSquareShare className="w-5 h-5" />}
+              badge="New"
+              tone="violet"
             />
             <ToolCard
               href="/trackers/leaders"
@@ -180,14 +189,6 @@ function NetworksLedgerPage() {
               badge="Live"
               tone="cyan"
             />
-            <ToolCard
-              href="/trackers/football"
-              title="Football player index"
-              body="Fan discourse rankings — form, legacy, post-match sentiment."
-              icon={<Trophy className="w-5 h-5" />}
-              badge="Live"
-              tone="emerald"
-            />
           </div>
           <Link
             to="/trackers"
@@ -197,10 +198,13 @@ function NetworksLedgerPage() {
           </Link>
         </section>
 
-        {/* Designations ledger — single tracker (terror-finance + financial-crime public actions) */}
+        {/* Terror & Finance branch content */}
         <div id="designations-ledger" className="scroll-mt-28 space-y-5 sm:space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-2 px-0.5">
             <div className="min-w-0">
+              <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan/90 mb-1">
+                Branch · Terror & Finance Networks
+              </p>
               <h2 className="text-[15px] sm:text-[16px] font-display font-semibold text-foreground">
                 Official actions on terror-finance networks
               </h2>

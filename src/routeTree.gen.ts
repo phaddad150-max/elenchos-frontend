@@ -25,6 +25,7 @@ import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersFootballRouteImport } from './routes/trackers.football'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
 import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.networks-ledger'
+import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
 import { Route as ResearchLibraryRouteImport } from './routes/research.library'
 import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
@@ -122,6 +123,12 @@ const ResearchNetworksLedgerRoute = ResearchNetworksLedgerRouteImport.update({
   path: '/research/networks-ledger',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchNetworksLedgerSpeechReachRoute =
+  ResearchNetworksLedgerSpeechReachRouteImport.update({
+    id: '/research/networks-ledger/speech-reach',
+    path: '/research/networks-ledger/speech-reach',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
   id: '/research/library',
   path: '/research/library',
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
+  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -252,6 +260,7 @@ export interface FileRoutesByTo {
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
+  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -287,6 +296,7 @@ export interface FileRoutesById {
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
   '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
+  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/football': typeof TrackersFootballRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/research/commission'
     | '/research/library'
     | '/research/networks-ledger'
+    | '/research/networks-ledger/speech-reach'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/research/commission'
     | '/research/library'
     | '/research/networks-ledger'
+    | '/research/networks-ledger/speech-reach'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -391,6 +403,7 @@ export interface FileRouteTypes {
     | '/research/commission'
     | '/research/library'
     | '/research/networks-ledger'
+    | '/research/networks-ledger/speech-reach'
     | '/topics/$topicId'
     | '/trackers/football'
     | '/trackers/leaders'
@@ -426,6 +439,7 @@ export interface RootRouteChildren {
   ResearchCommissionRoute: typeof ResearchCommissionRoute
   ResearchLibraryRoute: typeof ResearchLibraryRoute
   ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRoute
+  ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersFootballRoute: typeof TrackersFootballRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
@@ -561,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchNetworksLedgerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research/networks-ledger/speech-reach': {
+      id: '/research/networks-ledger/speech-reach'
+      path: '/research/networks-ledger/speech-reach'
+      fullPath: '/research/networks-ledger/speech-reach'
+      preLoaderRoute: typeof ResearchNetworksLedgerSpeechReachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/library': {
       id: '/research/library'
       path: '/research/library'
@@ -690,6 +711,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchCommissionRoute: ResearchCommissionRoute,
   ResearchLibraryRoute: ResearchLibraryRoute,
   ResearchNetworksLedgerRoute: ResearchNetworksLedgerRoute,
+  ResearchNetworksLedgerSpeechReachRoute: ResearchNetworksLedgerSpeechReachRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersFootballRoute: TrackersFootballRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,

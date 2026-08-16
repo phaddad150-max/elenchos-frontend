@@ -1,5 +1,14 @@
 # Networks Ledger (Phase 2)
 
+Hub with two branches:
+
+| Branch | URL | Focus |
+|--------|-----|--------|
+| **Terror & Finance Networks** | `/research/networks-ledger` | Official designations, freezes, arrests, charges |
+| **Speech Reach** | `/research/networks-ledger/speech-reach` | Code-visible limits on algorithmic distribution of already-public speech on X |
+
+## Terror & Finance Networks
+
 Public tracker of **official government designations, arrests/charges, and quantified freezes** involving:
 
 - IRGC  
