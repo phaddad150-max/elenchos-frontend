@@ -5,13 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
   Brain,
+  BookOpen,
   ChevronDown,
   FileStack,
+  FlaskConical,
   Globe2,
   Layers,
+  Library,
   MapPin,
   MapPinned,
   Radio,
+  Radar,
   TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
@@ -23,6 +27,7 @@ import {
   Users,
   Sparkles,
   ArrowRight,
+  FilePenLine,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { CitizenSignalModal } from "@/components/CitizenSignalModal";
@@ -552,11 +557,20 @@ function Dashboard() {
         >
           <section className="dash-panel p-2.5 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start h-auto">
             <div className="flex flex-col gap-1.5 sm:gap-2.5 mb-2 sm:mb-2.5 pb-2 sm:pb-2.5 border-b border-border/80 shrink-0">
-              <Header
-                icon={<Radio className="w-4 h-4" />}
-                title="Citizen signals"
-                subtitle="From the latest sample. Tap any row for the full briefing."
-              />
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 min-w-0">
+                <Header
+                  icon={<Radio className="w-4 h-4" />}
+                  title="Live Citizen Signals"
+                  subtitle="From the latest sample. Tap a row for the full briefing."
+                />
+                <Link
+                  to="/topics"
+                  className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-3 py-2 text-[12px] font-medium transition-colors min-h-[44px] sm:min-h-[36px] touch-manipulation self-start"
+                >
+                  Open full briefing
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden />
+                </Link>
+              </div>
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll overscroll-x-contain">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
               </div>
@@ -600,14 +614,14 @@ function Dashboard() {
             <div className="mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-border/80 shrink-0">
               <Header
                 icon={<Globe2 className="w-4 h-4" />}
-                title="Global sentiment heatmap"
-                subtitle={`Tap a point · ${kpis.regions} region${kpis.regions === 1 ? "" : "s"} · ${fmtNum(kpis.postsAnalyzed)} posts`}
+                title="Global Sentiment Heatmap"
+                subtitle={`Tap a point · ${kpis.regions} region${kpis.regions === 1 ? "" : "s"} · ${fmtNum(kpis.postsAnalyzed)} data points`}
               />
             </div>
 
             {/* Stable globe stage height — not tied to signals panel reflow */}
             <div className="flex flex-col gap-2">
-              <div className="relative h-[350px] sm:h-[400px] xl:h-[450px] w-full rounded-xl border border-cyan/25 overflow-hidden globe-stage shadow-[inset_0_0_40px_-12px_var(--cyan-glow)]">
+              <div className="relative h-[min(52vw,280px)] sm:h-[400px] xl:h-[450px] w-full rounded-xl border border-cyan/30 overflow-hidden globe-stage shadow-[inset_0_0_48px_-14px_var(--cyan-glow)] ring-1 ring-cyan/10">
                 {dashReady && effectiveSignals.length === 0 ? (
                   <div className="absolute inset-0 grid place-items-center bg-background/40 px-4 text-center">
                     <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
@@ -624,6 +638,10 @@ function Dashboard() {
                     }}
                   />
                 )}
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background/50 to-transparent sm:h-12"
+                  aria-hidden
+                />
               </div>
               <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-mono shrink-0">
                 <LegendDot color="var(--rose-signal)" label="Critical" />
@@ -636,13 +654,23 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={() => setRegionFilter(null)}
-                className="absolute top-3 right-3 text-[11px] font-mono px-2.5 py-2 sm:py-1 rounded-full bg-card border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[44px] sm:min-h-[36px] touch-manipulation"
+                className="absolute top-3 right-3 text-[11px] font-mono px-2.5 py-2 sm:py-1 rounded-full bg-card/95 backdrop-blur-sm border border-cyan/45 text-cyan hover:bg-cyan/10 min-h-[44px] sm:min-h-[36px] touch-manipulation shadow-sm"
               >
                 <MapPin className="w-3 h-3 inline mr-1" />
                 {regionFilter} · clear
               </button>
             )}
           </section>
+        </motion.div>
+
+        {/* Published Intelligence — existing Library case studies + active trackers */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <PublishedIntelligencePanel />
+        </motion.div>
+
+        {/* Quick entry points — existing Research routes only */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <DashboardQuickActions />
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
@@ -1190,6 +1218,14 @@ function CitizenSignalRow({
   ]
     .filter(Boolean)
     .join(" · ");
+  // Mini trend bars from existing score + delta only (no invented series).
+  const sparkBars = useMemo(() => {
+    const base = score != null ? Math.max(8, Math.min(100, score)) : 50;
+    const d = typeof delta === "number" ? Math.max(-18, Math.min(18, delta)) : 0;
+    const steps = [base - d * 1.2, base - d * 0.5, base, base + d * 0.35, base + d * 0.7];
+    return steps.map((v) => Math.max(12, Math.min(100, v)));
+  }, [score, delta]);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -1201,21 +1237,26 @@ function CitizenSignalRow({
       transition={{ duration: 0.25, ease: "easeOut" }}
       whileTap={{ scale: 0.995 }}
       onClick={() => onPick(signal)}
-      className="signal-row group w-full max-w-full text-left px-2 sm:px-2.5 py-2 sm:py-2 rounded-xl active:bg-secondary/50 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden min-h-[44px] sm:min-h-[3.4rem]"
+      className="signal-row group w-full max-w-full text-left px-2 sm:px-2.5 py-2 sm:py-2 rounded-xl active:bg-secondary/50 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5 cursor-pointer touch-manipulation min-w-0 overflow-hidden min-h-[48px] sm:min-h-[3.5rem]"
     >
       <div className="flex items-center gap-2.5 sm:gap-3 w-full min-w-0">
       <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
         {String(index).padStart(2, "0")}
       </span>
       <span className="flex-1 min-w-0">
-        <span className="flex items-center gap-1.5 mb-0.5">
+        <span className="flex items-center gap-1.5 mb-0.5 min-w-0">
           <span
-            className="w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: mood.color }}
+            className="w-1.5 h-1.5 rounded-full shrink-0 ring-2 ring-offset-1 ring-offset-transparent"
+            style={{ background: mood.color, boxShadow: `0 0 0 1px ${mood.color}44` }}
           />
-          <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-cyan/80 truncate">
+          <span className="block text-[10px] font-mono uppercase tracking-[0.18em] text-cyan/85 truncate min-w-0">
             {signal.topic}
           </span>
+          {signal.sample_size != null && signal.sample_size > 0 && (
+            <span className="hidden md:inline-flex shrink-0 text-[9px] font-mono tabular-nums text-muted-foreground/90 px-1.5 py-0.5 rounded border border-border/70 bg-card/50">
+              n={signal.sample_size.toLocaleString()}
+            </span>
+          )}
         </span>
         {/* Full fitted line — no line-clamp ellipsis ("...") */}
         <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground break-words line-clamp-2 sm:line-clamp-1">
@@ -1223,11 +1264,11 @@ function CitizenSignalRow({
         </span>
       </span>
       </div>
-      {/* Mood (from sentiment) + trend — no numeric score on the row */}
-      <span className="flex items-center justify-end gap-2 sm:gap-2.5 pl-8 sm:pl-0 w-full sm:w-auto shrink-0">
+      {/* Mood + mini trend + open cue */}
+      <span className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2.5 pl-7 sm:pl-0 w-full sm:w-auto shrink-0">
         <span
           title={mood.band}
-          className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] font-semibold px-2 py-1 rounded-md border whitespace-nowrap"
+          className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] font-semibold px-2 py-1 rounded-md border whitespace-nowrap shadow-sm"
           style={{
             color: mood.color,
             borderColor: `${mood.color}55`,
@@ -1237,6 +1278,23 @@ function CitizenSignalRow({
           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: mood.color }} />
           {mood.label}
         </span>
+        {(hasWindow || score != null) && (
+          <span
+            title={trendTitle}
+            className={`hidden sm:inline-flex items-end gap-0.5 h-5 px-1 ${
+              trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"
+            }`}
+            aria-hidden
+          >
+            {sparkBars.map((h, i) => (
+              <span
+                key={i}
+                className="w-[3px] rounded-full bg-current opacity-70"
+                style={{ height: `${Math.round(h * 0.18)}px` }}
+              />
+            ))}
+          </span>
+        )}
         <span
           title={trendTitle}
           className={`inline-flex flex-col items-center justify-center min-w-[2rem] leading-none gap-0.5 ${
@@ -1247,6 +1305,10 @@ function CitizenSignalRow({
           {hasWindow && (
             <span className="text-[8px] font-mono uppercase tracking-wider opacity-90">{windowLabel}</span>
           )}
+        </span>
+        <span className="sm:hidden text-[10px] font-mono text-cyan/90 inline-flex items-center gap-0.5">
+          Brief
+          <ChevronRight className="w-3 h-3" aria-hidden />
         </span>
       </span>
     </motion.button>
@@ -1448,8 +1510,8 @@ function AiAnalysisSummary({
       <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-border/80 flex-wrap">
         <Header
           icon={<Brain className="w-4 h-4" />}
-          title="AI cross-topic analysis"
-          subtitle="Built from the same sample as the signals above"
+          title="AI Cross-Topic Synthesis"
+          subtitle="Scannable insights from the same sample as the signals above"
         />
         <div className="flex items-center gap-2 flex-wrap">
           {lastUpdated && (
@@ -1464,15 +1526,34 @@ function AiAnalysisSummary({
       </div>
 
       {summaryPoints.length > 0 ? (
-        <div className="space-y-4 sm:space-y-5">
-          {summaryPoints.map((point, i) => (
-            <p
-              key={i}
-              className="text-[14px] sm:text-[15px] leading-relaxed text-foreground/90"
-            >
-              {point}
-            </p>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+          {summaryPoints.map((point, i) => {
+            const t = findingTone(i);
+            return (
+              <motion.article
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.3 }}
+                className="finding-card rounded-xl p-3 sm:p-3.5 flex flex-col gap-2 min-h-[44px] bg-card/40"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-[10px] font-mono uppercase tracking-[0.14em] px-1.5 py-0.5 rounded border shrink-0 ${t.chip}`}
+                  >
+                    Insight {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className={`ml-auto h-0.5 w-8 sm:w-10 rounded-full bg-gradient-to-r ${t.bar} opacity-80`}
+                    aria-hidden
+                  />
+                </div>
+                <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-foreground/90">
+                  {point}
+                </p>
+              </motion.article>
+            );
+          })}
         </div>
       ) : (
         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -1486,7 +1567,7 @@ function AiAnalysisSummary({
       {k && (
         <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] font-mono text-muted-foreground">
           <span>
-            Topics monitored:{" "}
+            Active topics:{" "}
             <span className="text-foreground/90 tabular-nums">{activeLiveTopicCount()}</span>
           </span>
           {typeof k.regions_monitored === "number" && k.regions_monitored > 0 && (
@@ -1496,7 +1577,7 @@ function AiAnalysisSummary({
           )}
           {typeof k.total_posts_analyzed === "number" && k.total_posts_analyzed > 0 && (
             <span>
-              Posts analyzed:{" "}
+              Data points analyzed:{" "}
               <span className="text-foreground/90 tabular-nums">
                 {k.total_posts_analyzed.toLocaleString()}
               </span>
@@ -1509,6 +1590,177 @@ function AiAnalysisSummary({
           )}
         </div>
       )}
+    </section>
+  );
+}
+
+/** Free Library case studies + active trackers — existing content only. */
+function PublishedIntelligencePanel() {
+  return (
+    <section className="dash-panel p-2.5 sm:p-4 md:p-5 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3 sm:mb-3.5 pb-2.5 sm:pb-3 border-b border-border/80">
+        <Header
+          icon={<Library className="w-4 h-4" />}
+          title="Published Intelligence Highlights"
+          subtitle="Latest free case studies and active trackers from the Library"
+        />
+        <Link
+          to="/research/library"
+          className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-3 py-2 text-[12px] font-medium transition-colors min-h-[44px] sm:min-h-[36px] touch-manipulation self-start"
+        >
+          Browse free Library
+          <ArrowRight className="w-3.5 h-3.5" aria-hidden />
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 min-w-0">
+        <div className="lg:col-span-7 min-w-0 space-y-2">
+          <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan flex items-center gap-1.5">
+            <FileStack className="w-3 h-3" aria-hidden />
+            Case studies
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+            {DASHBOARD_CASE_HIGHLIGHTS.map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <a
+                  href={c.href}
+                  className="group dash-panel-soft flex flex-col gap-1.5 p-3 sm:p-3.5 min-h-[44px] h-full hover:border-cyan/45 hover:bg-cyan/5 transition-colors touch-manipulation"
+                >
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[9px] font-mono uppercase tracking-[0.14em] px-1.5 py-0.5 rounded border border-cyan/35 bg-cyan/10 text-cyan">
+                      {c.badge}
+                    </span>
+                    <span className="text-[10px] font-mono text-muted-foreground truncate">
+                      {c.region}
+                    </span>
+                  </div>
+                  <span className="text-[13.5px] sm:text-[14px] font-medium leading-snug text-foreground/95 group-hover:text-cyan transition-colors">
+                    {c.title}
+                  </span>
+                  <span className="text-[12px] text-muted-foreground leading-snug line-clamp-2">
+                    {c.subtitle}
+                  </span>
+                  <span className="mt-auto pt-1 inline-flex items-center gap-1 text-[11px] font-mono text-cyan">
+                    Open
+                    <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </a>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-5 min-w-0 space-y-2">
+          <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan flex items-center gap-1.5">
+            <Radar className="w-3 h-3" aria-hidden />
+            Active trackers
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
+            {DASHBOARD_TRACKERS.map((t, i) => (
+              <motion.div
+                key={t.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 + i * 0.04 }}
+              >
+                <Link
+                  to={t.href}
+                  className="group flex items-center gap-3 p-2.5 sm:p-3 rounded-xl border border-border/90 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 transition-colors min-h-[52px] touch-manipulation"
+                >
+                  <span className="shrink-0 w-9 h-9 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan">
+                    {t.id === "leaders" ? (
+                      <Users className="w-4 h-4" aria-hidden />
+                    ) : t.id === "peace" ? (
+                      <ShieldCheck className="w-4 h-4" aria-hidden />
+                    ) : (
+                      <ShieldAlert className="w-4 h-4" aria-hidden />
+                    )}
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[13px] font-medium text-foreground/95 group-hover:text-cyan transition-colors">
+                        {t.title}
+                      </span>
+                      <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-border text-muted-foreground">
+                        {t.badge}
+                      </span>
+                    </span>
+                    <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-1 mt-0.5">
+                      {t.blurb}
+                    </span>
+                  </span>
+                  <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-cyan transition-colors" />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Clear entry points — Research Desk, Library, Commission (existing routes). */
+function DashboardQuickActions() {
+  const actions = [
+    {
+      href: "/research" as const,
+      title: "Research Desk",
+      blurb: "Choose free Library or commission a private brief.",
+      icon: FlaskConical,
+      accent: "border-cyan/40 bg-cyan/8",
+    },
+    {
+      href: "/research/library" as const,
+      title: "Library",
+      blurb: "Topics, case studies, and trackers — free to browse.",
+      icon: BookOpen,
+      accent: "border-cyan/35 bg-card/50",
+    },
+    {
+      href: "/research/commission" as const,
+      title: "Commission",
+      blurb: "Private multi-source report on your question.",
+      icon: FilePenLine,
+      accent: "border-border bg-card/40",
+    },
+  ];
+
+  return (
+    <section className="min-w-0" aria-label="Quick actions">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
+        {actions.map((a, i) => (
+          <motion.div
+            key={a.href}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04 }}
+          >
+            <Link
+              to={a.href}
+              className={`group dash-panel-soft flex items-center gap-3 p-3 sm:p-3.5 min-h-[56px] sm:min-h-[64px] border ${a.accent} hover:border-cyan/50 hover:bg-cyan/5 transition-colors touch-manipulation`}
+            >
+              <span className="shrink-0 w-10 h-10 rounded-xl grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan">
+                <a.icon className="w-4.5 h-4.5 w-[18px] h-[18px]" aria-hidden />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[13.5px] font-medium text-foreground/95 group-hover:text-cyan transition-colors">
+                  {a.title}
+                </span>
+                <span className="block text-[11.5px] text-muted-foreground leading-snug line-clamp-2 mt-0.5">
+                  {a.blurb}
+                </span>
+              </span>
+              <ArrowRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-cyan group-hover:translate-x-0.5 transition-all" />
+            </Link>
+          </motion.div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -2000,10 +2252,58 @@ type KpiHeroFormat = "number" | "percent" | "compact";
 type KpiHeroHref =
   | "/about"
   | "/research"
+  | "/research/library"
+  | "/research/commission"
+  | "/research/networks-ledger"
   | "/topics"
   | "/trackers"
   | "/trackers/leaders"
   | "/trackers/peace";
+
+/** Existing product surfaces only — count for Trackers Active KPI (no new pipeline). */
+const DASHBOARD_TRACKERS = [
+  {
+    id: "leaders",
+    title: "Leadership board",
+    href: "/trackers/leaders" as const,
+    blurb: "Citizen trust rankings vs official frames.",
+    badge: "Index",
+  },
+  {
+    id: "peace",
+    title: "Peace index",
+    href: "/trackers/peace" as const,
+    blurb: "Normalization & peace diagnostics by country.",
+    badge: "Index",
+  },
+  {
+    id: "networks",
+    title: "Networks Ledger",
+    href: "/research/networks-ledger" as const,
+    blurb: "Terror & Finance + Speech Reach branches.",
+    badge: "Ledger",
+  },
+] as const;
+
+/** Latest free Library case studies — presentation only (same content as Library). */
+const DASHBOARD_CASE_HIGHLIGHTS = [
+  {
+    id: "aviation",
+    title: "Aviation after disruption",
+    subtitle: "OEM race, satcom, AI readiness",
+    href: "/research-aviation",
+    region: "Global",
+    badge: "Case study",
+  },
+  {
+    id: "migration",
+    title: "Irregular migration",
+    subtitle: "Corridors, frames, returns honesty",
+    href: "/research-migration",
+    region: "EU · UK",
+    badge: "Case study",
+  },
+] as const;
 
 /** Optional expand-panel action. Nested Link uses stopPropagation so expand still works. */
 type KpiHeroCta = {
@@ -2030,120 +2330,6 @@ type KpiHeroTileModel = {
   links?: KpiHeroLink[];
   cta?: KpiHeroCta;
 };
-
-/** Min dedicated research case studies before we hard-push /research from the hero. */
-const RESEARCH_LIBRARY_CTA_MIN = 3;
-
-function clampPct(n: number, lo: number, hi: number): number {
-  return Math.max(lo, Math.min(hi, Math.round(n)));
-}
-
-/**
- * Honest *estimated* pipeline confidence for SpaceXAI / Grok on this product surface.
- *
- * This is NOT measured model accuracy and MUST NOT read like 95–99% “lab accuracy.”
- * Public discourse sampling (X + multi-source packs) is purposive, incomplete, noisy;
- * LLM reasoning is directional and interpretive; only research claims get human review.
- * Stage scores sit in realistic bands with hard caps so coverage ≠ truth.
- */
-function computePipelineConfidence(args: {
-  snapshots: Record<string, TopicSnapshot> | null;
-  liveTopicCount: number;
-  overview: DashboardOverview | null;
-  researchCount: number;
-}): {
-  composite: number | undefined;
-  fetching: number;
-  cleaning: number;
-  reasoning: number;
-  reporting: number;
-  liveFacts: string[];
-} {
-  const { snapshots, liveTopicCount, overview, researchCount } = args;
-  const snapList = snapshots ? Object.values(snapshots) : [];
-  const snapCount = snapList.length;
-  const denom = Math.max(liveTopicCount, 1);
-  const coverage = snapCount / denom;
-
-  if (snapCount === 0 && !overview) {
-    return {
-      composite: undefined,
-      fetching: 0,
-      cleaning: 0,
-      reasoning: 0,
-      reporting: 0,
-      liveFacts: ["No sample loaded yet — confidence undefined, not 100%."],
-    };
-  }
-
-  let totalSample = 0;
-  let thinTopics = 0;
-  let reasoned = 0;
-  let withDivergence = 0;
-  for (const s of snapList) {
-    const n =
-      typeof s.fetched_post_count === "number" && s.fetched_post_count > 0
-        ? s.fetched_post_count
-        : typeof s.sample_size === "number"
-          ? s.sample_size
-          : 0;
-    totalSample += n;
-    if (n > 0 && n < 25) thinTopics += 1;
-
-    const hasSentiment =
-      typeof s.overall_sentiment === "object" &&
-      s.overall_sentiment &&
-      typeof s.overall_sentiment.score === "number";
-    const hasDiv =
-      typeof s.divergence_score === "number" ||
-      s.narrative_divergence != null ||
-      Boolean(s.divergence_gap?.trim?.());
-    const hasText =
-      Boolean(s.narrative_summary?.trim?.()) ||
-      (Array.isArray(s.key_insights) && s.key_insights.length > 0);
-    if (hasSentiment || hasDiv || hasText) reasoned += 1;
-    if (hasDiv) withDivergence += 1;
-  }
-
-  const avgSample = snapCount ? totalSample / snapCount : 0;
-  const reasonedShare = snapCount ? reasoned / snapCount : 0;
-  const divShare = snapCount ? withDivergence / snapCount : 0;
-  const thinShare = snapCount ? thinTopics / snapCount : 0;
-
-  // Fetch — public APIs / purposive packs; rate limits; not a census of X
-  // Realistic band ~45–72 even when coverage looks “full”
-  let fetching = 48 + coverage * 16 + (avgSample >= 40 ? 5 : avgSample >= 15 ? 2 : 0);
-  fetching = clampPct(fetching, 38, 72);
-
-  // Clean / filter — bots, media bleed, language mix, dupes; we do not publish measured F1
-  let cleaning = 50 + (avgSample >= 40 ? 6 : avgSample >= 15 ? 3 : 0) - thinShare * 12;
-  cleaning = clampPct(cleaning, 36, 66);
-
-  // Reason — SpaceXAI/Grok directional analysis; interpretive, not ground-truth verified
-  let reasoning = 46 + reasonedShare * 12 + divShare * 5;
-  if (avgSample < 15 && snapCount > 0) reasoning -= 4;
-  reasoning = clampPct(reasoning, 38, 68);
-
-  // Report — structured outputs; human review on research raises integrity, still provisional
-  let reporting = 48;
-  if (overview?.grok_ai_summary?.trim()) reporting += 7;
-  if (researchCount > 0) reporting += 6; // human-reviewed research path exists
-  if (snapCount > 0) reporting += 4;
-  if (coverage >= 0.75) reporting += 3;
-  reporting = clampPct(reporting, 40, 72);
-
-  // Composite hard-capped: full topic coverage must never look like 98% “accuracy”
-  const composite = clampPct((fetching + cleaning + reasoning + reporting) / 4, 40, 70);
-
-  // Live readout only — full method/limits live on About (no duplicate essays here).
-  const liveFacts = [
-    `Est. bands — fetch ${fetching}% · clean ${cleaning}% · reason ${reasoning}% · report ${reporting}%`,
-    `This page: ${snapCount}/${liveTopicCount} topics with sample rows · ${thinTopics} thin (under 25 posts)`,
-    "Hard-capped ≤70%. Not lab accuracy.",
-  ];
-
-  return { composite, fetching, cleaning, reasoning, reporting, liveFacts };
-}
 
 /**
  * Canonical "posts / sample analyzed" for dashboard + KPI hero.
@@ -2261,13 +2447,13 @@ function postsAnalyzedBreakdown(args: {
   }
   return [
     fromOverview != null
-      ? `Lifetime (all historical live snapshots): ${Math.round(fromOverview).toLocaleString()}`
+      ? `Lifetime total (X + multi-source history): ${Math.round(fromOverview).toLocaleString()}`
       : "Lifetime total: not in this sample yet.",
     windowFromKpi != null
       ? `Current window (latest per topic): ${Math.round(windowFromKpi).toLocaleString()}`
       : `Current window (topic snapshots sum): ${Math.round(fromSnaps).toLocaleString()}`,
     `Live citizen-signal samples: ${Math.round(fromCitizens).toLocaleString()}`,
-    "Face value uses lifetime total — grows with every pipeline insert; same on mobile and desktop.",
+    "Face value uses the same lifetime total as before — grows with every pipeline insert; same on mobile and desktop.",
   ];
 }
 
@@ -2455,26 +2641,43 @@ function KpiHeroTile({
         ) : (
           <div className="text-[12px] font-mono text-muted-foreground px-0.5">—</div>
         )}
-        {/* Desktop-only subtle delta / bar — mobile stays dense */}
-        <div className="hidden sm:flex flex-col gap-1 w-full">
-          <span
-            className={`text-[9px] font-mono tabular-nums leading-none ${
-              delta == null
-                ? "text-transparent select-none"
-                : delta > 0
-                  ? "text-emerald-signal"
-                  : delta < 0
-                    ? "text-rose-signal"
-                    : "text-muted-foreground"
-            }`}
-            aria-hidden={delta == null}
-          >
-            {delta == null
-              ? "·"
-              : `${delta > 0 ? "+" : ""}${Math.round(delta)}${tile.format === "percent" ? " pts" : ""} vs last`}
-          </span>
+        {/* Subtle delta + mini history spark — denser on mobile */}
+        <div className="flex flex-col gap-1 w-full">
+          <div className="flex items-center justify-between gap-1 min-w-0">
+            <span
+              className={`text-[8px] sm:text-[9px] font-mono tabular-nums leading-none ${
+                delta == null
+                  ? "text-transparent select-none"
+                  : delta > 0
+                    ? "text-emerald-signal"
+                    : delta < 0
+                      ? "text-rose-signal"
+                      : "text-muted-foreground"
+              }`}
+              aria-hidden={delta == null}
+            >
+              {delta == null
+                ? "·"
+                : `${delta > 0 ? "+" : ""}${Math.round(delta)}${tile.format === "percent" ? " pts" : ""}`}
+            </span>
+            {history.length >= 3 && (
+              <span className="inline-flex items-end gap-px h-3.5 opacity-70" aria-hidden>
+                {history.slice(-5).map((v, i, arr) => {
+                  const max = Math.max(...arr, 1);
+                  const h = Math.max(2, Math.round((v / max) * 12));
+                  return (
+                    <span
+                      key={i}
+                      className="w-[2.5px] rounded-full bg-cyan/80"
+                      style={{ height: `${h}px` }}
+                    />
+                  );
+                })}
+              </span>
+            )}
+          </div>
           {barPct != null && (
-            <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden shrink-0">
+            <div className="w-full h-1 rounded-full bg-border/70 overflow-hidden shrink-0 hidden sm:block">
               <motion.div
                 className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
                 initial={{ width: 0 }}
@@ -2572,39 +2775,21 @@ function DashboardKpiGrid({
         ? k.regions_monitored
         : undefined;
 
-  // Topic intelligence reports + research case studies + curated/new highlights
+  // Topic intelligence reports + research case studies + curated/new highlights (existing counts only)
   const topicReports = typeof topicsMonitored === "number" ? topicsMonitored : liveTopicCount;
   const caseStudiesTotal = topicReports + researchCount + (curatedCount > 0 ? curatedCount : 0);
-  const publishedResearch = researchBriefs.filter((b) => b.status === "published").length;
-  const libraryReady =
-    researchCount >= RESEARCH_LIBRARY_CTA_MIN || publishedResearch >= RESEARCH_LIBRARY_CTA_MIN;
+  const trackersActive = DASHBOARD_TRACKERS.length;
 
-  /**
-   * Gated CTA for case studies & reports:
-   * - Hard-push /research only when the dedicated library is thick enough.
-   * - Until then: soft link to Topics (where reports already exist), with a clear “building” note.
-   */
-  const reportsCta: KpiHeroCta = libraryReady
-    ? {
-        label: "Browse case studies & reports",
-        href: "/research",
-        emphasis: "primary",
-        note: `${researchCount} research briefs in the library · open the full desk.`,
-      }
-    : topicReports > 0
-      ? {
-          label: "Browse topic reports",
-          href: "/topics",
-          emphasis: "soft",
-          note: `Research library building (${researchCount}/${RESEARCH_LIBRARY_CTA_MIN} case studies). Full “browse library” CTA unlocks at ${RESEARCH_LIBRARY_CTA_MIN}+ dedicated briefs — not pushing a thin shelf yet.`,
-        }
-      : {
-          label: "Case studies coming soon",
-          comingSoon: true,
-          note: "Dedicated research briefs are still being added. Check back as the library grows.",
-        };
+  /** Primary CTA → free Library (existing route). */
+  const reportsCta: KpiHeroCta = {
+    label: "Browse free Library",
+    href: "/research/library",
+    emphasis: "primary",
+    note: "Case studies, topic reports, and active trackers — free to browse.",
+  };
 
   // Single sample total — same on mobile and desktop (no per-device localStorage).
+  // Face value unchanged: lifetime posts / multi-source sample total from existing resolvers.
   const sampleAnalyzed = useMemo(() => {
     if (!ready) return undefined;
     if (typeof postsAnalyzedProp === "number" && postsAnalyzedProp > 0) {
@@ -2625,17 +2810,10 @@ function DashboardKpiGrid({
 
   const runId = overview?.generated_at ?? overview?.last_updated ?? null;
 
-  const accuracy = computePipelineConfidence({
-    snapshots,
-    liveTopicCount,
-    overview,
-    researchCount,
-  });
-
   const tiles: KpiHeroTileModel[] = [
     {
       id: "topics",
-      label: "Topics monitored",
+      label: "Active Topics",
       value: topicsMonitored,
       icon: Layers,
       format: "number",
@@ -2653,24 +2831,8 @@ function DashboardKpiGrid({
       ],
     },
     {
-      id: "leaders",
-      label: "Leaders ranked",
-      value: leadersRanked,
-      icon: Users,
-      format: "number",
-      liveNote: "Rows in the global leader trust table.",
-      liveFacts:
-        typeof leadersRanked === "number"
-          ? [`Leaders in current tracker: ${leadersRanked}`]
-          : ["Leader table not loaded for this sample."],
-      links: [
-        { label: "Open leaders tracker", href: "/trackers/leaders" },
-        { label: "How scoring works", href: "/about" },
-      ],
-    },
-    {
       id: "countries",
-      label: "Countries monitored",
+      label: "Countries / Regions",
       value: countriesMonitored,
       icon: MapPinned,
       format: "number",
@@ -2689,28 +2851,48 @@ function DashboardKpiGrid({
       ],
     },
     {
+      id: "leaders",
+      label: "Leaders Ranked",
+      value: leadersRanked,
+      icon: Users,
+      format: "number",
+      liveNote: "Rows in the global leader trust table.",
+      liveFacts:
+        typeof leadersRanked === "number"
+          ? [`Leaders in current tracker: ${leadersRanked}`]
+          : ["Leader table not loaded for this sample."],
+      links: [
+        { label: "Open leaders tracker", href: "/trackers/leaders" },
+        { label: "How scoring works", href: "/about" },
+      ],
+    },
+    {
       id: "reports",
-      label: "Case studies & reports",
+      label: "Published Intelligence",
       value: ready ? caseStudiesTotal : undefined,
       icon: FileStack,
       format: "number",
-      liveNote: "Topic reports + research case studies + curated highlights.",
+      liveNote: "Topic reports + research case studies + curated highlights. Trackers listed separately.",
       liveFacts: [
         `Topic reports: ${topicReports}`,
         `Research case studies: ${researchCount}`,
         curatedCount > 0 ? `Curated highlights: ${curatedCount}` : "No curated highlights this load.",
+        `Active trackers: ${trackersActive} (Leadership, Peace, Networks Ledger)`,
       ],
-      links: [{ label: "Method & product pillars", href: "/about" }],
+      links: [
+        { label: "Browse free Library", href: "/research/library" },
+        { label: "Method & limits", href: "/about" },
+      ],
       cta: reportsCta,
     },
     {
       id: "sample",
-      label: "Posts analyzed",
+      label: "Data Points Analyzed",
       value: sampleAnalyzed,
       icon: Activity,
       format: sampleAnalyzed != null && sampleAnalyzed >= 1000 ? "compact" : "number",
       liveNote:
-        "All posts ever analyzed for live topics (full Supabase history). Grows with every pipeline run; never drops.",
+        "All data points analyzed for live topics (X posts + multi-source material in the same lifetime total). Grows with every pipeline run; never drops.",
       liveFacts: [
         ...sampleFacts,
         typeof k.signals_generated === "number"
@@ -2726,17 +2908,17 @@ function DashboardKpiGrid({
       ],
     },
     {
-      id: "accuracy",
-      label: "Est. sample confidence",
-      value: ready ? accuracy.composite : undefined,
-      icon: ShieldCheck,
-      format: "percent",
-      liveNote:
-        "How complete and consistent this sample looks (coverage across topics). Not a lab accuracy score.",
-      liveFacts: accuracy.liveFacts,
+      id: "trackers",
+      label: "Trackers Active",
+      value: ready ? trackersActive : undefined,
+      icon: Radar,
+      format: "number",
+      liveNote: "Live product trackers and indexes on the desk.",
+      liveFacts: DASHBOARD_TRACKERS.map((t) => `${t.title} · ${t.badge}`),
       links: [
-        { label: "How AI is used (xAI / SpaceXAI)", href: "/about" },
-        { label: "Limits & samples", href: "/about" },
+        { label: "Leadership board", href: "/trackers/leaders" },
+        { label: "Peace index", href: "/trackers/peace" },
+        { label: "Networks Ledger", href: "/research/networks-ledger" },
       ],
     },
   ];
@@ -2757,7 +2939,7 @@ function DashboardKpiGrid({
     countriesMonitored,
     caseStudiesTotal,
     sampleAnalyzed,
-    accuracy.composite,
+    trackersActive,
   ]);
 
   useEffect(() => {

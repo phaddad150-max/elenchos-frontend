@@ -83,7 +83,8 @@ export function Globe3D({ signals, onPick }: Props) {
   const points = activeSignals.map((s) => ({
     lat: s.lat,
     lng: s.lng,
-    size: 0.42 + s.intensityScore * 1.15,
+    // Slightly stronger clustering weight for high intensity — presentation only
+    size: 0.48 + s.intensityScore * 1.25,
     color: INTENSITY_GLOBE_COLOR[s.intensity],
     signal: s,
   }));
@@ -131,7 +132,7 @@ export function Globe3D({ signals, onPick }: Props) {
     : (["#00d5ff", "rgba(0, 213, 255, 0.16)"] as [string, string]);
   const arcStroke = isLight ? 0.65 : 0.45;
   const labelSize = isLight ? 0.82 : 0.72;
-  const pointRadiusBoost = isLight ? 1.15 : 1;
+  const pointRadiusBoost = isLight ? 1.22 : 1.08;
 
   return (
     <div
@@ -168,17 +169,22 @@ export function Globe3D({ signals, onPick }: Props) {
               const div = Math.round((s.divergence ?? 0) * 100);
               const posts = typeof s.posts === "number" ? s.posts.toLocaleString() : "—";
               const sentiment = (s.sentiment ?? "neutral").replace(/</g, "&lt;");
-              const excerpt = (s.headline ?? s.excerpt ?? "").replace(/</g, "&lt;").slice(0, 90);
+              const intensity = (s.intensity ?? "monitor").replace(/</g, "&lt;");
+              const excerpt = (s.headline ?? s.excerpt ?? "").replace(/</g, "&lt;").slice(0, 100);
               // Tooltip always dark for readability on both themes
               return `
-                <div style="background:rgba(8,12,20,0.94);border:1px solid rgba(34,211,238,0.45);padding:9px 11px;border-radius:9px;font-family:ui-monospace,monospace;font-size:11px;color:#e2e8f0;max-width:260px;box-shadow:0 6px 22px rgba(0,0,0,0.55)">
-                  <div style="color:#22d3ee;text-transform:uppercase;letter-spacing:0.12em;font-size:9.5px;margin-bottom:4px">${s.region ?? "—"} · ${sentiment}</div>
-                  <div style="font-weight:600;margin-bottom:5px;line-height:1.3">${(s.topic ?? "Signal").replace(/</g,"&lt;")}</div>
-                  ${excerpt ? `<div style="color:#cbd5e1;font-size:10px;line-height:1.35;margin-bottom:6px">${excerpt}</div>` : ""}
-                  <div style="display:flex;flex-wrap:wrap;gap:8px;color:#94a3b8;font-size:10px">
+                <div style="background:rgba(8,12,20,0.96);border:1px solid rgba(34,211,238,0.5);padding:10px 12px;border-radius:10px;font-family:ui-monospace,monospace;font-size:11px;color:#e2e8f0;max-width:280px;box-shadow:0 8px 28px rgba(0,0,0,0.6),0 0 0 1px rgba(34,211,238,0.12)">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+                    <span style="width:7px;height:7px;border-radius:999px;background:${d.color};box-shadow:0 0 8px ${d.color}"></span>
+                    <span style="color:#22d3ee;text-transform:uppercase;letter-spacing:0.12em;font-size:9.5px">${s.region ?? "—"} · ${intensity}</span>
+                  </div>
+                  <div style="font-weight:600;margin-bottom:5px;line-height:1.35;font-size:12px">${(s.topic ?? "Signal").replace(/</g,"&lt;")}</div>
+                  ${excerpt ? `<div style="color:#cbd5e1;font-size:10.5px;line-height:1.4;margin-bottom:7px">${excerpt}</div>` : ""}
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;color:#94a3b8;font-size:10px;border-top:1px solid rgba(148,163,184,0.2);padding-top:6px">
                     <span>Intensity <span style="color:${d.color};font-weight:600">${score}</span></span>
                     <span>Divergence <span style="color:#22d3ee;font-weight:600">${div}%</span></span>
-                    <span>Posts <span style="color:#e2e8f0;font-weight:600">${posts}</span></span>
+                    <span>Sample <span style="color:#e2e8f0;font-weight:600">${posts}</span></span>
+                    <span style="color:#67e8f9">· tap to open</span>
                   </div>
                 </div>`;
             }}
