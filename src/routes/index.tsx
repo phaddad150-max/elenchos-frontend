@@ -557,20 +557,11 @@ function Dashboard() {
         >
           <section className="dash-panel p-2.5 sm:p-4 md:p-5 xl:col-span-8 overflow-hidden min-w-0 flex flex-col max-w-full self-start h-auto">
             <div className="flex flex-col gap-1.5 sm:gap-2.5 mb-2 sm:mb-2.5 pb-2 sm:pb-2.5 border-b border-border/80 shrink-0">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 min-w-0">
-                <Header
-                  icon={<Radio className="w-4 h-4" />}
-                  title="Live Citizen Signals"
-                  subtitle="From the latest sample. Tap a row for the full briefing."
-                />
-                <Link
-                  to="/topics"
-                  className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full border border-cyan/45 bg-cyan/12 hover:bg-cyan/20 text-cyan px-3 py-2 text-[12px] font-medium transition-colors min-h-[44px] sm:min-h-[36px] touch-manipulation self-start"
-                >
-                  Open full briefing
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden />
-                </Link>
-              </div>
+              <Header
+                icon={<Radio className="w-4 h-4" />}
+                title="Live Citizen Signals"
+                subtitle="From the latest sample. Tap a row for the full briefing."
+              />
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll overscroll-x-contain">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
               </div>
