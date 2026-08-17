@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
-  BookOpen,
   Brain,
   CheckCircle2,
   ExternalLink,
@@ -40,9 +39,11 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
+  ResearchBackBar,
   ResearchBreadcrumb,
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
+import { ResearchNextSteps } from "@/components/research/ResearchNextSteps";
 import { LedgerBranchNav } from "@/components/networks-ledger/LedgerBranchNav";
 import {
   SPEECH_REACH_META,
@@ -88,8 +89,14 @@ function SpeechReachPage() {
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <ResearchBreadcrumb current="Library · Speech Reach" />
+        <ResearchBreadcrumb
+          trail={[
+            { label: "Library", to: "/research/library" },
+            { label: "Speech Reach" },
+          ]}
+        />
         <ResearchDeskNav />
+        <ResearchBackBar />
         <LedgerBranchNav />
 
         {/* Hero */}
@@ -489,8 +496,12 @@ function SpeechReachPage() {
           </div>
         </section>
 
-        {/* Cross-links */}
-        <div className="flex flex-wrap gap-3 text-[12.5px]">
+        <ResearchNextSteps
+          contextHint="Speech Reach / Brazil 2026 election filter on X"
+          showTopics={false}
+          className="mb-2"
+        />
+        <div className="flex flex-wrap gap-3 text-[12.5px] mb-2">
           <Link
             to="/research/networks-ledger"
             className="inline-flex items-center gap-1.5 text-cyan hover:underline min-h-[40px]"
@@ -498,13 +509,6 @@ function SpeechReachPage() {
             <Shield className="w-3.5 h-3.5" />
             Terror & Finance Networks
             <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-          <Link
-            to="/research/library"
-            className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-cyan min-h-[40px]"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            Full library
           </Link>
         </div>
       </main>

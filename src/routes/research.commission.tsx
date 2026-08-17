@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Building2,
   CreditCard,
@@ -83,8 +83,20 @@ function CommissionPage() {
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 space-y-6 sm:space-y-8 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
-        <ResearchBreadcrumb current="Commission report" />
+        <ResearchBreadcrumb trail={[{ label: "Commission" }]} />
         <ResearchDeskNav />
+
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+            Progress: 1 pick package → 2 brief → 3 pay → 4 get link
+          </p>
+          <Link
+            to="/research/library"
+            className="text-[12.5px] font-medium text-cyan hover:underline min-h-[40px] inline-flex items-center touch-manipulation"
+          >
+            Exit to Library
+          </Link>
+        </div>
 
         <header className="page-hero-banner overflow-hidden min-w-0">
           <div className="relative p-4 sm:p-5 md:p-7 min-w-0 space-y-3">

@@ -1420,21 +1420,30 @@ function TrackersPage() {
       <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 relative flex-1 mobile-safe-bottom overflow-x-clip">
         <nav
           aria-label="Breadcrumb"
-          className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
+          className="mb-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] text-muted-foreground"
         >
-          <Link to="/research" className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center">
+          <Link to="/" className="hover:text-cyan min-h-[32px] inline-flex items-center">
+            Home
+          </Link>
+          <span aria-hidden className="opacity-50">/</span>
+          <Link to="/research" className="hover:text-cyan min-h-[32px] inline-flex items-center">
             Research
           </Link>
-          <span aria-hidden className="text-border">/</span>
-          <Link
-            to="/research/library"
-            className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center"
-          >
+          <span aria-hidden className="opacity-50">/</span>
+          <Link to="/research/library" className="hover:text-cyan min-h-[32px] inline-flex items-center">
             Library
           </Link>
-          <span aria-hidden className="text-border">/</span>
-          <span className="text-foreground/85">Trackers</span>
+          <span aria-hidden className="opacity-50">/</span>
+          <span className="text-foreground/90 font-medium">Trackers</span>
         </nav>
+        <div className="mb-4">
+          <Link
+            to="/research/library"
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-cyan hover:underline min-h-[40px]"
+          >
+            ← Back to Library
+          </Link>
+        </div>
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1537,6 +1546,26 @@ function TrackersPage() {
             Backend sync pending — leadership and peace rows will appear here automatically.
           </p>
         )}
+
+        <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <p className="text-[13px] text-foreground/90">
+            Want a private brief on leaders, peace, or terror-finance networks?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/research/commission"
+              className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full text-[13px] font-semibold"
+            >
+              Commission a report
+            </Link>
+            <Link
+              to="/research/library"
+              className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan"
+            >
+              Back to Library
+            </Link>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </div>

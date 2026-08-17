@@ -1,18 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, FlaskConical, FilePenLine } from "lucide-react";
+import { BookOpen, FilePenLine } from "lucide-react";
 
 /**
- * Research Desk secondary nav — three doors only:
- * Desk (hub) · Library (all free work) · Commission report (paid)
+ * Research secondary nav — two modes only:
+ * Library (free published work) · Commission (paid private reports)
  */
 const ITEMS = [
-  {
-    to: "/research",
-    label: "Desk",
-    short: "Desk",
-    icon: FlaskConical,
-    match: (p: string) => p === "/research" || p === "/research/",
-  },
   {
     to: "/research/library",
     label: "Library",
@@ -23,15 +16,14 @@ const ITEMS = [
       p.startsWith("/research/preview") ||
       p.startsWith("/research/report") ||
       p.startsWith("/research-migration") ||
+      p.startsWith("/research-aviation") ||
       p.startsWith("/research/networks-ledger") ||
       p.startsWith("/research/speech-reach") ||
-      p.startsWith("/research/intelligence") ||
-      p.startsWith("/research/fraud-ledger") ||
       p.startsWith("/trackers"),
   },
   {
     to: "/research/commission",
-    label: "Commission report",
+    label: "Commission",
     short: "Commission",
     icon: FilePenLine,
     match: (p: string) => p.startsWith("/research/commission"),
@@ -43,11 +35,11 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
 
   return (
     <nav
-      aria-label="Research Desk sections"
+      aria-label="Research sections"
       className={`sticky top-[3.25rem] md:top-[3.75rem] z-20 -mx-0.5 mb-4 sm:mb-5 ${className}`}
     >
       <div className="overflow-x-auto scrollbar-none -mx-1 px-1">
-        <ul className="rd-nav-shell flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-full rounded-xl p-1">
+        <ul className="rd-nav-shell flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-md rounded-xl p-1">
           {ITEMS.map((item) => {
             const active = item.match(pathname);
             const Icon = item.icon;
@@ -55,7 +47,7 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
               <li key={item.to} className="shrink-0 sm:flex-1 min-w-0">
                 <Link
                   to={item.to}
-                  className={`rd-nav-item flex items-center justify-center gap-1.5 min-h-[42px] sm:min-h-[44px] px-2.5 sm:px-3 rounded-lg text-[11.5px] sm:text-[12.5px] font-medium touch-manipulation whitespace-nowrap ${
+                  className={`rd-nav-item flex items-center justify-center gap-1.5 min-h-[42px] sm:min-h-[44px] px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium touch-manipulation whitespace-nowrap ${
                     active
                       ? "rd-nav-item-active"
                       : "text-muted-foreground border border-transparent hover:text-foreground hover:bg-secondary/50"
@@ -63,8 +55,7 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
                   aria-current={active ? "page" : undefined}
                 >
                   <Icon className="w-3.5 h-3.5 shrink-0 opacity-90" aria-hidden />
-                  <span className="sm:hidden">{item.short}</span>
-                  <span className="hidden sm:inline truncate">{item.label}</span>
+                  <span>{item.label}</span>
                 </Link>
               </li>
             );
@@ -75,7 +66,26 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
   );
 }
 
-export function ResearchBreadcrumb({ current }: { current: string }) {
+type Crumb = { label: string; to?: string };
+
+/**
+ * Consistent breadcrumbs: Home > Research > [segments]
+ */
+export function ResearchBreadcrumb({
+  current,
+  trail,
+}: {
+  /** Final segment label when trail is not provided */
+  current?: string;
+  /** Optional full trail after Research (overrides current) */
+  trail?: Crumb[];
+}) {
+  const segments: Crumb[] = trail?.length
+    ? trail
+    : current
+      ? [{ label: current }]
+      : [];
+
   return (
     <nav
       aria-label="Breadcrumb"
@@ -94,12 +104,50 @@ export function ResearchBreadcrumb({ current }: { current: string }) {
         to="/research"
         className="hover:text-cyan touch-manipulation min-h-[32px] inline-flex items-center shrink-0"
       >
-        Research Desk
+        Research
       </Link>
-      <span aria-hidden className="opacity-50">
-        /
-      </span>
-      <span className="text-foreground/90 font-medium truncate min-w-0">{current}</span>
+      {segments.map((seg, i) => {
+        const isLast = i === segments.length - 1;
+        return (
+          <span key={`${seg.label}-${i}`} className="contents">
+            <span aria-hidden className="opacity-50">
+              /
+            </span>
+            {seg.to && !isLast ? (
+              <Link
+                to={seg.to}
+                className="hover:text-cyan touch-manipulation min-h-[32px] inline-flex items-center shrink-0"
+              >
+                {seg.label}
+              </Link>
+            ) : (
+              <span className="text-foreground/90 font-medium truncate min-w-0">
+                {seg.label}
+              </span>
+            )}
+          </span>
+        );
+      })}
     </nav>
+  );
+}
+
+/** Sticky back link for deep Research Library pages */
+export function ResearchBackBar({
+  to = "/research/library",
+  label = "Back to Library",
+}: {
+  to?: string;
+  label?: string;
+}) {
+  return (
+    <div className="mb-3">
+      <Link
+        to={to}
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-cyan hover:underline min-h-[40px] touch-manipulation"
+      >
+        <span aria-hidden>←</span> {label}
+      </Link>
+    </div>
   );
 }

@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
+  FilePenLine,
   FileText,
-  MessageSquareQuote,
+  Layers,
   MessageSquareShare,
   Share2,
   Shield,
@@ -20,6 +21,7 @@ import {
 } from "@/components/research/ResearchDeskNav";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
 import { LIBRARY_SOCIAL, socialMetaTags } from "@/lib/social-meta";
+import { activeLiveTopicCount, archivedLiveTopicCount } from "@/lib/topic-catalog";
 
 type SharedItem = {
   token: string;
@@ -65,10 +67,9 @@ function buildCaseStudies(): CaseStudy[] {
     },
     {
       id: "aviation-race-digital-ai",
-      title:
-        "Aviation after disruption — OEM race, satcom, AI readiness",
+      title: "Aviation after disruption — OEM race, satcom, AI readiness",
       subtitle:
-        "Interactive deep dive: delivery trust, networks, Starlink-class cabin bandwidth, payments, AI ops KPIs.",
+        "Interactive deep dive: delivery trust, networks, cabin bandwidth, payments, AI ops KPIs.",
       region: "Global",
       statusLabel: "Published",
       updatedAt: "2026-08-15",
@@ -96,57 +97,15 @@ function buildCaseStudies(): CaseStudy[] {
   );
 }
 
-type DeepSection = "cases" | "trackers" | null;
-
-const DOORS = [
-  {
-    id: "discourse" as const,
-    title: "Public discourse on X",
-    kicker: "Topic analysis",
-    description:
-      "Live Topics monitors — citizen voices on X vs official and media frames. Scores, narrative gaps, and insights per topic.",
-    leadsTo: "Opens the Topics desk with active, commissioned, and archived reports.",
-    cta: "Go to Topics",
-    href: "/topics",
-    externalNav: true,
-    icon: MessageSquareQuote,
-    accent: "cyan",
-    glow: "from-cyan/25 via-cyan/5 to-transparent border-cyan/40",
-  },
-  {
-    id: "cases" as const,
-    title: "Case studies",
-    kicker: "Deep dives",
-    description:
-      "Multi-source research briefs — scholarly, official, media, and optional discourse. Thesis-style claims with limits you can check.",
-    leadsTo: "Opens published deep dives and community-shared reports in this library.",
-    cta: "Browse case studies",
-    href: "#cases",
-    externalNav: false,
-    icon: FileText,
-    accent: "emerald",
-    glow: "from-emerald-signal/20 via-emerald-signal/5 to-transparent border-emerald-signal/35",
-  },
-  {
-    id: "trackers" as const,
-    title: "Trackers",
-    kicker: "Indexes & ledgers",
-    description:
-      "Leadership board, peace index, and the Networks Ledger (Terror & Finance + Speech Reach).",
-    leadsTo: "Opens free indexes and the networks ledger from this library.",
-    cta: "Browse trackers",
-    href: "#trackers",
-    externalNav: false,
-    icon: Trophy,
-    accent: "amber",
-    glow: "from-amber-signal/20 via-amber-signal/5 to-transparent border-amber-signal/35",
-  },
-] as const;
-
+/**
+ * Library = single free catalog. All sections always visible (no door maze).
+ * Topics live on /topics but are clearly labeled as the discourse monitor.
+ */
 function ResearchLibraryPage() {
   const cases = useMemo(() => buildCaseStudies(), []);
   const [shared, setShared] = useState<SharedItem[]>([]);
-  const [deep, setDeep] = useState<DeepSection>(null);
+  const activeTopics = activeLiveTopicCount();
+  const archivedTopics = archivedLiveTopicCount();
 
   useEffect(() => {
     let cancelled = false;
@@ -166,267 +125,230 @@ function ResearchLibraryPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const h = window.location.hash.replace("#", "");
-    if (h === "cases" || h === "trackers") {
-      setDeep(h);
+    if (h === "cases" || h === "trackers" || h === "topics") {
       requestAnimationFrame(() => {
         document.getElementById(`lib-${h}`)?.scrollIntoView({ behavior: "smooth" });
       });
     }
   }, []);
 
-  const openDeep = (id: "cases" | "trackers") => {
-    setDeep(id);
-    if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", `#${id}`);
-    }
-    requestAnimationFrame(() => {
-      document.getElementById(`lib-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  };
-
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <ResearchBreadcrumb current="Library" />
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip space-y-8 sm:space-y-10">
+        <ResearchBreadcrumb trail={[{ label: "Library" }]} />
         <ResearchDeskNav />
 
-        <header className="page-hero-banner mb-6 sm:mb-8 overflow-hidden min-w-0 relative">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_20%_0%,color-mix(in_oklab,var(--cyan)_18%,transparent),transparent_55%),radial-gradient(ellipse_at_90%_20%,color-mix(in_oklab,var(--amber-signal)_10%,transparent),transparent_50%)]" />
-          <div className="relative p-4 sm:p-5 md:p-7 space-y-2.5 min-w-0">
+        <header className="page-hero-banner overflow-hidden min-w-0 relative">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_20%_0%,color-mix(in_oklab,var(--cyan)_14%,transparent),transparent_55%)]" />
+          <div className="relative p-4 sm:p-5 md:p-6 space-y-2 min-w-0">
             <div className="page-hero-kicker">
               <BookOpen className="w-3.5 h-3.5" aria-hidden />
               Library
             </div>
-            <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] break-words max-w-3xl">
-              Three free doors into Elenchos intelligence
+            <h1 className="page-hero-title text-[1.35rem] sm:text-2xl md:text-[1.85rem] break-words max-w-3xl">
+              Free published intelligence
             </h1>
-            <p className="page-hero-sub max-w-2xl break-words text-[13.5px] sm:text-[14px]">
-              Pick where you want to go — live discourse on X, multi-source case studies, or
-              citizen trackers and ledgers. No paywall on published work.
+            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-2xl leading-relaxed">
+              Topic analyses on X, multi-source case studies, and trackers. No paywall on published
+              work. Need something custom?{" "}
+              <Link to="/research/commission" className="text-cyan hover:underline font-medium">
+                Commission a report
+              </Link>
+              .
             </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <a
+                href="#lib-topics"
+                className="text-[11px] font-mono px-2.5 py-1.5 rounded-full border border-border/80 text-muted-foreground hover:text-cyan hover:border-cyan/40 min-h-[36px] inline-flex items-center"
+              >
+                Topic analyses
+              </a>
+              <a
+                href="#lib-cases"
+                className="text-[11px] font-mono px-2.5 py-1.5 rounded-full border border-border/80 text-muted-foreground hover:text-cyan hover:border-cyan/40 min-h-[36px] inline-flex items-center"
+              >
+                Case studies
+              </a>
+              <a
+                href="#lib-trackers"
+                className="text-[11px] font-mono px-2.5 py-1.5 rounded-full border border-border/80 text-muted-foreground hover:text-cyan hover:border-cyan/40 min-h-[36px] inline-flex items-center"
+              >
+                Trackers
+              </a>
+            </div>
           </div>
         </header>
 
-        {/* Three creative doors */}
-        <section
-          aria-label="Library sections"
-          className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-8"
-        >
-          {DOORS.map((door, i) => {
-            const Icon = door.icon;
-            const isOpen = deep === door.id;
-            const cardClass = `lib-door group relative flex flex-col h-full min-h-[260px] sm:min-h-[280px] rounded-2xl border bg-gradient-to-b ${door.glow} bg-card/70 p-4 sm:p-5 overflow-hidden transition-all touch-manipulation ${
-              isOpen ? "ring-1 ring-cyan/40 shadow-[0_0_36px_-12px_var(--cyan-glow)]" : "hover:shadow-[0_0_36px_-14px_var(--cyan-glow)]"
-            }`;
-
-            const body = (
-              <>
-                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-cyan/10 blur-2xl pointer-events-none group-hover:bg-cyan/15 transition-colors" />
-                <div className="relative flex items-start justify-between gap-2 mb-4">
-                  <span className="w-12 h-12 rounded-2xl border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center group-hover:scale-105 transition-transform">
-                    <Icon className="w-6 h-6" />
-                  </span>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground tabular-nums">
-                    0{i + 1}
-                  </span>
-                </div>
-                <p className="relative text-[10px] font-mono uppercase tracking-[0.18em] text-cyan mb-1">
-                  {door.kicker}
-                </p>
-                <h2 className="relative text-[1.15rem] sm:text-xl font-display font-semibold text-foreground group-hover:text-cyan transition-colors break-words">
-                  {door.title}
-                </h2>
-                <p className="relative text-[13px] text-muted-foreground leading-relaxed mt-2 flex-1 break-words">
-                  {door.description}
-                </p>
-                <p className="relative text-[11.5px] font-mono text-foreground/75 leading-snug mt-3 border-t border-border/60 pt-3 break-words">
-                  {door.leadsTo}
-                </p>
-                <span className="relative mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">
-                  {door.cta}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </>
-            );
-
-            return (
-              <motion.div
-                key={door.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.06 * i, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="min-w-0 h-full"
-              >
-                {door.externalNav ? (
-                  <Link to={door.href} className={cardClass}>
-                    {body}
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => openDeep(door.id)}
-                    className={`${cardClass} w-full text-left`}
-                    aria-expanded={isOpen}
-                  >
-                    {body}
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
+        {/* 1 · Topic analyses */}
+        <section id="lib-topics" className="scroll-mt-28 space-y-3" aria-labelledby="h-topics">
+          <SectionHead
+            id="h-topics"
+            icon={<Layers className="w-4 h-4" />}
+            title="Topic analyses"
+            sub="Live citizen discourse monitors on X vs official and media frames. This is the Topics product — opened from the Library so you know where you are."
+          />
+          <div className="rounded-2xl border border-cyan/30 bg-cyan/[0.05] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[14px] font-display font-semibold text-foreground">
+                Open the Topics desk
+              </p>
+              <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">
+                {activeTopics} active monitors
+                {archivedTopics > 0 ? ` · ${archivedTopics} archived` : ""}. Scores, narrative gaps,
+                and full briefings per topic.
+              </p>
+            </div>
+            <Link
+              to="/topics"
+              className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] font-semibold shrink-0 touch-manipulation"
+            >
+              Go to Topics <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </section>
 
-        {/* Case studies panel */}
-        {deep === "cases" && (
-          <section
-            id="lib-cases"
-            className="scroll-mt-28 space-y-4 mb-8 rounded-2xl border border-emerald-signal/25 bg-emerald-signal/[0.04] p-3.5 sm:p-5"
-            aria-labelledby="h-cases"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h2
-                  id="h-cases"
-                  className="text-[15px] sm:text-base font-display font-semibold text-foreground"
+        {/* 2 · Case studies */}
+        <section id="lib-cases" className="scroll-mt-28 space-y-3" aria-labelledby="h-cases">
+          <SectionHead
+            id="h-cases"
+            icon={<FileText className="w-4 h-4" />}
+            title="Case studies"
+            sub="Multi-source deep dives (scholarly, official, media, optional discourse). Thesis-style claims with limits you can check."
+          />
+          <div className="space-y-2.5">
+            {cases.map((c, i) => (
+              <CaseCard key={c.id} item={c} delay={i * 0.02} />
+            ))}
+          </div>
+          {cases.length === 0 && (
+            <p className="text-[13px] text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
+              No case studies published yet.
+            </p>
+          )}
+          {shared.length > 0 && (
+            <div className="pt-2 space-y-2.5">
+              <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <Share2 className="w-3.5 h-3.5" /> Community shared deep dives
+              </p>
+              {shared.map((s) => (
+                <Link
+                  key={s.token}
+                  to="/research/report/$token"
+                  params={{ token: s.token }}
+                  className="group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-cyan/40 p-3.5 transition-colors"
                 >
-                  Case studies
-                </h2>
-                <p className="text-[12.5px] text-muted-foreground mt-1 max-w-2xl leading-snug">
-                  Multi-source deep dives published by Elenchos — same research discipline as
-                  commissioned briefs.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setDeep(null);
-                  window.history.replaceState(null, "", "/research/library");
-                }}
-                className="text-[12px] font-mono text-muted-foreground hover:text-cyan min-h-[36px] px-2"
-              >
-                Close
-              </button>
-            </div>
-            <div className="space-y-2.5">
-              {cases.map((c, i) => (
-                <CaseCard key={c.id} item={c} delay={i * 0.03} />
+                  <Share2 className="w-4 h-4 text-cyan shrink-0 mt-1" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-mono text-muted-foreground">
+                      Shared · {s.packageId}
+                    </p>
+                    <h3 className="text-[14px] font-display font-semibold group-hover:text-cyan break-words">
+                      {s.title}
+                    </h3>
+                    <p className="text-[12px] text-muted-foreground line-clamp-1">{s.topic}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                </Link>
               ))}
             </div>
-            {cases.length === 0 && (
-              <p className="text-[13px] text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
-                No case studies published yet.
-              </p>
-            )}
-            {shared.length > 0 && (
-              <div className="pt-4 space-y-2.5">
-                <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-                  <Share2 className="w-3.5 h-3.5" /> Community shared deep dives
-                </p>
-                {shared.map((s) => (
-                  <Link
-                    key={s.token}
-                    to="/research/report/$token"
-                    params={{ token: s.token }}
-                    className="group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-cyan/40 p-3.5 transition-colors"
-                  >
-                    <Share2 className="w-4 h-4 text-cyan shrink-0 mt-1" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-mono text-muted-foreground">
-                        Shared · {s.packageId}
-                      </p>
-                      <h3 className="text-[14px] font-display font-semibold group-hover:text-cyan break-words">
-                        {s.title}
-                      </h3>
-                      <p className="text-[12px] text-muted-foreground line-clamp-1">{s.topic}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+          )}
+        </section>
 
-        {/* Trackers panel */}
-        {deep === "trackers" && (
-          <section
-            id="lib-trackers"
-            className="scroll-mt-28 space-y-4 mb-8 rounded-2xl border border-amber-signal/25 bg-amber-signal/[0.04] p-3.5 sm:p-5"
-            aria-labelledby="h-trackers"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h2
-                  id="h-trackers"
-                  className="text-[15px] sm:text-base font-display font-semibold text-foreground"
-                >
-                  Trackers
-                </h2>
-                <p className="text-[12.5px] text-muted-foreground mt-1 max-w-2xl leading-snug">
-                  Indexes, leadership board, and the Networks Ledger — free to explore.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setDeep(null);
-                  window.history.replaceState(null, "", "/research/library");
-                }}
-                className="text-[12px] font-mono text-muted-foreground hover:text-cyan min-h-[36px] px-2"
-              >
-                Close
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              <ToolCard
-                href="/research/networks-ledger"
-                title="Networks Ledger · Terror & Finance"
-                body="Aggregate official designations, freezes, arrests, and charges. Names only on official source lists."
-                icon={<Shield className="w-5 h-5" />}
-                badge="Live"
-              />
-              <ToolCard
-                href="/research/speech-reach"
-                title="Speech Reach"
-                body="Brazil 2026: campaign accounts stay public — only free For You recommendation is limited. No individual names here."
-                icon={<MessageSquareShare className="w-5 h-5" />}
-                badge="Live"
-              />
-              <ToolCard
-                href="/trackers/leaders"
-                title="Leadership board"
-                body="Citizen trust rankings for world leaders vs official narratives."
-                icon={<Users className="w-5 h-5" />}
-                badge="Index"
-              />
-              <ToolCard
-                href="/trackers/peace"
-                title="Peace index"
-                body="Normalization & peace diagnostics — support, momentum, official gap."
-                icon={<Trophy className="w-5 h-5" />}
-                badge="Index"
-              />
-            </div>
-          </section>
-        )}
+        {/* 3 · Trackers (elevated) */}
+        <section id="lib-trackers" className="scroll-mt-28 space-y-3" aria-labelledby="h-trackers">
+          <SectionHead
+            id="h-trackers"
+            icon={<Trophy className="w-4 h-4" />}
+            title="Trackers & indexes"
+            sub="Citizen rankings and official-action ledgers. Open any card, or browse the full trackers hub."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+            <ToolCard
+              href="/trackers/leaders"
+              title="Leadership board"
+              body="Citizen trust rankings for world leaders vs official narratives."
+              icon={<Users className="w-5 h-5" />}
+              badge="Index"
+            />
+            <ToolCard
+              href="/trackers/peace"
+              title="Peace index"
+              body="Normalization & peace diagnostics — support, momentum, official gap."
+              icon={<Trophy className="w-5 h-5" />}
+              badge="Index"
+            />
+            <ToolCard
+              href="/research/networks-ledger"
+              title="Networks Ledger · Terror & Finance"
+              body="Aggregate official designations, freezes, arrests, and charges. Names only on official lists."
+              icon={<Shield className="w-5 h-5" />}
+              badge="Ledger"
+            />
+            <ToolCard
+              href="/research/speech-reach"
+              title="Speech Reach"
+              body="Brazil 2026: campaign posts stay public — only free For You recommendation is limited."
+              icon={<MessageSquareShare className="w-5 h-5" />}
+              badge="Ledger"
+            />
+            <ToolCard
+              href="/trackers"
+              title="All trackers hub"
+              body="Leadership, Peace, and Networks Ledger in one place."
+              icon={<Trophy className="w-5 h-5" />}
+              badge="Hub"
+            />
+          </div>
+        </section>
 
-        <div className="mt-4 rounded-2xl border border-cyan/30 bg-cyan/[0.06] px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-          <p className="text-[13px] text-foreground/90 break-words">
-            Need a private brief on your own question?
-          </p>
+        {/* Primary CTA out of library */}
+        <section className="rounded-2xl border border-cyan/35 bg-cyan/[0.07] px-4 py-4 sm:px-5 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[14px] font-display font-semibold text-foreground">
+              Need a private brief on your own question?
+            </p>
+            <p className="text-[12.5px] text-muted-foreground mt-0.5">
+              Fixed price · unique link + PDF · typically minutes after pay.
+            </p>
+          </div>
           <Link
             to="/research/commission"
-            className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] touch-manipulation shrink-0"
+            className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] font-semibold touch-manipulation shrink-0"
           >
+            <FilePenLine className="w-4 h-4" />
             Commission report · $10 / $20 <ArrowRight className="w-4 h-4" />
           </Link>
-        </div>
+        </section>
       </main>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+function SectionHead({
+  id,
+  icon,
+  title,
+  sub,
+}: {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  sub: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-cyan">{icon}</span>
+        <h2 id={id} className="text-[15px] sm:text-base font-display font-semibold text-foreground">
+          {title}
+        </h2>
+      </div>
+      <p className="text-[12.5px] text-muted-foreground max-w-2xl leading-snug pl-6">{sub}</p>
     </div>
   );
 }
@@ -487,10 +409,6 @@ function ToolCard({
   icon: React.ReactNode;
   badge: string;
 }) {
-  const isInternal =
-    href.startsWith("/trackers") ||
-    href.startsWith("/research") ||
-    href.startsWith("/topics");
   const className =
     "rd-card group flex flex-col h-full min-h-[148px] rounded-2xl border border-border/80 bg-card/60 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
 
@@ -514,13 +432,6 @@ function ToolCard({
     </>
   );
 
-  if (href.includes("#") || !isInternal) {
-    return (
-      <a href={href} className={className}>
-        {inner}
-      </a>
-    );
-  }
   return (
     <Link to={href} className={className}>
       {inner}

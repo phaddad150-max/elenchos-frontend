@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
-  BookOpen,
   Brain,
   ExternalLink,
   FlaskConical,
@@ -28,9 +27,11 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
+  ResearchBackBar,
   ResearchBreadcrumb,
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
+import { ResearchNextSteps } from "@/components/research/ResearchNextSteps";
 import { LedgerBranchNav } from "@/components/networks-ledger/LedgerBranchNav";
 import {
   TERROR_FINANCE_DATA,
@@ -102,8 +103,14 @@ function TerrorFinancePage() {
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip">
-        <ResearchBreadcrumb current="Library · Terror & Finance" />
+        <ResearchBreadcrumb
+          trail={[
+            { label: "Library", to: "/research/library" },
+            { label: "Terror & Finance" },
+          ]}
+        />
         <ResearchDeskNav />
+        <ResearchBackBar />
         <LedgerBranchNav />
 
         {/* Hero */}
@@ -465,6 +472,11 @@ function TerrorFinancePage() {
           </p>
         </section>
 
+        <ResearchNextSteps
+          contextHint="terror-finance official actions"
+          showTopics={false}
+          className="mb-2"
+        />
         <div className="flex flex-wrap gap-3 text-[12.5px]">
           <Link
             to="/research/speech-reach"
@@ -473,13 +485,6 @@ function TerrorFinancePage() {
             <MessageSquareShare className="w-3.5 h-3.5" />
             Speech Reach
             <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-          <Link
-            to="/research/library"
-            className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-cyan min-h-[40px]"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            Full library
           </Link>
         </div>
       </main>

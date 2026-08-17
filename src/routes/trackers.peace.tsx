@@ -86,6 +86,25 @@ function PeacePage() {
           </div>
         </header>
         <PeaceDetail row={row} />
+        <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <p className="text-[13px] text-foreground/90">
+            Want a deeper private brief on peace or normalization?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/research/commission"
+              className="btn-intel-primary inline-flex items-center justify-center min-h-[44px] px-4 rounded-full text-[13px] font-semibold"
+            >
+              Commission a report
+            </Link>
+            <Link
+              to="/research/library"
+              className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan"
+            >
+              Back to Library
+            </Link>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </div>
