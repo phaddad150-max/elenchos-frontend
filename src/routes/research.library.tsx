@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
   FilePenLine,
   FileText,
   Layers,
+  Radio,
   Share2,
   Shield,
   Trophy,
   Users,
+  Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -96,15 +98,47 @@ function buildCaseStudies(): CaseStudy[] {
   );
 }
 
+const TRACKERS = [
+  {
+    href: "/trackers/leaders",
+    title: "Leadership board",
+    body: "Citizen trust rankings for world leaders vs official narratives.",
+    icon: Users,
+    badge: "Index",
+    accent: "amber" as const,
+    metric: "Live rankings",
+  },
+  {
+    href: "/trackers/peace",
+    title: "Peace index",
+    body: "Normalization & peace diagnostics — support, momentum, official gap.",
+    icon: Trophy,
+    badge: "Index",
+    accent: "emerald" as const,
+    metric: "Country index",
+  },
+  {
+    href: "/research/networks-ledger",
+    title: "Networks Ledger",
+    body: "Terror & Finance + Speech Reach — official actions and For You recommendation rules.",
+    icon: Shield,
+    badge: "Ledger",
+    accent: "cyan" as const,
+    metric: "2 branches",
+  },
+] as const;
+
 /**
- * Library = single free catalog. All sections always visible (no door maze).
- * Topics live on /topics but are clearly labeled as the discourse monitor.
+ * Premium interactive Library — scannable in 2–5s, distinct section visuals.
  */
 function ResearchLibraryPage() {
   const cases = useMemo(() => buildCaseStudies(), []);
   const [shared, setShared] = useState<SharedItem[]>([]);
+  const [activeSec, setActiveSec] = useState<"topics" | "cases" | "trackers">("topics");
   const activeTopics = activeLiveTopicCount();
   const archivedTopics = archivedLiveTopicCount();
+  const caseCount = cases.length + shared.length;
+  const trackerCount = TRACKERS.length;
 
   useEffect(() => {
     let cancelled = false;
@@ -123,6 +157,32 @@ function ResearchLibraryPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const ids = ["lib-topics", "lib-cases", "lib-trackers"] as const;
+    const map: Record<string, "topics" | "cases" | "trackers"> = {
+      "lib-topics": "topics",
+      "lib-cases": "cases",
+      "lib-trackers": "trackers",
+    };
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const hit = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (hit?.target?.id && map[hit.target.id]) {
+          setActiveSec(map[hit.target.id]!);
+        }
+      },
+      { rootMargin: "-25% 0px -45% 0px", threshold: [0.15, 0.4] },
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const h = window.location.hash.replace("#", "");
     if (h === "cases" || h === "trackers" || h === "topics") {
       requestAnimationFrame(() => {
@@ -131,95 +191,227 @@ function ResearchLibraryPage() {
     }
   }, []);
 
+  const portals = [
+    {
+      id: "topics" as const,
+      href: "#lib-topics",
+      title: "Topic analyses",
+      kicker: "On X",
+      blurb: "Citizen voices vs official frames — live scores & briefings.",
+      cta: "Explore topics",
+      icon: Layers,
+      count: activeTopics,
+      countLabel: "active",
+      tone: "cyan" as const,
+      bars: [72, 58, 81, 44, 66, 90, 55],
+    },
+    {
+      id: "cases" as const,
+      href: "#lib-cases",
+      title: "Case studies",
+      kicker: "Deep dives",
+      blurb: "Multi-source thesis briefs with claims you can check.",
+      cta: "Browse cases",
+      icon: FileText,
+      count: caseCount,
+      countLabel: "published",
+      tone: "emerald" as const,
+      bars: [40, 65, 50, 85, 70, 48, 92],
+    },
+    {
+      id: "trackers" as const,
+      href: "#lib-trackers",
+      title: "Trackers",
+      kicker: "Indexes",
+      blurb: "Leaders, peace, and Networks Ledger branches.",
+      cta: "Open trackers",
+      icon: Trophy,
+      count: trackerCount,
+      countLabel: "surfaces",
+      tone: "amber" as const,
+      bars: [60, 75, 55, 80, 45, 70, 88],
+    },
+  ];
+
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip space-y-8 sm:space-y-10">
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip space-y-7 sm:space-y-9">
         <ResearchBreadcrumb trail={[{ label: "Library" }]} />
         <ResearchDeskNav />
 
+        {/* Hero + at-a-glance KPIs */}
         <header className="page-hero-banner overflow-hidden min-w-0 relative">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_20%_0%,color-mix(in_oklab,var(--cyan)_14%,transparent),transparent_55%)]" />
-          <div className="relative p-4 sm:p-5 md:p-6 space-y-2 min-w-0">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_15%_0%,color-mix(in_oklab,var(--cyan)_22%,transparent),transparent_50%),radial-gradient(ellipse_at_85%_30%,color-mix(in_oklab,var(--amber-signal)_12%,transparent),transparent_45%)]" />
+          <div className="relative p-4 sm:p-5 md:p-7 space-y-4 min-w-0">
             <div className="page-hero-kicker">
               <BookOpen className="w-3.5 h-3.5" aria-hidden />
-              Library
+              Library · Free published work
             </div>
-            <h1 className="page-hero-title text-[1.35rem] sm:text-2xl md:text-[1.85rem] break-words max-w-3xl">
-              Free published intelligence
-            </h1>
-            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-2xl leading-relaxed">
-              Topic analyses on X, multi-source case studies, and trackers. No paywall on published
-              work. Need something custom?{" "}
-              <Link to="/research/commission" className="text-cyan hover:underline font-medium">
-                Commission a report
-              </Link>
-              .
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <a
-                href="#lib-topics"
-                className="text-[11px] font-mono px-2.5 py-1.5 rounded-full border border-border/80 text-muted-foreground hover:text-cyan hover:border-cyan/40 min-h-[36px] inline-flex items-center"
-              >
-                Topic analyses
-              </a>
-              <a
-                href="#lib-cases"
-                className="text-[11px] font-mono px-2.5 py-1.5 rounded-full border border-border/80 text-muted-foreground hover:text-cyan hover:border-cyan/40 min-h-[36px] inline-flex items-center"
-              >
-                Case studies
-              </a>
-              <a
-                href="#lib-trackers"
-                className="text-[11px] font-mono px-2.5 py-1.5 rounded-full border border-border/80 text-muted-foreground hover:text-cyan hover:border-cyan/40 min-h-[36px] inline-flex items-center"
-              >
-                Trackers
-              </a>
+            <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:justify-between">
+              <div className="min-w-0 max-w-2xl space-y-2">
+                <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] break-words">
+                  Three free ways into Elenchos
+                </h1>
+                <p className="text-[13px] sm:text-[14.5px] text-muted-foreground leading-relaxed">
+                  Topics on X · Case studies · Trackers. Pick a door below — or scroll the full
+                  catalog. No paywall on published work.
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full lg:w-auto lg:min-w-[320px]">
+                <StatTile
+                  value={String(activeTopics)}
+                  label="Topics"
+                  sub={archivedTopics > 0 ? `${archivedTopics} archived` : "live"}
+                  tone="cyan"
+                  delay={0}
+                />
+                <StatTile
+                  value={String(caseCount)}
+                  label="Cases"
+                  sub="deep dives"
+                  tone="emerald"
+                  delay={0.05}
+                />
+                <StatTile
+                  value={String(trackerCount)}
+                  label="Trackers"
+                  sub="indexes"
+                  tone="amber"
+                  delay={0.1}
+                />
+              </div>
             </div>
           </div>
         </header>
 
-        {/* 1 · Topic analyses */}
-        <section id="lib-topics" className="scroll-mt-28 space-y-3" aria-labelledby="h-topics">
+        {/* Interactive portal map — understand offer in 2–5s */}
+        <section aria-label="What you can open" className="space-y-3">
+          <div className="flex items-center gap-2 px-0.5">
+            <Zap className="w-3.5 h-3.5 text-cyan" aria-hidden />
+            <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+              Jump in
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5">
+            {portals.map((p, i) => (
+              <PortalCard
+                key={p.id}
+                {...p}
+                delay={i * 0.06}
+                active={activeSec === p.id}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Sticky section rail */}
+        <div className="sticky top-[6.75rem] z-10 -mx-0.5">
+          <div className="flex flex-wrap gap-1.5 p-1 rounded-xl border border-border/70 bg-background/85 backdrop-blur-md shadow-sm">
+            {(
+              [
+                { id: "topics", label: "Topics", href: "#lib-topics" },
+                { id: "cases", label: "Cases", href: "#lib-cases" },
+                { id: "trackers", label: "Trackers", href: "#lib-trackers" },
+              ] as const
+            ).map((t) => (
+              <a
+                key={t.id}
+                href={t.href}
+                className={`min-h-[40px] px-3.5 rounded-lg text-[12px] font-medium inline-flex items-center touch-manipulation transition-colors ${
+                  activeSec === t.id
+                    ? "bg-cyan/15 text-cyan border border-cyan/40"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-transparent"
+                }`}
+              >
+                {t.label}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* 1 · Topics */}
+        <section
+          id="lib-topics"
+          className="scroll-mt-36 lib-panel lib-panel-cyan rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+          aria-labelledby="h-topics"
+        >
           <SectionHead
             id="h-topics"
             icon={<Layers className="w-4 h-4" />}
             title="Topic analyses"
-            sub="Live citizen discourse monitors on X vs official and media frames. This is the Topics product — opened from the Library so you know where you are."
+            sub="Live citizen discourse on X vs official and media frames."
+            tone="cyan"
+            metric={`${activeTopics} active`}
           />
-          <div className="rounded-2xl border border-cyan/30 bg-cyan/[0.05] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-[14px] font-display font-semibold text-foreground">
-                Open the Topics desk
-              </p>
-              <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">
-                {activeTopics} active monitors
-                {archivedTopics > 0 ? ` · ${archivedTopics} archived` : ""}. Scores, narrative gaps,
-                and full briefings per topic.
-              </p>
+          <motion.div
+            whileHover={{ y: -2 }}
+            className="group relative overflow-hidden rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/[0.12] via-card/80 to-card/40 p-4 sm:p-5"
+          >
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[radial-gradient(ellipse_at_80%_0%,color-mix(in_oklab,var(--cyan)_20%,transparent),transparent_55%)]" />
+            <div className="relative flex flex-col lg:flex-row lg:items-center gap-5 lg:justify-between">
+              <div className="min-w-0 space-y-3 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.14em] text-cyan px-2 py-0.5 rounded-full border border-cyan/35 bg-cyan/10">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
+                    Live monitors
+                  </span>
+                  {archivedTopics > 0 && (
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      +{archivedTopics} archived
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-[1.1rem] sm:text-xl font-display font-semibold text-foreground group-hover:text-cyan transition-colors">
+                  Open the Topics desk
+                </h3>
+                <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xl">
+                  Scores, narrative gaps, and full briefings per topic — the main public discourse
+                  product, linked here so the Library stays the free catalog home.
+                </p>
+                {/* Mini density viz */}
+                <div className="flex items-end gap-1 h-10 max-w-xs" aria-hidden>
+                  {Array.from({ length: Math.min(activeTopics, 16) }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex-1 rounded-sm bg-cyan/70 min-w-[6px]"
+                      initial={{ height: 8 }}
+                      whileInView={{ height: 12 + ((i * 17) % 28) }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.03, duration: 0.4 }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <Link
+                to="/topics"
+                className="btn-intel-primary relative inline-flex items-center justify-center gap-1.5 min-h-[48px] px-6 rounded-full text-[13px] font-semibold shrink-0 touch-manipulation"
+              >
+                Go to Topics <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-            <Link
-              to="/topics"
-              className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] font-semibold shrink-0 touch-manipulation"
-            >
-              Go to Topics <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          </motion.div>
         </section>
 
-        {/* 2 · Case studies */}
-        <section id="lib-cases" className="scroll-mt-28 space-y-3" aria-labelledby="h-cases">
+        {/* 2 · Cases */}
+        <section
+          id="lib-cases"
+          className="scroll-mt-36 lib-panel lib-panel-emerald rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+          aria-labelledby="h-cases"
+        >
           <SectionHead
             id="h-cases"
             icon={<FileText className="w-4 h-4" />}
             title="Case studies"
-            sub="Multi-source deep dives (scholarly, official, media, optional discourse). Thesis-style claims with limits you can check."
+            sub="Multi-source deep dives with claims and limits you can check."
+            tone="emerald"
+            metric={`${cases.length} listed`}
           />
-          <div className="space-y-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {cases.map((c, i) => (
-              <CaseCard key={c.id} item={c} delay={i * 0.02} />
+              <CaseCard key={c.id} item={c} delay={i * 0.04} index={i} />
             ))}
           </div>
           {cases.length === 0 && (
@@ -228,89 +420,251 @@ function ResearchLibraryPage() {
             </p>
           )}
           {shared.length > 0 && (
-            <div className="pt-2 space-y-2.5">
+            <div className="pt-1 space-y-2.5">
               <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5" /> Community shared deep dives
+                <Share2 className="w-3.5 h-3.5" /> Community shared
               </p>
-              {shared.map((s) => (
-                <Link
-                  key={s.token}
-                  to="/research/report/$token"
-                  params={{ token: s.token }}
-                  className="group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-cyan/40 p-3.5 transition-colors"
-                >
-                  <Share2 className="w-4 h-4 text-cyan shrink-0 mt-1" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-mono text-muted-foreground">
-                      Shared · {s.packageId}
-                    </p>
-                    <h3 className="text-[14px] font-display font-semibold group-hover:text-cyan break-words">
-                      {s.title}
-                    </h3>
-                    <p className="text-[12px] text-muted-foreground line-clamp-1">{s.topic}</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-                </Link>
-              ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                {shared.map((s) => (
+                  <Link
+                    key={s.token}
+                    to="/research/report/$token"
+                    params={{ token: s.token }}
+                    className="lib-case-card group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-emerald-signal/45 p-3.5 transition-all"
+                  >
+                    <span className="w-10 h-10 shrink-0 rounded-xl border border-emerald-signal/30 bg-emerald-signal/10 text-emerald-signal grid place-items-center">
+                      <Share2 className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-mono text-muted-foreground">
+                        Shared · {s.packageId}
+                      </p>
+                      <h3 className="text-[14px] font-display font-semibold group-hover:text-emerald-signal break-words">
+                        {s.title}
+                      </h3>
+                      <p className="text-[12px] text-muted-foreground line-clamp-1">{s.topic}</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1 group-hover:text-emerald-signal group-hover:translate-x-0.5 transition-all" />
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
         </section>
 
-        {/* 3 · Trackers (elevated) */}
-        <section id="lib-trackers" className="scroll-mt-28 space-y-3" aria-labelledby="h-trackers">
+        {/* 3 · Trackers */}
+        <section
+          id="lib-trackers"
+          className="scroll-mt-36 lib-panel lib-panel-amber rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+          aria-labelledby="h-trackers"
+        >
           <SectionHead
             id="h-trackers"
             icon={<Trophy className="w-4 h-4" />}
             title="Trackers & indexes"
             sub="Citizen rankings and the Networks Ledger (Terror & Finance + Speech Reach)."
+            tone="amber"
+            metric={`${trackerCount} surfaces`}
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-            <ToolCard
-              href="/trackers/leaders"
-              title="Leadership board"
-              body="Citizen trust rankings for world leaders vs official narratives."
-              icon={<Users className="w-5 h-5" />}
-              badge="Index"
-            />
-            <ToolCard
-              href="/trackers/peace"
-              title="Peace index"
-              body="Normalization & peace diagnostics — support, momentum, official gap."
-              icon={<Trophy className="w-5 h-5" />}
-              badge="Index"
-            />
-            <ToolCard
-              href="/research/networks-ledger"
-              title="Networks Ledger"
-              body="Two branches: Terror & Finance (official designations, freezes, charges — names only on source lists) and Speech Reach (For You recommendation limits on public speech)."
-              icon={<Shield className="w-5 h-5" />}
-              badge="Ledger"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {TRACKERS.map((t, i) => (
+              <ToolCard key={t.href} {...t} delay={i * 0.05} />
+            ))}
           </div>
         </section>
 
-        {/* Primary CTA out of library */}
-        <section className="rounded-2xl border border-cyan/35 bg-cyan/[0.07] px-4 py-4 sm:px-5 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-[14px] font-display font-semibold text-foreground">
-              Need a private brief on your own question?
-            </p>
-            <p className="text-[12.5px] text-muted-foreground mt-0.5">
-              Fixed price · unique link + PDF · typically minutes after pay.
-            </p>
+        {/* Commission CTA */}
+        <motion.section
+          whileHover={{ scale: 1.005 }}
+          className="relative overflow-hidden rounded-2xl border border-cyan/40 bg-gradient-to-r from-cyan/[0.12] via-card/80 to-violet-500/[0.08] px-4 py-5 sm:px-6 sm:py-6"
+        >
+          <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-cyan/15 blur-3xl pointer-events-none" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+            <div className="min-w-0 flex gap-3 items-start">
+              <span className="w-11 h-11 shrink-0 rounded-xl border border-cyan/40 bg-cyan/15 text-cyan grid place-items-center">
+                <FilePenLine className="w-5 h-5" />
+              </span>
+              <div>
+                <p className="text-[15px] font-display font-semibold text-foreground">
+                  Need a private brief on your own question?
+                </p>
+                <p className="text-[12.5px] text-muted-foreground mt-0.5">
+                  Fixed price · unique link + PDF · typically minutes after pay.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/research/commission"
+              className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[48px] px-5 rounded-full text-[13px] font-semibold touch-manipulation shrink-0"
+            >
+              Commission · $10 / $20 <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          <Link
-            to="/research/commission"
-            className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] font-semibold touch-manipulation shrink-0"
-          >
-            <FilePenLine className="w-4 h-4" />
-            Commission report · $10 / $20 <ArrowRight className="w-4 h-4" />
-          </Link>
-        </section>
+        </motion.section>
       </main>
 
       <SiteFooter />
     </div>
+  );
+}
+
+function StatTile({
+  value,
+  label,
+  sub,
+  tone,
+  delay,
+}: {
+  value: string;
+  label: string;
+  sub: string;
+  tone: "cyan" | "emerald" | "amber";
+  delay: number;
+}) {
+  const toneCls =
+    tone === "emerald"
+      ? "border-emerald-signal/35 text-emerald-signal"
+      : tone === "amber"
+        ? "border-amber-signal/35 text-amber-signal"
+        : "border-cyan/35 text-cyan";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      className={`rounded-xl border bg-background/50 px-2.5 py-2.5 sm:px-3 sm:py-3 text-center ${toneCls}`}
+    >
+      <p className="text-xl sm:text-2xl font-display font-semibold tabular-nums leading-none">
+        {value}
+      </p>
+      <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mt-1.5">
+        {label}
+      </p>
+      <p className="text-[10px] text-muted-foreground/80 mt-0.5">{sub}</p>
+    </motion.div>
+  );
+}
+
+function PortalCard({
+  href,
+  title,
+  kicker,
+  blurb,
+  cta,
+  icon: Icon,
+  count,
+  countLabel,
+  tone,
+  bars,
+  delay,
+  active,
+}: {
+  href: string;
+  title: string;
+  kicker: string;
+  blurb: string;
+  cta: string;
+  icon: React.ComponentType<{ className?: string }>;
+  count: number;
+  countLabel: string;
+  tone: "cyan" | "emerald" | "amber";
+  bars: number[];
+  delay: number;
+  active: boolean;
+}) {
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const glow = useMotionTemplate`radial-gradient(420px circle at ${mx}px ${my}px, ${
+    tone === "emerald"
+      ? "color-mix(in oklab, var(--emerald-signal) 18%, transparent)"
+      : tone === "amber"
+        ? "color-mix(in oklab, var(--amber-signal) 16%, transparent)"
+        : "color-mix(in oklab, var(--cyan) 20%, transparent)"
+  }, transparent 55%)`;
+
+  const border =
+    tone === "emerald"
+      ? active
+        ? "border-emerald-signal/55 ring-1 ring-emerald-signal/30"
+        : "border-emerald-signal/30 hover:border-emerald-signal/55"
+      : tone === "amber"
+        ? active
+          ? "border-amber-signal/55 ring-1 ring-amber-signal/30"
+          : "border-amber-signal/30 hover:border-amber-signal/55"
+        : active
+          ? "border-cyan/55 ring-1 ring-cyan/35"
+          : "border-cyan/30 hover:border-cyan/55";
+
+  const iconTone =
+    tone === "emerald"
+      ? "text-emerald-signal border-emerald-signal/40 bg-emerald-signal/10"
+      : tone === "amber"
+        ? "text-amber-signal border-amber-signal/40 bg-amber-signal/10"
+        : "text-cyan border-cyan/40 bg-cyan/10";
+
+  const barTone =
+    tone === "emerald"
+      ? "bg-emerald-signal"
+      : tone === "amber"
+        ? "bg-amber-signal"
+        : "bg-cyan";
+
+  return (
+    <motion.a
+      href={href}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4 }}
+      whileHover={{ y: -4 }}
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        mx.set(e.clientX - r.left);
+        my.set(e.clientY - r.top);
+      }}
+      className={`lib-portal group relative flex flex-col h-full min-h-[200px] rounded-2xl border bg-card/70 p-4 sm:p-5 overflow-hidden transition-shadow touch-manipulation ${border} hover:shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]`}
+    >
+      <motion.div
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: glow }}
+      />
+      <div className="relative flex items-start justify-between gap-2 mb-3">
+        <span
+          className={`w-11 h-11 rounded-xl border grid place-items-center group-hover:scale-105 transition-transform ${iconTone}`}
+        >
+          <Icon className="w-5 h-5" />
+        </span>
+        <div className="text-right">
+          <p className="text-2xl font-display font-semibold tabular-nums text-foreground leading-none">
+            {count}
+          </p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mt-1">
+            {countLabel}
+          </p>
+        </div>
+      </div>
+      <p className="relative text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+        {kicker}
+      </p>
+      <h2 className="relative text-[1.1rem] font-display font-semibold text-foreground mt-0.5 group-hover:text-cyan transition-colors">
+        {title}
+      </h2>
+      <p className="relative text-[12.5px] text-muted-foreground leading-snug mt-1.5 flex-1">
+        {blurb}
+      </p>
+      <div className="relative flex items-end gap-0.5 h-8 mt-3 opacity-80" aria-hidden>
+        {bars.map((h, i) => (
+          <div
+            key={i}
+            className={`flex-1 rounded-sm ${barTone} opacity-70 group-hover:opacity-100 transition-opacity`}
+            style={{ height: `${Math.max(18, h)}%` }}
+          />
+        ))}
+      </div>
+      <span className="relative mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">
+        {cta}
+        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      </span>
+    </motion.a>
   );
 }
 
@@ -319,54 +673,100 @@ function SectionHead({
   icon,
   title,
   sub,
+  tone,
+  metric,
 }: {
   id: string;
   icon: React.ReactNode;
   title: string;
   sub: string;
+  tone: "cyan" | "emerald" | "amber";
+  metric: string;
 }) {
+  const chip =
+    tone === "emerald"
+      ? "text-emerald-signal border-emerald-signal/35 bg-emerald-signal/10"
+      : tone === "amber"
+        ? "text-amber-signal border-amber-signal/35 bg-amber-signal/10"
+        : "text-cyan border-cyan/35 bg-cyan/10";
   return (
-    <div className="min-w-0">
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-cyan">{icon}</span>
-        <h2 id={id} className="text-[15px] sm:text-base font-display font-semibold text-foreground">
-          {title}
-        </h2>
+    <div className="flex flex-wrap items-start justify-between gap-2 min-w-0">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-cyan">{icon}</span>
+          <h2
+            id={id}
+            className="text-[15px] sm:text-base font-display font-semibold text-foreground"
+          >
+            {title}
+          </h2>
+        </div>
+        <p className="text-[12.5px] text-muted-foreground max-w-2xl leading-snug pl-6">{sub}</p>
       </div>
-      <p className="text-[12.5px] text-muted-foreground max-w-2xl leading-snug pl-6">{sub}</p>
+      <span
+        className={`text-[10px] font-mono uppercase tracking-[0.12em] px-2 py-1 rounded-full border ${chip}`}
+      >
+        {metric}
+      </span>
     </div>
   );
 }
 
-function CaseCard({ item, delay }: { item: CaseStudy; delay: number }) {
-  const className =
-    "rd-lib-row group flex gap-3 rounded-2xl border border-border/90 bg-card/70 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
+function CaseCard({
+  item,
+  delay,
+  index,
+}: {
+  item: CaseStudy;
+  delay: number;
+  index: number;
+}) {
+  const accents = [
+    "from-cyan/15 to-transparent border-cyan/30 hover:border-cyan/55",
+    "from-emerald-signal/15 to-transparent border-emerald-signal/30 hover:border-emerald-signal/55",
+    "from-violet-500/12 to-transparent border-violet-400/30 hover:border-violet-400/50",
+    "from-amber-signal/12 to-transparent border-amber-signal/30 hover:border-amber-signal/50",
+  ];
+  const accent = accents[index % accents.length];
+  const className = `lib-case-card group relative flex flex-col h-full min-h-[148px] rounded-2xl border bg-gradient-to-br ${accent} bg-card/80 p-4 overflow-hidden transition-all touch-manipulation hover:-translate-y-1 hover:shadow-[0_16px_40px_-24px_rgba(0,0,0,0.5)]`;
+
   const inner = (
     <>
-      <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
-        <FileText className="w-4 h-4" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/90 truncate">
-          {item.region} · {item.statusLabel}
-          {item.pdf ? " · PDF" : ""}
-        </p>
-        <h3 className="text-[14px] sm:text-[15px] font-display font-semibold group-hover:text-cyan transition-colors leading-snug mt-0.5 break-words">
-          {item.title}
-        </h3>
-        <p className="text-[12.5px] text-muted-foreground leading-snug mt-1 line-clamp-2 break-words">
-          {item.subtitle}
-        </p>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <span className="shrink-0 w-10 h-10 rounded-xl border border-border/70 bg-background/50 text-cyan grid place-items-center group-hover:scale-105 transition-transform">
+          <FileText className="w-4 h-4" />
+        </span>
+        <div className="flex flex-wrap gap-1 justify-end">
+          <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-border/70 text-muted-foreground">
+            {item.region}
+          </span>
+          {item.pdf && (
+            <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-cyan/35 text-cyan bg-cyan/10">
+              PDF
+            </span>
+          )}
+        </div>
       </div>
-      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0 mt-1" />
+      <p className="text-[10px] font-mono text-muted-foreground">{item.statusLabel}</p>
+      <h3 className="text-[14px] sm:text-[15px] font-display font-semibold group-hover:text-cyan transition-colors leading-snug mt-0.5 break-words">
+        {item.title}
+      </h3>
+      <p className="text-[12.5px] text-muted-foreground leading-snug mt-1.5 line-clamp-2 break-words flex-1">
+        {item.subtitle}
+      </p>
+      <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-cyan">
+        Open briefing <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+      </span>
     </>
   );
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ delay, duration: 0.35 }}
+      className="h-full"
     >
       {item.params ? (
         <Link to={item.href} params={item.params as never} className={className}>
@@ -385,41 +785,80 @@ function ToolCard({
   href,
   title,
   body,
-  icon,
+  icon: Icon,
   badge,
+  accent,
+  metric,
+  delay,
 }: {
   href: string;
   title: string;
   body: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
   badge: string;
+  accent: "cyan" | "emerald" | "amber";
+  metric: string;
+  delay: number;
 }) {
-  const className =
-    "rd-card group flex flex-col h-full min-h-[148px] rounded-2xl border border-border/80 bg-card/60 hover:border-cyan/50 p-3.5 sm:p-4 transition-colors touch-manipulation min-w-0";
-
-  const inner = (
-    <>
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="w-10 h-10 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan grid place-items-center">
-          {icon}
-        </span>
-        <span className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground border border-border/70 rounded-full px-1.5 py-0.5">
-          {badge}
-        </span>
-      </div>
-      <h3 className="text-[14px] font-display font-semibold group-hover:text-cyan transition-colors break-words">
-        {title}
-      </h3>
-      <p className="text-[12px] text-muted-foreground leading-snug mt-1 flex-1 break-words">{body}</p>
-      <span className="mt-2 text-[12px] font-medium text-cyan inline-flex items-center gap-1">
-        Open <ArrowRight className="w-3.5 h-3.5" />
-      </span>
-    </>
-  );
+  const border =
+    accent === "emerald"
+      ? "border-emerald-signal/30 hover:border-emerald-signal/55"
+      : accent === "amber"
+        ? "border-amber-signal/30 hover:border-amber-signal/55"
+        : "border-cyan/30 hover:border-cyan/55";
+  const iconBox =
+    accent === "emerald"
+      ? "text-emerald-signal border-emerald-signal/40 bg-emerald-signal/10"
+      : accent === "amber"
+        ? "text-amber-signal border-amber-signal/40 bg-amber-signal/10"
+        : "text-cyan border-cyan/40 bg-cyan/10";
+  const bar =
+    accent === "emerald"
+      ? "bg-emerald-signal"
+      : accent === "amber"
+        ? "bg-amber-signal"
+        : "bg-cyan";
 
   return (
-    <Link to={href} className={className}>
-      {inner}
-    </Link>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.35 }}
+      whileHover={{ y: -3 }}
+      className="h-full"
+    >
+      <Link
+        to={href}
+        className={`lib-tracker-card group relative flex flex-col h-full min-h-[168px] rounded-2xl border bg-card/70 p-4 overflow-hidden transition-shadow touch-manipulation ${border} hover:shadow-[0_18px_44px_-28px_rgba(0,0,0,0.5)]`}
+      >
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <span
+            className={`w-11 h-11 rounded-xl border grid place-items-center group-hover:scale-105 transition-transform ${iconBox}`}
+          >
+            <Icon className="w-5 h-5" />
+          </span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground border border-border/70 rounded-full px-1.5 py-0.5">
+            {badge}
+          </span>
+        </div>
+        <h3 className="text-[14px] font-display font-semibold group-hover:text-cyan transition-colors break-words">
+          {title}
+        </h3>
+        <p className="text-[12px] text-muted-foreground leading-snug mt-1 flex-1 break-words">
+          {body}
+        </p>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1.5">
+            <Radio className="w-3 h-3 text-cyan" />
+            {metric}
+          </span>
+          <span className="text-[12px] font-semibold text-cyan inline-flex items-center gap-1">
+            Open <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </span>
+        </div>
+        <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${bar} opacity-40 group-hover:opacity-90 transition-opacity`} />
+      </Link>
+    </motion.div>
   );
 }

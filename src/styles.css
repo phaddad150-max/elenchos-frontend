@@ -963,6 +963,56 @@
   box-shadow: 0 0 20px -6px var(--color-cyan-glow);
 }
 
+/* Library page — distinct section panels + interactive cards */
+.lib-panel {
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--card) 92%, transparent),
+      color-mix(in oklab, var(--card) 75%, transparent)
+    );
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 4%, transparent);
+}
+.lib-panel-cyan {
+  border-color: color-mix(in oklab, var(--cyan) 35%, var(--border));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in oklab, var(--cyan) 8%, var(--card)),
+      color-mix(in oklab, var(--card) 88%, transparent)
+    );
+}
+.lib-panel-emerald {
+  border-color: color-mix(in oklab, var(--emerald-signal) 32%, var(--border));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in oklab, var(--emerald-signal) 7%, var(--card)),
+      color-mix(in oklab, var(--card) 88%, transparent)
+    );
+}
+.lib-panel-amber {
+  border-color: color-mix(in oklab, var(--amber-signal) 32%, var(--border));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in oklab, var(--amber-signal) 7%, var(--card)),
+      color-mix(in oklab, var(--card) 88%, transparent)
+    );
+}
+.lib-portal,
+.lib-case-card,
+.lib-tracker-card {
+  isolation: isolate;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lib-portal:hover,
+  .lib-case-card:hover,
+  .lib-tracker-card:hover {
+    border-color: color-mix(in oklab, var(--cyan) 45%, var(--border));
+  }
+}
+
 .globe-stage canvas {
   display: block;
 }
