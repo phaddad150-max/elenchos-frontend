@@ -19,9 +19,16 @@ import {
   ResearchBreadcrumb,
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
+import { FEATURE_TOPICS } from "@/lib/feature-topics";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
 import { LIBRARY_SOCIAL, socialMetaTags } from "@/lib/social-meta";
-import { activeLiveTopicCount, archivedLiveTopicCount } from "@/lib/topic-catalog";
+import {
+  activeLiveTopicCount,
+  archivedLiveTopicCount,
+  isArchivedTopicId,
+  isNewTopicBadge,
+  LIVE_TOPIC_KEYS,
+} from "@/lib/topic-catalog";
 
 type SharedItem = {
   token: string;
@@ -138,6 +145,21 @@ function isLibrarySection(v: string): v is LibrarySection {
  */
 function ResearchLibraryPage() {
   const cases = useMemo(() => buildCaseStudies(), []);
+  /** Same product surface as Topics page — active monitors only (presentation list). */
+  const topicList = useMemo(
+    () =>
+      FEATURE_TOPICS.filter(
+        (t) => Object.prototype.hasOwnProperty.call(LIVE_TOPIC_KEYS, t.id) && !isArchivedTopicId(t.id),
+      ),
+    [],
+  );
+  const archivedTopicList = useMemo(
+    () =>
+      FEATURE_TOPICS.filter(
+        (t) => Object.prototype.hasOwnProperty.call(LIVE_TOPIC_KEYS, t.id) && isArchivedTopicId(t.id),
+      ),
+    [],
+  );
   const [shared, setShared] = useState<SharedItem[]>([]);
   const [activeSec, setActiveSec] = useState<LibrarySection>("topics");
   const activeTopics = activeLiveTopicCount();
@@ -330,35 +352,32 @@ function ResearchLibraryPage() {
                 id="h-topics"
                 icon={<Layers className="w-4 h-4" />}
                 title="Topic analyses"
-                sub="Live citizen discourse on X vs official and media frames."
+                sub="Live citizen discourse on X vs official and media frames. Open any card for the full briefing."
                 tone="cyan"
                 metric={`${activeTopics} active`}
               />
-              <div className="rounded-xl border border-border/80 bg-card/50 p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-                <div className="min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.14em] text-cyan px-2 py-0.5 rounded-full border border-cyan/35 bg-cyan/10">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
-                      Live monitors
-                    </span>
-                    {archivedTopics > 0 && (
-                      <span className="text-[10px] font-mono text-muted-foreground">
-                        +{archivedTopics} archived
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[13px] text-muted-foreground leading-snug">
-                    Scores, narrative gaps, and full briefings per topic — open the Topics desk to
-                    browse all active analyses.
-                  </p>
-                </div>
-                <Link
-                  to="/topics"
-                  className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] font-semibold shrink-0 touch-manipulation"
-                >
-                  Browse topics <ArrowRight className="w-4 h-4" />
-                </Link>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+                {topicList.map((t, i) => (
+                  <TopicLibraryCard key={t.id} topic={t} delay={i * 0.03} />
+                ))}
               </div>
+              {topicList.length === 0 && (
+                <p className="text-[13px] text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
+                  No active topic analyses listed yet.
+                </p>
+              )}
+              {archivedTopicList.length > 0 && (
+                <div className="pt-1 space-y-2.5">
+                  <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                    Archived · history only
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+                    {archivedTopicList.map((t, i) => (
+                      <TopicLibraryCard key={t.id} topic={t} delay={i * 0.03} archived />
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
           )}
 
@@ -678,6 +697,75 @@ function SectionHead({
         {metric}
       </span>
     </div>
+  );
+}
+
+function TopicLibraryCard({
+  topic,
+  delay,
+  archived = false,
+}: {
+  topic: (typeof FEATURE_TOPICS)[number];
+  delay: number;
+  archived?: boolean;
+}) {
+  const isNew = !archived && isNewTopicBadge(topic.id);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.3 }}
+      className="h-full"
+    >
+      <Link
+        to="/topics/$topicId"
+        params={{ topicId: topic.id }}
+        className={`group lib-case-card flex flex-col h-full min-h-[132px] rounded-2xl border p-3.5 sm:p-4 overflow-hidden transition-all touch-manipulation hover:-translate-y-0.5 ${
+          archived
+            ? "border-border/70 bg-card/40 opacity-90 hover:border-border"
+            : "border-cyan/30 bg-gradient-to-br from-cyan/[0.08] via-card/80 to-card/60 hover:border-cyan/55 hover:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.45)]"
+        }`}
+      >
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <span
+            className={`shrink-0 w-9 h-9 rounded-xl border grid place-items-center ${
+              archived
+                ? "border-border/70 bg-background/40 text-muted-foreground"
+                : "border-cyan/35 bg-cyan/10 text-cyan group-hover:scale-105 transition-transform"
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+          </span>
+          <div className="flex flex-wrap gap-1 justify-end">
+            {isNew && (
+              <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-cyan/40 bg-cyan/15 text-cyan">
+                New
+              </span>
+            )}
+            {archived && (
+              <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-border text-muted-foreground">
+                Archived
+              </span>
+            )}
+            {topic.region && (
+              <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-border/70 text-muted-foreground max-w-[9rem] truncate">
+                {topic.region}
+              </span>
+            )}
+          </div>
+        </div>
+        <h3 className="text-[13.5px] sm:text-[14px] font-display font-semibold leading-snug group-hover:text-cyan transition-colors break-words">
+          {topic.title}
+        </h3>
+        <p className="text-[12px] text-muted-foreground leading-snug mt-1.5 line-clamp-2 break-words flex-1">
+          {topic.description}
+        </p>
+        <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-cyan">
+          Open briefing
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
