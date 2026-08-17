@@ -94,8 +94,8 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
   },
   "cyprus-palestine-attention-asymmetry": {
     rootKey:
-      "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
-    headerLabel: "Cyprus vs Palestine · Attention",
+      "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
+    headerLabel: "Cyprus · Selective Outrage",
   },
   /** Archived — history only; still mapped for Topics archive section + snapshot reads */
   "maritime-ai-greece": {

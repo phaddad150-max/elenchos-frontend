@@ -35,7 +35,7 @@ export const CANONICAL_TOPICS = [
   "Commercial Space Race: SpaceX, Rivals & Public Trust",
   "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps",
   "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
-  "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+  "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   // History / archive keys (not live output — kept for normalize/legacy only)
   "Maritime AI Industry & Greece's Global Role",
   "fifa-world-cup-2026",
@@ -153,17 +153,23 @@ export const TOPIC_ALIASES: Record<string, string> = {
   "india gdp growth":
     "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
   "cyprus vs palestine":
-    "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   "cyprus palestine":
-    "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   "cyprus-palestine-attention-asymmetry":
-    "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   "selective solidarity cyprus":
-    "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
+  "selective outrage cyprus":
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   "cyprus attention asymmetry":
-    "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
+  "cyprus palestine selective outrage":
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
+  "cyprus, palestine & selective outrage: attention asymmetries in european public discourse":
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   "cyprus vs palestine: the attention asymmetry in european (and greek) public discourse":
-    "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
   "crime & safety": "Crime, Safety & Lawlessness",
   "crime and safety": "Crime, Safety & Lawlessness",
   "crime-safety-lawlessness": "Crime, Safety & Lawlessness",
