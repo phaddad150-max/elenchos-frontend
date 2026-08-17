@@ -4,7 +4,6 @@ import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
-  FilePenLine,
   FileText,
   Layers,
   Radio,
@@ -128,17 +127,31 @@ const TRACKERS = [
   },
 ] as const;
 
+type LibrarySection = "topics" | "cases" | "trackers";
+
+function isLibrarySection(v: string): v is LibrarySection {
+  return v === "topics" || v === "cases" || v === "trackers";
+}
+
 /**
- * Premium interactive Library — scannable in 2–5s, distinct section visuals.
+ * Premium interactive Library — one section at a time via Jump in.
  */
 function ResearchLibraryPage() {
   const cases = useMemo(() => buildCaseStudies(), []);
   const [shared, setShared] = useState<SharedItem[]>([]);
-  const [activeSec, setActiveSec] = useState<"topics" | "cases" | "trackers">("topics");
+  const [activeSec, setActiveSec] = useState<LibrarySection>("topics");
   const activeTopics = activeLiveTopicCount();
   const archivedTopics = archivedLiveTopicCount();
   const caseCount = cases.length + shared.length;
   const trackerCount = TRACKERS.length;
+
+  const selectSection = (id: LibrarySection) => {
+    setActiveSec(id);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.hash = id;
+    window.history.replaceState(null, "", `${url.pathname}${url.search}#${id}`);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -155,50 +168,27 @@ function ResearchLibraryPage() {
     };
   }, []);
 
+  // Deep-link: #topics | #cases | #trackers (also legacy #lib-*)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const ids = ["lib-topics", "lib-cases", "lib-trackers"] as const;
-    const map: Record<string, "topics" | "cases" | "trackers"> = {
-      "lib-topics": "topics",
-      "lib-cases": "cases",
-      "lib-trackers": "trackers",
-    };
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const hit = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (hit?.target?.id && map[hit.target.id]) {
-          setActiveSec(map[hit.target.id]!);
-        }
-      },
-      { rootMargin: "-25% 0px -45% 0px", threshold: [0.15, 0.4] },
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) obs.observe(el);
-    });
-    return () => obs.disconnect();
-  }, []);
+    const raw = window.location.hash.replace(/^#/, "").replace(/^lib-/, "");
+    if (isLibrarySection(raw)) setActiveSec(raw);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const h = window.location.hash.replace("#", "");
-    if (h === "cases" || h === "trackers" || h === "topics") {
-      requestAnimationFrame(() => {
-        document.getElementById(`lib-${h}`)?.scrollIntoView({ behavior: "smooth" });
-      });
-    }
+    const onHash = () => {
+      const h = window.location.hash.replace(/^#/, "").replace(/^lib-/, "");
+      if (isLibrarySection(h)) setActiveSec(h);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
   const portals = [
     {
       id: "topics" as const,
-      href: "#lib-topics",
       title: "Topic analyses",
       kicker: "On X",
       blurb: "Citizen voices vs official frames — live scores & briefings.",
-      cta: "Explore topics",
+      cta: "Show topics",
       icon: Layers,
       count: activeTopics,
       countLabel: "active",
@@ -207,11 +197,10 @@ function ResearchLibraryPage() {
     },
     {
       id: "cases" as const,
-      href: "#lib-cases",
       title: "Case studies",
       kicker: "Deep dives",
       blurb: "Multi-source thesis briefs with claims you can check.",
-      cta: "Browse cases",
+      cta: "Show cases",
       icon: FileText,
       count: caseCount,
       countLabel: "published",
@@ -220,11 +209,10 @@ function ResearchLibraryPage() {
     },
     {
       id: "trackers" as const,
-      href: "#lib-trackers",
       title: "Trackers",
       kicker: "Indexes",
       blurb: "Leaders, peace, and Networks Ledger branches.",
-      cta: "Open trackers",
+      cta: "Show trackers",
       icon: Trophy,
       count: trackerCount,
       countLabel: "surfaces",
@@ -238,7 +226,7 @@ function ResearchLibraryPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip space-y-7 sm:space-y-9">
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip space-y-5 sm:space-y-7">
         <ResearchBreadcrumb trail={[{ label: "Library" }]} />
         <ResearchDeskNav />
 
@@ -256,8 +244,8 @@ function ResearchLibraryPage() {
                   Three free ways into Elenchos
                 </h1>
                 <p className="text-[13px] sm:text-[14.5px] text-muted-foreground leading-relaxed">
-                  Topics on X · Case studies · Trackers. Pick a door below — or scroll the full
-                  catalog. No paywall on published work.
+                  Topics on X · Case studies · Trackers. Choose one below — only that collection
+                  opens. No paywall on published work.
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full lg:w-auto lg:min-w-[320px]">
@@ -267,6 +255,8 @@ function ResearchLibraryPage() {
                   sub={archivedTopics > 0 ? `${archivedTopics} archived` : "live"}
                   tone="cyan"
                   delay={0}
+                  active={activeSec === "topics"}
+                  onSelect={() => selectSection("topics")}
                 />
                 <StatTile
                   value={String(caseCount)}
@@ -274,6 +264,8 @@ function ResearchLibraryPage() {
                   sub="deep dives"
                   tone="emerald"
                   delay={0.05}
+                  active={activeSec === "cases"}
+                  onSelect={() => selectSection("cases")}
                 />
                 <StatTile
                   value={String(trackerCount)}
@@ -281,226 +273,175 @@ function ResearchLibraryPage() {
                   sub="indexes"
                   tone="amber"
                   delay={0.1}
+                  active={activeSec === "trackers"}
+                  onSelect={() => selectSection("trackers")}
                 />
               </div>
             </div>
           </div>
         </header>
 
-        {/* Interactive portal map — understand offer in 2–5s */}
-        <section aria-label="What you can open" className="space-y-3">
-          <div className="flex items-center gap-2 px-0.5">
-            <Zap className="w-3.5 h-3.5 text-cyan" aria-hidden />
-            <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              Jump in
+        {/* Jump in — selects which collection appears below (only one at a time) */}
+        <section aria-label="Choose a collection" className="space-y-3">
+          <div className="flex items-center justify-between gap-2 px-0.5 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-cyan" aria-hidden />
+              <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                Jump in
+              </p>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Showing{" "}
+              <span className="text-foreground/90 font-medium">
+                {activeSec === "topics"
+                  ? "Topic analyses"
+                  : activeSec === "cases"
+                    ? "Case studies"
+                    : "Trackers"}
+              </span>
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5">
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5"
+            role="tablist"
+            aria-label="Library collections"
+          >
             {portals.map((p, i) => (
               <PortalCard
                 key={p.id}
                 {...p}
                 delay={i * 0.06}
                 active={activeSec === p.id}
+                onSelect={() => selectSection(p.id)}
               />
             ))}
           </div>
         </section>
 
-        {/* Sticky section rail */}
-        <div className="sticky top-[6.75rem] z-10 -mx-0.5">
-          <div className="flex flex-wrap gap-1.5 p-1 rounded-xl border border-border/70 bg-background/85 backdrop-blur-md shadow-sm">
-            {(
-              [
-                { id: "topics", label: "Topics", href: "#lib-topics" },
-                { id: "cases", label: "Cases", href: "#lib-cases" },
-                { id: "trackers", label: "Trackers", href: "#lib-trackers" },
-              ] as const
-            ).map((t) => (
-              <a
-                key={t.id}
-                href={t.href}
-                className={`min-h-[40px] px-3.5 rounded-lg text-[12px] font-medium inline-flex items-center touch-manipulation transition-colors ${
-                  activeSec === t.id
-                    ? "bg-cyan/15 text-cyan border border-cyan/40"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-transparent"
-                }`}
-              >
-                {t.label}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* 1 · Topics */}
-        <section
-          id="lib-topics"
-          className="scroll-mt-36 lib-panel lib-panel-cyan rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
-          aria-labelledby="h-topics"
-        >
-          <SectionHead
-            id="h-topics"
-            icon={<Layers className="w-4 h-4" />}
-            title="Topic analyses"
-            sub="Live citizen discourse on X vs official and media frames."
-            tone="cyan"
-            metric={`${activeTopics} active`}
-          />
-          <motion.div
-            whileHover={{ y: -2 }}
-            className="group relative overflow-hidden rounded-2xl border border-cyan/35 bg-gradient-to-br from-cyan/[0.12] via-card/80 to-card/40 p-4 sm:p-5"
-          >
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[radial-gradient(ellipse_at_80%_0%,color-mix(in_oklab,var(--cyan)_20%,transparent),transparent_55%)]" />
-            <div className="relative flex flex-col lg:flex-row lg:items-center gap-5 lg:justify-between">
-              <div className="min-w-0 space-y-3 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.14em] text-cyan px-2 py-0.5 rounded-full border border-cyan/35 bg-cyan/10">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
-                    Live monitors
-                  </span>
-                  {archivedTopics > 0 && (
-                    <span className="text-[10px] font-mono text-muted-foreground">
-                      +{archivedTopics} archived
+        {/* Active collection only — no stacked sections, no extra CTA banners */}
+        <div className="min-w-0" role="tabpanel" aria-live="polite">
+          {activeSec === "topics" && (
+            <section
+              id="lib-topics"
+              className="lib-panel lib-panel-cyan rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+              aria-labelledby="h-topics"
+            >
+              <SectionHead
+                id="h-topics"
+                icon={<Layers className="w-4 h-4" />}
+                title="Topic analyses"
+                sub="Live citizen discourse on X vs official and media frames."
+                tone="cyan"
+                metric={`${activeTopics} active`}
+              />
+              <div className="rounded-xl border border-border/80 bg-card/50 p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.14em] text-cyan px-2 py-0.5 rounded-full border border-cyan/35 bg-cyan/10">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
+                      Live monitors
                     </span>
-                  )}
+                    {archivedTopics > 0 && (
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        +{archivedTopics} archived
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[13px] text-muted-foreground leading-snug">
+                    Scores, narrative gaps, and full briefings per topic — open the Topics desk to
+                    browse all active analyses.
+                  </p>
                 </div>
-                <h3 className="text-[1.1rem] sm:text-xl font-display font-semibold text-foreground group-hover:text-cyan transition-colors">
-                  Open the Topics desk
-                </h3>
-                <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xl">
-                  Scores, narrative gaps, and full briefings per topic — the main public discourse
-                  product, linked here so the Library stays the free catalog home.
-                </p>
-                {/* Mini density viz */}
-                <div className="flex items-end gap-1 h-10 max-w-xs" aria-hidden>
-                  {Array.from({ length: Math.min(activeTopics, 16) }).map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="flex-1 rounded-sm bg-cyan/70 min-w-[6px]"
-                      initial={{ height: 8 }}
-                      whileInView={{ height: 12 + ((i * 17) % 28) }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.03, duration: 0.4 }}
-                    />
-                  ))}
-                </div>
+                <Link
+                  to="/topics"
+                  className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full text-[13px] font-semibold shrink-0 touch-manipulation"
+                >
+                  Browse topics <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
-              <Link
-                to="/topics"
-                className="btn-intel-primary relative inline-flex items-center justify-center gap-1.5 min-h-[48px] px-6 rounded-full text-[13px] font-semibold shrink-0 touch-manipulation"
-              >
-                Go to Topics <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* 2 · Cases */}
-        <section
-          id="lib-cases"
-          className="scroll-mt-36 lib-panel lib-panel-emerald rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
-          aria-labelledby="h-cases"
-        >
-          <SectionHead
-            id="h-cases"
-            icon={<FileText className="w-4 h-4" />}
-            title="Case studies"
-            sub="Multi-source deep dives with claims and limits you can check."
-            tone="emerald"
-            metric={`${cases.length} listed`}
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {cases.map((c, i) => (
-              <CaseCard key={c.id} item={c} delay={i * 0.04} index={i} />
-            ))}
-          </div>
-          {cases.length === 0 && (
-            <p className="text-[13px] text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
-              No case studies published yet.
-            </p>
+            </section>
           )}
-          {shared.length > 0 && (
-            <div className="pt-1 space-y-2.5">
-              <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5" /> Community shared
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                {shared.map((s) => (
-                  <Link
-                    key={s.token}
-                    to="/research/report/$token"
-                    params={{ token: s.token }}
-                    className="lib-case-card group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-emerald-signal/45 p-3.5 transition-all"
-                  >
-                    <span className="w-10 h-10 shrink-0 rounded-xl border border-emerald-signal/30 bg-emerald-signal/10 text-emerald-signal grid place-items-center">
-                      <Share2 className="w-4 h-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-mono text-muted-foreground">
-                        Shared · {s.packageId}
-                      </p>
-                      <h3 className="text-[14px] font-display font-semibold group-hover:text-emerald-signal break-words">
-                        {s.title}
-                      </h3>
-                      <p className="text-[12px] text-muted-foreground line-clamp-1">{s.topic}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1 group-hover:text-emerald-signal group-hover:translate-x-0.5 transition-all" />
-                  </Link>
+
+          {activeSec === "cases" && (
+            <section
+              id="lib-cases"
+              className="lib-panel lib-panel-emerald rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+              aria-labelledby="h-cases"
+            >
+              <SectionHead
+                id="h-cases"
+                icon={<FileText className="w-4 h-4" />}
+                title="Case studies"
+                sub="Multi-source deep dives with claims and limits you can check."
+                tone="emerald"
+                metric={`${cases.length} listed`}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {cases.map((c, i) => (
+                  <CaseCard key={c.id} item={c} delay={i * 0.04} index={i} />
                 ))}
               </div>
-            </div>
+              {cases.length === 0 && (
+                <p className="text-[13px] text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
+                  No case studies published yet.
+                </p>
+              )}
+              {shared.length > 0 && (
+                <div className="pt-1 space-y-2.5">
+                  <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                    <Share2 className="w-3.5 h-3.5" /> Community shared
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {shared.map((s) => (
+                      <Link
+                        key={s.token}
+                        to="/research/report/$token"
+                        params={{ token: s.token }}
+                        className="lib-case-card group flex gap-3 rounded-2xl border border-border/80 bg-card/50 hover:border-emerald-signal/45 p-3.5 transition-all"
+                      >
+                        <span className="w-10 h-10 shrink-0 rounded-xl border border-emerald-signal/30 bg-emerald-signal/10 text-emerald-signal grid place-items-center">
+                          <Share2 className="w-4 h-4" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-mono text-muted-foreground">
+                            Shared · {s.packageId}
+                          </p>
+                          <h3 className="text-[14px] font-display font-semibold group-hover:text-emerald-signal break-words">
+                            {s.title}
+                          </h3>
+                          <p className="text-[12px] text-muted-foreground line-clamp-1">{s.topic}</p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1 group-hover:text-emerald-signal group-hover:translate-x-0.5 transition-all" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
           )}
-        </section>
 
-        {/* 3 · Trackers */}
-        <section
-          id="lib-trackers"
-          className="scroll-mt-36 lib-panel lib-panel-amber rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
-          aria-labelledby="h-trackers"
-        >
-          <SectionHead
-            id="h-trackers"
-            icon={<Trophy className="w-4 h-4" />}
-            title="Trackers & indexes"
-            sub="Citizen rankings and the Networks Ledger (Terror & Finance + Speech Reach)."
-            tone="amber"
-            metric={`${trackerCount} surfaces`}
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {TRACKERS.map((t, i) => (
-              <ToolCard key={t.href} {...t} delay={i * 0.05} />
-            ))}
-          </div>
-        </section>
-
-        {/* Commission CTA */}
-        <motion.section
-          whileHover={{ scale: 1.005 }}
-          className="relative overflow-hidden rounded-2xl border border-cyan/40 bg-gradient-to-r from-cyan/[0.12] via-card/80 to-violet-500/[0.08] px-4 py-5 sm:px-6 sm:py-6"
-        >
-          <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-cyan/15 blur-3xl pointer-events-none" />
-          <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-            <div className="min-w-0 flex gap-3 items-start">
-              <span className="w-11 h-11 shrink-0 rounded-xl border border-cyan/40 bg-cyan/15 text-cyan grid place-items-center">
-                <FilePenLine className="w-5 h-5" />
-              </span>
-              <div>
-                <p className="text-[15px] font-display font-semibold text-foreground">
-                  Need a private brief on your own question?
-                </p>
-                <p className="text-[12.5px] text-muted-foreground mt-0.5">
-                  Fixed price · unique link + PDF · typically minutes after pay.
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/research/commission"
-              className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[48px] px-5 rounded-full text-[13px] font-semibold touch-manipulation shrink-0"
+          {activeSec === "trackers" && (
+            <section
+              id="lib-trackers"
+              className="lib-panel lib-panel-amber rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+              aria-labelledby="h-trackers"
             >
-              Commission · $10 / $20 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </motion.section>
+              <SectionHead
+                id="h-trackers"
+                icon={<Trophy className="w-4 h-4" />}
+                title="Trackers & indexes"
+                sub="Citizen rankings and the Networks Ledger (Terror & Finance + Speech Reach)."
+                tone="amber"
+                metric={`${trackerCount} surfaces`}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {TRACKERS.map((t, i) => (
+                  <ToolCard key={t.href} {...t} delay={i * 0.05} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       </main>
 
       <SiteFooter />
@@ -514,25 +455,38 @@ function StatTile({
   sub,
   tone,
   delay,
+  active,
+  onSelect,
 }: {
   value: string;
   label: string;
   sub: string;
   tone: "cyan" | "emerald" | "amber";
   delay: number;
+  active?: boolean;
+  onSelect?: () => void;
 }) {
   const toneCls =
     tone === "emerald"
-      ? "border-emerald-signal/35 text-emerald-signal"
+      ? active
+        ? "border-emerald-signal/55 text-emerald-signal bg-emerald-signal/10 ring-1 ring-emerald-signal/25"
+        : "border-emerald-signal/35 text-emerald-signal"
       : tone === "amber"
-        ? "border-amber-signal/35 text-amber-signal"
-        : "border-cyan/35 text-cyan";
+        ? active
+          ? "border-amber-signal/55 text-amber-signal bg-amber-signal/10 ring-1 ring-amber-signal/25"
+          : "border-amber-signal/35 text-amber-signal"
+        : active
+          ? "border-cyan/55 text-cyan bg-cyan/10 ring-1 ring-cyan/25"
+          : "border-cyan/35 text-cyan";
   return (
-    <motion.div
+    <motion.button
+      type="button"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.35 }}
-      className={`rounded-xl border bg-background/50 px-2.5 py-2.5 sm:px-3 sm:py-3 text-center ${toneCls}`}
+      onClick={onSelect}
+      aria-pressed={active}
+      className={`rounded-xl border bg-background/50 px-2.5 py-2.5 sm:px-3 sm:py-3 text-center w-full min-h-[44px] touch-manipulation transition-colors hover:bg-background/80 ${toneCls}`}
     >
       <p className="text-xl sm:text-2xl font-display font-semibold tabular-nums leading-none">
         {value}
@@ -541,12 +495,11 @@ function StatTile({
         {label}
       </p>
       <p className="text-[10px] text-muted-foreground/80 mt-0.5">{sub}</p>
-    </motion.div>
+    </motion.button>
   );
 }
 
 function PortalCard({
-  href,
   title,
   kicker,
   blurb,
@@ -558,8 +511,8 @@ function PortalCard({
   bars,
   delay,
   active,
+  onSelect,
 }: {
-  href: string;
   title: string;
   kicker: string;
   blurb: string;
@@ -571,6 +524,7 @@ function PortalCard({
   bars: number[];
   delay: number;
   active: boolean;
+  onSelect: () => void;
 }) {
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -585,14 +539,14 @@ function PortalCard({
   const border =
     tone === "emerald"
       ? active
-        ? "border-emerald-signal/55 ring-1 ring-emerald-signal/30"
+        ? "border-emerald-signal/55 ring-1 ring-emerald-signal/30 bg-emerald-signal/[0.06]"
         : "border-emerald-signal/30 hover:border-emerald-signal/55"
       : tone === "amber"
         ? active
-          ? "border-amber-signal/55 ring-1 ring-amber-signal/30"
+          ? "border-amber-signal/55 ring-1 ring-amber-signal/30 bg-amber-signal/[0.06]"
           : "border-amber-signal/30 hover:border-amber-signal/55"
         : active
-          ? "border-cyan/55 ring-1 ring-cyan/35"
+          ? "border-cyan/55 ring-1 ring-cyan/35 bg-cyan/[0.06]"
           : "border-cyan/30 hover:border-cyan/55";
 
   const iconTone =
@@ -609,19 +563,30 @@ function PortalCard({
         ? "bg-amber-signal"
         : "bg-cyan";
 
+  const ctaTone =
+    tone === "emerald"
+      ? "text-emerald-signal"
+      : tone === "amber"
+        ? "text-amber-signal"
+        : "text-cyan";
+
   return (
-    <motion.a
-      href={href}
+    <motion.button
+      type="button"
+      role="tab"
+      aria-selected={active}
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={onSelect}
       onMouseMove={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         mx.set(e.clientX - r.left);
         my.set(e.clientY - r.top);
       }}
-      className={`lib-portal group relative flex flex-col h-full min-h-[200px] rounded-2xl border bg-card/70 p-4 sm:p-5 overflow-hidden transition-shadow touch-manipulation ${border} hover:shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]`}
+      className={`lib-portal group relative flex flex-col h-full min-h-[180px] sm:min-h-[200px] rounded-2xl border bg-card/70 p-4 sm:p-5 overflow-hidden transition-shadow touch-manipulation text-left w-full cursor-pointer ${border} hover:shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]`}
     >
       <motion.div
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -645,7 +610,7 @@ function PortalCard({
       <p className="relative text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
         {kicker}
       </p>
-      <h2 className="relative text-[1.1rem] font-display font-semibold text-foreground mt-0.5 group-hover:text-cyan transition-colors">
+      <h2 className="relative text-[1.1rem] font-display font-semibold text-foreground mt-0.5">
         {title}
       </h2>
       <p className="relative text-[12.5px] text-muted-foreground leading-snug mt-1.5 flex-1">
@@ -660,11 +625,15 @@ function PortalCard({
           />
         ))}
       </div>
-      <span className="relative mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">
-        {cta}
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      <span
+        className={`relative mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold ${ctaTone}`}
+      >
+        {active ? "Viewing" : cta}
+        <ArrowRight
+          className={`w-4 h-4 transition-transform ${active ? "" : "group-hover:translate-x-1"}`}
+        />
       </span>
-    </motion.a>
+    </motion.button>
   );
 }
 
