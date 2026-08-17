@@ -26,6 +26,7 @@ import {
   Sparkles,
   ArrowRight,
   FilePenLine,
+  Trophy,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { CitizenSignalModal } from "@/components/CitizenSignalModal";
@@ -288,7 +289,7 @@ function Dashboard() {
           leadersRanked: leaders.length || undefined,
           countriesMonitored: peaceCountries.length || undefined,
         });
-        setTopLeaders(leaders.slice(0, 3));
+        setTopLeaders(leaders.slice(0, 5));
       }
       setDashReady(true);
     })();
@@ -672,18 +673,9 @@ function Dashboard() {
           />
         </motion.div>
 
-        {/* Insight previews of Library reports + live trackers (published layer, not live X feed) */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-4 min-w-0"
-        >
-          <div className="lg:col-span-6 min-w-0">
-            <PublishedCasesPanel />
-          </div>
-          <div className="lg:col-span-6 min-w-0">
-            <LeadershipBoardPreview leaders={topLeaders} rankedTotal={trackerKpis.leadersRanked} />
-          </div>
+        {/* Focused live tracker preview — Leadership board only (Library published panel removed) */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
+          <LeadershipBoardPreview leaders={topLeaders} rankedTotal={trackerKpis.leadersRanked} />
         </motion.div>
 
         {/* Contextual actions — end of page only, not mid-page marketing banners */}
@@ -1332,9 +1324,7 @@ function splitSummaryIntoPoints(text: string): string[] {
   return sentences.map((s) => s.trim()).filter((s) => s.length > 0);
 }
 
-/**
- * Compact collapsible sample structure — gaps + movers only, no essay wall.
- */
+/** Compact always-open sample structure — visual gaps + movers, no essay wall. */
 function SampleStructureModules({
   overview,
   snapshots,
@@ -1344,7 +1334,6 @@ function SampleStructureModules({
   signals?: FeedCitizenSignal[];
   overview: DashboardOverview | null;
 }) {
-  const [open, setOpen] = useState(false);
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const avgDiv =
     typeof overview?.kpis?.average_narrative_divergence === "number"
@@ -1376,7 +1365,7 @@ function SampleStructureModules({
       }
       return Array.from(byTopic.values())
         .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+        .slice(0, 4);
     }
     if (!snapshots) return [] as Gap[];
     return Object.values(snapshots)
@@ -1392,7 +1381,7 @@ function SampleStructureModules({
               : null,
       }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
+      .slice(0, 4);
   }, [signals, snapshots]);
 
   const movers = useMemo(() => {
@@ -1415,205 +1404,114 @@ function SampleStructureModules({
     return { rising, falling };
   }, [signals]);
 
-  const summaryChip =
-    gaps.length > 0
-      ? `Top gap ${gaps[0]!.score} · ${gaps[0]!.topic.split(/[:/]/)[0]!.trim().slice(0, 28)}`
-      : avgDiv != null
-        ? `Avg gap ${avgDiv}`
-        : "No structure yet";
-
   return (
-    <section className="rounded-xl border border-border/80 bg-card/30 overflow-hidden min-w-0">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="w-full flex items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-3.5 min-h-[48px] text-left touch-manipulation hover:bg-cyan/[0.04] transition-colors"
-      >
-        <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 text-cyan shrink-0">
-          <Brain className="w-3.5 h-3.5" />
-        </span>
-        <span className="flex-1 min-w-0">
-          <span className="flex items-center gap-2 flex-wrap">
-            <span className="text-[13px] font-medium text-foreground/95">This sample · structure</span>
-            {avgDiv != null && (
-              <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/10">
-                avg {avgDiv}
-              </span>
-            )}
+    <section className="dash-panel p-2.5 sm:p-3.5 min-w-0">
+      <div className="flex items-center justify-between gap-2 mb-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 text-cyan shrink-0">
+            <Brain className="w-3.5 h-3.5" />
           </span>
-          {!open && (
-            <span className="block text-[11px] text-muted-foreground truncate mt-0.5">{summaryChip}</span>
-          )}
-        </span>
-        {lastUpdated && (
-          <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground shrink-0" suppressHydrationWarning>
-            {timeAgo(lastUpdated)}
-          </span>
-        )}
-        <ChevronDown
-          className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="px-3 pb-3 sm:px-3.5 sm:pb-3.5 pt-0 border-t border-border/60">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 min-w-0">
-                <div className="min-w-0">
-                  <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan mb-1.5">
-                    Strongest gaps
-                  </p>
-                  {gaps.length === 0 ? (
-                    <p className="text-[11.5px] text-muted-foreground">No divergence in this sample.</p>
-                  ) : (
-                    <ul className="space-y-1">
-                      {gaps.map((g) => (
-                        <li key={g.topic} className="flex items-center gap-2 min-w-0">
-                          <span className="text-[13px] font-display font-semibold tabular-nums text-cyan w-8 shrink-0">
-                            {g.score}
-                          </span>
-                          <span className="h-1.5 flex-1 max-w-[4.5rem] rounded-full bg-border overflow-hidden shrink-0">
-                            <motion.span
-                              className="block h-full rounded-full bg-cyan"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(100, g.score)}%` }}
-                              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                            />
-                          </span>
-                          <span className="text-[11.5px] truncate text-foreground/90 min-w-0 flex-1">
-                            {g.topic}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <div className="min-w-0 grid grid-cols-2 gap-2">
-                  <div className="rounded-lg border border-emerald-signal/25 bg-emerald-signal/[0.05] p-2 min-w-0">
-                    <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-emerald-signal flex items-center gap-0.5 mb-1">
-                      <ArrowUpRight className="w-3 h-3" /> Up
-                    </p>
-                    {movers.rising.length === 0 ? (
-                      <p className="text-[10.5px] text-muted-foreground">—</p>
-                    ) : (
-                      movers.rising.map((r) => (
-                        <p key={r.topic} className="text-[11px] leading-snug line-clamp-2">
-                          <span className="font-mono text-emerald-signal tabular-nums">+{r.delta}</span>{" "}
-                          <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
-                        </p>
-                      ))
-                    )}
-                  </div>
-                  <div className="rounded-lg border border-rose-signal/25 bg-rose-signal/[0.05] p-2 min-w-0">
-                    <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-rose-signal flex items-center gap-0.5 mb-1">
-                      <ArrowDownRight className="w-3 h-3" /> Down
-                    </p>
-                    {movers.falling.length === 0 ? (
-                      <p className="text-[10.5px] text-muted-foreground">—</p>
-                    ) : (
-                      movers.falling.map((r) => (
-                        <p key={r.topic} className="text-[11px] leading-snug line-clamp-2">
-                          <span className="font-mono text-rose-signal tabular-nums">{r.delta}</span>{" "}
-                          <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
-                        </p>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-}
-
-/** Migration brief sneak peek — single focused, animated published intelligence card. */
-function PublishedCasesPanel() {
-  const brief = MIGRATION_SNEAK_PEEK;
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setActive((i) => (i + 1) % brief.highlights.length);
-    }, 4200);
-    return () => window.clearInterval(id);
-  }, [brief.highlights.length]);
-
-  return (
-    <section className="dash-panel p-3 sm:p-4 h-full min-w-0 flex flex-col overflow-hidden relative">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_0%_0%,color-mix(in_oklab,var(--emerald-signal)_12%,transparent),transparent_55%)]" />
-      <div className="relative flex items-start justify-between gap-2 mb-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap mb-1">
-            <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-emerald-signal/40 text-emerald-signal bg-emerald-signal/10">
-              Published · Case study
-            </span>
-            <span className="text-[10px] font-mono text-muted-foreground">{brief.region}</span>
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium text-foreground/95 leading-tight">
+              This sample · structure
+            </p>
+            <p className="text-[10px] font-mono text-muted-foreground truncate">
+              Live signal gaps & movers
+            </p>
           </div>
-          <h2 className="text-[15px] sm:text-base font-display font-semibold text-foreground/95 leading-snug">
-            {brief.title}
-          </h2>
-          <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{brief.teaser}</p>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {avgDiv != null && (
+            <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/10">
+              avg {avgDiv}
+            </span>
+          )}
+          {lastUpdated && (
+            <span className="hidden xs:inline sm:inline text-[10px] font-mono text-muted-foreground" suppressHydrationWarning>
+              {timeAgo(lastUpdated)}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-[7.5rem] sm:min-h-[8.5rem]">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 rounded-xl border border-emerald-signal/25 bg-emerald-signal/[0.06] p-3 sm:p-3.5 flex flex-col"
-          >
-            <span className="text-[9px] font-mono uppercase tracking-[0.14em] text-emerald-signal mb-1.5">
-              Insight {String(active + 1).padStart(2, "0")} / {String(brief.highlights.length).padStart(2, "0")}
-            </span>
-            <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-foreground/95 flex-1">
-              {brief.highlights[active]}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 min-w-0">
+        <div className="sm:col-span-7 min-w-0 space-y-1">
+          <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan">Strongest gaps</p>
+          {gaps.length === 0 ? (
+            <p className="text-[11.5px] text-muted-foreground py-1">No divergence scores yet.</p>
+          ) : (
+            gaps.map((g, i) => (
+              <div key={g.topic} className="flex items-center gap-2 min-w-0 py-0.5">
+                <span className="text-[12px] sm:text-[13px] font-display font-semibold tabular-nums text-cyan w-7 shrink-0">
+                  {g.score}
+                </span>
+                <div className="flex-1 min-w-0 h-2 rounded-full bg-secondary overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{
+                      background: "linear-gradient(90deg, #FFAB00, #FF5722, #FF1744)",
+                    }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, g.score)}%` }}
+                    transition={{ duration: 0.65, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                </div>
+                <span className="text-[11px] sm:text-[11.5px] truncate text-foreground/90 max-w-[42%] sm:max-w-[48%]">
+                  {g.topic}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="sm:col-span-5 min-w-0 grid grid-cols-2 gap-1.5 sm:gap-2">
+          <div className="rounded-lg border border-[#00C853]/30 bg-[#00C853]/[0.06] p-2 min-w-0">
+            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#00C853] flex items-center gap-0.5 mb-1">
+              <ArrowUpRight className="w-3 h-3" /> Rising
             </p>
-          </motion.div>
-        </AnimatePresence>
+            {movers.rising.length === 0 ? (
+              <p className="text-[10.5px] text-muted-foreground">—</p>
+            ) : (
+              movers.rising.map((r) => (
+                <p key={r.topic} className="text-[11px] leading-snug line-clamp-2 mb-0.5">
+                  <span className="font-mono text-[#00C853] tabular-nums">+{r.delta}</span>{" "}
+                  <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
+                </p>
+              ))
+            )}
+          </div>
+          <div className="rounded-lg border border-[#FF1744]/30 bg-[#FF1744]/[0.06] p-2 min-w-0">
+            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#FF1744] flex items-center gap-0.5 mb-1">
+              <ArrowDownRight className="w-3 h-3" /> Falling
+            </p>
+            {movers.falling.length === 0 ? (
+              <p className="text-[10.5px] text-muted-foreground">—</p>
+            ) : (
+              movers.falling.map((r) => (
+                <p key={r.topic} className="text-[11px] leading-snug line-clamp-2 mb-0.5">
+                  <span className="font-mono text-[#FF1744] tabular-nums">{r.delta}</span>{" "}
+                  <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
+                </p>
+              ))
+            )}
+          </div>
+        </div>
       </div>
-
-      <div className="relative flex items-center gap-1.5 mt-3">
-        {brief.highlights.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Show insight ${i + 1}`}
-            onClick={() => setActive(i)}
-            className={`h-1.5 rounded-full transition-all touch-manipulation min-h-[12px] ${
-              i === active ? "w-6 bg-emerald-signal" : "w-1.5 bg-border hover:bg-emerald-signal/50"
-            }`}
-          />
-        ))}
-      </div>
-
-      <a
-        href={brief.href}
-        className="relative mt-3 group inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-emerald-signal/40 bg-emerald-signal/10 hover:bg-emerald-signal/18 text-emerald-signal text-[12.5px] font-semibold touch-manipulation transition-colors"
-      >
-        Open full migration brief
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-      </a>
     </section>
   );
 }
 
+/** Score colors aligned with Leadership board / trackers.index */
+function leaderScoreHex(s?: number | null): string {
+  if (s == null || Number.isNaN(s)) return "#6B7280";
+  if (s >= 80) return "#00C853";
+  if (s >= 65) return "#64DD17";
+  if (s >= 50) return "#FFAB00";
+  if (s >= 35) return "#FF5722";
+  return "#FF1744";
+}
+
 /**
- * Leadership board — top 3 only, podium + auto-rotate focus, interactive.
+ * Leadership board preview — top 5, tracker-theme gold ranks + score bars, interactive.
  */
 function LeadershipBoardPreview({
   leaders,
@@ -1622,184 +1520,173 @@ function LeadershipBoardPreview({
   leaders: RankedLeader[];
   rankedTotal?: number;
 }) {
-  const top3 = leaders.slice(0, 3);
+  const top = leaders.slice(0, 5);
   const [focus, setFocus] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (top3.length < 2) return;
+    if (top.length < 2 || paused) return;
     const id = window.setInterval(() => {
-      setFocus((i) => (i + 1) % top3.length);
-    }, 3200);
+      setFocus((i) => (i + 1) % top.length);
+    }, 2800);
     return () => window.clearInterval(id);
-  }, [top3.length]);
+  }, [top.length, paused]);
 
-  // Podium visual order: 2nd, 1st, 3rd
-  const podiumOrder =
-    top3.length >= 3
-      ? [top3[1]!, top3[0]!, top3[2]!]
-      : top3.length === 2
-        ? [top3[1]!, top3[0]!]
-        : top3;
-
-  const podiumHeights = top3.length >= 3 ? [58, 88, 46] : top3.length === 2 ? [58, 88] : [88];
-  const focused = top3[focus];
+  const focused = top[focus];
   const maxScore = Math.max(
-    ...top3.map((l) => (typeof l.overall_score === "number" ? l.overall_score : 0)),
+    ...top.map((l) => (typeof l.overall_score === "number" ? l.overall_score : 0)),
     1,
   );
 
   return (
-    <section className="dash-panel p-3 sm:p-4 h-full min-w-0 flex flex-col overflow-hidden relative">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_100%_0%,color-mix(in_oklab,var(--cyan)_14%,transparent),transparent_55%)]" />
-      <div className="relative flex items-start justify-between gap-2 mb-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap mb-1">
-            <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-cyan/40 text-cyan bg-cyan/10">
-              Tracker · Live
-            </span>
-            {typeof rankedTotal === "number" && (
-              <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
-                {rankedTotal} ranked
-              </span>
-            )}
-          </div>
-          <h2 className="text-[15px] sm:text-base font-display font-semibold text-foreground/95">
-            Leadership board
-          </h2>
-          <p className="text-[12px] text-muted-foreground mt-0.5">Top 3 · citizen trust</p>
-        </div>
-        <Link
-          to="/trackers/leaders"
-          className="shrink-0 text-[11px] font-mono text-cyan hover:underline inline-flex items-center gap-0.5 min-h-[36px] touch-manipulation"
-        >
-          Full board
-          <ArrowRight className="w-3 h-3" />
-        </Link>
-      </div>
+    <section
+      className="tracker-card relative rounded-2xl border border-border/60 overflow-hidden min-w-0"
+      style={{
+        background:
+          "linear-gradient(165deg, color-mix(in oklab, var(--card) 92%, #FFAB00 8%) 0%, var(--card) 45%, color-mix(in oklab, var(--card) 94%, var(--cyan) 4%) 100%)",
+        boxShadow: "0 20px 48px -28px rgba(255, 171, 0, 0.28), 0 0 0 1px color-mix(in oklab, #FFAB00 12%, transparent)",
+      }}
+    >
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_10%_0%,rgba(255,213,79,0.14),transparent_50%),radial-gradient(ellipse_at_90%_20%,color-mix(in_oklab,var(--cyan)_10%,transparent),transparent_45%)]" />
 
-      {top3.length === 0 ? (
-        <p className="relative text-[12px] text-muted-foreground py-8 text-center">Loading leaders…</p>
-      ) : (
-        <>
-          {/* Interactive podium */}
-          <div className="relative flex items-end justify-center gap-2 sm:gap-3 min-h-[120px] sm:min-h-[132px] px-1 pt-2">
-            {podiumOrder.map((l, visualIdx) => {
-              const rank = l.rank ?? (top3.indexOf(l) + 1);
-              const score = typeof l.overall_score === "number" ? l.overall_score : 0;
-              const h = podiumHeights[visualIdx] ?? 50;
-              const isFocus = top3[focus] === l;
-              const realIdx = top3.indexOf(l);
+      <div className="relative p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-3.5">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-1">
+              <Trophy className="w-3.5 h-3.5" />
+              Live leaderboard
+            </div>
+            <h2 className="text-[1.05rem] sm:text-xl font-display font-semibold leading-tight">
+              Leadership board{" "}
+              <span className="text-cyan">by citizens</span>
+            </h2>
+            <p className="text-[11.5px] sm:text-[12px] text-muted-foreground mt-0.5">
+              Top {top.length || 5}
+              {typeof rankedTotal === "number" ? ` of ${rankedTotal}` : ""} · trust scores
+            </p>
+          </div>
+          <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.16em] inline-flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" /> Live
+          </span>
+        </div>
+
+        {top.length === 0 ? (
+          <p className="text-[12px] text-muted-foreground py-6 text-center">Loading leaders…</p>
+        ) : (
+          <ul
+            className="space-y-1.5 sm:space-y-2"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onTouchStart={() => setPaused(true)}
+          >
+            {top.map((l, i) => {
+              const rank = l.rank ?? i + 1;
+              const score = typeof l.overall_score === "number" ? l.overall_score : null;
+              const hex = leaderScoreHex(score);
+              const isFocus = i === focus;
+              const barPct = score != null ? Math.min(100, (score / maxScore) * 100) : 0;
               return (
-                <button
-                  key={l.name}
-                  type="button"
-                  onClick={() => setFocus(realIdx >= 0 ? realIdx : 0)}
-                  className={`flex-1 max-w-[7.5rem] flex flex-col items-center gap-1.5 touch-manipulation transition-transform ${
-                    isFocus ? "scale-105 z-10" : "opacity-80 hover:opacity-100"
-                  }`}
-                >
-                  <motion.span
-                    className="text-lg leading-none"
-                    animate={isFocus ? { y: [0, -3, 0] } : { y: 0 }}
-                    transition={{ duration: 1.6, repeat: isFocus ? Infinity : 0, ease: "easeInOut" }}
-                  >
-                    {l.flag ?? "🏳️"}
-                  </motion.span>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-center line-clamp-2 leading-tight px-0.5 min-h-[2rem]">
-                    {l.name}
-                  </span>
-                  <motion.div
-                    className={`w-full rounded-t-lg border flex flex-col items-center justify-end pb-2 ${
-                      rank === 1
-                        ? "border-cyan/50 bg-gradient-to-t from-cyan/25 to-cyan/5"
-                        : "border-border/80 bg-gradient-to-t from-card to-cyan/[0.04]"
+                <motion.li key={l.name + rank}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFocus(i);
+                      setPaused(true);
+                    }}
+                    className={`w-full text-left rounded-xl border px-2.5 py-2 sm:px-3 sm:py-2.5 flex items-center gap-2 sm:gap-2.5 min-h-[52px] sm:min-h-[56px] touch-manipulation transition-all ${
+                      isFocus
+                        ? "border-[#FFAB00]/55 bg-[#FFAB00]/[0.08] shadow-[0_0_20px_-8px_#FFAB0088]"
+                        : "border-border/50 bg-background/45 hover:border-[#FFAB00]/35 hover:bg-background/70"
                     }`}
-                    initial={{ height: 24 }}
-                    animate={{ height: h }}
-                    transition={{ duration: 0.7, delay: visualIdx * 0.08, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <span className="text-[10px] font-mono text-cyan tabular-nums">#{rank}</span>
-                    <span className="text-[14px] font-display font-semibold tabular-nums text-foreground">
-                      {Math.round(score)}
+                    <span
+                      className={
+                        rank <= 3
+                          ? "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-display font-bold text-[11px] sm:text-[12px] tabular-nums shrink-0"
+                          : "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-secondary/70 border border-border/60 font-mono font-semibold text-[11px] text-muted-foreground tabular-nums shrink-0"
+                      }
+                      style={
+                        rank <= 3
+                          ? {
+                              background: "linear-gradient(135deg, #FFD54F, #FFAB00)",
+                              color: "#1a1100",
+                              boxShadow: "0 0 12px #FFAB0080, inset 0 0 0 1px #FFE082",
+                            }
+                          : undefined
+                      }
+                    >
+                      {rank}
                     </span>
-                  </motion.div>
-                </button>
+                    <span className="text-lg sm:text-xl leading-none shrink-0" aria-hidden>
+                      {l.flag ?? "🏳️"}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[12.5px] sm:text-[13.5px] font-medium truncate text-foreground/95">
+                        {l.name}
+                      </span>
+                      <span className="block text-[10px] font-mono text-muted-foreground truncate">
+                        {[l.country, l.region].filter(Boolean).join(" · ") || "—"}
+                      </span>
+                      <span className="mt-1 block h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
+                        <motion.span
+                          className="block h-full rounded-full"
+                          style={{ background: hex, boxShadow: `0 0 8px ${hex}66` }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${barPct}%` }}
+                          transition={{ duration: 0.7, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                        />
+                      </span>
+                    </span>
+                    <span
+                      className="inline-flex items-center rounded-lg font-display font-bold tabular-nums text-sm sm:text-base px-2 py-1 shrink-0"
+                      style={{
+                        color: hex,
+                        background: `${hex}1A`,
+                        boxShadow: `inset 0 0 0 1px ${hex}55`,
+                      }}
+                    >
+                      {score == null ? "—" : Math.round(score)}
+                    </span>
+                  </button>
+                </motion.li>
               );
             })}
-          </div>
+          </ul>
+        )}
 
-          {/* Focused detail strip */}
+        {focused && (
           <AnimatePresence mode="wait">
-            {focused && (
-              <motion.div
-                key={focused.name}
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.25 }}
-                className="relative mt-3 rounded-xl border border-cyan/30 bg-cyan/[0.07] p-2.5 sm:p-3"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xl shrink-0">{focused.flag ?? "🏳️"}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium truncate">
-                      #{focused.rank ?? focus + 1} {focused.name}
-                    </p>
-                    <p className="text-[10px] font-mono text-muted-foreground truncate">
-                      {[focused.country, focused.region].filter(Boolean).join(" · ") || "Global"}
-                      {typeof focused.divergence === "number"
-                        ? ` · gap ${Math.round(focused.divergence)}`
-                        : ""}
-                    </p>
-                  </div>
-                  {typeof focused.overall_score === "number" && (
-                    <span className="text-[1.25rem] font-display font-semibold tabular-nums text-cyan shrink-0">
-                      {Math.round(focused.overall_score)}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-2 h-1.5 rounded-full bg-border/80 overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${Math.min(100, ((typeof focused.overall_score === "number" ? focused.overall_score : 0) / maxScore) * 100)}%`,
-                    }}
-                    transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                  />
-                </div>
-                {focused.summary && (
-                  <p className="mt-2 text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
-                    {focused.summary}
-                  </p>
-                )}
-              </motion.div>
-            )}
+            <motion.div
+              key={focused.name}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22 }}
+              className="rounded-xl border border-[#FFAB00]/30 bg-background/50 px-3 py-2.5 min-w-0"
+            >
+              <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#FFAB00] mb-1">
+                Focus · #{focused.rank ?? focus + 1}
+              </p>
+              <p className="text-[12.5px] sm:text-[13px] leading-snug text-foreground/90 line-clamp-2 sm:line-clamp-3">
+                {focused.summary?.trim() ||
+                  `${focused.name} — citizen trust score ${
+                    typeof focused.overall_score === "number"
+                      ? Math.round(focused.overall_score)
+                      : "—"
+                  }${typeof focused.divergence === "number" ? ` · official gap ${Math.round(focused.divergence)}` : ""}.`}
+              </p>
+            </motion.div>
           </AnimatePresence>
+        )}
 
-          <div className="relative flex justify-center gap-1.5 mt-2.5">
-            {top3.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Focus rank ${i + 1}`}
-                onClick={() => setFocus(i)}
-                className={`h-1.5 rounded-full transition-all touch-manipulation min-h-[12px] ${
-                  i === focus ? "w-5 bg-cyan" : "w-1.5 bg-border hover:bg-cyan/40"
-                }`}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      <Link
-        to="/trackers/leaders"
-        className="relative mt-3 group inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan text-[12.5px] font-semibold touch-manipulation transition-colors"
-      >
-        Open leadership board
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-      </Link>
+        <Link
+          to="/trackers/leaders"
+          className="group flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[42px] rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan text-[12.5px] font-semibold touch-manipulation transition-colors w-full sm:w-auto sm:self-end sm:px-5"
+        >
+          Open full leaderboard
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+      </div>
     </section>
   );
 }
@@ -2370,20 +2257,6 @@ const DASHBOARD_TRACKERS = [
     badge: "Ledger",
   },
 ] as const;
-
-/** Single focused Library sneak peek for the landing page. */
-const MIGRATION_SNEAK_PEEK = {
-  title: "Irregular migration",
-  teaser: "Scale, corridors, open vs resist frames — returns honesty.",
-  region: "EU · UK",
-  href: "/research-migration",
-  highlights: [
-    "Citizen discourse clusters on entry pressure; return and removal capacity get far less sustained attention.",
-    "Open vs resist frames compete more loudly than measured corridor data in public samples.",
-    "Official success claims and lived experience diverge most where enforcement is intermittent.",
-    "Solidarity and security narratives both claim moral high ground — few posts hold both at once.",
-  ],
-} as const;
 
 /** Optional expand-panel action. Nested Link uses stopPropagation so expand still works. */
 type KpiHeroCta = {
