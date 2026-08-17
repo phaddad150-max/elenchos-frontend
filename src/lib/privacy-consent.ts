@@ -33,3 +33,9 @@ export function writeConsentChoice(value: ConsentChoice): void {
   }
   window.dispatchEvent(new Event("consent-changed"));
 }
+
+/** Re-open the cookie bar (footer “Privacy & cookies” control). */
+export function requestConsentPreferences(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("consent-open"));
+}

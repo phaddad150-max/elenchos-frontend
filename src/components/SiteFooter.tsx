@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
+import { requestConsentPreferences } from "@/lib/privacy-consent";
 
 /** Site footer: nav CTAs + legal. Keep short; story lives on About. */
 export function SiteFooter() {
@@ -42,6 +43,13 @@ export function SiteFooter() {
           <Link to="/privacy" className="hover:text-cyan hover:underline">
             Privacy
           </Link>
+          <button
+            type="button"
+            onClick={() => requestConsentPreferences()}
+            className="hover:text-cyan hover:underline text-left"
+          >
+            Cookies
+          </button>
           <ContactEmailMe
             source="footer"
             variant="inline"

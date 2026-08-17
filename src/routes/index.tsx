@@ -49,7 +49,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { sentimentTone as sharedSentimentTone } from "@/lib/score-colors";
 import { LIVE_TOPIC_KEYS, activeLiveTopicCount, isArchivedTopicId } from "@/lib/topic-catalog";
 import { listResearchBriefs } from "@/lib/research-catalog";
-import { appendKpiHistory, readKpiHistory } from "@/lib/kpi-history";
+import { appendKpiHistory, readKpiHistory, saneKpiDelta } from "@/lib/kpi-history";
 import { useCountUp } from "@/hooks/use-count-up";
 
 import {
@@ -244,29 +244,43 @@ function Dashboard() {
     countriesMonitored?: number;
   }>({});
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
+  const [dashReady, setDashReady] = useState(false);
   const [simMode] = useSimMode();
 
   const [, setTickKey] = useState(0);
 
   useEffect(() => {
-    loadDashboardData().then((d) => {
-      setSnapshots(d ?? null);
-    });
-    loadDashboardOverview().then((o) => setOverview(o));
-    loadCitizenSignals().then((s) => setCitizenSignals(s ?? []));
-    // Load all live curated highlights (not a hard 6) so the feed can rotate every topic.
-    loadCuratedHighlights(40).then(setCuratedHighlights);
-    fetchLatestTrackers().then((rows) => {
-      const byType = new Map(rows.map((r) => [r.tracker_type, r]));
-      const leaderRow = byType.get("global_leader_trust");
-      const peaceRow = byType.get("peace_normalization");
-      const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
-      const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
-      setTrackerKpis({
-        leadersRanked: leaders.length || undefined,
-        countriesMonitored: peaceCountries.length || undefined,
-      });
-    });
+    let cancelled = false;
+    void (async () => {
+      const [snapRes, ovRes, citRes, curRes, trackRes] = await Promise.allSettled([
+        loadDashboardData(),
+        loadDashboardOverview(),
+        loadCitizenSignals(),
+        loadCuratedHighlights(40),
+        fetchLatestTrackers(),
+      ]);
+      if (cancelled) return;
+      if (snapRes.status === "fulfilled") setSnapshots(snapRes.value ?? null);
+      if (ovRes.status === "fulfilled") setOverview(ovRes.value);
+      if (citRes.status === "fulfilled") setCitizenSignals(citRes.value ?? []);
+      if (curRes.status === "fulfilled") setCuratedHighlights(curRes.value);
+      if (trackRes.status === "fulfilled") {
+        const rows = trackRes.value;
+        const byType = new Map(rows.map((r) => [r.tracker_type, r]));
+        const leaderRow = byType.get("global_leader_trust");
+        const peaceRow = byType.get("peace_normalization");
+        const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
+        const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
+        setTrackerKpis({
+          leadersRanked: leaders.length || undefined,
+          countriesMonitored: peaceCountries.length || undefined,
+        });
+      }
+      setDashReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Simulated signal stream — only used when simMode is explicitly on.
@@ -374,13 +388,12 @@ function Dashboard() {
     });
   }, [effectiveSignals, filter, regionFilter, topicFilter, search]);
 
+  // Single product surface: topics count matches Topics page (activeLiveTopicCount).
+  const topicsCount = activeLiveTopicCount();
+
   const kpis = useMemo(() => {
-    const coreTopics = CANONICAL_TOPICS.length;
     // Live topics only (archived excluded from sample counts).
     const liveCitizens = citizenSignals.filter((s) => isLiveOutputTopic(s.topic));
-    const activeTopicSet = new Set<string>();
-    liveCitizens.forEach((s) => s.topic && activeTopicSet.add(s.topic));
-    const activeTopics = activeTopicSet.size || coreTopics;
 
     // Same posts-analyzed number as KPI hero (mobile + desktop).
     const postsAnalyzed =
@@ -390,25 +403,28 @@ function Dashboard() {
         citizenSignals,
       }) ?? 0;
 
+    // Regions = distinct region labels on the same signal set that feeds the globe.
+    const regions = new Set(
+      effectiveSignals.map((s) => s.region).filter((r) => r && r !== "Global"),
+    ).size;
+
     if (isLive && overview) {
-      const regions = new Set(effectiveSignals.map((s) => s.region)).size || activeTopics;
       return {
         postsAnalyzed,
-        topics: activeTopics,
+        topics: topicsCount,
         regions,
         highAlert: overview.high_alert_topics ?? 0,
         avgVelocity: overview.trend_velocity ?? 0,
         precision: 94.2,
       };
     }
-    const regions = new Set(effectiveSignals.map((s) => s.region)).size || activeTopics;
     const highAlert = effectiveSignals.filter(
       (s) => s.intensity === "high" || s.intensity === "critical"
     ).length || liveCitizens.filter((s) => (s.sentiment_score ?? 100) < 50).length;
     const avgVelocity =
       effectiveSignals.reduce((s, x) => s + x.velocity, 0) / Math.max(effectiveSignals.length, 1);
-    return { postsAnalyzed, topics: activeTopics, regions, highAlert, avgVelocity, precision: 94.2 };
-  }, [effectiveSignals, isLive, overview, citizenSignals, snapshots]);
+    return { postsAnalyzed, topics: topicsCount, regions, highAlert, avgVelocity, precision: 94.2 };
+  }, [effectiveSignals, isLive, overview, citizenSignals, snapshots, topicsCount]);
 
   // Citizen signals: prefer the inline `citizen_signals` array on the
   // freshest dashboard_overviews row. Fall back to the citizen_signals
@@ -525,6 +541,7 @@ function Dashboard() {
           trackerKpis={trackerKpis}
           curatedCount={curatedHighlights.length}
           postsAnalyzed={kpis.postsAnalyzed}
+          ready={dashReady}
         />
 
         {/* Signals + heatmap — side by side, independent heights (signal flips must not move globe) */}
@@ -584,20 +601,29 @@ function Dashboard() {
               <Header
                 icon={<Globe2 className="w-4 h-4" />}
                 title="Global sentiment heatmap"
-                subtitle={`Tap or hover a point · ${regionTiles.length} regions · ${fmtNum(kpis.postsAnalyzed)} posts`}
+                subtitle={`Tap a point · ${kpis.regions} region${kpis.regions === 1 ? "" : "s"} · ${fmtNum(kpis.postsAnalyzed)} posts`}
               />
             </div>
 
             {/* Stable globe stage height — not tied to signals panel reflow */}
             <div className="flex flex-col gap-2">
               <div className="relative h-[350px] sm:h-[400px] xl:h-[450px] w-full rounded-xl border border-cyan/25 overflow-hidden globe-stage shadow-[inset_0_0_40px_-12px_var(--cyan-glow)]">
-                <Globe3D
-                  signals={effectiveSignals}
-                  onPick={(s) => {
-                    setRegionFilter(s.region);
-                    setPicked(s);
-                  }}
-                />
+                {dashReady && effectiveSignals.length === 0 ? (
+                  <div className="absolute inset-0 grid place-items-center bg-background/40 px-4 text-center">
+                    <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
+                      No region markers in this sample yet. Signals may still load — try again after
+                      the next pipeline run.
+                    </p>
+                  </div>
+                ) : (
+                  <Globe3D
+                    signals={effectiveSignals}
+                    onPick={(s) => {
+                      setRegionFilter(s.region);
+                      setPicked(s);
+                    }}
+                  />
+                )}
               </div>
               <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-mono shrink-0">
                 <LegendDot color="var(--rose-signal)" label="Critical" />
@@ -1459,18 +1485,16 @@ function AiAnalysisSummary({
 
       {k && (
         <div className="mt-4 pt-3 border-t border-border flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] font-mono text-muted-foreground">
-          {typeof k.total_topics_monitored === "number" && (
-            <span>
-              Topics monitored:{" "}
-              <span className="text-foreground/90 tabular-nums">{k.total_topics_monitored}</span>
-            </span>
-          )}
-          {typeof k.regions_monitored === "number" && (
+          <span>
+            Topics monitored:{" "}
+            <span className="text-foreground/90 tabular-nums">{activeLiveTopicCount()}</span>
+          </span>
+          {typeof k.regions_monitored === "number" && k.regions_monitored > 0 && (
             <span>
               Regions: <span className="text-foreground/90 tabular-nums">{k.regions_monitored}</span>
             </span>
           )}
-          {typeof k.total_posts_analyzed === "number" && (
+          {typeof k.total_posts_analyzed === "number" && k.total_posts_analyzed > 0 && (
             <span>
               Posts analyzed:{" "}
               <span className="text-foreground/90 tabular-nums">
@@ -2289,10 +2313,7 @@ function KpiHeroTile({
   }, [has, numericValue]);
 
   const prevHist = history.length >= 2 ? history[history.length - 2] : undefined;
-  const delta =
-    has && typeof prevHist === "number" && prevHist !== numericValue
-      ? numericValue - prevHist
-      : null;
+  const delta = saneKpiDelta(numericValue, prevHist);
 
   const barPct =
     has && tile.format === "percent" ? Math.min(100, Math.max(0, Math.round(numericValue))) : null;
@@ -2513,6 +2534,7 @@ function DashboardKpiGrid({
   trackerKpis,
   curatedCount = 0,
   postsAnalyzed: postsAnalyzedProp,
+  ready = true,
 }: {
   overview: DashboardOverview | null;
   snapshots: Record<string, TopicSnapshot> | null;
@@ -2521,6 +2543,8 @@ function DashboardKpiGrid({
   curatedCount?: number;
   /** Pass parent-resolved value so face KPI always matches globe/header posts count. */
   postsAnalyzed?: number;
+  /** False until first dashboard fetch settles — avoid painting zeros as real KPIs. */
+  ready?: boolean;
 }) {
   const k = overview?.kpis ?? {};
   // Product surface: active monitors only (exclude archived). Matches Topics page active count.
@@ -2530,15 +2554,21 @@ function DashboardKpiGrid({
   const researchBriefs = listResearchBriefs();
   const researchCount = researchBriefs.length;
 
-  const topicsMonitored = activeTopicCount > 0 ? activeTopicCount : undefined;
+  // Until ready, leave values undefined so cards show "—" not fake zeros.
+  const topicsMonitored =
+    ready && activeTopicCount > 0 ? activeTopicCount : ready ? activeTopicCount || undefined : undefined;
 
-  const leadersRanked =
-    typeof k.leaders_ranked === "number" ? k.leaders_ranked : trackerKpis?.leadersRanked;
+  const leadersRanked = !ready
+    ? undefined
+    : typeof k.leaders_ranked === "number" && k.leaders_ranked > 0
+      ? k.leaders_ranked
+      : trackerKpis?.leadersRanked;
 
-  const countriesMonitored =
-    typeof trackerKpis?.countriesMonitored === "number" && trackerKpis.countriesMonitored > 0
+  const countriesMonitored = !ready
+    ? undefined
+    : typeof trackerKpis?.countriesMonitored === "number" && trackerKpis.countriesMonitored > 0
       ? trackerKpis.countriesMonitored
-      : typeof k.regions_monitored === "number"
+      : typeof k.regions_monitored === "number" && k.regions_monitored > 0
         ? k.regions_monitored
         : undefined;
 
@@ -2576,11 +2606,12 @@ function DashboardKpiGrid({
 
   // Single sample total — same on mobile and desktop (no per-device localStorage).
   const sampleAnalyzed = useMemo(() => {
+    if (!ready) return undefined;
     if (typeof postsAnalyzedProp === "number" && postsAnalyzedProp > 0) {
       return Math.round(postsAnalyzedProp);
     }
     return resolvePostsAnalyzed({ overview, snapshots, citizenSignals });
-  }, [postsAnalyzedProp, overview, snapshots, citizenSignals]);
+  }, [ready, postsAnalyzedProp, overview, snapshots, citizenSignals]);
 
   const sampleFacts = useMemo(
     () =>
@@ -2660,7 +2691,7 @@ function DashboardKpiGrid({
     {
       id: "reports",
       label: "Case studies & reports",
-      value: caseStudiesTotal,
+      value: ready ? caseStudiesTotal : undefined,
       icon: FileStack,
       format: "number",
       liveNote: "Topic reports + research case studies + curated highlights.",
@@ -2696,12 +2727,12 @@ function DashboardKpiGrid({
     },
     {
       id: "accuracy",
-      label: "Est. AI accuracy",
-      value: accuracy.composite,
+      label: "Est. sample confidence",
+      value: ready ? accuracy.composite : undefined,
       icon: ShieldCheck,
       format: "percent",
       liveNote:
-        "Estimated confidence for analysis on this page (sample coverage and consistency). Not a laboratory accuracy score.",
+        "How complete and consistent this sample looks (coverage across topics). Not a lab accuracy score.",
       liveFacts: accuracy.liveFacts,
       links: [
         { label: "How AI is used (xAI / SpaceXAI)", href: "/about" },
@@ -2714,11 +2745,13 @@ function DashboardKpiGrid({
   const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!ready) return;
     const payload: Record<string, number | undefined> = {};
     for (const t of tiles) payload[t.id] = t.value;
     setHistoryStore(appendKpiHistory(payload));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- track when numeric values change
   }, [
+    ready,
     topicsMonitored,
     leadersRanked,
     countriesMonitored,

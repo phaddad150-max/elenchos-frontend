@@ -692,9 +692,9 @@ const CARD_SCORE_VALUE =
 const CARD_CTA =
   "w-full inline-flex items-center justify-center rounded-lg font-mono uppercase tracking-[0.12em] font-semibold text-[11.5px] md:text-[12px] min-h-[40px] md:min-h-[36px]";
 
-/** Fixed card height was clipping the CTA — use min-height only so Open/View always shows. */
+/** Equal-height cards: fixed min-height + flex so every card in a row matches. */
 const TOPIC_CARD_SHELL =
-  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/35 p-2.5 sm:p-3 flex flex-col h-full min-w-0 hover:border-cyan/65 md:hover:shadow-[0_0_32px_-10px_var(--cyan-glow)] transition-all touch-manipulation min-h-[248px] sm:min-h-[260px]";
+  "topic-card-shell group relative overflow-hidden rounded-xl md:rounded-2xl border border-cyan/35 p-2.5 sm:p-3 flex flex-col h-full min-h-[268px] sm:min-h-[280px] min-w-0 hover:border-cyan/65 md:hover:shadow-[0_0_32px_-10px_var(--cyan-glow)] transition-all touch-manipulation";
 
 function TopicCardCadence({
   cadence,
@@ -746,7 +746,7 @@ function CommissionedTopicCard({
       <Link
         to="/research/report/$token"
         params={{ token: item.token }}
-        className={`${TOPIC_CARD_SHELL} topic-card-commissioned no-underline text-inherit opacity-100`}
+        className={`${TOPIC_CARD_SHELL} topic-card-commissioned no-underline text-inherit opacity-100 w-full`}
         style={{ opacity: 1 }}
       >
         <div className="flex flex-col items-center gap-1.5 shrink-0 w-full">
@@ -779,14 +779,19 @@ function TopicCardScore({
   shortLabel,
   value,
   color,
+  hint,
 }: {
   label: string;
   shortLabel: string;
   value: number | undefined;
   color: string;
+  hint?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center px-0.5 min-w-0 h-full gap-1.5">
+    <div
+      className="flex flex-col items-center justify-center text-center px-0.5 min-w-0 h-full gap-1.5"
+      title={hint}
+    >
       <span className={CARD_SCORE_LABEL}>
         <span className="md:hidden">{shortLabel}</span>
         <span className="hidden md:inline">{label}</span>
@@ -909,19 +914,21 @@ function TopicCard({
       </div>
 
       {/* Slot 3 — scores (fixed height, always 2 equal columns, centered) */}
-      <div className="h-[4.1rem] shrink-0 w-full">
+      <div className="h-[4.5rem] shrink-0 w-full">
         <div className="grid grid-cols-2 h-full w-full divide-x divide-border/60 items-center justify-items-center">
           <TopicCardScore
             label="Sentiment"
             shortLabel="Sent."
             value={sentiment}
             color={sentimentTone}
+            hint="Citizen lean in the sample (0–100). Higher = more positive public tone."
           />
           <TopicCardScore
             label="Divergence"
             shortLabel="Div."
             value={divergence}
             color={divergenceTone}
+            hint="Gap vs official/media frames (0–100). Higher = bigger citizen–official split."
           />
         </div>
       </div>

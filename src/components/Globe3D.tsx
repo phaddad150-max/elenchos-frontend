@@ -67,6 +67,19 @@ export function Globe3D({ signals, onPick }: Props) {
 
   const activeSignals = useMemo(() => signals.slice(0, 32), [signals]);
 
+  if (mounted && activeSignals.length === 0) {
+    return (
+      <div
+        ref={wrapRef}
+        className="w-full h-full min-h-[200px] grid place-items-center px-4 text-center bg-background/30"
+      >
+        <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-[240px]">
+          No map points in this sample. Check back after the next pipeline run.
+        </p>
+      </div>
+    );
+  }
+
   const points = activeSignals.map((s) => ({
     lat: s.lat,
     lng: s.lng,

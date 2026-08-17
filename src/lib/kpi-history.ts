@@ -19,8 +19,9 @@ export function appendKpiHistory(values: Record<string, number | undefined>): Kp
   const prev = readKpiHistory();
   const next: KpiHistoryStore = { ...prev };
   for (const [label, value] of Object.entries(values)) {
-    if (typeof value !== "number" || Number.isNaN(value)) continue;
-    const series = [...(prev[label] ?? [])];
+    // Never store loading zeros / NaN — they poison “vs last” deltas.
+    if (typeof value !== "number" || Number.isNaN(value) || value <= 0) continue;
+    const series = [...(prev[label] ?? [])].filter((n) => typeof n === "number" && n > 0);
     const last = series[series.length - 1];
     if (last !== value) series.push(value);
     next[label] = series.slice(-MAX_POINTS);
@@ -31,6 +32,38 @@ export function appendKpiHistory(values: Record<string, number | undefined>): Kp
     /* ignore quota */
   }
   return next;
+}
+
+/**
+ * Only show “vs last” when the change is plausible (not loading race junk).
+ * Returns null when the delta should be hidden.
+ */
+export function saneKpiDelta(
+  current: number | undefined,
+  previous: number | undefined,
+): number | null {
+  if (
+    typeof current !== "number" ||
+    typeof previous !== "number" ||
+    Number.isNaN(current) ||
+    Number.isNaN(previous) ||
+    current <= 0 ||
+    previous <= 0 ||
+    current === previous
+  ) {
+    return null;
+  }
+  const delta = current - previous;
+  const abs = Math.abs(delta);
+  // Absolute cap for count KPIs (posts/topics) and relative for percentages
+  if (current <= 100 && previous <= 100) {
+    // percent-like: hide > 35pt swings
+    if (abs > 35) return null;
+  } else {
+    // counts: hide absurd jumps (e.g. –1444)
+    if (abs > Math.max(previous * 0.75, 500)) return null;
+  }
+  return delta;
 }
 
 type SampleCumStore = {
