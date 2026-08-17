@@ -216,6 +216,12 @@ const TOPIC_ANCHORS: Record<string, { region: string; subregion: Subregion; lat:
     lat: 28.61,
     lng: 77.21,
   },
+  "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse": {
+    region: "Nicosia",
+    subregion: "Eastern Mediterranean",
+    lat: 35.17,
+    lng: 33.36,
+  },
 };
 
 function topicGeo(topic: string) {

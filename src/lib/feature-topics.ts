@@ -1062,6 +1062,27 @@ export const FEATURE_TOPICS: FeatureTopic[] = [
  takeaway: "",
  compare: [],
  },
+ {
+ id: "cyprus-palestine-attention-asymmetry",
+ title:
+ "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+ shortTitle: "Cyprus vs Palestine · Attention",
+ description:
+ "Why Cyprus’s decades-long occupation draws so little sustained European (and Greek) protest, media volume, and moral urgency compared with Palestine — and what that imbalance reveals about solidarity hierarchies and attention politics.",
+ sampleSize: "",
+ confidence: "Moderate",
+ region: "Europe · Greece · Cyprus",
+ trackers: [],
+ simulation: {
+ title: "Live data",
+ pathA: { label: "Live", series: [] },
+ pathB: { label: "Live", series: [] },
+ caption: "",
+ },
+ insights: { citizenSays: "", officialSays: "", gap: "" },
+ takeaway: "",
+ compare: [],
+ },
 ];
 
 

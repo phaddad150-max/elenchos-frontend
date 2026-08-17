@@ -92,6 +92,11 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
       "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames",
     headerLabel: "India Economic Growth Narrative",
   },
+  "cyprus-palestine-attention-asymmetry": {
+    rootKey:
+      "Cyprus vs Palestine: The Attention Asymmetry in European (and Greek) Public Discourse",
+    headerLabel: "Cyprus vs Palestine · Attention",
+  },
   /** Archived — history only; still mapped for Topics archive section + snapshot reads */
   "maritime-ai-greece": {
     rootKey: "Maritime AI Industry & Greece's Global Role",
@@ -126,6 +131,7 @@ export const TOPIC_ADDED_AT: Record<string, string> = {
   "greece-economic-recovery": "2026-07-25",
   "ai-productivity-gdp-growth": "2026-08-12",
   "india-economic-growth-narrative": "2026-08-12",
+  "cyprus-palestine-attention-asymmetry": "2026-08-18",
 };
 
 /** How long the NEW pill stays on topic cards after TOPIC_ADDED_AT. */

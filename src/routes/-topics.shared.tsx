@@ -82,6 +82,7 @@ const TOPIC_UPDATE_CADENCE: Record<string, "realtime" | "weekly" | "monthly" | "
   "us-ai-economy-boom": "weekly",
   "ai-productivity-gdp-growth": "weekly",
   "india-economic-growth-narrative": "weekly",
+  "cyprus-palestine-attention-asymmetry": "weekly",
   "new-us-foreign-policy": "weekly",
   "crypto-regulation-financial-markets": "weekly",
   "eu-migration-green-divisions": "weekly",
@@ -390,6 +391,7 @@ function TopicsFilterableGrid({
       "us-ai-economy-boom",
     ];
     const NEW_TOPIC_CARD_HEAD = [
+      "cyprus-palestine-attention-asymmetry",
       "ai-productivity-gdp-growth",
       "india-economic-growth-narrative",
     ] as const;
