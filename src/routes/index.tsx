@@ -76,7 +76,10 @@ import {
   extractPeaceCountries,
   extractRankedLeaders,
   fetchLatestTrackers,
+  type PeaceCountry,
+  type RankedLeader,
 } from "@/lib/trackers-data";
+import { TERROR_FINANCE_METRICS, TERROR_FINANCE_DATA } from "@/lib/networks-ledger";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -252,6 +255,13 @@ function Dashboard() {
     leadersRanked?: number;
     countriesMonitored?: number;
   }>({});
+  /** Preview highlights for Active Trackers panel — existing tracker payloads only. */
+  const [trackerPreview, setTrackerPreview] = useState<{
+    topLeaders: RankedLeader[];
+    peaceTop: PeaceCountry[];
+    peaceBottom: PeaceCountry[];
+    peaceInsights: string[];
+  }>({ topLeaders: [], peaceTop: [], peaceBottom: [], peaceInsights: [] });
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [dashReady, setDashReady] = useState(false);
   const [simMode] = useSimMode();
@@ -283,6 +293,38 @@ function Dashboard() {
         setTrackerKpis({
           leadersRanked: leaders.length || undefined,
           countriesMonitored: peaceCountries.length || undefined,
+        });
+        const peaceSorted = [...peaceCountries].sort((a, b) => {
+          const sa =
+            typeof a.peace_health_score === "number"
+              ? a.peace_health_score
+              : typeof a.citizen_normalization_support === "number"
+                ? a.citizen_normalization_support
+                : typeof a.citizen_support === "number"
+                  ? a.citizen_support
+                  : 0;
+          const sb =
+            typeof b.peace_health_score === "number"
+              ? b.peace_health_score
+              : typeof b.citizen_normalization_support === "number"
+                ? b.citizen_normalization_support
+                : typeof b.citizen_support === "number"
+                  ? b.citizen_support
+                  : 0;
+          return sb - sa;
+        });
+        const rawInsights = (peaceRow?.data as { key_insights?: unknown } | undefined)?.key_insights;
+        const peaceInsights = Array.isArray(rawInsights)
+          ? rawInsights
+              .map((x) => (typeof x === "string" ? x.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 2)
+          : [];
+        setTrackerPreview({
+          topLeaders: leaders.slice(0, 3),
+          peaceTop: peaceSorted.slice(0, 2),
+          peaceBottom: peaceSorted.slice(-2).reverse(),
+          peaceInsights,
         });
       }
       setDashReady(true);
@@ -658,27 +700,27 @@ function Dashboard() {
           </section>
         </motion.div>
 
-        {/* Library case studies + live trackers — separate panels, same row on desktop */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-4 min-w-0"
-        >
-          <div className="lg:col-span-7 min-w-0">
-            <PublishedCasesPanel />
-          </div>
-          <div className="lg:col-span-5 min-w-0">
-            <ActiveTrackersPanel trackerKpis={trackerKpis} />
-          </div>
-        </motion.div>
-
-        {/* Disciplined sample structure — visual modules from live data, not dual Findings+Insights */}
+        {/* Sample structure sits under Live Citizen Signals (not under Library/trackers) */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <SampleStructureModules
             snapshots={snapshots}
             signals={mergedFeedSignals}
             overview={overview}
           />
+        </motion.div>
+
+        {/* Insight previews of Library reports + live trackers (published layer, not live X feed) */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-4 min-w-0"
+        >
+          <div className="lg:col-span-6 min-w-0">
+            <PublishedCasesPanel />
+          </div>
+          <div className="lg:col-span-6 min-w-0">
+            <ActiveTrackersPanel trackerKpis={trackerKpis} preview={trackerPreview} />
+          </div>
         </motion.div>
 
         {/* Contextual actions — end of page only, not mid-page marketing banners */}
@@ -1594,7 +1636,10 @@ function SampleStructureModules({
   );
 }
 
-/** Free Library case studies only — not live signals, not trackers. */
+/**
+ * Published intelligence preview — highlight-level findings from free Library case studies.
+ * Not live X sample; multi-source briefs only.
+ */
 function PublishedCasesPanel() {
   return (
     <section className="dash-panel p-2.5 sm:p-4 h-full min-w-0 flex flex-col">
@@ -1602,17 +1647,17 @@ function PublishedCasesPanel() {
         <Header
           icon={<FileStack className="w-4 h-4" />}
           title="Published Intelligence"
-          subtitle="Library case studies · multi-source briefs"
+          subtitle="Preview highlights from free Library case studies"
         />
         <Link
           to="/research/library"
           className="shrink-0 text-[11px] font-mono text-cyan hover:underline inline-flex items-center gap-0.5 min-h-[36px] touch-manipulation"
         >
-          Library
+          Full library
           <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+      <div className="flex flex-col gap-2.5 flex-1 min-w-0">
         {DASHBOARD_CASE_HIGHLIGHTS.map((c, i) => (
           <motion.a
             key={c.id}
@@ -1620,22 +1665,38 @@ function PublishedCasesPanel() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 flex flex-col gap-1.5 min-h-[104px] touch-manipulation transition-colors"
+            className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 sm:p-3.5 flex flex-col gap-2 min-h-[44px] touch-manipulation transition-colors"
           >
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-emerald-signal/35 text-emerald-signal bg-emerald-signal/10">
-                Case study
-              </span>
-              <span className="text-[10px] font-mono text-muted-foreground">{c.region}</span>
+            <div className="flex items-start justify-between gap-2 min-w-0">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                  <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-emerald-signal/35 text-emerald-signal bg-emerald-signal/10">
+                    Case study
+                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground">{c.region}</span>
+                </div>
+                <span className="block text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-cyan transition-colors">
+                  {c.title}
+                </span>
+              </div>
+              <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-cyan mt-1" />
             </div>
-            <span className="text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-cyan transition-colors">
-              {c.title}
-            </span>
-            <span className="text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
-              {c.subtitle}
-            </span>
-            <span className="mt-auto pt-1 text-[11px] font-mono text-cyan inline-flex items-center gap-1">
-              Open
+            <p className="text-[12px] text-muted-foreground leading-snug line-clamp-2">{c.teaser}</p>
+            <ul className="space-y-1.5">
+              {c.highlights.map((h, hi) => (
+                <li
+                  key={hi}
+                  className="flex gap-2 text-[12px] leading-snug text-foreground/90 min-w-0"
+                >
+                  <span className="shrink-0 text-cyan font-mono text-[10px] mt-0.5">
+                    {String(hi + 1).padStart(2, "0")}
+                  </span>
+                  <span className="min-w-0 line-clamp-2">{h}</span>
+                </li>
+              ))}
+            </ul>
+            <span className="text-[11px] font-mono text-cyan inline-flex items-center gap-1 pt-0.5">
+              Open full brief
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
             </span>
           </motion.a>
@@ -1645,35 +1706,33 @@ function PublishedCasesPanel() {
   );
 }
 
-/** Compact live trackers — status from existing KPI props only. */
+/**
+ * Active trackers preview — movers/highlights from live tracker payloads + ledger aggregates.
+ * Separate product layer from Live Citizen Signals.
+ */
 function ActiveTrackersPanel({
   trackerKpis,
+  preview,
 }: {
   trackerKpis?: { leadersRanked?: number; countriesMonitored?: number };
+  preview: {
+    topLeaders: RankedLeader[];
+    peaceTop: PeaceCountry[];
+    peaceBottom: PeaceCountry[];
+    peaceInsights: string[];
+  };
 }) {
-  const rows = [
-    {
-      ...DASHBOARD_TRACKERS[0]!,
-      metric:
-        typeof trackerKpis?.leadersRanked === "number"
-          ? `${trackerKpis.leadersRanked} ranked`
-          : "Live board",
-      icon: Users,
-    },
-    {
-      ...DASHBOARD_TRACKERS[1]!,
-      metric:
-        typeof trackerKpis?.countriesMonitored === "number"
-          ? `${trackerKpis.countriesMonitored} countries`
-          : "Country index",
-      icon: ShieldCheck,
-    },
-    {
-      ...DASHBOARD_TRACKERS[2]!,
-      metric: "2 branches",
-      icon: ShieldAlert,
-    },
-  ];
+  const peaceScore = (c: PeaceCountry) =>
+    typeof c.peace_health_score === "number"
+      ? c.peace_health_score
+      : typeof c.citizen_normalization_support === "number"
+        ? c.citizen_normalization_support
+        : typeof c.citizen_support === "number"
+          ? c.citizen_support
+          : null;
+
+  const ledgerActions = TERROR_FINANCE_METRICS?.totalActions;
+  const ledgerPeriod = TERROR_FINANCE_DATA?.period?.label;
 
   return (
     <section className="dash-panel p-2.5 sm:p-4 h-full min-w-0 flex flex-col">
@@ -1681,48 +1740,188 @@ function ActiveTrackersPanel({
         <Header
           icon={<Radar className="w-4 h-4" />}
           title="Active Trackers"
-          subtitle="Indexes & ledger · separate from live X signals"
+          subtitle="Live index snapshots · not the X signal feed"
         />
         <Link
           to="/trackers"
           className="shrink-0 text-[11px] font-mono text-cyan hover:underline inline-flex items-center gap-0.5 min-h-[36px] touch-manipulation"
         >
-          All
+          Full trackers
           <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
-      <div className="flex flex-col gap-2 flex-1">
-        {rows.map((t, i) => (
-          <motion.div
-            key={t.id}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-          >
-            <Link
-              to={t.href}
-              className="group flex items-center gap-3 rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 px-2.5 py-2.5 sm:px-3 min-h-[52px] touch-manipulation transition-colors"
-            >
-              <span className="shrink-0 w-9 h-9 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan">
-                <t.icon className="w-4 h-4" aria-hidden />
+
+      <div className="flex flex-col gap-2.5 flex-1 min-w-0">
+        {/* Leadership board preview */}
+        <Link
+          to="/trackers/leaders"
+          className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 touch-manipulation transition-colors"
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan shrink-0">
+                <Users className="w-3.5 h-3.5" />
               </span>
-              <span className="flex-1 min-w-0">
-                <span className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[13px] font-medium text-foreground/95 group-hover:text-cyan transition-colors">
-                    {t.title}
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium group-hover:text-cyan transition-colors">
+                  Leadership board
+                </p>
+                <p className="text-[10px] font-mono text-muted-foreground">
+                  {typeof trackerKpis?.leadersRanked === "number"
+                    ? `${trackerKpis.leadersRanked} ranked · citizen trust`
+                    : "Citizen trust rankings"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0" />
+          </div>
+          {preview.topLeaders.length > 0 ? (
+            <ol className="space-y-1.5">
+              {preview.topLeaders.map((l, i) => (
+                <li
+                  key={l.name + i}
+                  className="flex items-center gap-2 text-[12px] min-w-0"
+                >
+                  <span className="text-[10px] font-mono text-cyan tabular-nums w-5 shrink-0">
+                    #{l.rank ?? i + 1}
                   </span>
-                  <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded border border-border text-muted-foreground">
-                    {t.badge}
+                  <span className="truncate flex-1 font-medium text-foreground/90">
+                    {l.flag ? `${l.flag} ` : ""}
+                    {l.name}
                   </span>
-                </span>
-                <span className="block text-[11px] font-mono text-cyan/90 tabular-nums mt-0.5">
-                  {t.metric}
-                </span>
+                  {typeof l.overall_score === "number" && (
+                    <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
+                      {Math.round(l.overall_score)}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-[11.5px] text-muted-foreground">Leader table loading…</p>
+          )}
+        </Link>
+
+        {/* Peace index preview */}
+        <Link
+          to="/trackers/peace"
+          className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 touch-manipulation transition-colors"
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5" />
               </span>
-              <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-cyan" />
-            </Link>
-          </motion.div>
-        ))}
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium group-hover:text-cyan transition-colors">
+                  Peace index
+                </p>
+                <p className="text-[10px] font-mono text-muted-foreground">
+                  {typeof trackerKpis?.countriesMonitored === "number"
+                    ? `${trackerKpis.countriesMonitored} countries · normalization`
+                    : "Normalization diagnostics"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0" />
+          </div>
+          {preview.peaceInsights[0] ? (
+            <p className="text-[12px] leading-snug text-foreground/90 line-clamp-2 mb-2">
+              {preview.peaceInsights[0]}
+            </p>
+          ) : null}
+          {(preview.peaceTop.length > 0 || preview.peaceBottom.length > 0) && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="min-w-0">
+                <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-emerald-signal mb-1">
+                  Higher health
+                </p>
+                {preview.peaceTop.map((c) => {
+                  const s = peaceScore(c);
+                  return (
+                    <p key={c.name} className="text-[11.5px] truncate text-foreground/90">
+                      {c.flag ? `${c.flag} ` : ""}
+                      {c.name}
+                      {s != null ? (
+                        <span className="font-mono text-muted-foreground"> · {Math.round(s)}</span>
+                      ) : null}
+                    </p>
+                  );
+                })}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-rose-signal mb-1">
+                  Pressure
+                </p>
+                {preview.peaceBottom.map((c) => {
+                  const s = peaceScore(c);
+                  return (
+                    <p key={c.name} className="text-[11.5px] truncate text-foreground/90">
+                      {c.flag ? `${c.flag} ` : ""}
+                      {c.name}
+                      {s != null ? (
+                        <span className="font-mono text-muted-foreground"> · {Math.round(s)}</span>
+                      ) : null}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {preview.peaceTop.length === 0 && !preview.peaceInsights[0] && (
+            <p className="text-[11.5px] text-muted-foreground">Peace index loading…</p>
+          )}
+        </Link>
+
+        {/* Networks Ledger preview — aggregate metrics only (privacy-safe) */}
+        <Link
+          to="/research/networks-ledger"
+          className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 touch-manipulation transition-colors"
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan shrink-0">
+                <ShieldAlert className="w-3.5 h-3.5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium group-hover:text-cyan transition-colors">
+                  Networks Ledger
+                </p>
+                <p className="text-[10px] font-mono text-muted-foreground">
+                  Terror & Finance · official aggregates
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0" />
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
+            {typeof ledgerActions === "number" && (
+              <span>
+                <span className="font-mono tabular-nums text-cyan font-semibold">{ledgerActions}</span>
+                <span className="text-muted-foreground"> actions tracked</span>
+              </span>
+            )}
+            {typeof TERROR_FINANCE_METRICS?.designations === "number" && (
+              <span>
+                <span className="font-mono tabular-nums text-foreground/90">
+                  {TERROR_FINANCE_METRICS.designations}
+                </span>
+                <span className="text-muted-foreground"> designations</span>
+              </span>
+            )}
+            {typeof TERROR_FINANCE_METRICS?.actionsLatestPeriod === "number" && (
+              <span>
+                <span className="font-mono tabular-nums text-foreground/90">
+                  {TERROR_FINANCE_METRICS.actionsLatestPeriod}
+                </span>
+                <span className="text-muted-foreground"> latest window</span>
+              </span>
+            )}
+          </div>
+          {ledgerPeriod && (
+            <p className="text-[10px] font-mono text-muted-foreground mt-1.5">{ledgerPeriod}</p>
+          )}
+        </Link>
       </div>
     </section>
   );
@@ -2296,22 +2495,31 @@ const DASHBOARD_TRACKERS = [
 ] as const;
 
 /** Latest free Library case studies — presentation only (same content as Library). */
+/** Library case-study previews — static editorial highlights (same free briefs as Library). */
 const DASHBOARD_CASE_HIGHLIGHTS = [
   {
     id: "aviation",
     title: "Aviation after disruption",
-    subtitle: "OEM race, satcom, AI readiness",
+    teaser: "Who leads on recovery, connectivity, and AI readiness after COVID-era disruption.",
+    highlights: [
+      "Delivery trust and network strategy separate OEM winners from laggards — not a single stock tip.",
+      "Cabin bandwidth (satcom) and payments innovation show up as citizen-facing proof points, not only fleet stats.",
+      "AI ops readiness is uneven: maintenance and pricing claims often outrun what public evidence supports.",
+    ],
     href: "/research-aviation",
     region: "Global",
-    badge: "Case study",
   },
   {
     id: "migration",
     title: "Irregular migration",
-    subtitle: "Corridors, frames, returns honesty",
+    teaser: "Scale, corridors, and open vs resist frames — with returns honesty.",
+    highlights: [
+      "Public discourse volume clusters on entry pressure; return and removal capacity get far less sustained attention.",
+      "Open vs resist frames compete more loudly than measured corridor data in citizen samples.",
+      "Official success claims and street-level lived experience diverge most where enforcement is intermittent.",
+    ],
     href: "/research-migration",
     region: "EU · UK",
-    badge: "Case study",
   },
 ] as const;
 
