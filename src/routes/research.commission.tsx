@@ -1,24 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Building2,
   CreditCard,
   FilePenLine,
   FileText,
   FlaskConical,
   Link2,
-  Sparkles,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { CommissionBriefForm } from "@/components/research/CommissionBriefForm";
 import {
   ResearchBreadcrumb,
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
-
-const ENTERPRISE_DEFAULT_MESSAGE =
-  "Hi — I'm interested in Enterprise for Elenchos: personalized dashboards, custom topics, and team research. Here's what I need:\n\n";
 
 export const Route = createFileRoute("/research/commission")({
   head: () => ({
@@ -164,55 +158,6 @@ function CommissionPage() {
           Stripe holds card data. Optional email is one-time delivery only. Experimental research
           tool — not legal, medical, or investment advice. Lawful public research only.
         </p>
-
-        {/* Enterprise — same structure as Desk */}
-        <section
-          aria-labelledby="enterprise-heading"
-          className="rounded-2xl border border-amber-signal/30 bg-gradient-to-b from-amber-signal/[0.08] to-transparent p-4 sm:p-5 md:p-6 min-w-0 max-w-4xl"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:justify-between">
-            <div className="min-w-0 flex gap-3">
-              <span className="w-12 h-12 shrink-0 rounded-2xl border border-amber-signal/40 bg-amber-signal/10 text-amber-signal grid place-items-center">
-                <Building2 className="w-6 h-6" aria-hidden />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-amber-signal mb-1">
-                  Enterprise
-                </p>
-                <h2
-                  id="enterprise-heading"
-                  className="text-[1.1rem] sm:text-lg font-display font-semibold text-foreground"
-                >
-                  Custom dashboards &amp; ongoing research
-                </h2>
-                <p className="text-[13px] text-muted-foreground leading-relaxed mt-1.5 max-w-xl break-words">
-                  Personalized topics, team access, and continuous monitoring — not self-serve
-                  checkout. Email with what you need; no card form on this path.
-                </p>
-                <ul className="mt-3 space-y-1 text-[12.5px] text-muted-foreground">
-                  <li className="flex items-start gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-signal shrink-0 mt-0.5" />
-                    Custom live dashboards and topic sets
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-signal shrink-0 mt-0.5" />
-                    Ongoing research retainers and team delivery
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <ContactEmailMe
-              source="research-enterprise"
-              variant="button"
-              defaultMessage={ENTERPRISE_DEFAULT_MESSAGE}
-              dialogTitle="Enterprise inquiry"
-              dialogDescription="Describe dashboards, topics, or ongoing research."
-              className="shrink-0 border-amber-signal/40 bg-amber-signal/10 text-amber-signal text-[13px] font-semibold min-h-[44px] px-4"
-            >
-              Email me
-            </ContactEmailMe>
-          </div>
-        </section>
       </main>
 
       <SiteFooter />

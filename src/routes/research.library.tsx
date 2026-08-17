@@ -7,7 +7,6 @@ import {
   FilePenLine,
   FileText,
   Layers,
-  MessageSquareShare,
   Share2,
   Shield,
   Trophy,
@@ -263,7 +262,7 @@ function ResearchLibraryPage() {
             id="h-trackers"
             icon={<Trophy className="w-4 h-4" />}
             title="Trackers & indexes"
-            sub="Citizen rankings and official-action ledgers. Open any card, or browse the full trackers hub."
+            sub="Citizen rankings and the Networks Ledger (Terror & Finance + Speech Reach)."
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             <ToolCard
@@ -282,24 +281,10 @@ function ResearchLibraryPage() {
             />
             <ToolCard
               href="/research/networks-ledger"
-              title="Networks Ledger · Terror & Finance"
-              body="Aggregate official designations, freezes, arrests, and charges. Names only on official lists."
+              title="Networks Ledger"
+              body="Two branches: Terror & Finance (official designations, freezes, charges — names only on source lists) and Speech Reach (For You recommendation limits on public speech)."
               icon={<Shield className="w-5 h-5" />}
               badge="Ledger"
-            />
-            <ToolCard
-              href="/research/speech-reach"
-              title="Speech Reach"
-              body="Brazil 2026: campaign posts stay public — only free For You recommendation is limited."
-              icon={<MessageSquareShare className="w-5 h-5" />}
-              badge="Ledger"
-            />
-            <ToolCard
-              href="/trackers"
-              title="All trackers hub"
-              body="Leadership, Peace, and Networks Ledger in one place."
-              icon={<Trophy className="w-5 h-5" />}
-              badge="Hub"
             />
           </div>
         </section>

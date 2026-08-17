@@ -270,12 +270,23 @@ export function CommissionBriefForm() {
             <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground leading-snug">
               Enterprise
             </p>
-            <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-1 flex-1 break-words">
-              Custom dashboards, ongoing research, and team delivery — not fixed $10/$20 checkout.
+            <p className="text-[12.5px] font-medium text-foreground/90 leading-snug mt-0.5">
+              Custom dashboards &amp; ongoing research
             </p>
-            <p className="text-[11.5px] text-foreground/80 leading-snug mt-2.5 border-t border-amber-signal/20 pt-2.5 break-words">
-              Email with scope. No self-serve card form on this path.
+            <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-1.5 flex-1 break-words">
+              Personalized topics, team access, and continuous monitoring — not self-serve checkout.
+              Email with what you need; no card form on this path.
             </p>
+            <ul className="mt-2.5 space-y-1 text-[12px] text-muted-foreground border-t border-amber-signal/20 pt-2.5">
+              <li className="flex items-start gap-1.5">
+                <span className="text-amber-signal shrink-0">·</span>
+                Custom live dashboards and topic sets
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="text-amber-signal shrink-0">·</span>
+                Ongoing research retainers and team delivery
+              </li>
+            </ul>
             <ContactEmailMe
               source="research-enterprise-package"
               variant="button"
