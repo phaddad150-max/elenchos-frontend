@@ -76,10 +76,9 @@ import {
   extractPeaceCountries,
   extractRankedLeaders,
   fetchLatestTrackers,
-  type PeaceCountry,
   type RankedLeader,
 } from "@/lib/trackers-data";
-import { TERROR_FINANCE_METRICS, TERROR_FINANCE_DATA } from "@/lib/networks-ledger";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -255,13 +254,8 @@ function Dashboard() {
     leadersRanked?: number;
     countriesMonitored?: number;
   }>({});
-  /** Preview highlights for Active Trackers panel — existing tracker payloads only. */
-  const [trackerPreview, setTrackerPreview] = useState<{
-    topLeaders: RankedLeader[];
-    peaceTop: PeaceCountry[];
-    peaceBottom: PeaceCountry[];
-    peaceInsights: string[];
-  }>({ topLeaders: [], peaceTop: [], peaceBottom: [], peaceInsights: [] });
+  /** Top leaders for the focused Leadership board preview. */
+  const [topLeaders, setTopLeaders] = useState<RankedLeader[]>([]);
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [dashReady, setDashReady] = useState(false);
   const [simMode] = useSimMode();
@@ -294,38 +288,7 @@ function Dashboard() {
           leadersRanked: leaders.length || undefined,
           countriesMonitored: peaceCountries.length || undefined,
         });
-        const peaceSorted = [...peaceCountries].sort((a, b) => {
-          const sa =
-            typeof a.peace_health_score === "number"
-              ? a.peace_health_score
-              : typeof a.citizen_normalization_support === "number"
-                ? a.citizen_normalization_support
-                : typeof a.citizen_support === "number"
-                  ? a.citizen_support
-                  : 0;
-          const sb =
-            typeof b.peace_health_score === "number"
-              ? b.peace_health_score
-              : typeof b.citizen_normalization_support === "number"
-                ? b.citizen_normalization_support
-                : typeof b.citizen_support === "number"
-                  ? b.citizen_support
-                  : 0;
-          return sb - sa;
-        });
-        const rawInsights = (peaceRow?.data as { key_insights?: unknown } | undefined)?.key_insights;
-        const peaceInsights = Array.isArray(rawInsights)
-          ? rawInsights
-              .map((x) => (typeof x === "string" ? x.trim() : ""))
-              .filter(Boolean)
-              .slice(0, 2)
-          : [];
-        setTrackerPreview({
-          topLeaders: leaders.slice(0, 3),
-          peaceTop: peaceSorted.slice(0, 2),
-          peaceBottom: peaceSorted.slice(-2).reverse(),
-          peaceInsights,
-        });
+        setTopLeaders(leaders.slice(0, 3));
       }
       setDashReady(true);
     })();
@@ -719,7 +682,7 @@ function Dashboard() {
             <PublishedCasesPanel />
           </div>
           <div className="lg:col-span-6 min-w-0">
-            <ActiveTrackersPanel trackerKpis={trackerKpis} preview={trackerPreview} />
+            <LeadershipBoardPreview leaders={topLeaders} rankedTotal={trackerKpis.leadersRanked} />
           </div>
         </motion.div>
 
@@ -1370,8 +1333,7 @@ function splitSummaryIntoPoints(text: string): string[] {
 }
 
 /**
- * Live-sample structure modules — presentation only from existing signal/snapshot fields.
- * Replaces dual “Insights + Findings” free-form synthesis that mixed and repeated text.
+ * Compact collapsible sample structure — gaps + movers only, no essay wall.
  */
 function SampleStructureModules({
   overview,
@@ -1382,6 +1344,7 @@ function SampleStructureModules({
   signals?: FeedCitizenSignal[];
   overview: DashboardOverview | null;
 }) {
+  const [open, setOpen] = useState(false);
   const lastUpdated = overview?.generated_at ?? overview?.last_updated ?? null;
   const avgDiv =
     typeof overview?.kpis?.average_narrative_divergence === "number"
@@ -1389,7 +1352,7 @@ function SampleStructureModules({
       : null;
 
   const gaps = useMemo(() => {
-    type Gap = { topic: string; score: number; line: string; sample: number | null };
+    type Gap = { topic: string; score: number; sample: number | null };
     const fromSignals: Gap[] = [];
     for (const s of signals ?? []) {
       const score =
@@ -1399,15 +1362,12 @@ function SampleStructureModules({
             ? s.narrative_divergence
             : null;
       if (score == null || score <= 0) continue;
-      const line = shortenSignal(s.headline ?? s.summary ?? "") || s.topic;
       fromSignals.push({
         topic: s.topic,
         score: Math.round(score),
-        line,
         sample: typeof s.sample_size === "number" ? s.sample_size : null,
       });
     }
-
     if (fromSignals.length > 0) {
       const byTopic = new Map<string, Gap>();
       for (const g of fromSignals) {
@@ -1416,19 +1376,14 @@ function SampleStructureModules({
       }
       return Array.from(byTopic.values())
         .sort((a, b) => b.score - a.score)
-        .slice(0, 4);
+        .slice(0, 3);
     }
-
     if (!snapshots) return [] as Gap[];
     return Object.values(snapshots)
       .filter((s) => isLiveOutputTopic(s.topic) && typeof s.divergence_score === "number")
       .map((s): Gap => ({
         topic: s.topic,
         score: Math.round(s.divergence_score as number),
-        line:
-          (s.divergence_gap?.trim() && s.divergence_gap.trim().slice(0, 140)) ||
-          (s.key_insights?.[0]?.trim() ?? "").slice(0, 140) ||
-          "Citizen–official gap in this sample",
         sample:
           typeof s.sample_size === "number"
             ? s.sample_size
@@ -1437,492 +1392,414 @@ function SampleStructureModules({
               : null,
       }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 4);
+      .slice(0, 3);
   }, [signals, snapshots]);
 
-  const { rising, declining } = useMemo(() => {
-    const risingList: { topic: string; delta: number }[] = [];
-    const decliningList: { topic: string; delta: number }[] = [];
+  const movers = useMemo(() => {
+    const rising: { topic: string; delta: number }[] = [];
+    const falling: { topic: string; delta: number }[] = [];
+    const seenR = new Set<string>();
+    const seenF = new Set<string>();
     for (const s of signals ?? []) {
       if (typeof s.sentiment_delta !== "number" || s.sentiment_delta === 0) continue;
-      const row = { topic: s.topic, delta: s.sentiment_delta };
-      if (s.sentiment_delta > 0) risingList.push(row);
-      else decliningList.push(row);
-    }
-    risingList.sort((a, b) => b.delta - a.delta);
-    decliningList.sort((a, b) => a.delta - b.delta);
-    // Dedupe topics
-    const take = (arr: { topic: string; delta: number }[]) => {
-      const seen = new Set<string>();
-      const out: typeof arr = [];
-      for (const r of arr) {
-        if (seen.has(r.topic)) continue;
-        seen.add(r.topic);
-        out.push(r);
-        if (out.length >= 3) break;
+      if (s.sentiment_delta > 0 && !seenR.has(s.topic) && rising.length < 2) {
+        seenR.add(s.topic);
+        rising.push({ topic: s.topic, delta: s.sentiment_delta });
+      } else if (s.sentiment_delta < 0 && !seenF.has(s.topic) && falling.length < 2) {
+        seenF.add(s.topic);
+        falling.push({ topic: s.topic, delta: s.sentiment_delta });
       }
-      return out;
-    };
-    return { rising: take(risingList), declining: take(decliningList) };
+    }
+    rising.sort((a, b) => b.delta - a.delta);
+    falling.sort((a, b) => a.delta - b.delta);
+    return { rising, falling };
   }, [signals]);
 
-  // Optional Grok line — max 3 short points, only if present; never paired with a second “findings” grid
-  const sampleNotes = useMemo(() => {
-    const raw = overview?.grok_ai_summary?.trim();
-    if (!raw) return [] as string[];
-    return splitSummaryIntoPoints(raw)
-      .map((p) => p.replace(/\s+/g, " ").trim())
-      .filter((p) => p.length > 28 && p.length < 280)
-      .slice(0, 3);
-  }, [overview?.grok_ai_summary]);
-
-  const hasStructure = gaps.length > 0 || rising.length > 0 || declining.length > 0;
+  const summaryChip =
+    gaps.length > 0
+      ? `Top gap ${gaps[0]!.score} · ${gaps[0]!.topic.split(/[:/]/)[0]!.trim().slice(0, 28)}`
+      : avgDiv != null
+        ? `Avg gap ${avgDiv}`
+        : "No structure yet";
 
   return (
-    <section className="dash-panel p-2.5 sm:p-4 md:p-5 border-l-[3px] border-l-cyan min-w-0">
-      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3 pb-2.5 border-b border-border/80 flex-wrap">
-        <Header
-          icon={<Brain className="w-4 h-4" />}
-          title="This sample · structure"
-          subtitle="Gaps and movers from live signals — not a free-form essay"
-        />
-        <div className="flex items-center gap-2 flex-wrap">
-          {avgDiv != null && (
-            <span className="px-2 py-1 rounded-md bg-card border border-border text-[11px] font-mono text-muted-foreground">
-              Avg gap{" "}
-              <span className="text-cyan tabular-nums font-semibold">{avgDiv}</span>
-            </span>
-          )}
-          {lastUpdated && (
-            <span className="px-2 py-1 rounded-md bg-card border border-border text-muted-foreground text-[11px] font-mono">
-              Sample{" "}
-              <span className="text-foreground/90" suppressHydrationWarning>
-                {timeAgo(lastUpdated)}
+    <section className="rounded-xl border border-border/80 bg-card/30 overflow-hidden min-w-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-3.5 min-h-[48px] text-left touch-manipulation hover:bg-cyan/[0.04] transition-colors"
+      >
+        <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 text-cyan shrink-0">
+          <Brain className="w-3.5 h-3.5" />
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="flex items-center gap-2 flex-wrap">
+            <span className="text-[13px] font-medium text-foreground/95">This sample · structure</span>
+            {avgDiv != null && (
+              <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/10">
+                avg {avgDiv}
               </span>
-            </span>
+            )}
+          </span>
+          {!open && (
+            <span className="block text-[11px] text-muted-foreground truncate mt-0.5">{summaryChip}</span>
           )}
-        </div>
-      </div>
+        </span>
+        {lastUpdated && (
+          <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground shrink-0" suppressHydrationWarning>
+            {timeAgo(lastUpdated)}
+          </span>
+        )}
+        <ChevronDown
+          className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5 min-w-0">
-        {/* Strongest narrative gaps */}
-        <div className="lg:col-span-5 min-w-0 space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
-            Strongest narrative gaps
-          </div>
-          {gaps.length === 0 ? (
-            <p className="text-[12.5px] text-muted-foreground leading-snug py-3">
-              No divergence scores in this sample yet.
-            </p>
-          ) : (
-            <ul className="space-y-1.5">
-              {gaps.map((g, i) => (
-                <li
-                  key={g.topic + i}
-                  className="rounded-xl border border-border/80 bg-card/40 px-2.5 py-2 sm:px-3 sm:py-2.5 flex gap-2.5 items-start min-w-0"
-                >
-                  <span className="shrink-0 w-10 text-center">
-                    <span className="block text-[15px] font-display font-semibold tabular-nums text-cyan leading-none">
-                      {g.score}
-                    </span>
-                    <span className="block text-[8px] font-mono uppercase text-muted-foreground mt-0.5">
-                      gap
-                    </span>
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[10px] font-mono uppercase tracking-[0.12em] text-cyan/85 truncate">
-                      {g.topic}
-                    </span>
-                    <span className="block text-[12.5px] leading-snug text-foreground/90 line-clamp-2 mt-0.5">
-                      {g.line}
-                    </span>
-                    {g.sample != null && g.sample > 0 && (
-                      <span className="inline-flex mt-1 text-[9px] font-mono tabular-nums text-muted-foreground px-1.5 py-0.5 rounded border border-border/70">
-                        n={g.sample.toLocaleString()}
-                      </span>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-3 pb-3 sm:px-3.5 sm:pb-3.5 pt-0 border-t border-border/60">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 min-w-0">
+                <div className="min-w-0">
+                  <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan mb-1.5">
+                    Strongest gaps
+                  </p>
+                  {gaps.length === 0 ? (
+                    <p className="text-[11.5px] text-muted-foreground">No divergence in this sample.</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {gaps.map((g) => (
+                        <li key={g.topic} className="flex items-center gap-2 min-w-0">
+                          <span className="text-[13px] font-display font-semibold tabular-nums text-cyan w-8 shrink-0">
+                            {g.score}
+                          </span>
+                          <span className="h-1.5 flex-1 max-w-[4.5rem] rounded-full bg-border overflow-hidden shrink-0">
+                            <motion.span
+                              className="block h-full rounded-full bg-cyan"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(100, g.score)}%` }}
+                              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                          </span>
+                          <span className="text-[11.5px] truncate text-foreground/90 min-w-0 flex-1">
+                            {g.topic}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="min-w-0 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg border border-emerald-signal/25 bg-emerald-signal/[0.05] p-2 min-w-0">
+                    <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-emerald-signal flex items-center gap-0.5 mb-1">
+                      <ArrowUpRight className="w-3 h-3" /> Up
+                    </p>
+                    {movers.rising.length === 0 ? (
+                      <p className="text-[10.5px] text-muted-foreground">—</p>
+                    ) : (
+                      movers.rising.map((r) => (
+                        <p key={r.topic} className="text-[11px] leading-snug line-clamp-2">
+                          <span className="font-mono text-emerald-signal tabular-nums">+{r.delta}</span>{" "}
+                          <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
+                        </p>
+                      ))
                     )}
-                  </span>
-                  <span
-                    className="hidden sm:block shrink-0 w-1 self-stretch rounded-full bg-cyan/50 min-h-[2.5rem]"
-                    style={{ opacity: 0.35 + Math.min(0.65, g.score / 100) }}
-                    aria-hidden
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Rising vs declining */}
-        <div className="lg:col-span-4 min-w-0 space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
-            Rising vs declining
-          </div>
-          <div className="grid grid-cols-2 gap-2 h-full min-h-0">
-            <div className="rounded-xl border border-emerald-signal/30 bg-emerald-signal/[0.06] p-2.5 space-y-1.5">
-              <div className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] text-emerald-signal">
-                <ArrowUpRight className="w-3.5 h-3.5" />
-                Rising
-              </div>
-              {rising.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground leading-snug">No WoW/MoM rise in feed.</p>
-              ) : (
-                rising.map((r) => (
-                  <div key={r.topic} className="min-w-0">
-                    <p className="text-[12px] font-medium leading-snug line-clamp-2 text-foreground/90">
-                      {r.topic}
-                    </p>
-                    <p className="text-[11px] font-mono tabular-nums text-emerald-signal">
-                      +{r.delta}
-                    </p>
                   </div>
-                ))
-              )}
-            </div>
-            <div className="rounded-xl border border-rose-signal/30 bg-rose-signal/[0.06] p-2.5 space-y-1.5">
-              <div className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] text-rose-signal">
-                <ArrowDownRight className="w-3.5 h-3.5" />
-                Declining
-              </div>
-              {declining.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground leading-snug">No WoW/MoM drop in feed.</p>
-              ) : (
-                declining.map((r) => (
-                  <div key={r.topic} className="min-w-0">
-                    <p className="text-[12px] font-medium leading-snug line-clamp-2 text-foreground/90">
-                      {r.topic}
+                  <div className="rounded-lg border border-rose-signal/25 bg-rose-signal/[0.05] p-2 min-w-0">
+                    <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-rose-signal flex items-center gap-0.5 mb-1">
+                      <ArrowDownRight className="w-3 h-3" /> Down
                     </p>
-                    <p className="text-[11px] font-mono tabular-nums text-rose-signal">{r.delta}</p>
+                    {movers.falling.length === 0 ? (
+                      <p className="text-[10.5px] text-muted-foreground">—</p>
+                    ) : (
+                      movers.falling.map((r) => (
+                        <p key={r.topic} className="text-[11px] leading-snug line-clamp-2">
+                          <span className="font-mono text-rose-signal tabular-nums">{r.delta}</span>{" "}
+                          <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
+                        </p>
+                      ))
+                    )}
                   </div>
-                ))
-              )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Optional short Grok notes OR empty state — never a second findings wall */}
-        <div className="lg:col-span-3 min-w-0 space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
-            Sample notes
-          </div>
-          {sampleNotes.length > 0 ? (
-            <ol className="space-y-1.5 list-none">
-              {sampleNotes.map((note, i) => (
-                <li
-                  key={i}
-                  className="rounded-xl border border-border/80 bg-card/40 px-2.5 py-2 flex gap-2 min-w-0"
-                >
-                  <span className="shrink-0 text-[10px] font-mono text-cyan tabular-nums">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-[12px] leading-snug text-foreground/90 line-clamp-4">
-                    {note}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          ) : hasStructure ? (
-            <p className="text-[12px] text-muted-foreground leading-relaxed rounded-xl border border-dashed border-border/80 px-2.5 py-3">
-              No separate AI essay this run. Use gaps and movers above — full briefings stay on Topics.
-            </p>
-          ) : (
-            <p className="text-[12px] text-muted-foreground leading-relaxed rounded-xl border border-dashed border-border/80 px-2.5 py-3">
-              Structure will fill when the next sample lands.
-            </p>
-          )}
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
 
-/**
- * Published intelligence preview — highlight-level findings from free Library case studies.
- * Not live X sample; multi-source briefs only.
- */
+/** Migration brief sneak peek — single focused, animated published intelligence card. */
 function PublishedCasesPanel() {
+  const brief = MIGRATION_SNEAK_PEEK;
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setActive((i) => (i + 1) % brief.highlights.length);
+    }, 4200);
+    return () => window.clearInterval(id);
+  }, [brief.highlights.length]);
+
   return (
-    <section className="dash-panel p-2.5 sm:p-4 h-full min-w-0 flex flex-col">
-      <div className="flex items-start justify-between gap-2 mb-2.5 pb-2 border-b border-border/80">
-        <Header
-          icon={<FileStack className="w-4 h-4" />}
-          title="Published Intelligence"
-          subtitle="Preview highlights from free Library case studies"
-        />
-        <Link
-          to="/research/library"
-          className="shrink-0 text-[11px] font-mono text-cyan hover:underline inline-flex items-center gap-0.5 min-h-[36px] touch-manipulation"
-        >
-          Full library
-          <ArrowRight className="w-3 h-3" />
-        </Link>
-      </div>
-      <div className="flex flex-col gap-2.5 flex-1 min-w-0">
-        {DASHBOARD_CASE_HIGHLIGHTS.map((c, i) => (
-          <motion.a
-            key={c.id}
-            href={c.href}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 sm:p-3.5 flex flex-col gap-2 min-h-[44px] touch-manipulation transition-colors"
-          >
-            <div className="flex items-start justify-between gap-2 min-w-0">
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                  <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-emerald-signal/35 text-emerald-signal bg-emerald-signal/10">
-                    Case study
-                  </span>
-                  <span className="text-[10px] font-mono text-muted-foreground">{c.region}</span>
-                </div>
-                <span className="block text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-cyan transition-colors">
-                  {c.title}
-                </span>
-              </div>
-              <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-cyan mt-1" />
-            </div>
-            <p className="text-[12px] text-muted-foreground leading-snug line-clamp-2">{c.teaser}</p>
-            <ul className="space-y-1.5">
-              {c.highlights.map((h, hi) => (
-                <li
-                  key={hi}
-                  className="flex gap-2 text-[12px] leading-snug text-foreground/90 min-w-0"
-                >
-                  <span className="shrink-0 text-cyan font-mono text-[10px] mt-0.5">
-                    {String(hi + 1).padStart(2, "0")}
-                  </span>
-                  <span className="min-w-0 line-clamp-2">{h}</span>
-                </li>
-              ))}
-            </ul>
-            <span className="text-[11px] font-mono text-cyan inline-flex items-center gap-1 pt-0.5">
-              Open full brief
-              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+    <section className="dash-panel p-3 sm:p-4 h-full min-w-0 flex flex-col overflow-hidden relative">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_0%_0%,color-mix(in_oklab,var(--emerald-signal)_12%,transparent),transparent_55%)]" />
+      <div className="relative flex items-start justify-between gap-2 mb-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap mb-1">
+            <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-emerald-signal/40 text-emerald-signal bg-emerald-signal/10">
+              Published · Case study
             </span>
-          </motion.a>
+            <span className="text-[10px] font-mono text-muted-foreground">{brief.region}</span>
+          </div>
+          <h2 className="text-[15px] sm:text-base font-display font-semibold text-foreground/95 leading-snug">
+            {brief.title}
+          </h2>
+          <p className="text-[12px] text-muted-foreground mt-1 leading-snug">{brief.teaser}</p>
+        </div>
+      </div>
+
+      <div className="relative flex-1 min-h-[7.5rem] sm:min-h-[8.5rem]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 rounded-xl border border-emerald-signal/25 bg-emerald-signal/[0.06] p-3 sm:p-3.5 flex flex-col"
+          >
+            <span className="text-[9px] font-mono uppercase tracking-[0.14em] text-emerald-signal mb-1.5">
+              Insight {String(active + 1).padStart(2, "0")} / {String(brief.highlights.length).padStart(2, "0")}
+            </span>
+            <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-foreground/95 flex-1">
+              {brief.highlights[active]}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="relative flex items-center gap-1.5 mt-3">
+        {brief.highlights.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Show insight ${i + 1}`}
+            onClick={() => setActive(i)}
+            className={`h-1.5 rounded-full transition-all touch-manipulation min-h-[12px] ${
+              i === active ? "w-6 bg-emerald-signal" : "w-1.5 bg-border hover:bg-emerald-signal/50"
+            }`}
+          />
         ))}
       </div>
+
+      <a
+        href={brief.href}
+        className="relative mt-3 group inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-emerald-signal/40 bg-emerald-signal/10 hover:bg-emerald-signal/18 text-emerald-signal text-[12.5px] font-semibold touch-manipulation transition-colors"
+      >
+        Open full migration brief
+        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+      </a>
     </section>
   );
 }
 
 /**
- * Active trackers preview — movers/highlights from live tracker payloads + ledger aggregates.
- * Separate product layer from Live Citizen Signals.
+ * Leadership board — top 3 only, podium + auto-rotate focus, interactive.
  */
-function ActiveTrackersPanel({
-  trackerKpis,
-  preview,
+function LeadershipBoardPreview({
+  leaders,
+  rankedTotal,
 }: {
-  trackerKpis?: { leadersRanked?: number; countriesMonitored?: number };
-  preview: {
-    topLeaders: RankedLeader[];
-    peaceTop: PeaceCountry[];
-    peaceBottom: PeaceCountry[];
-    peaceInsights: string[];
-  };
+  leaders: RankedLeader[];
+  rankedTotal?: number;
 }) {
-  const peaceScore = (c: PeaceCountry) =>
-    typeof c.peace_health_score === "number"
-      ? c.peace_health_score
-      : typeof c.citizen_normalization_support === "number"
-        ? c.citizen_normalization_support
-        : typeof c.citizen_support === "number"
-          ? c.citizen_support
-          : null;
+  const top3 = leaders.slice(0, 3);
+  const [focus, setFocus] = useState(0);
 
-  const ledgerActions = TERROR_FINANCE_METRICS?.totalActions;
-  const ledgerPeriod = TERROR_FINANCE_DATA?.period?.label;
+  useEffect(() => {
+    if (top3.length < 2) return;
+    const id = window.setInterval(() => {
+      setFocus((i) => (i + 1) % top3.length);
+    }, 3200);
+    return () => window.clearInterval(id);
+  }, [top3.length]);
+
+  // Podium visual order: 2nd, 1st, 3rd
+  const podiumOrder =
+    top3.length >= 3
+      ? [top3[1]!, top3[0]!, top3[2]!]
+      : top3.length === 2
+        ? [top3[1]!, top3[0]!]
+        : top3;
+
+  const podiumHeights = top3.length >= 3 ? [58, 88, 46] : top3.length === 2 ? [58, 88] : [88];
+  const focused = top3[focus];
+  const maxScore = Math.max(
+    ...top3.map((l) => (typeof l.overall_score === "number" ? l.overall_score : 0)),
+    1,
+  );
 
   return (
-    <section className="dash-panel p-2.5 sm:p-4 h-full min-w-0 flex flex-col">
-      <div className="flex items-start justify-between gap-2 mb-2.5 pb-2 border-b border-border/80">
-        <Header
-          icon={<Radar className="w-4 h-4" />}
-          title="Active Trackers"
-          subtitle="Live index snapshots · not the X signal feed"
-        />
+    <section className="dash-panel p-3 sm:p-4 h-full min-w-0 flex flex-col overflow-hidden relative">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_100%_0%,color-mix(in_oklab,var(--cyan)_14%,transparent),transparent_55%)]" />
+      <div className="relative flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap mb-1">
+            <span className="text-[9px] font-mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-cyan/40 text-cyan bg-cyan/10">
+              Tracker · Live
+            </span>
+            {typeof rankedTotal === "number" && (
+              <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+                {rankedTotal} ranked
+              </span>
+            )}
+          </div>
+          <h2 className="text-[15px] sm:text-base font-display font-semibold text-foreground/95">
+            Leadership board
+          </h2>
+          <p className="text-[12px] text-muted-foreground mt-0.5">Top 3 · citizen trust</p>
+        </div>
         <Link
-          to="/trackers"
+          to="/trackers/leaders"
           className="shrink-0 text-[11px] font-mono text-cyan hover:underline inline-flex items-center gap-0.5 min-h-[36px] touch-manipulation"
         >
-          Full trackers
+          Full board
           <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
 
-      <div className="flex flex-col gap-2.5 flex-1 min-w-0">
-        {/* Leadership board preview */}
-        <Link
-          to="/trackers/leaders"
-          className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan shrink-0">
-                <Users className="w-3.5 h-3.5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium group-hover:text-cyan transition-colors">
-                  Leadership board
-                </p>
-                <p className="text-[10px] font-mono text-muted-foreground">
-                  {typeof trackerKpis?.leadersRanked === "number"
-                    ? `${trackerKpis.leadersRanked} ranked · citizen trust`
-                    : "Citizen trust rankings"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0" />
-          </div>
-          {preview.topLeaders.length > 0 ? (
-            <ol className="space-y-1.5">
-              {preview.topLeaders.map((l, i) => (
-                <li
-                  key={l.name + i}
-                  className="flex items-center gap-2 text-[12px] min-w-0"
+      {top3.length === 0 ? (
+        <p className="relative text-[12px] text-muted-foreground py-8 text-center">Loading leaders…</p>
+      ) : (
+        <>
+          {/* Interactive podium */}
+          <div className="relative flex items-end justify-center gap-2 sm:gap-3 min-h-[120px] sm:min-h-[132px] px-1 pt-2">
+            {podiumOrder.map((l, visualIdx) => {
+              const rank = l.rank ?? (top3.indexOf(l) + 1);
+              const score = typeof l.overall_score === "number" ? l.overall_score : 0;
+              const h = podiumHeights[visualIdx] ?? 50;
+              const isFocus = top3[focus] === l;
+              const realIdx = top3.indexOf(l);
+              return (
+                <button
+                  key={l.name}
+                  type="button"
+                  onClick={() => setFocus(realIdx >= 0 ? realIdx : 0)}
+                  className={`flex-1 max-w-[7.5rem] flex flex-col items-center gap-1.5 touch-manipulation transition-transform ${
+                    isFocus ? "scale-105 z-10" : "opacity-80 hover:opacity-100"
+                  }`}
                 >
-                  <span className="text-[10px] font-mono text-cyan tabular-nums w-5 shrink-0">
-                    #{l.rank ?? i + 1}
-                  </span>
-                  <span className="truncate flex-1 font-medium text-foreground/90">
-                    {l.flag ? `${l.flag} ` : ""}
+                  <motion.span
+                    className="text-lg leading-none"
+                    animate={isFocus ? { y: [0, -3, 0] } : { y: 0 }}
+                    transition={{ duration: 1.6, repeat: isFocus ? Infinity : 0, ease: "easeInOut" }}
+                  >
+                    {l.flag ?? "🏳️"}
+                  </motion.span>
+                  <span className="text-[10px] sm:text-[11px] font-medium text-center line-clamp-2 leading-tight px-0.5 min-h-[2rem]">
                     {l.name}
                   </span>
-                  {typeof l.overall_score === "number" && (
-                    <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
-                      {Math.round(l.overall_score)}
+                  <motion.div
+                    className={`w-full rounded-t-lg border flex flex-col items-center justify-end pb-2 ${
+                      rank === 1
+                        ? "border-cyan/50 bg-gradient-to-t from-cyan/25 to-cyan/5"
+                        : "border-border/80 bg-gradient-to-t from-card to-cyan/[0.04]"
+                    }`}
+                    initial={{ height: 24 }}
+                    animate={{ height: h }}
+                    transition={{ duration: 0.7, delay: visualIdx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <span className="text-[10px] font-mono text-cyan tabular-nums">#{rank}</span>
+                    <span className="text-[14px] font-display font-semibold tabular-nums text-foreground">
+                      {Math.round(score)}
+                    </span>
+                  </motion.div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Focused detail strip */}
+          <AnimatePresence mode="wait">
+            {focused && (
+              <motion.div
+                key={focused.name}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.25 }}
+                className="relative mt-3 rounded-xl border border-cyan/30 bg-cyan/[0.07] p-2.5 sm:p-3"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl shrink-0">{focused.flag ?? "🏳️"}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-medium truncate">
+                      #{focused.rank ?? focus + 1} {focused.name}
+                    </p>
+                    <p className="text-[10px] font-mono text-muted-foreground truncate">
+                      {[focused.country, focused.region].filter(Boolean).join(" · ") || "Global"}
+                      {typeof focused.divergence === "number"
+                        ? ` · gap ${Math.round(focused.divergence)}`
+                        : ""}
+                    </p>
+                  </div>
+                  {typeof focused.overall_score === "number" && (
+                    <span className="text-[1.25rem] font-display font-semibold tabular-nums text-cyan shrink-0">
+                      {Math.round(focused.overall_score)}
                     </span>
                   )}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="text-[11.5px] text-muted-foreground">Leader table loading…</p>
-          )}
-        </Link>
+                </div>
+                <div className="mt-2 h-1.5 rounded-full bg-border/80 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan/70 to-cyan"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${Math.min(100, ((typeof focused.overall_score === "number" ? focused.overall_score : 0) / maxScore) * 100)}%`,
+                    }}
+                    transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                </div>
+                {focused.summary && (
+                  <p className="mt-2 text-[11.5px] text-muted-foreground leading-snug line-clamp-2">
+                    {focused.summary}
+                  </p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* Peace index preview */}
-        <Link
-          to="/trackers/peace"
-          className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan shrink-0">
-                <ShieldCheck className="w-3.5 h-3.5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium group-hover:text-cyan transition-colors">
-                  Peace index
-                </p>
-                <p className="text-[10px] font-mono text-muted-foreground">
-                  {typeof trackerKpis?.countriesMonitored === "number"
-                    ? `${trackerKpis.countriesMonitored} countries · normalization`
-                    : "Normalization diagnostics"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0" />
+          <div className="relative flex justify-center gap-1.5 mt-2.5">
+            {top3.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Focus rank ${i + 1}`}
+                onClick={() => setFocus(i)}
+                className={`h-1.5 rounded-full transition-all touch-manipulation min-h-[12px] ${
+                  i === focus ? "w-5 bg-cyan" : "w-1.5 bg-border hover:bg-cyan/40"
+                }`}
+              />
+            ))}
           </div>
-          {preview.peaceInsights[0] ? (
-            <p className="text-[12px] leading-snug text-foreground/90 line-clamp-2 mb-2">
-              {preview.peaceInsights[0]}
-            </p>
-          ) : null}
-          {(preview.peaceTop.length > 0 || preview.peaceBottom.length > 0) && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="min-w-0">
-                <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-emerald-signal mb-1">
-                  Higher health
-                </p>
-                {preview.peaceTop.map((c) => {
-                  const s = peaceScore(c);
-                  return (
-                    <p key={c.name} className="text-[11.5px] truncate text-foreground/90">
-                      {c.flag ? `${c.flag} ` : ""}
-                      {c.name}
-                      {s != null ? (
-                        <span className="font-mono text-muted-foreground"> · {Math.round(s)}</span>
-                      ) : null}
-                    </p>
-                  );
-                })}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-rose-signal mb-1">
-                  Pressure
-                </p>
-                {preview.peaceBottom.map((c) => {
-                  const s = peaceScore(c);
-                  return (
-                    <p key={c.name} className="text-[11.5px] truncate text-foreground/90">
-                      {c.flag ? `${c.flag} ` : ""}
-                      {c.name}
-                      {s != null ? (
-                        <span className="font-mono text-muted-foreground"> · {Math.round(s)}</span>
-                      ) : null}
-                    </p>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          {preview.peaceTop.length === 0 && !preview.peaceInsights[0] && (
-            <p className="text-[11.5px] text-muted-foreground">Peace index loading…</p>
-          )}
-        </Link>
+        </>
+      )}
 
-        {/* Networks Ledger preview — aggregate metrics only (privacy-safe) */}
-        <Link
-          to="/research/networks-ledger"
-          className="group rounded-xl border border-border/80 bg-card/40 hover:border-cyan/45 hover:bg-cyan/5 p-3 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-8 h-8 rounded-lg grid place-items-center border border-cyan/30 bg-cyan/10 text-cyan shrink-0">
-                <ShieldAlert className="w-3.5 h-3.5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium group-hover:text-cyan transition-colors">
-                  Networks Ledger
-                </p>
-                <p className="text-[10px] font-mono text-muted-foreground">
-                  Terror & Finance · official aggregates
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan shrink-0" />
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
-            {typeof ledgerActions === "number" && (
-              <span>
-                <span className="font-mono tabular-nums text-cyan font-semibold">{ledgerActions}</span>
-                <span className="text-muted-foreground"> actions tracked</span>
-              </span>
-            )}
-            {typeof TERROR_FINANCE_METRICS?.designations === "number" && (
-              <span>
-                <span className="font-mono tabular-nums text-foreground/90">
-                  {TERROR_FINANCE_METRICS.designations}
-                </span>
-                <span className="text-muted-foreground"> designations</span>
-              </span>
-            )}
-            {typeof TERROR_FINANCE_METRICS?.actionsLatestPeriod === "number" && (
-              <span>
-                <span className="font-mono tabular-nums text-foreground/90">
-                  {TERROR_FINANCE_METRICS.actionsLatestPeriod}
-                </span>
-                <span className="text-muted-foreground"> latest window</span>
-              </span>
-            )}
-          </div>
-          {ledgerPeriod && (
-            <p className="text-[10px] font-mono text-muted-foreground mt-1.5">{ledgerPeriod}</p>
-          )}
-        </Link>
-      </div>
+      <Link
+        to="/trackers/leaders"
+        className="relative mt-3 group inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan text-[12.5px] font-semibold touch-manipulation transition-colors"
+      >
+        Open leadership board
+        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+      </Link>
     </section>
   );
 }
@@ -2494,34 +2371,19 @@ const DASHBOARD_TRACKERS = [
   },
 ] as const;
 
-/** Latest free Library case studies — presentation only (same content as Library). */
-/** Library case-study previews — static editorial highlights (same free briefs as Library). */
-const DASHBOARD_CASE_HIGHLIGHTS = [
-  {
-    id: "aviation",
-    title: "Aviation after disruption",
-    teaser: "Who leads on recovery, connectivity, and AI readiness after COVID-era disruption.",
-    highlights: [
-      "Delivery trust and network strategy separate OEM winners from laggards — not a single stock tip.",
-      "Cabin bandwidth (satcom) and payments innovation show up as citizen-facing proof points, not only fleet stats.",
-      "AI ops readiness is uneven: maintenance and pricing claims often outrun what public evidence supports.",
-    ],
-    href: "/research-aviation",
-    region: "Global",
-  },
-  {
-    id: "migration",
-    title: "Irregular migration",
-    teaser: "Scale, corridors, and open vs resist frames — with returns honesty.",
-    highlights: [
-      "Public discourse volume clusters on entry pressure; return and removal capacity get far less sustained attention.",
-      "Open vs resist frames compete more loudly than measured corridor data in citizen samples.",
-      "Official success claims and street-level lived experience diverge most where enforcement is intermittent.",
-    ],
-    href: "/research-migration",
-    region: "EU · UK",
-  },
-] as const;
+/** Single focused Library sneak peek for the landing page. */
+const MIGRATION_SNEAK_PEEK = {
+  title: "Irregular migration",
+  teaser: "Scale, corridors, open vs resist frames — returns honesty.",
+  region: "EU · UK",
+  href: "/research-migration",
+  highlights: [
+    "Citizen discourse clusters on entry pressure; return and removal capacity get far less sustained attention.",
+    "Open vs resist frames compete more loudly than measured corridor data in public samples.",
+    "Official success claims and lived experience diverge most where enforcement is intermittent.",
+    "Solidarity and security narratives both claim moral high ground — few posts hold both at once.",
+  ],
+} as const;
 
 /** Optional expand-panel action. Nested Link uses stopPropagation so expand still works. */
 type KpiHeroCta = {
