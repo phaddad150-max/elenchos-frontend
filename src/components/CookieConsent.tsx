@@ -9,6 +9,7 @@ import {
   writeConsentChoice,
   type ConsentChoice,
 } from "@/lib/privacy-consent";
+import { denyAnalyticsConsent } from "@/lib/google-analytics";
 
 async function recordConsent(granted: boolean) {
   try {
@@ -44,9 +45,12 @@ export function CookieConsent() {
   }, []);
 
   const set = (value: ConsentChoice) => {
-    writeConsentChoice(value);
+    writeConsentChoice(value); // dispatches consent-changed → GoogleAnalytics enables gtag
     void recordConsent(value === "accepted");
     setOpen(false);
+    if (value === "declined") {
+      denyAnalyticsConsent();
+    }
   };
 
   if (!open) return null;
