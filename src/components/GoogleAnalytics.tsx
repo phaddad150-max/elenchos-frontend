@@ -4,9 +4,8 @@ import { enableAnalyticsAndTrack } from "@/lib/google-analytics";
 import { readConsentChoice } from "@/lib/privacy-consent";
 
 /**
- * GA4 via gtag.js (measurement ID G-SM3C2J9L0Z).
- * Loads and sends page views only after cookie Accept.
- * Note: this is GA4 gtag — not a GTM-XXXX container snippet.
+ * GA4 via gtag.js (G-SM3C2J9L0Z) already bootstrapped in document head with Consent Mode.
+ * Grants analytics_storage + sends page views only after cookie Accept.
  */
 export function GoogleAnalytics() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

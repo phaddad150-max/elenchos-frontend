@@ -83,8 +83,8 @@ export function CookieConsent() {
               </button>
             </div>
             <p className="text-[11.5px] text-muted-foreground leading-snug mt-1">
-              Essential cookies keep you signed in. Analytics load only if you accept — no ads, no
-              selling profiles.{" "}
+              Essential cookies keep you signed in. The Google tag is present with analytics off until
+              you Accept — no ads, no selling profiles.{" "}
               <Link to="/privacy" className="text-cyan hover:underline">
                 Privacy Notice
               </Link>

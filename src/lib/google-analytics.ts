@@ -1,4 +1,4 @@
-import { readConsentChoice } from "@/lib/privacy-consent";
+import { CONSENT_KEY, readConsentChoice } from "@/lib/privacy-consent";
 
 /** GA4 Measurement ID (gtag.js). Not a GTM container (GTM-…). */
 export const GA_MEASUREMENT_ID = "G-SM3C2J9L0Z";
@@ -10,19 +10,16 @@ declare global {
   }
 }
 
-let loadPromise: Promise<void> | null = null;
 let consentGranted = false;
 
 /**
- * Official gtag stub must push the Arguments object — not a rest array.
- * Pushing `args` (Array) breaks Google's pre-load dataLayer queue, so config /
- * page_view commands never fire after gtag.js boots.
+ * Official stub: must push Arguments (not a rest array) so Google’s queue works.
  * @see https://developers.google.com/tag-platform/gtagjs/install
  */
-function ensureGtagStub() {
+export function ensureGtagStub() {
+  if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag === "function") return;
-  // Important: use `arguments`, not `...args` + push(args)
   window.gtag = function gtag() {
     // eslint-disable-next-line prefer-rest-params
     window.dataLayer!.push(arguments);
@@ -30,72 +27,40 @@ function ensureGtagStub() {
 }
 
 /**
- * Load gtag.js. Consent default is set before the script tag so Consent Mode
- * queues correctly. Script loads only when we intend to track (after Accept).
+ * Consent default MUST run before gtag.js processes the queue (Consent Mode v2).
+ * analytics_storage stays denied until Accept unless the user already accepted.
  */
-export function loadGoogleAnalytics(): Promise<void> {
-  if (typeof window === "undefined") return Promise.resolve();
-  if (loadPromise) return loadPromise;
+export function getGtagConsentDefaultInlineScript(): string {
+  const key = CONSENT_KEY;
+  return `(function(){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;var g=false;try{g=localStorage.getItem(${JSON.stringify(key)})==="accepted";}catch(e){}gtag("consent","default",{analytics_storage:g?"granted":"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",wait_for_update:500});})();`;
+}
 
-  loadPromise = new Promise((resolve) => {
-    ensureGtagStub();
-
-    const accepted = readConsentChoice() === "accepted";
-    // Consent Mode v2 defaults — must run before gtag.js processes the queue
-    window.gtag!("consent", "default", {
-      analytics_storage: accepted ? "granted" : "denied",
-      ad_storage: "denied",
-      ad_user_data: "denied",
-      ad_personalization: "denied",
-      wait_for_update: 500,
-    });
-    window.gtag!("js", new Date());
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src*="googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"]`,
-    );
-    if (existing) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    script.onload = () => resolve();
-    script.onerror = () => {
-      // Allow a later retry if the network failed
-      loadPromise = null;
-      resolve();
-    };
-    document.head.appendChild(script);
-  });
-
-  return loadPromise;
+/** After the async gtag.js tag: js timestamp + config (no page_view until Accept). */
+export function getGtagConfigInlineScript(): string {
+  const id = GA_MEASUREMENT_ID;
+  return `(function(){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag("js",new Date());gtag("config",${JSON.stringify(id)},{anonymize_ip:true,send_page_view:false});})();`;
 }
 
 export function grantAnalyticsConsent() {
   if (typeof window === "undefined") return;
   ensureGtagStub();
-  window.gtag!("consent", "update", {
-    analytics_storage: "granted",
-  });
+  window.gtag!("consent", "update", { analytics_storage: "granted" });
   consentGranted = true;
 }
 
 export function denyAnalyticsConsent() {
   if (typeof window === "undefined") return;
+  ensureGtagStub();
   if (typeof window.gtag !== "function") return;
   window.gtag("consent", "update", { analytics_storage: "denied" });
   consentGranted = false;
 }
 
-/**
- * SPA page view via gtag config (GA4 recommended for client-side navigations).
- */
+/** SPA page view after consent (GA4 config pattern). */
 export function trackPageview(path: string) {
   if (typeof window === "undefined") return;
   if (readConsentChoice() !== "accepted") return;
+  ensureGtagStub();
   if (typeof window.gtag !== "function") return;
 
   window.gtag("config", GA_MEASUREMENT_ID, {
@@ -107,15 +72,15 @@ export function trackPageview(path: string) {
   });
 }
 
-/** Call when consent is accepted (or on route change after Accept). */
+/**
+ * After Accept (or on route change when already accepted): grant storage + pageview.
+ * Tag script is already in the document head via Consent Mode bootstrap.
+ */
 export async function enableAnalyticsAndTrack(path: string) {
   if (typeof window === "undefined") return;
   if (readConsentChoice() !== "accepted") return;
 
-  await loadGoogleAnalytics();
-  // Ensure real gtag from the script has replaced the stub when possible
   ensureGtagStub();
-
   if (!consentGranted) {
     grantAnalyticsConsent();
   }

@@ -163,11 +163,12 @@ function PrivacyPage() {
           <Section icon={Cookie} title="Cookies">
             <p>
               Theme preference and similar strictly useful local settings may be stored in your
-              browser. If you choose <strong className="text-foreground/90">Accept</strong> on the
-              cookie banner, we load Google Analytics (measurement ID G-SM3C2J9L0Z) to count page
-              visits with IP anonymization. We do not use advertising cookies or sell personal
-              profiles. Choose Essential only to keep analytics off. You can clear site data in
-              your browser at any time.
+              browser. The Google Analytics tag (measurement ID G-SM3C2J9L0Z) is present on the site
+              with Consent Mode; analytics storage stays off until you choose{" "}
+              <strong className="text-foreground/90">Accept</strong> on the cookie banner. After
+              Accept we count page visits with IP anonymization. We do not use advertising cookies
+              or sell personal profiles. Choose Essential only to keep analytics off. You can clear
+              site data in your browser at any time.
             </p>
           </Section>
 

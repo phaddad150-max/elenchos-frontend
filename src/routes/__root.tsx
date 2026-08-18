@@ -12,6 +12,11 @@ import appCss from "../styles.css?url";
 import { ThemeInit } from "@/components/ThemeInit";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import {
+  GA_MEASUREMENT_ID,
+  getGtagConfigInlineScript,
+  getGtagConsentDefaultInlineScript,
+} from "@/lib/google-analytics";
 
 const FONT_LINKS = [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -160,8 +165,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-US" className="light" suppressHydrationWarning>
       <head>
-        {/* gtag.js loads only after cookie Accept — see GoogleAnalytics + google-analytics.ts */}
         <HeadContent />
+        {/*
+          Consent Mode v2 (Google Admin Test can detect the tag):
+          1) consent default  2) async gtag.js  3) js + config (send_page_view false until Accept)
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: getGtagConsentDefaultInlineScript(),
+          }}
+        />
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: getGtagConfigInlineScript(),
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("cp-theme");if(t!=="light"&&t!=="dark")t="light";document.documentElement.classList.remove("light","dark");document.documentElement.classList.add(t);}catch(e){document.documentElement.classList.add("light");}})();`,
