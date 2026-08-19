@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Eye,
   FlaskConical,
   Layers,
   LineChart,
-  Lock,
+  MessageSquareQuote,
   Radio,
   Scale,
+  Shield,
   Sparkles,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -32,58 +34,193 @@ function AboutPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-12 space-y-8 md:space-y-10 relative flex-1 overflow-x-clip min-w-0">
-        <header className="page-hero-banner overflow-hidden min-w-0">
-          <div className="p-4 sm:p-5 md:p-6 space-y-3 min-w-0">
+      <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-12 space-y-7 md:space-y-9 relative flex-1 overflow-x-clip min-w-0">
+        {/* 1 · Hero — ἔλεγχος */}
+        <header className="page-hero-banner overflow-hidden min-w-0 relative rounded-2xl border border-cyan/25">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_12%_0%,color-mix(in_oklab,var(--cyan)_20%,transparent),transparent_55%)]" />
+          <div className="relative p-4 sm:p-5 md:p-7 space-y-3.5 min-w-0">
             <div className="page-hero-kicker">
               <Radio className="w-3.5 h-3.5" aria-hidden />
               About
             </div>
-            <h1 className="page-hero-title text-[1.5rem] sm:text-3xl md:text-[2.1rem] break-words">
+            <h1 className="page-hero-title text-[1.55rem] sm:text-3xl md:text-[2.15rem] break-words">
               Elenchos <span className="text-cyan">ἔλεγχος</span>
             </h1>
-            <p className="text-[15px] sm:text-base font-display font-medium text-cyan/95 leading-snug max-w-xl break-words">
+            <p className="text-[15px] sm:text-base font-display font-medium text-cyan/95 leading-snug max-w-xl">
               {ELENCHOS_TAGLINE}
             </p>
-            <p className="page-hero-sub max-w-2xl text-[14px] leading-relaxed break-words">
-              Ancient Greek for cross-examination. Elenchos helps ordinary people see the gap
-              between public conversation and official or media frames — and run deeper research
-              when a topic needs more than a pulse. Independent researcher · EU.
+            <p className="max-w-2xl text-[14px] sm:text-[14.5px] text-foreground/90 leading-relaxed">
+              In ancient Greek, <em className="text-cyan not-italic font-medium">elenchos</em>{" "}
+              (ἔλεγχος) means <strong className="text-foreground font-semibold">cross-examination</strong>{" "}
+              and <strong className="text-foreground font-semibold">refutation</strong> — the
+              disciplined testing of claims under questioning. That is the spirit of this desk: we
+              examine the gap between{" "}
+              <strong className="text-foreground font-semibold">
+                what ordinary people say in public
+              </strong>{" "}
+              and{" "}
+              <strong className="text-foreground font-semibold">
+                what official or media frames assert
+              </strong>
+              , so citizens can weigh evidence instead of slogans.
+            </p>
+            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-2xl">
+              Independent researcher · based in the EU · human-managed. AI assists analysis; it does
+              not invent voices.
+            </p>
+            <p className="text-[10.5px] sm:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+              Citizen voices vs official narratives · Data, not dogma · Human-managed
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               <Link
                 to="/research/library"
-                search={{ section: "topics" }}
                 className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full bg-cyan text-background text-[13px] font-semibold touch-manipulation"
               >
-                Explore Library <ArrowRight className="w-3.5 h-3.5" />
+                Open Research <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
-                to="/research/library"
+                to="/pro"
                 className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
               >
-                Research
+                Open Pro
               </Link>
             </div>
           </div>
         </header>
 
-        {/* Safe environment */}
-        <section className="rounded-2xl border border-cyan/35 bg-cyan/[0.07] p-4 sm:p-5 space-y-2">
-          <p className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">
-            <Lock className="w-3.5 h-3.5" /> A safe place to check and generate research
-          </p>
-          <ul className="text-[13.5px] text-foreground/90 space-y-1.5 leading-relaxed">
-            <li>· Browse the site without an account.</li>
-            <li>· We do not sell personal dossiers or store card numbers.</li>
-            <li>· Pro private runs use a unique link and stay off the public dashboard.</li>
-            <li>· Methods and sample sizes are shown so you can weigh the evidence.</li>
-          </ul>
+        {/* 2 · Freemium */}
+        <section aria-labelledby="about-freemium">
+          <h2
+            id="about-freemium"
+            className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3"
+          >
+            Free &amp; Pro
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-emerald-signal/35 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px]">
+              <div className="flex items-center gap-2">
+                <span className="w-9 h-9 rounded-lg border border-emerald-signal/35 bg-emerald-signal/10 text-emerald-signal grid place-items-center">
+                  <Eye className="w-4 h-4" aria-hidden />
+                </span>
+                <p className="font-display font-semibold text-[15px]">Free</p>
+              </div>
+              <p className="text-[13px] text-muted-foreground leading-relaxed flex-1">
+                <strong className="text-foreground/90 font-medium">Dashboard + Research Library</strong>{" "}
+                — all published work: topic analyses, case studies, trackers, and ledgers. No account
+                required.
+              </p>
+              <Link
+                to="/research/library"
+                className="inline-flex items-center gap-1 text-[13px] font-semibold text-cyan self-start min-h-[36px]"
+              >
+                Browse free work <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-cyan/40 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px]">
+              <div className="flex items-center gap-2">
+                <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
+                  <Sparkles className="w-4 h-4" aria-hidden />
+                </span>
+                <p className="font-display font-semibold text-[15px]">Pro</p>
+              </div>
+              <p className="text-[13px] text-muted-foreground leading-relaxed flex-1">
+                <strong className="text-foreground/90 font-medium">Monthly token packs</strong> —
+                Starter ($10 / 10 tokens), Plus ($40 / 50), Mega ($90 / 120). Soft sign-in. Private
+                deep-dive runs; reports stay off the public dashboard.
+              </p>
+              <Link
+                to="/pro"
+                className="inline-flex items-center gap-1 text-[13px] font-semibold text-cyan self-start min-h-[36px]"
+              >
+                View plans <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
         </section>
 
-        {/* Three products */}
-        <section>
-          <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">
+        {/* 3 · Why X */}
+        <section aria-labelledby="about-why-x" className="space-y-3">
+          <h2
+            id="about-why-x"
+            className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground"
+          >
+            Why X
+          </h2>
+          <div className="rounded-2xl border border-border/90 bg-card/50 p-4 sm:p-5 flex gap-3 sm:gap-4">
+            <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
+              <MessageSquareQuote className="w-5 h-5" aria-hidden />
+            </span>
+            <div className="min-w-0 space-y-2">
+              <p className="font-display font-semibold text-[15px]">
+                Free speech makes citizen voices audible enough to examine
+              </p>
+              <p className="text-[13.5px] text-muted-foreground leading-relaxed">
+                X is where public speech still moves fast and often stays visible. We sample{" "}
+                <strong className="text-foreground/85 font-medium">public</strong> posts to hear
+                citizen language that press cycles and closed platforms can bury. In restricted
+                environments, whole conversations disappear from feeds or never appear — studying
+                open discourse is one way to surface what official frames leave out. Free speech is
+                not a slogan here; it is the condition that makes ordinary voices audible enough to
+                examine.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 4 · Method */}
+        <section aria-labelledby="about-method" className="space-y-3">
+          <h2
+            id="about-method"
+            className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground"
+          >
+            How the method works
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {[
+              {
+                t: "Sample",
+                d: "Purposive public sample on one topic — a digital focus group, not a national poll.",
+                icon: Layers,
+              },
+              {
+                t: "Structure",
+                d: "Socratic questions, sentiment, and narrative-gap framing.",
+                icon: FlaskConical,
+              },
+              {
+                t: "Human gate",
+                d: "Human-managed research. AI drafts and scores; empty stays empty — we do not invent voices.",
+                icon: Shield,
+              },
+              {
+                t: "Show limits",
+                d: "Sample size, confidence, and honesty notes stay visible so you can weigh the evidence.",
+                icon: Scale,
+              },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <div
+                  key={s.t}
+                  className="rounded-xl border border-border bg-card/50 p-3.5 space-y-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="w-3.5 h-3.5 text-cyan shrink-0" aria-hidden />
+                    <p className="text-[13px] font-display font-semibold text-cyan">{s.t}</p>
+                  </div>
+                  <p className="text-[12.5px] text-muted-foreground leading-snug">{s.d}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 5 · What you can do */}
+        <section aria-labelledby="about-surfaces">
+          <h2
+            id="about-surfaces"
+            className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3"
+          >
             What you can do here
           </h2>
           <div className="grid sm:grid-cols-3 gap-3">
@@ -96,67 +233,44 @@ function AboutPage() {
             <ProductCard
               to="/research/library"
               icon={<Layers className="w-4 h-4" />}
-              title="Library"
-              body="Free researched material: topic analyses, case studies, trackers, and ledgers."
+              title="Research"
+              body="Free published Library — topics, case studies, trackers, and ledgers."
             />
             <ProductCard
               to="/pro"
-              icon={<FlaskConical className="w-4 h-4" />}
+              icon={<Sparkles className="w-4 h-4" />}
               title="Pro"
-              body="Monthly plans with a token wallet for private analyses. Enterprise by contact."
+              body="Monthly tokens for private analyses. Enterprise by contact."
             />
           </div>
         </section>
 
-        {/* Method short */}
-        <section className="space-y-3">
-          <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-            How Topics analysis works
-          </h2>
-          <div className="grid sm:grid-cols-3 gap-2.5">
-            {[
-              {
-                t: "Sample",
-                d: "A purposive public sample of posts on one topic — a digital focus group, not a national poll.",
-              },
-              {
-                t: "Structure",
-                d: "Socratic questions, sentiment, and narrative-gap framing under human management.",
-              },
-              {
-                t: "Show limits",
-                d: "Sample size and confidence stay visible. Empty stays empty — we do not invent voices.",
-              },
-            ].map((s) => (
-              <div
-                key={s.t}
-                className="rounded-xl border border-border bg-card/50 p-3.5"
-              >
-                <p className="text-[13px] font-display font-semibold text-cyan">{s.t}</p>
-                <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">{s.d}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-border bg-card/40 p-4 space-y-2">
+        {/* 6 · Honest limits */}
+        <section className="rounded-xl border border-border bg-card/40 p-4 sm:p-5 space-y-2">
           <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-2">
             <Scale className="w-3.5 h-3.5 text-cyan" /> Honest limits
           </p>
           <p className="text-[13px] text-muted-foreground leading-relaxed">
-            Elenchos is experimental research infrastructure. Insights are directional. Not legal,
-            medical, or investment advice. Not affiliated with governments or platforms we analyze.
-            Corrections:{" "}
+            Elenchos is experimental research infrastructure. Insights are{" "}
+            <strong className="text-foreground/85 font-medium">directional</strong>, not verdicts.
+            Not legal, medical, or investment advice. Not affiliated with governments or platforms we
+            analyse. Corrections:{" "}
             <ContactEmailMe source="about" variant="inline" className="text-cyan text-[13px]" />.
           </p>
         </section>
 
         <div className="flex flex-wrap gap-2">
           <Link
-            to="/pro"
+            to="/research/library"
             className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/12 text-cyan text-[13px] font-medium touch-manipulation"
           >
-            <Sparkles className="w-3.5 h-3.5" /> Open Pro
+            Open Research
+          </Link>
+          <Link
+            to="/pro"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan hover:border-cyan/40 touch-manipulation"
+          >
+            Open Pro
           </Link>
           <Link
             to="/privacy"

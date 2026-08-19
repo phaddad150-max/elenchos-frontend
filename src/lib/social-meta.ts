@@ -50,9 +50,9 @@ export const HOME_SOCIAL: SocialPageMeta = {
 };
 
 export const ABOUT_SOCIAL: SocialPageMeta = {
-  title: "About Elenchos · Public Discourse Lens × Research Desk",
+  title: "About Elenchos · ἔλεγχος · Public Discourse Lens × Research Desk",
   description:
-    "A privacy-first desk for public discourse on X and research you can check. Dashboard, Research Library, Pro, and Enterprise.",
+    "Elenchos (ἔλεγχος) means cross-examination. Free Dashboard and Research Library; Pro monthly tokens for private analyses. Citizen voices vs official narratives.",
   url: `${SITE}/about`,
   image: DEFAULT_OG,
 };
