@@ -76,6 +76,10 @@ import { Compass } from "lucide-react";
 import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
 import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
 import {
+  seedWorldLeadersTrackerRow,
+  worldLeadersRosterIsOutdated,
+} from "@/lib/trackers/seeds/world-leaders";
+import {
   extractPeaceCountries,
   extractRankedLeaders,
   fetchLatestTrackers,
@@ -270,9 +274,10 @@ function Dashboard() {
   const [simMode] = useSimMode();
 
   const boardPreview = useMemo(() => {
+    // Hard isolation by signal tab — never mix world / business / citizen indexes.
     if (topicFilter === "Economic") {
       return {
-        leaders: businessLeaders,
+        leaders: businessLeaders.slice(0, 5),
         rankedTotal: businessLeaders.length,
         title: "AI & Business leaders",
         titleAccent: "by citizens",
@@ -282,24 +287,26 @@ function Dashboard() {
       };
     }
     if (topicFilter === "Social") {
+      const scored = discourseLeaders.filter((l) => l.status !== "waiting");
       return {
-        leaders: discourseLeaders,
-        rankedTotal: discourseLeaders.filter((l) => l.status !== "waiting").length,
-        title: "Citizen discourse",
-        titleAccent: "awareness",
+        leaders: scored.slice(0, 5),
+        rankedTotal: scored.length,
+        title: "Citizen journalism",
+        titleAccent: "index",
         href: "/trackers/citizen-discourse" as const,
-        ctaLabel: "Open discourse board",
+        ctaLabel: "Open journalism board",
         kicker: "Social board",
       };
     }
+    // Political tab or no filter → world leaders only
     return {
-      leaders: topLeaders,
+      leaders: topLeaders.slice(0, 5),
       rankedTotal: trackerKpis.leadersRanked,
       title: "Leadership board",
       titleAccent: "by citizens",
       href: "/trackers/leaders" as const,
       ctaLabel: "Open full leaderboard",
-      kicker: "Live leaderboard",
+      kicker: "Political board",
     };
   }, [
     topicFilter,
@@ -331,7 +338,11 @@ function Dashboard() {
         const byType = new Map(rows.map((r) => [r.tracker_type, r]));
         const leaderRow = byType.get("global_leader_trust");
         const peaceRow = byType.get("peace_normalization");
-        const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
+        let leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
+        // Live DB still lists departed leaders → use current-officeholder seed (max 15).
+        if (worldLeadersRosterIsOutdated(leaders)) {
+          leaders = extractRankedLeaders(seedWorldLeadersTrackerRow());
+        }
         const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
         setTrackerKpis({
           leadersRanked: leaders.length || undefined,
@@ -724,6 +735,7 @@ function Dashboard() {
         >
           <div className="min-w-0 xl:col-span-8 h-full flex">
             <LeadershipBoardPreview
+              key={boardPreview.href}
               leaders={boardPreview.leaders}
               rankedTotal={boardPreview.rankedTotal}
               title={boardPreview.title}
@@ -1655,7 +1667,8 @@ function LeadershipBoardPreview({
             </p>
           </div>
           <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.16em] inline-flex items-center gap-1 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" /> Live
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
+            {href === "/trackers/leaders" ? "Live" : "Preview"}
           </span>
         </div>
 
@@ -1669,13 +1682,12 @@ function LeadershipBoardPreview({
             onTouchStart={() => setPaused(true)}
           >
             {top.map((l, i) => {
-              const rank = l.rank ?? i + 1;
               const score = typeof l.overall_score === "number" ? l.overall_score : null;
               const hex = leaderScoreHex(score);
               const isFocus = i === focus;
               const barPct = score != null ? Math.min(100, (score / maxScore) * 100) : 0;
               return (
-                <motion.li key={l.name + rank}>
+                <motion.li key={`${href}:${l.name}`}>
                   <button
                     type="button"
                     onClick={() => {
@@ -1688,24 +1700,6 @@ function LeadershipBoardPreview({
                         : "border-border/50 bg-background/45 hover:border-[#FFAB00]/35 hover:bg-background/70"
                     }`}
                   >
-                    <span
-                      className={
-                        rank <= 3
-                          ? "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-7 md:h-7 rounded-lg font-display font-bold text-[11px] sm:text-[12px] tabular-nums shrink-0"
-                          : "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-7 md:h-7 rounded-lg bg-secondary/70 border border-border/60 font-mono font-semibold text-[11px] text-muted-foreground tabular-nums shrink-0"
-                      }
-                      style={
-                        rank <= 3
-                          ? {
-                              background: "linear-gradient(135deg, #FFD54F, #FFAB00)",
-                              color: "#1a1100",
-                              boxShadow: "0 0 12px #FFAB0080, inset 0 0 0 1px #FFE082",
-                            }
-                          : undefined
-                      }
-                    >
-                      {rank}
-                    </span>
                     <span className="text-lg sm:text-xl leading-none shrink-0" aria-hidden>
                       {l.flag ?? "🏳️"}
                     </span>
@@ -1714,7 +1708,9 @@ function LeadershipBoardPreview({
                         {l.name}
                       </span>
                       <span className="block text-[10px] font-mono text-muted-foreground truncate">
-                        {[l.country, l.region].filter(Boolean).join(" · ") || "—"}
+                        {[l.role, l.country].filter(Boolean).join(" · ") ||
+                          [l.country, l.region].filter(Boolean).join(" · ") ||
+                          "—"}
                       </span>
                       <span className="mt-1 block h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
                         <motion.span
@@ -1754,7 +1750,7 @@ function LeadershipBoardPreview({
               className="rounded-xl border border-[#FFAB00]/30 bg-background/50 px-3 py-2.5 min-w-0"
             >
               <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#FFAB00] mb-1">
-                Focus · #{focused.rank ?? focus + 1}
+                Focus · {focused.name}
               </p>
               <p className="text-[12.5px] sm:text-[13px] leading-snug text-foreground/90 line-clamp-2 sm:line-clamp-3">
                 {focused.summary?.trim() ||
@@ -2327,6 +2323,8 @@ type KpiHeroHref =
   | "/pro"
   | "/trackers"
   | "/trackers/leaders"
+  | "/trackers/business"
+  | "/trackers/citizen-discourse"
   | "/trackers/peace";
 
 /** Existing product surfaces only — count for Trackers Active KPI (no new pipeline). */
@@ -2335,8 +2333,22 @@ const DASHBOARD_TRACKERS = [
     id: "leaders",
     title: "Leadership board",
     href: "/trackers/leaders" as const,
-    blurb: "Citizen trust rankings vs official frames.",
+    blurb: "Current world leaders — citizen trust vs official frames.",
     badge: "Index",
+  },
+  {
+    id: "business",
+    title: "AI & Business leaders",
+    href: "/trackers/business" as const,
+    blurb: "Vision, execution, free-speech stance for AI / tech builders.",
+    badge: "Preview",
+  },
+  {
+    id: "citizen",
+    title: "Citizen journalism",
+    href: "/trackers/citizen-discourse" as const,
+    blurb: "Individual reporters — trust, authenticity, independence.",
+    badge: "Preview",
   },
   {
     id: "peace",
@@ -2966,8 +2978,9 @@ function DashboardKpiGrid({
       liveFacts: DASHBOARD_TRACKERS.map((t) => `${t.title} · ${t.badge}`),
       links: [
         { label: "Leadership board", href: "/trackers/leaders" },
+        { label: "AI & Business", href: "/trackers/business" },
+        { label: "Citizen journalism", href: "/trackers/citizen-discourse" },
         { label: "Peace index", href: "/trackers/peace" },
-        { label: "Networks Ledger", href: "/research/networks-ledger" },
       ],
     },
   ];

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { ArrowLeft, Megaphone } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { TRACKER_CATALOG } from "@/lib/trackers-data";
+import { JOURNALIST_DIMENSIONS, TRACKER_CATALOG } from "@/lib/trackers-data";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/trackers/citizen-discourse")({
       {
         name: "description",
         content:
-          "Public voices in social-awareness conversations — migration, accountability, free speech, conflict. Ranked by how citizens talk about them, not endorsement.",
+          "Individual citizen journalists ranked on trust, authenticity, reporting rigor, and independence — NGOs excluded. Not an endorsement.",
       },
       { property: "og:title", content: "Citizen Discourse & Awareness — Elenchos" },
       {
@@ -90,7 +90,7 @@ function CitizenDiscoursePage() {
             <SimulatedDataBadge />
           </div>
         </header>
-        <LeaderboardDetail row={row} />
+        <LeaderboardDetail row={row} dimensions={JOURNALIST_DIMENSIONS} />
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
             Need a private brief on migration, fraud, or peace discourse?

@@ -3,8 +3,18 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { fetchLatestTrackers, TRACKER_CATALOG, type TrackerRow } from "@/lib/trackers-data";
+import {
+  extractRankedLeaders,
+  fetchLatestTrackers,
+  LEADER_DIMENSIONS,
+  TRACKER_CATALOG,
+  type TrackerRow,
+} from "@/lib/trackers-data";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
+import {
+  seedWorldLeadersTrackerRow,
+  worldLeadersRosterIsOutdated,
+} from "@/lib/trackers/seeds/world-leaders";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/leaders")({
@@ -14,7 +24,7 @@ export const Route = createFileRoute("/trackers/leaders")({
       {
         name: "description",
         content:
-          "Citizen-scored leaderboard of global leaders across trust, leadership, corruption, economy and more — refreshed continuously from real public discourse.",
+          "Citizen-scored leaderboard of current world leaders across trust, leadership, corruption, economy and more — refreshed from public discourse.",
       },
       { property: "og:title", content: "Live Leader Leaderboard — Elenchos" },
       { property: "og:url", content: "https://elenchos.live/trackers/leaders" },
@@ -26,13 +36,31 @@ export const Route = createFileRoute("/trackers/leaders")({
 
 function LeadersPage() {
   const [rows, setRows] = useState<TrackerRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    fetchLatestTrackers().then(setRows);
+    fetchLatestTrackers()
+      .then(setRows)
+      .finally(() => setLoaded(true));
   }, []);
-  const row = useMemo(
+
+  const liveRow = useMemo(
     () => rows.find((r) => r.tracker_type === "global_leader_trust"),
     [rows],
   );
+
+  const row = useMemo(() => {
+    if (!loaded) return undefined;
+    const liveLeaders = liveRow ? extractRankedLeaders(liveRow) : [];
+    if (worldLeadersRosterIsOutdated(liveLeaders)) {
+      return seedWorldLeadersTrackerRow();
+    }
+    return liveRow;
+  }, [loaded, liveRow]);
+
+  const usingSeed = Boolean(
+    loaded && row && row.snapshot_label?.startsWith("seed-current-officeholders"),
+  );
+
   const def = TRACKER_CATALOG.find((t) => t.tracker_type === "global_leader_trust");
   const snapshotDate = row ? formatDate(row.created_at) : null;
 
@@ -44,16 +72,24 @@ function LeadersPage() {
         <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
           <Link
             to="/research/library"
+            search={{ section: "trackers" }}
             className="hover:text-cyan transition-colors inline-flex items-center gap-1.5 min-h-[36px]"
           >
             <ArrowLeft className="w-3 h-3" />
-            Library
+            Research
           </Link>
-          <span aria-hidden className="text-border">/</span>
-          <Link to="/trackers" className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center">
+          <span aria-hidden className="text-border">
+            /
+          </span>
+          <Link
+            to="/trackers"
+            className="hover:text-cyan transition-colors min-h-[36px] inline-flex items-center"
+          >
             Trackers
           </Link>
-          <span aria-hidden className="text-border">/</span>
+          <span aria-hidden className="text-border">
+            /
+          </span>
           <span className="text-foreground/80">Leaders</span>
         </div>
         <header className="mb-8 space-y-3 max-w-4xl">
@@ -70,7 +106,8 @@ function LeadersPage() {
           </p>
           <div className="flex items-center gap-2 flex-wrap pt-1">
             <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em] inline-flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" /> Live
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />{" "}
+              {usingSeed ? "Current roster" : "Live"}
             </span>
             {snapshotDate && (
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
@@ -85,20 +122,21 @@ function LeadersPage() {
             <SimulatedDataBadge />
           </div>
         </header>
-        <LeaderboardDetail row={row} />
+        <LeaderboardDetail row={row} dimensions={LEADER_DIMENSIONS} />
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
             Need a private multi-source brief on a leader or region?
           </p>
           <div className="flex flex-wrap gap-2">
             <Link
-              to="/research/commission"
+              to="/pro"
               className="btn-intel-primary inline-flex items-center justify-center min-h-[44px] px-4 rounded-full text-[13px] font-semibold"
             >
-              Commission a report
+              Open Pro
             </Link>
             <Link
               to="/research/library"
+              search={{ section: "trackers" }}
               className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan"
             >
               Back to Library

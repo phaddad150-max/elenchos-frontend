@@ -144,12 +144,28 @@ export function GlobalSearch() {
               <CommandShortcut>Pro</CommandShortcut>
             </CommandItem>
             <CommandItem
-              value="leadership board leader trust rankings"
+              value="leadership board leader trust rankings world leaders"
               onSelect={() => go("/trackers/leaders")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Leadership board</span>
-              <CommandShortcut>Library</CommandShortcut>
+              <span className="truncate">Leadership board · world leaders</span>
+              <CommandShortcut>Trackers</CommandShortcut>
+            </CommandItem>
+            <CommandItem
+              value="ai business leaders economy musk nvidia tech ceos"
+              onSelect={() => go("/trackers/business")}
+            >
+              <FlaskConical className="w-4 h-4 text-cyan" />
+              <span className="truncate">AI & Business leaders</span>
+              <CommandShortcut>Trackers</CommandShortcut>
+            </CommandItem>
+            <CommandItem
+              value="citizen journalism discourse journalists independent reporters"
+              onSelect={() => go("/trackers/citizen-discourse")}
+            >
+              <FlaskConical className="w-4 h-4 text-cyan" />
+              <span className="truncate">Citizen journalism index</span>
+              <CommandShortcut>Trackers</CommandShortcut>
             </CommandItem>
             <CommandItem
               value="peace index normalization abraham accords"
@@ -157,7 +173,7 @@ export function GlobalSearch() {
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
               <span className="truncate">Peace index</span>
-              <CommandShortcut>Library</CommandShortcut>
+              <CommandShortcut>Trackers</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

@@ -1,0 +1,331 @@
+/**
+ * Current serving heads of government / state relevant to Elenchos topics (max 15).
+ * Used when live Supabase roster still contains departed leaders (AMLO, Scholz, Petro, Boric).
+ * Scores are illustrative until the next trackers.py run.
+ */
+import type { RankedLeader, TrackerRow } from "@/lib/trackers-data";
+
+function dims(partial: Record<string, number>) {
+  return {
+    trust: 50,
+    leadership: 50,
+    corruption: 50,
+    economic_performance: 50,
+    security_stability: 50,
+    freedom_speech: 50,
+    global_influence: 50,
+    pragmatism_ideology: 50,
+    youth_appeal: 50,
+    transparency: 50,
+    ...partial,
+  };
+}
+
+/** As of Aug 2026 — current officeholders only. */
+export const WORLD_LEADERS_SEED: RankedLeader[] = [
+  {
+    rank: 1,
+    name: "Donald J. Trump",
+    flag: "🇺🇸",
+    country: "United States",
+    region: "Americas",
+    role: "President",
+    overall_score: 58,
+    divergence: 68,
+    summary: "Polarizing US executive; high engagement on speech, security, and trade.",
+    dimensions: dims({
+      trust: 52,
+      leadership: 65,
+      freedom_speech: 70,
+      security_stability: 60,
+      global_influence: 88,
+      economic_performance: 55,
+    }),
+  },
+  {
+    rank: 2,
+    name: "Javier Milei",
+    flag: "🇦🇷",
+    country: "Argentina",
+    region: "Americas",
+    role: "President",
+    overall_score: 56,
+    divergence: 62,
+    summary: "Shock-reform presidency; strong among anti-establishment voices, contested on social cost.",
+    dimensions: dims({
+      trust: 54,
+      leadership: 60,
+      economic_performance: 48,
+      freedom_speech: 66,
+      pragmatism_ideology: 58,
+    }),
+  },
+  {
+    rank: 3,
+    name: "Nayib Bukele",
+    flag: "🇸🇻",
+    country: "El Salvador",
+    region: "Americas",
+    role: "President",
+    overall_score: 64,
+    divergence: 55,
+    summary: "Security crackdown narrative dominates citizen talk; high trust on crime, concerns on rights.",
+    dimensions: dims({
+      trust: 66,
+      security_stability: 78,
+      leadership: 70,
+      freedom_speech: 42,
+      transparency: 45,
+    }),
+  },
+  {
+    rank: 4,
+    name: "Claudia Sheinbaum",
+    flag: "🇲🇽",
+    country: "Mexico",
+    region: "Americas",
+    role: "President",
+    overall_score: 57,
+    divergence: 40,
+    summary: "Post-AMLO continuity with technocratic framing; migration and security stay hot.",
+    dimensions: dims({
+      trust: 58,
+      leadership: 55,
+      economic_performance: 54,
+      security_stability: 50,
+      transparency: 56,
+    }),
+  },
+  {
+    rank: 5,
+    name: "Luiz Inácio Lula da Silva",
+    flag: "🇧🇷",
+    country: "Brazil",
+    region: "Americas",
+    role: "President",
+    overall_score: 53,
+    divergence: 48,
+    summary: "Polarized BRICS / Amazon / speech debates; base loyalty vs opposition intensity.",
+    dimensions: dims({
+      trust: 52,
+      leadership: 58,
+      economic_performance: 50,
+      global_influence: 62,
+    }),
+  },
+  {
+    rank: 6,
+    name: "José Antonio Kast",
+    flag: "🇨🇱",
+    country: "Chile",
+    region: "Americas",
+    role: "President",
+    overall_score: 55,
+    divergence: 52,
+    summary: "New right-wing Chilean presidency (2026); security and migration frame early discourse.",
+    dimensions: dims({
+      trust: 54,
+      leadership: 56,
+      security_stability: 60,
+      economic_performance: 52,
+    }),
+  },
+  {
+    rank: 7,
+    name: "Abelardo de la Espriella",
+    flag: "🇨🇴",
+    country: "Colombia",
+    region: "Americas",
+    role: "President",
+    overall_score: 52,
+    divergence: 58,
+    summary: "Inaugurated Aug 2026; crime and peace-policy pivot dominate early public talk.",
+    dimensions: dims({
+      trust: 50,
+      security_stability: 58,
+      leadership: 54,
+      pragmatism_ideology: 48,
+    }),
+  },
+  {
+    rank: 8,
+    name: "Keir Starmer",
+    flag: "🇬🇧",
+    country: "United Kingdom",
+    region: "Europe",
+    role: "Prime Minister",
+    overall_score: 49,
+    divergence: 42,
+    summary: "UK Labour government; migration, speech, and cost-of-living frame citizen replies.",
+    dimensions: dims({
+      trust: 48,
+      leadership: 50,
+      economic_performance: 46,
+      freedom_speech: 52,
+    }),
+  },
+  {
+    rank: 9,
+    name: "Giorgia Meloni",
+    flag: "🇮🇹",
+    country: "Italy",
+    region: "Europe",
+    role: "Prime Minister",
+    overall_score: 58,
+    divergence: 50,
+    summary: "EU migration and sovereignty discourse; strong base, sharp opposition abroad.",
+    dimensions: dims({
+      trust: 56,
+      leadership: 62,
+      security_stability: 60,
+      freedom_speech: 55,
+      global_influence: 58,
+    }),
+  },
+  {
+    rank: 10,
+    name: "Friedrich Merz",
+    flag: "🇩🇪",
+    country: "Germany",
+    region: "Europe",
+    role: "Chancellor",
+    overall_score: 51,
+    divergence: 38,
+    summary: "CDU chancellor (2025–); Ukraine, migration, and industry competitiveness in citizen talk.",
+    dimensions: dims({
+      trust: 50,
+      leadership: 52,
+      economic_performance: 54,
+      security_stability: 55,
+      global_influence: 60,
+    }),
+  },
+  {
+    rank: 11,
+    name: "Emmanuel Macron",
+    flag: "🇫🇷",
+    country: "France",
+    region: "Europe",
+    role: "President",
+    overall_score: 47,
+    divergence: 55,
+    summary: "EU leadership voice with domestic protest fatigue and speech/security flashpoints.",
+    dimensions: dims({
+      trust: 45,
+      leadership: 55,
+      global_influence: 70,
+      freedom_speech: 50,
+    }),
+  },
+  {
+    rank: 12,
+    name: "Volodymyr Zelensky",
+    flag: "🇺🇦",
+    country: "Ukraine",
+    region: "Europe",
+    role: "President",
+    overall_score: 60,
+    divergence: 45,
+    summary: "Wartime presidency; trust tied to resilience narrative and Western support debates.",
+    dimensions: dims({
+      trust: 62,
+      leadership: 68,
+      security_stability: 55,
+      global_influence: 72,
+      transparency: 58,
+    }),
+  },
+  {
+    rank: 13,
+    name: "Viktor Orbán",
+    flag: "🇭🇺",
+    country: "Hungary",
+    region: "Europe",
+    role: "Prime Minister",
+    overall_score: 48,
+    divergence: 70,
+    summary: "Speech, migration, and EU sovereignty debates keep him highly polarized in public feeds.",
+    dimensions: dims({
+      trust: 46,
+      leadership: 58,
+      freedom_speech: 40,
+      pragmatism_ideology: 55,
+      global_influence: 52,
+    }),
+  },
+  {
+    rank: 14,
+    name: "Pedro Sánchez",
+    flag: "🇪🇸",
+    country: "Spain",
+    region: "Europe",
+    role: "Prime Minister",
+    overall_score: 46,
+    divergence: 44,
+    summary: "Coalition politics and migration/EU debates shape a mixed citizen read.",
+    dimensions: dims({
+      trust: 45,
+      leadership: 48,
+      economic_performance: 47,
+      freedom_speech: 52,
+    }),
+  },
+  {
+    rank: 15,
+    name: "Benjamin Netanyahu",
+    flag: "🇮🇱",
+    country: "Israel",
+    region: "Middle East",
+    role: "Prime Minister",
+    overall_score: 44,
+    divergence: 78,
+    summary: "War, hostages, and regional peace discourse — extreme polarization in public speech.",
+    dimensions: dims({
+      trust: 40,
+      leadership: 55,
+      security_stability: 50,
+      global_influence: 75,
+      freedom_speech: 42,
+    }),
+  },
+];
+
+const OUTDATED_LEADER_NAMES = [
+  "andrés manuel lópez obrador",
+  "andres manuel lopez obrador",
+  "amlo",
+  "olaf scholz",
+  "gustavo petro",
+  "gabriel boric",
+];
+
+export function worldLeadersRosterIsOutdated(leaders: RankedLeader[]): boolean {
+  if (leaders.length === 0) return true;
+  return leaders.some((l) =>
+    OUTDATED_LEADER_NAMES.some((n) => (l.name || "").toLowerCase().includes(n)),
+  );
+}
+
+export function seedWorldLeadersTrackerRow(): TrackerRow {
+  const ranked = [...WORLD_LEADERS_SEED]
+    .sort((a, b) => (b.overall_score ?? 0) - (a.overall_score ?? 0))
+    .map((l, i) => ({ ...l, rank: i + 1 }));
+  return {
+    tracker_type: "global_leader_trust",
+    created_at: new Date().toISOString(),
+    last_updated: new Date().toISOString(),
+    item_count: ranked.length,
+    snapshot_label: "seed-current-officeholders-2026-08",
+    deep_dive_summary:
+      "Current serving heads of government relevant to Elenchos topics (Aug 2026 roster). Re-run trackers.py to refresh live X scores.",
+    data: {
+      regions: {
+        americas: ranked.filter((l) => l.region === "Americas"),
+        europe: ranked.filter((l) => l.region === "Europe"),
+        middle_east: ranked.filter((l) => l.region === "Middle East"),
+        global: [],
+      },
+      ranked_leaders: ranked,
+    },
+  };
+}

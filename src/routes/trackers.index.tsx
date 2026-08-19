@@ -26,8 +26,10 @@ import {
   extractPeaceCountries,
   extractRankedLeaders,
   fetchLatestTrackers,
+  mapLeaderRegionBucket,
   momentumColor,
   momentumIcon,
+  type DimensionDef,
   type LeaderRegionBucketKey,
   type PeaceCountry,
   type RankedLeader,
@@ -36,6 +38,10 @@ import {
 } from "@/lib/trackers-data";
 import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
 import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
+import {
+  seedWorldLeadersTrackerRow,
+  worldLeadersRosterIsOutdated,
+} from "@/lib/trackers/seeds/world-leaders";
 import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Quote } from "lucide-react";
 
 
@@ -144,27 +150,7 @@ function ScorePill({ value, size = "md" }: { value?: number | null; size?: "sm" 
   );
 }
 
-function RankBadge({ rank, highlight }: { rank: number; highlight?: boolean }) {
-  if (highlight) {
-    return (
-      <span
-        className="inline-flex items-center justify-center w-7 h-7 rounded-lg font-display font-bold text-[12px] tabular-nums shrink-0"
-        style={{
-          background: "linear-gradient(135deg, #FFD54F, #FFAB00)",
-          color: "#1a1100",
-          boxShadow: "0 0 12px #FFAB0080, inset 0 0 0 1px #FFE082",
-        }}
-      >
-        {rank}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-secondary/70 border border-border/60 font-mono font-semibold text-[11px] text-muted-foreground tabular-nums shrink-0">
-      {rank}
-    </span>
-  );
-}
+/** Rank numerals removed — overall score already indicates order. */
 
 // Convert various flag representations from the backend into a proper emoji flag.
 // Accepts: emoji ("🇸🇻"), ISO-2 code ("SV"), or country name ("El Salvador").
@@ -353,9 +339,16 @@ function LeaderOverviewCard({
 
   const snapshotDate = formatDate(row?.created_at);
 
+  const blurb =
+    def.tracker_type === "ai_business_leader_trust"
+      ? "Citizen trust in AI / tech builders — vision, execution, free-speech stance, and market influence."
+      : def.tracker_type === "citizen_discourse_index"
+        ? "Individual citizen journalists ranked on trust, authenticity, rigor, and independence — not NGOs."
+        : "Citizens scoring world leaders on trust, leadership, corruption, economy, youth appeal and more.";
+
   return (
     <Link
-      to="/trackers/leaders"
+      to={href}
       style={TRACKER_CARD_CYAN}
       className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-cyan/45 hover:shadow-[0_28px_64px_-28px_rgba(0,200,200,0.45)] overflow-hidden block cursor-pointer"
     >
@@ -369,7 +362,15 @@ function LeaderOverviewCard({
             >
               <Trophy className="w-4 h-4 text-cyan" />
             </motion.div>
-            <LivePulseBadge label="Live Leaderboard" />
+            <LivePulseBadge
+              label={
+                def.tracker_type === "ai_business_leader_trust"
+                  ? "Economy board"
+                  : def.tracker_type === "citizen_discourse_index"
+                    ? "Social board"
+                    : "Live Leaderboard"
+              }
+            />
           </div>
           <motion.span
             className="inline-flex"
@@ -383,7 +384,7 @@ function LeaderOverviewCard({
           {def.title}
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
-          Citizens scoring leaders on trust, leadership, corruption, economy, youth appeal and more.
+          {blurb}
         </p>
 
         {top.length > 0 ? (
@@ -395,7 +396,6 @@ function LeaderOverviewCard({
             {top.map((l, i) => (
               <TrackerOverviewRow key={`${l.name}-${l.rank}`} index={i} score={l.overall_score}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <RankBadge rank={l.rank ?? i + 1} highlight={i === 0} />
                   <FlagAvatar flag={l.flag} country={l.country || l.name} size="sm" />
                   <div className="min-w-0">
                     <div className="text-sm font-display font-semibold text-foreground truncate leading-tight">
@@ -462,7 +462,7 @@ function PeaceOverviewCard({
 
   return (
     <Link
-      to="/trackers/peace"
+      to={href}
       style={TRACKER_CARD_CYAN}
       className="tracker-card group text-left w-full rounded-2xl border border-border/60 hover:border-cyan/45 hover:shadow-[0_28px_64px_-28px_rgba(0,200,200,0.45)] overflow-hidden block cursor-pointer"
     >
@@ -505,7 +505,6 @@ function PeaceOverviewCard({
             {top.map((c, i) => (
               <TrackerOverviewRow key={`${c.name}-${c.rank}`} index={i} score={c.peace_health_score}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <RankBadge rank={i + 1} highlight={i === 0} />
                   <FlagAvatar flag={c.flag} country={c.name} size="sm" />
                   <span className="text-sm font-display font-semibold text-foreground truncate">
                     {c.name}
@@ -768,13 +767,16 @@ function LeaderCard({
   highlight,
   expanded,
   onToggle,
+  dimensions = LEADER_DIMENSIONS,
 }: {
   leader: RankedLeader;
   highlight?: boolean;
   expanded: boolean;
   onToggle: () => void;
+  dimensions?: readonly DimensionDef[];
 }) {
   const hex = scoreHex(leader.overall_score);
+  const dims = dimensions;
   return (
     <motion.div
       layout
@@ -788,20 +790,19 @@ function LeaderCard({
         onClick={onToggle}
         className="w-full text-left px-4 sm:px-5 py-3.5 flex items-center gap-3 sm:gap-4 hover:bg-card/70 transition-colors"
       >
-        <RankBadge rank={leader.rank ?? 0} highlight={highlight} />
         <FlagAvatar flag={leader.flag} country={leader.country || leader.name} size="md" />
         <div className="min-w-0 flex-1">
           <div className="text-sm sm:text-[15px] font-display font-semibold text-foreground truncate leading-tight">
             {leader.name}
           </div>
           <div className="text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground truncate">
-            {[leader.country, leader.region].filter(Boolean).join(" · ") || "—"}
+            {[leader.role, leader.country, leader.region].filter(Boolean).join(" · ") || "—"}
           </div>
         </div>
 
         {/* Inline mini sparkbars on desktop */}
         <div className="hidden lg:flex items-end gap-[3px] h-7 mr-3">
-          {LEADER_DIMENSIONS.map((d) => {
+          {dims.map((d) => {
             const v = leader.dimensions?.[d.key];
             const h = typeof v === "number" ? Math.max(4, Math.min(100, v)) : 4;
             return (
@@ -854,7 +855,7 @@ function LeaderCard({
                 </p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-3">
-                {LEADER_DIMENSIONS.map((d) => (
+                {dims.map((d) => (
                   <DimensionBar
                     key={d.key}
                     label={d.label}
@@ -878,7 +879,6 @@ function LeaderCard({
 function WaitingLeaderRow({ leader }: { leader: RankedLeader }) {
   return (
     <div className="rounded-2xl border border-dashed border-border/60 bg-card/30 px-4 sm:px-5 py-3.5 flex items-center gap-3 sm:gap-4">
-      <RankBadge rank={leader.rank ?? 0} />
       <FlagAvatar flag={leader.flag} country={leader.country || leader.name} size="md" />
       <div className="min-w-0 flex-1">
         <div className="text-sm sm:text-[15px] font-display font-semibold text-foreground/80 truncate leading-tight">
@@ -895,18 +895,32 @@ function WaitingLeaderRow({ leader }: { leader: RankedLeader }) {
   );
 }
 
-function LeaderboardDetail({ row }: { row?: TrackerRow }) {
+function LeaderboardDetail({
+  row,
+  dimensions = LEADER_DIMENSIONS,
+}: {
+  row?: TrackerRow;
+  dimensions?: readonly DimensionDef[];
+}) {
   const byRegion = useMemo(() => extractLeadersByRegion(row), [row]);
+  const rankedAll = useMemo(() => extractRankedLeaders(row), [row]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [activeRegion, setActiveRegion] = useState<LeaderRegionBucketKey | "all">("all");
 
   const allLeaders = useMemo(() => {
+    // Prefer deduped ranked_leaders for "All" to avoid cross-bucket duplicates.
+    if (rankedAll.length > 0) {
+      return rankedAll.map((l) => ({
+        ...l,
+        _bucket: mapLeaderRegionBucket(l.region),
+      }));
+    }
     const all: (RankedLeader & { _bucket: LeaderRegionBucketKey })[] = [];
     for (const b of LEADER_REGION_BUCKETS) {
       for (const l of byRegion[b.key]) all.push({ ...l, _bucket: b.key });
     }
     return all;
-  }, [byRegion]);
+  }, [byRegion, rankedAll]);
 
   const toggle = (id: string) => {
     setExpanded((prev) => {
@@ -918,7 +932,7 @@ function LeaderboardDetail({ row }: { row?: TrackerRow }) {
   };
   const allIds = allLeaders
     .filter((l) => l.status !== "waiting")
-    .map((l) => `${l._bucket}:${l.name}-${l.rank}`);
+    .map((l) => l.name);
   const allExpanded = allIds.length > 0 && allIds.every((id) => expanded.has(id));
   const toggleAll = () => {
     if (allExpanded) setExpanded(new Set());
@@ -926,11 +940,26 @@ function LeaderboardDetail({ row }: { row?: TrackerRow }) {
   };
 
   const populatedSections = LEADER_REGION_BUCKETS.filter((b) => byRegion[b.key].length > 0);
-  const visibleSections =
-    activeRegion === "all"
-      ? populatedSections
-      : populatedSections.filter((b) => b.key === activeRegion);
+  const hasAny = allLeaders.length > 0 || populatedSections.length > 0;
 
+  const renderLeaderList = (leaders: RankedLeader[]) => (
+    <div className="space-y-2.5">
+      {leaders.map((l, i) => {
+        const id = l.name;
+        if (l.status === "waiting") return <WaitingLeaderRow key={id} leader={l} />;
+        return (
+          <LeaderCard
+            key={id}
+            leader={l}
+            highlight={i === 0}
+            expanded={expanded.has(id)}
+            onToggle={() => toggle(id)}
+            dimensions={dimensions}
+          />
+        );
+      })}
+    </div>
+  );
 
   return (
     <div>
@@ -987,48 +1016,47 @@ function LeaderboardDetail({ row }: { row?: TrackerRow }) {
         </button>
       </div>
 
-      {populatedSections.length === 0 ? (
+      {!hasAny ? (
         <div className="px-4 py-6 rounded-xl border border-dashed border-border bg-background/30 text-center">
           <Radio className="w-4 h-4 animate-pulse text-cyan mx-auto mb-2" />
           <p className="text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
             No leaders in this sample yet.
           </p>
         </div>
+      ) : activeRegion === "all" ? (
+        <section>
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-base sm:text-lg font-display font-semibold text-foreground">
+              Full ranking
+            </h3>
+            <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+              {allLeaders.length} scored · ordered by score
+            </span>
+          </div>
+          {renderLeaderList(allLeaders)}
+        </section>
       ) : (
         <div className="space-y-8">
-          {visibleSections.map((bucket) => {
-
-            const leaders = byRegion[bucket.key];
-            if (leaders.length === 0) return null;
-            const activeCount = leaders.filter((l) => l.status !== "waiting").length;
-            return (
-              <section key={bucket.key}>
-                <div className="flex items-baseline justify-between mb-3">
-                  <h3 className="text-base sm:text-lg font-display font-semibold text-foreground">
-                    {bucket.label}
-                  </h3>
-                  <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                    Top {leaders.length} · {activeCount} active
-                  </span>
-                </div>
-                <div className="space-y-2.5">
-                  {leaders.map((l, i) => {
-                    const id = `${bucket.key}:${l.name}-${l.rank}`;
-                    if (l.status === "waiting") return <WaitingLeaderRow key={id} leader={l} />;
-                    return (
-                      <LeaderCard
-                        key={id}
-                        leader={l}
-                        highlight={i === 0}
-                        expanded={expanded.has(id)}
-                        onToggle={() => toggle(id)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
+          {populatedSections
+            .filter((b) => b.key === activeRegion)
+            .map((bucket) => {
+              const leaders = byRegion[bucket.key];
+              if (leaders.length === 0) return null;
+              const activeCount = leaders.filter((l) => l.status !== "waiting").length;
+              return (
+                <section key={bucket.key}>
+                  <div className="flex items-baseline justify-between mb-3">
+                    <h3 className="text-base sm:text-lg font-display font-semibold text-foreground">
+                      {bucket.label}
+                    </h3>
+                    <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                      Top {leaders.length} · {activeCount} active
+                    </span>
+                  </div>
+                  {renderLeaderList(leaders)}
+                </section>
+              );
+            })}
         </div>
       )}
 
@@ -1492,13 +1520,20 @@ function TrackersPage() {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
           {live.map((def, idx) => {
             const liveRow = byType.get(def.tracker_type);
-            const row =
+            let row =
               liveRow ??
               (def.tracker_type === "ai_business_leader_trust"
                 ? seedAiBusinessTrackerRow()
                 : def.tracker_type === "citizen_discourse_index"
                   ? seedCitizenDiscourseTrackerRow()
                   : undefined);
+            // Swap outdated world-leader roster (AMLO / Scholz / Petro / Boric) for current officeholders.
+            if (def.tracker_type === "global_leader_trust") {
+              const liveLeaders = liveRow ? extractRankedLeaders(liveRow) : [];
+              if (worldLeadersRosterIsOutdated(liveLeaders)) {
+                row = seedWorldLeadersTrackerRow();
+              }
+            }
             const inner =
               def.tracker_type === "global_leader_trust" ? (
                 <LeaderOverviewCard def={def} row={row} href="/trackers/leaders" />

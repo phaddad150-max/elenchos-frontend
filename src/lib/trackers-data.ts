@@ -6,10 +6,11 @@ const SUPABASE_URL = "https://jacbalsongvqvaqlfsbx.supabase.co";
 const ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphY2JhbHNvbmd2cXZhcWxmc2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDg1MjgsImV4cCI6MjA5NTEyNDUyOH0.NZI55Xy8KpqQHdPfQohojnnc-GDef0L8dKQ2oOYI1EU";
 
+/** World / political leaders */
 export const LEADER_DIMENSIONS = [
-  { key: "trust", label: "Trust" },
+  { key: "trust", label: "Public Trust" },
   { key: "leadership", label: "Leadership" },
-  { key: "corruption", label: "Corruption" },
+  { key: "corruption", label: "Corruption Concern" },
   { key: "economic_performance", label: "Economy" },
   { key: "security_stability", label: "Security" },
   { key: "freedom_speech", label: "Free Speech" },
@@ -19,7 +20,37 @@ export const LEADER_DIMENSIONS = [
   { key: "transparency", label: "Transparency" },
 ] as const;
 
+/** AI / business economy figures */
+export const BUSINESS_LEADER_DIMENSIONS = [
+  { key: "trust", label: "Public Trust" },
+  { key: "leadership", label: "Vision" },
+  { key: "economic_performance", label: "Execution" },
+  { key: "freedom_speech", label: "Free Speech Stance" },
+  { key: "transparency", label: "Transparency" },
+  { key: "global_influence", label: "Market Influence" },
+  { key: "youth_appeal", label: "Builder Appeal" },
+  { key: "pragmatism_ideology", label: "Innovation Pace" },
+  { key: "security_stability", label: "Safety & Governance" },
+  { key: "corruption", label: "Ethics Concern" },
+] as const;
+
+/** Individual citizen journalists / independent reporters (not NGOs) */
+export const JOURNALIST_DIMENSIONS = [
+  { key: "trust", label: "Trust" },
+  { key: "transparency", label: "Authenticity" },
+  { key: "leadership", label: "Reporting Rigor" },
+  { key: "freedom_speech", label: "Independence" },
+  { key: "global_influence", label: "Reach of Conversation" },
+  { key: "youth_appeal", label: "Citizen Resonance" },
+  { key: "pragmatism_ideology", label: "On-the-ground Focus" },
+  { key: "security_stability", label: "Courage / Risk" },
+  { key: "economic_performance", label: "Consistency" },
+  { key: "corruption", label: "Bias Concern" },
+] as const;
+
 export type LeaderDimensionKey = (typeof LEADER_DIMENSIONS)[number]["key"];
+
+export type DimensionDef = { key: LeaderDimensionKey; label: string };
 
 export type RankedLeader = {
   rank?: number;
@@ -27,6 +58,7 @@ export type RankedLeader = {
   flag?: string;
   country?: string;
   region?: string;
+  role?: string;
   overall_score?: number | null;
   divergence?: number;
   official_approval?: number;
@@ -319,7 +351,7 @@ function sortLeaders(leaders: RankedLeader[]): RankedLeader[] {
   return arr;
 }
 
-function mapLeaderRegionBucket(region?: string): LeaderRegionBucketKey {
+export function mapLeaderRegionBucket(region?: string): LeaderRegionBucketKey {
   const r = (region ?? "").toLowerCase();
   if (
     /(america|latin|caribbean|usa|u\.s\.|canada|mexico|brazil|argentin|chile|colomb|peru|salvador)/.test(
@@ -396,17 +428,51 @@ export function extractLeadersByRegion(
   return out;
 }
 
+/** Prefer ranked_leaders when present (avoids duplicate names across region buckets). */
 export function extractRankedLeaders(row?: TrackerRow): RankedLeader[] {
+  const data = (row?.data ?? {}) as Record<string, unknown>;
+  const rankedRaw = data.ranked_leaders ?? data.leaders;
+  if (rankedRaw) {
+    const ranked = sortLeaders(
+      coerceLeaders(rankedRaw).filter(
+        (l) => l.status !== "waiting" && typeof l.overall_score === "number",
+      ),
+    );
+    if (ranked.length > 0) {
+      return dedupeLeadersByName(ranked).map((l, i) => ({
+        ...l,
+        rank: i + 1,
+      }));
+    }
+  }
+
   const byRegion = extractLeadersByRegion(row);
   const all: RankedLeader[] = [];
   for (const bucket of LEADER_REGION_BUCKETS) all.push(...byRegion[bucket.key]);
-  if (all.length > 0) return sortLeaders(all);
+  if (all.length > 0) {
+    return dedupeLeadersByName(sortLeaders(all)).map((l, i) => ({
+      ...l,
+      rank: i + 1,
+    }));
+  }
+  return [];
+}
 
-  // Final legacy fallback
-  const data = (row?.data ?? {}) as Record<string, unknown>;
-  const raw = (data.ranked_leaders ?? data.leaders) as unknown;
-  const withScore = sortLeaders(coerceLeaders(raw));
-  return withScore.map((l, i) => ({ ...l, rank: l.rank ?? i + 1 }));
+function dedupeLeadersByName(leaders: RankedLeader[]): RankedLeader[] {
+  const best = new Map<string, RankedLeader>();
+  for (const l of leaders) {
+    const key = (l.name || "").trim().toLowerCase();
+    if (!key) continue;
+    const prev = best.get(key);
+    if (!prev) {
+      best.set(key, l);
+      continue;
+    }
+    const prevScore = typeof prev.overall_score === "number" ? prev.overall_score : -1;
+    const nextScore = typeof l.overall_score === "number" ? l.overall_score : -1;
+    if (nextScore > prevScore) best.set(key, l);
+  }
+  return sortLeaders(Array.from(best.values()));
 }
 
 
@@ -613,16 +679,16 @@ export const TRACKER_CATALOG: TrackerDefinition[] = [
     tracker_type: "ai_business_leader_trust",
     title: "AI & Business Leaders",
     tagline:
-      "Public trust in AI / tech economy figures — how citizens talk about CEOs and builders, not follower counts.",
+      "Citizen trust in AI / tech builders — vision, execution, free-speech stance, and market influence. Not follower counts.",
     status: "preview",
     accent: "amber",
   },
   {
     key: "citizen-discourse",
     tracker_type: "citizen_discourse_index",
-    title: "Citizen Discourse & Awareness",
+    title: "Citizen Journalism Index",
     tagline:
-      "Public voices in social-awareness conversations (migration, accountability, free speech, conflict). Not an endorsement.",
+      "Individual citizen journalists ranked on trust, authenticity, rigor, and independence — NGOs and charities excluded. Not an endorsement.",
     status: "preview",
     accent: "magenta",
   },
