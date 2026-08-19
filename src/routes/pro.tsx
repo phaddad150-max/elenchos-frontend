@@ -259,30 +259,45 @@ function ProDeskPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[920px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 space-y-5 sm:space-y-6">
-        <header className="page-hero-banner overflow-hidden min-w-0 relative rounded-2xl border border-cyan/25">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_15%_0%,color-mix(in_oklab,var(--cyan)_18%,transparent),transparent_55%)]" />
-          <div className="relative p-4 sm:p-5 md:p-7 space-y-2.5">
-            <div className="page-hero-kicker inline-flex items-center gap-1.5">
+      <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 space-y-5 sm:space-y-6">
+        <header className="page-hero-banner overflow-hidden min-w-0 relative">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_15%_0%,color-mix(in_oklab,var(--cyan)_22%,transparent),transparent_50%),radial-gradient(ellipse_at_85%_30%,color-mix(in_oklab,var(--amber-signal)_12%,transparent),transparent_45%)]" />
+          <div className="relative p-4 sm:p-5 md:p-7 min-w-0">
+            <div className="page-hero-kicker inline-flex items-center gap-1.5 mb-2">
               <Sparkles className="w-3.5 h-3.5" aria-hidden />
               Pro
             </div>
-            <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem]">
-              Private research with a token wallet
-            </h1>
-            <p className="text-[13px] sm:text-[14.5px] text-muted-foreground leading-relaxed max-w-2xl">
-              Monthly plans credit tokens for private deep dives. The free{" "}
-              <Link
-                to="/research/library"
-                className="text-cyan underline-offset-2 hover:underline"
-              >
-                Library
-              </Link>{" "}
-              stays open to everyone — no account required.
-            </p>
+            {userId ? (
+              <>
+                <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] whitespace-normal md:whitespace-nowrap">
+                  Your Pro desk · token wallet ready
+                </h1>
+                <p className="page-hero-sub mt-2 text-[13px] sm:text-[14.5px] md:whitespace-nowrap md:overflow-hidden md:text-ellipsis">
+                  Signed in{userEmail ? ` as ${userEmail}` : ""}. Subscribe for monthly tokens, then
+                  run private deep dives — free Library stays open to everyone.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] whitespace-normal md:whitespace-nowrap">
+                  Private research with a token wallet
+                </h1>
+                <p className="page-hero-sub mt-2 text-[13px] sm:text-[14.5px] md:whitespace-nowrap md:overflow-hidden md:text-ellipsis">
+                  Monthly plans credit tokens for private deep dives · free{" "}
+                  <Link
+                    to="/research/library"
+                    className="text-cyan underline-offset-2 hover:underline"
+                  >
+                    Library
+                  </Link>{" "}
+                  stays open — no account required.
+                </p>
+              </>
+            )}
           </div>
         </header>
 
+        <div className="max-w-[920px] mx-auto w-full space-y-5 sm:space-y-6">
         {banner && (
           <p
             role="status"
@@ -514,6 +529,7 @@ function ProDeskPage() {
             . Pro never replaces that surface.
           </span>
         </aside>
+        </div>
       </main>
 
       <SiteFooter />

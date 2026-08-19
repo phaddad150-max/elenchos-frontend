@@ -21,11 +21,30 @@ export function Globe3D({ signals, onPick }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 600, h: 480 });
   const [mounted, setMounted] = useState(false);
+  /** Defer three.js / earth textures until the panel is near the viewport. */
+  const [inView, setInView] = useState(false);
   const globeRef = useRef<any>(null);
   const [theme] = useTheme();
   const isLight = theme === "light";
 
   useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "120px", threshold: 0.01 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView) return;
     setMounted(true);
     const el = wrapRef.current;
     if (!el) return;
@@ -42,7 +61,7 @@ export function Globe3D({ signals, onPick }: Props) {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [inView]);
 
   // Apply auto-rotate once the globe instance exists (re-run on theme swap remount).
   useEffect(() => {
@@ -66,6 +85,20 @@ export function Globe3D({ signals, onPick }: Props) {
   }, [mounted, isLight]);
 
   const activeSignals = useMemo(() => signals.slice(0, 32), [signals]);
+
+  if (!inView) {
+    return (
+      <div
+        ref={wrapRef}
+        className="w-full h-full min-h-[200px] grid place-items-center bg-background/30"
+        aria-hidden
+      >
+        <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground/70">
+          Map loading…
+        </span>
+      </div>
+    );
+  }
 
   if (mounted && activeSignals.length === 0) {
     return (

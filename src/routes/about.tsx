@@ -37,53 +37,59 @@ function AboutPage() {
       <main className="max-w-[1400px] mx-auto w-full px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-12 space-y-7 md:space-y-9 relative flex-1 overflow-x-clip min-w-0">
         {/* 1 · Hero — ἔλεγχος */}
         <header className="page-hero-banner overflow-hidden min-w-0 relative rounded-2xl border border-cyan/25">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_12%_0%,color-mix(in_oklab,var(--cyan)_20%,transparent),transparent_55%)]" />
-          <div className="relative p-4 sm:p-5 md:p-7 space-y-3.5 min-w-0">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_12%_0%,color-mix(in_oklab,var(--cyan)_20%,transparent),transparent_55%),radial-gradient(ellipse_at_88%_40%,color-mix(in_oklab,var(--cyan)_10%,transparent),transparent_50%)]" />
+          <div className="relative p-4 sm:p-5 md:p-7 space-y-3.5 min-w-0 w-full">
             <div className="page-hero-kicker">
               <Radio className="w-3.5 h-3.5" aria-hidden />
               About
             </div>
-            <h1 className="page-hero-title text-[1.55rem] sm:text-3xl md:text-[2.15rem] break-words">
-              Elenchos <span className="text-cyan">ἔλεγχος</span>
-            </h1>
-            <p className="text-[15px] sm:text-base font-display font-medium text-cyan/95 leading-snug max-w-xl">
-              {ELENCHOS_TAGLINE}
-            </p>
-            <p className="max-w-2xl text-[14px] sm:text-[14.5px] text-foreground/90 leading-relaxed">
-              In ancient Greek, <em className="text-cyan not-italic font-medium">elenchos</em>{" "}
-              (ἔλεγχος) means <strong className="text-foreground font-semibold">cross-examination</strong>{" "}
-              and <strong className="text-foreground font-semibold">refutation</strong> — the
-              disciplined testing of claims under questioning. That is the spirit of this desk: we
-              examine the gap between{" "}
-              <strong className="text-foreground font-semibold">
-                what ordinary people say in public
-              </strong>{" "}
-              and{" "}
-              <strong className="text-foreground font-semibold">
-                what official or media frames assert
-              </strong>
-              , so citizens can weigh evidence instead of slogans.
-            </p>
-            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-2xl">
-              Independent researcher · based in the EU · human-managed. AI assists analysis; it does
-              not invent voices.
-            </p>
-            <p className="text-[10.5px] sm:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              Citizen voices vs official narratives · Data, not dogma · Human-managed
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Link
-                to="/research/library"
-                className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full bg-cyan text-background text-[13px] font-semibold touch-manipulation"
-              >
-                Open Research <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <Link
-                to="/pro"
-                className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
-              >
-                Open Pro
-              </Link>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start w-full min-w-0">
+              <div className="lg:col-span-7 min-w-0 space-y-3">
+                <h1 className="page-hero-title text-[1.55rem] sm:text-3xl md:text-[2.15rem] break-words">
+                  Elenchos <span className="text-cyan">ἔλεγχος</span>
+                </h1>
+                <p className="text-[15px] sm:text-base font-display font-medium text-cyan/95 leading-snug">
+                  {ELENCHOS_TAGLINE}
+                </p>
+                <p className="text-[14px] sm:text-[14.5px] text-foreground/90 leading-relaxed">
+                  In ancient Greek, <em className="text-cyan not-italic font-medium">elenchos</em>{" "}
+                  (ἔλεγχος) means{" "}
+                  <strong className="text-foreground font-semibold">cross-examination</strong> and{" "}
+                  <strong className="text-foreground font-semibold">refutation</strong> — the
+                  disciplined testing of claims under questioning. That is the spirit of this desk:
+                  we examine the gap between{" "}
+                  <strong className="text-foreground font-semibold">
+                    what ordinary people say in public
+                  </strong>{" "}
+                  and{" "}
+                  <strong className="text-foreground font-semibold">
+                    what official or media frames assert
+                  </strong>
+                  , so citizens can weigh evidence instead of slogans.
+                </p>
+              </div>
+              <div className="lg:col-span-5 min-w-0 space-y-3 lg:pt-1">
+                <p className="text-[13px] sm:text-[13.5px] text-muted-foreground leading-relaxed">
+                  EU based · human-managed. AI powered analysis; it does not invent voices.
+                </p>
+                <p className="text-[10.5px] sm:text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                  Citizen voices vs official narratives · Data, not dogma · Human-managed
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Link
+                    to="/research/library"
+                    className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full bg-cyan text-background text-[13px] font-semibold touch-manipulation"
+                  >
+                    Open Research <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link
+                    to="/pro"
+                    className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
+                  >
+                    Open Pro
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </header>

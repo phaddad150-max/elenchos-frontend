@@ -47,6 +47,7 @@ import { SignalModal } from "@/components/SignalModal";
 import { TopicRequestModal } from "@/components/TopicRequestModal";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { GoDeeperCTA } from "@/components/GoDeeperCTA";
 import { TeaserLock } from "@/components/TeaserLock";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -259,6 +260,9 @@ function Dashboard() {
   const [citizenSignals, setCitizenSignals] = useState<CitizenSignal[]>([]);
   const [trackerKpis, setTrackerKpis] = useState<{
     leadersRanked?: number;
+    worldLeaders?: number;
+    businessLeaders?: number;
+    citizenJournalists?: number;
     countriesMonitored?: number;
   }>({});
   /** Top leaders for the focused Leadership board preview. */
@@ -320,19 +324,22 @@ function Dashboard() {
 
   useEffect(() => {
     let cancelled = false;
+    const bizCount = businessLeaders.length;
+    const cjCount = discourseLeaders.filter((l) => l.status !== "waiting").length;
+
+    // Critical path first (overview + signals + world leaders) — paint sooner.
+    // Curated highlights deferred so they don't block first paint.
     void (async () => {
-      const [snapRes, ovRes, citRes, curRes, trackRes] = await Promise.allSettled([
+      const [snapRes, ovRes, citRes, trackRes] = await Promise.allSettled([
         loadDashboardData(),
         loadDashboardOverview(),
         loadCitizenSignals(),
-        loadCuratedHighlights(40),
         fetchLatestTrackers(),
       ]);
       if (cancelled) return;
       if (snapRes.status === "fulfilled") setSnapshots(snapRes.value ?? null);
       if (ovRes.status === "fulfilled") setOverview(ovRes.value);
       if (citRes.status === "fulfilled") setCitizenSignals(citRes.value ?? []);
-      if (curRes.status === "fulfilled") setCuratedHighlights(curRes.value);
       if (trackRes.status === "fulfilled") {
         const rows = trackRes.value;
         const byType = new Map(rows.map((r) => [r.tracker_type, r]));
@@ -344,18 +351,35 @@ function Dashboard() {
           leaders = extractRankedLeaders(seedWorldLeadersTrackerRow());
         }
         const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
+        const worldCount = leaders.length;
         setTrackerKpis({
-          leadersRanked: leaders.length || undefined,
+          worldLeaders: worldCount || undefined,
+          businessLeaders: bizCount || undefined,
+          citizenJournalists: cjCount || undefined,
+          // KPI reflects all indexed leader types on Elenchos
+          leadersRanked: worldCount + bizCount + cjCount || undefined,
           countriesMonitored: peaceCountries.length || undefined,
         });
         setTopLeaders(leaders.slice(0, 5));
+      } else {
+        setTrackerKpis({
+          worldLeaders: undefined,
+          businessLeaders: bizCount || undefined,
+          citizenJournalists: cjCount || undefined,
+          leadersRanked: bizCount + cjCount || undefined,
+        });
       }
       setDashReady(true);
+
+      // Non-blocking second wave
+      void loadCuratedHighlights(24).then((cur) => {
+        if (!cancelled) setCuratedHighlights(cur);
+      });
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [businessLeaders, discourseLeaders]);
 
   // Simulated signal stream — only used when simMode is explicitly on.
   // Live data comes from Supabase (dashboard_overviews, topic_snapshots, citizen_signals).
@@ -1216,7 +1240,6 @@ function CitizenSignalRow({
       : signal.trend ?? "Stable";
   const tooltipDetail = [
     mood.band,
-    signal.sample_size != null ? `Sample: ${signal.sample_size.toLocaleString()} posts` : null,
     signal.last_updated ? `Updated ${timeAgo(signal.last_updated)}` : null,
     signal.summary?.trim() || signal.excerpt?.trim() || null,
   ]
@@ -1256,11 +1279,7 @@ function CitizenSignalRow({
           <span className="block text-[10px] font-mono uppercase tracking-[0.18em] text-cyan/85 truncate min-w-0">
             {signal.topic}
           </span>
-          {signal.sample_size != null && signal.sample_size > 0 && (
-            <span className="hidden md:inline-flex shrink-0 text-[9px] font-mono tabular-nums text-muted-foreground/90 px-1.5 py-0.5 rounded border border-border/70 bg-card/50">
-              n={signal.sample_size.toLocaleString()}
-            </span>
-          )}
+
         </span>
         {/* Full fitted line — no line-clamp ellipsis ("...") */}
         <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 group-hover:text-foreground break-words line-clamp-2 sm:line-clamp-1">
@@ -1776,58 +1795,9 @@ function LeadershipBoardPreview({
   );
 }
 
-/** Compact end-of-page actions — no mid-page marketing banners. */
+/** Compact end-of-page actions — topic analysis · case studies · trackers. */
 function DashboardActionRow() {
-  const actions = [
-    {
-      id: "library-topics",
-      href: "/research/library" as const,
-      search: { section: "topics" as const },
-      label: "Open Library topics",
-      icon: Layers,
-    },
-    {
-      id: "library",
-      href: "/research/library" as const,
-      search: undefined,
-      label: "Browse free Library",
-      icon: BookOpen,
-    },
-    {
-      id: "pro",
-      href: "/pro" as const,
-      search: undefined,
-      label: "Pro Research Desk",
-      icon: FilePenLine,
-    },
-  ];
-
-  return (
-    <section
-      aria-label="Next steps"
-      className="rounded-xl border border-border/80 bg-card/30 px-2.5 py-2 sm:px-3 sm:py-2.5"
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground shrink-0 px-0.5">
-          Go deeper
-        </span>
-        <div className="flex flex-col sm:flex-row flex-1 gap-1.5 sm:gap-2 min-w-0">
-          {actions.map((a) => (
-            <Link
-              key={a.id}
-              to={a.href}
-              search={a.search}
-              className="group flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[40px] px-3 rounded-lg border border-border/90 bg-background/60 hover:border-cyan/50 hover:bg-cyan/5 text-[12.5px] font-medium text-foreground/90 hover:text-cyan transition-colors touch-manipulation"
-            >
-              <a.icon className="w-3.5 h-3.5 text-cyan shrink-0" aria-hidden />
-              <span className="truncate">{a.label}</span>
-              <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  return <GoDeeperCTA />;
 }
 
 
@@ -2803,7 +2773,13 @@ function DashboardKpiGrid({
   overview: DashboardOverview | null;
   snapshots: Record<string, TopicSnapshot> | null;
   citizenSignals?: CitizenSignal[] | FeedCitizenSignal[] | null;
-  trackerKpis?: { leadersRanked?: number; countriesMonitored?: number };
+  trackerKpis?: {
+    leadersRanked?: number;
+    worldLeaders?: number;
+    businessLeaders?: number;
+    citizenJournalists?: number;
+    countriesMonitored?: number;
+  };
   curatedCount?: number;
   /** Pass parent-resolved value so face KPI always matches globe/header posts count. */
   postsAnalyzed?: number;
@@ -2917,14 +2893,23 @@ function DashboardKpiGrid({
       value: leadersRanked,
       icon: Users,
       format: "number",
-      liveNote: "Rows in the global leader trust table.",
-      liveFacts:
-        typeof leadersRanked === "number"
-          ? [`Leaders in current tracker: ${leadersRanked}`]
-          : ["Leader table not loaded for this sample."],
+      liveNote:
+        "World leaders + AI/business figures + citizen journalists across all Elenchos indexes.",
+      liveFacts: [
+        trackerKpis?.worldLeaders
+          ? `World leaders: ${trackerKpis.worldLeaders}`
+          : "World leaders: loading…",
+        trackerKpis?.businessLeaders
+          ? `AI & business: ${trackerKpis.businessLeaders}`
+          : "AI & business: —",
+        trackerKpis?.citizenJournalists
+          ? `Citizen journalists: ${trackerKpis.citizenJournalists}`
+          : "Citizen journalists: —",
+      ],
       links: [
-        { label: "Open leaders tracker", href: "/trackers/leaders" },
-        { label: "How scoring works", href: "/about" },
+        { label: "World leaders", href: "/trackers/leaders" },
+        { label: "AI & Business", href: "/trackers/business" },
+        { label: "Citizen journalism", href: "/trackers/citizen-discourse" },
       ],
     },
     {

@@ -50,11 +50,18 @@ export function MobileTabBar() {
                     : "text-muted-foreground active:bg-secondary/70"
                 }`}
               >
-                <Icon
-                  className={`w-5 h-5 ${active ? "text-cyan" : ""}`}
-                  strokeWidth={active ? 2.4 : 2}
-                  aria-hidden
-                />
+                <span className="relative inline-flex">
+                  <Icon
+                    className={`w-5 h-5 ${active ? "text-cyan" : ""}`}
+                    strokeWidth={active ? 2.4 : 2}
+                    aria-hidden
+                  />
+                  {t.to === "/pro" && (
+                    <span className="absolute -top-1.5 -right-2.5 inline-flex items-center justify-center rounded-[3px] bg-cyan px-[3px] py-[1px] text-[6px] font-bold uppercase leading-none tracking-wider text-background">
+                      NEW
+                    </span>
+                  )}
+                </span>
                 <span className="leading-none">{t.label}</span>
                 {active && (
                   <span

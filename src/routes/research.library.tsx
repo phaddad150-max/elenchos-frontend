@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { GoDeeperCTA } from "@/components/GoDeeperCTA";
 import { ResearchBreadcrumb } from "@/components/research/ResearchDeskNav";
 import {
   getWowTrendForTopic,
@@ -388,13 +389,12 @@ function ResearchLibraryPage() {
               Research · Free published work
             </div>
             <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:justify-between">
-              <div className="min-w-0 max-w-2xl space-y-2">
+              <div className="min-w-0 flex-1 space-y-2">
                 <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] break-words">
                   Three free ways into Elenchos
                 </h1>
-                <p className="text-[13px] sm:text-[14.5px] text-muted-foreground leading-relaxed">
-                  Topics on X · Case studies · Trackers. Choose one below — only that collection
-                  opens. No paywall on published work.
+                <p className="page-hero-sub text-[13px] sm:text-[14.5px]">
+                  Topics on X · Case studies · Trackers. Choose a collection below to open it.
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full lg:w-auto lg:min-w-[320px]">
@@ -451,7 +451,7 @@ function ResearchLibraryPage() {
             </p>
           </div>
           <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5"
             role="tablist"
             aria-label="Library collections"
           >
@@ -459,7 +459,7 @@ function ResearchLibraryPage() {
               <PortalCard
                 key={p.id}
                 {...p}
-                delay={i * 0.06}
+                delay={i * 0.04}
                 active={activeSec === p.id}
                 onSelect={() => selectSection(p.id)}
               />
@@ -597,6 +597,8 @@ function ResearchLibraryPage() {
             </section>
           )}
         </div>
+
+        <GoDeeperCTA />
       </main>
 
       <SiteFooter />
@@ -730,10 +732,9 @@ function PortalCard({
       type="button"
       role="tab"
       aria-selected={active}
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      whileHover={{ y: -4 }}
+      transition={{ delay, duration: 0.3 }}
       whileTap={{ scale: 0.99 }}
       onClick={onSelect}
       onMouseMove={(e) => {
@@ -741,53 +742,48 @@ function PortalCard({
         mx.set(e.clientX - r.left);
         my.set(e.clientY - r.top);
       }}
-      className={`lib-portal group relative flex flex-col h-full min-h-[180px] sm:min-h-[200px] rounded-2xl border bg-card/70 p-4 sm:p-5 overflow-hidden transition-shadow touch-manipulation text-left w-full cursor-pointer ${border} hover:shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]`}
+      className={`lib-portal group relative flex flex-row sm:flex-col items-center sm:items-stretch gap-3 sm:gap-2 rounded-xl border bg-card/70 p-3 sm:p-3.5 overflow-hidden transition-shadow touch-manipulation text-left w-full cursor-pointer min-h-[64px] sm:min-h-[112px] ${border} hover:shadow-[0_12px_32px_-24px_rgba(0,0,0,0.5)]`}
     >
       <motion.div
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ background: glow }}
       />
-      <div className="relative flex items-start justify-between gap-2 mb-3">
+      <div className="relative flex items-center gap-2.5 sm:justify-between w-full min-w-0">
         <span
-          className={`w-11 h-11 rounded-xl border grid place-items-center group-hover:scale-105 transition-transform ${iconTone}`}
+          className={`w-9 h-9 rounded-lg border grid place-items-center shrink-0 ${iconTone}`}
         >
-          <Icon className="w-5 h-5" />
+          <Icon className="w-4 h-4" />
         </span>
-        <div className="text-right">
-          <p className="text-2xl font-display font-semibold tabular-nums text-foreground leading-none">
+        <div className="min-w-0 flex-1 sm:flex-none sm:text-right">
+          <p className="text-lg sm:text-xl font-display font-semibold tabular-nums text-foreground leading-none">
             {count}
           </p>
-          <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mt-1">
+          <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground mt-0.5">
             {countLabel}
           </p>
         </div>
       </div>
-      <p className="relative text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-        {kicker}
-      </p>
-      <h2 className="relative text-[1.1rem] font-display font-semibold text-foreground mt-0.5">
-        {title}
-      </h2>
-      <p className="relative text-[12.5px] text-muted-foreground leading-snug mt-1.5 flex-1">
-        {blurb}
-      </p>
-      <div className="relative flex items-end gap-0.5 h-8 mt-3 opacity-80" aria-hidden>
-        {bars.map((h, i) => (
-          <div
-            key={i}
-            className={`flex-1 rounded-sm ${barTone} opacity-70 group-hover:opacity-100 transition-opacity`}
-            style={{ height: `${Math.max(18, h)}%` }}
-          />
-        ))}
+      <div className="relative min-w-0 flex-1 sm:flex-none">
+        <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+          {kicker}
+        </p>
+        <h2 className="text-[14px] font-display font-semibold text-foreground leading-tight truncate">
+          {title}
+        </h2>
+        <p className="hidden sm:block text-[11.5px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
+          {blurb}
+        </p>
       </div>
       <span
-        className={`relative mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold ${ctaTone}`}
+        className={`relative hidden sm:inline-flex items-center gap-1 text-[12px] font-semibold mt-auto ${ctaTone}`}
       >
         {active ? "Viewing" : cta}
         <ArrowRight
-          className={`w-4 h-4 transition-transform ${active ? "" : "group-hover:translate-x-1"}`}
+          className={`w-3.5 h-3.5 transition-transform ${active ? "" : "group-hover:translate-x-0.5"}`}
         />
       </span>
+      {/* keep bars prop referenced without large empty chrome */}
+      <span className="sr-only">{bars.length} signals</span>
     </motion.button>
   );
 }
@@ -901,96 +897,103 @@ function TopicLibraryCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -2 }}
-      transition={{ delay, duration: 0.3 }}
+      transition={{ delay, duration: 0.25 }}
       className="h-full"
     >
       <Link
         to="/research/library"
         search={{ section: "topics", topic: topic.id }}
-        className={`group lib-case-card flex flex-col h-full min-h-[168px] rounded-2xl border p-3.5 sm:p-4 overflow-hidden transition-all touch-manipulation ${
+        className={`group lib-case-card relative flex flex-col h-full min-h-0 rounded-xl border p-3 overflow-hidden transition-all touch-manipulation ${
           archived
             ? "border-border/70 bg-card/40 opacity-90 hover:border-border"
-            : "border-cyan/30 bg-gradient-to-br from-cyan/[0.08] via-card/80 to-card/60 hover:border-cyan/55 hover:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.45)]"
+            : "border-cyan/25 bg-card/70 hover:border-cyan/55 hover:bg-cyan/[0.06] hover:shadow-[0_12px_28px_-20px_rgba(0,200,200,0.35)]"
         }`}
       >
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start gap-2 min-w-0">
           <span
-            className={`shrink-0 w-9 h-9 rounded-xl border grid place-items-center ${
+            className={`shrink-0 w-8 h-8 rounded-lg border grid place-items-center ${
               archived
                 ? "border-border/70 bg-background/40 text-muted-foreground"
-                : "border-cyan/35 bg-cyan/10 text-cyan group-hover:scale-105 transition-transform"
+                : "border-cyan/35 bg-cyan/10 text-cyan"
             }`}
           >
-            <Layers className="w-4 h-4" />
+            <Layers className="w-3.5 h-3.5" />
           </span>
-          <div className="flex flex-wrap gap-1 justify-end">
-            {isNew && (
-              <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-cyan/40 bg-cyan/15 text-cyan">
-                New
-              </span>
-            )}
-            {archived && (
-              <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-border text-muted-foreground">
-                Archived
-              </span>
-            )}
-            {topic.region && (
-              <span className="text-[9px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-border/70 text-muted-foreground max-w-[9rem] truncate">
-                {topic.region}
-              </span>
-            )}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1 mb-1">
+              {isNew && (
+                <span className="text-[8px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-cyan/40 bg-cyan/15 text-cyan">
+                  New
+                </span>
+              )}
+              {archived && (
+                <span className="text-[8px] font-mono uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full border border-border text-muted-foreground">
+                  Archived
+                </span>
+              )}
+              {topic.region && (
+                <span
+                  className="text-[9px] font-mono uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md border border-border/60 text-muted-foreground bg-background/40 leading-snug break-words max-w-full"
+                  title={topic.region}
+                >
+                  {topic.region}
+                </span>
+              )}
+            </div>
+            <h3 className="text-[13px] sm:text-[13.5px] font-display font-semibold leading-snug group-hover:text-cyan transition-colors break-words">
+              {topic.title}
+            </h3>
           </div>
         </div>
-        <h3 className="text-[13.5px] sm:text-[14px] font-display font-semibold leading-snug group-hover:text-cyan transition-colors break-words">
-          {topic.title}
-        </h3>
-        <div
-          className="mt-1.5 flex items-center gap-1.5 min-h-[1.25rem]"
-          title="Week-over-week sentiment"
-          aria-label="Week-over-week sentiment trend"
-        >
-          <WowIcon className="w-4 h-4 shrink-0" style={{ color: wowColor }} strokeWidth={2.5} />
-          {typeof wow?.delta === "number" && wow.delta !== 0 && (
-            <span
-              className="text-[11px] font-mono font-semibold tabular-nums"
-              style={{ color: wowColor }}
+
+        <div className="mt-2.5 flex items-end justify-between gap-2 border-t border-border/40 pt-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="text-center min-w-[2.5rem]">
+              <p className="text-[8px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                Sent
+              </p>
+              <p
+                className="text-[1.05rem] font-display font-semibold tabular-nums leading-none mt-0.5"
+                style={{ color: sentColor }}
+              >
+                {sentiment ?? "—"}
+              </p>
+            </div>
+            <div className="text-center min-w-[2.5rem] border-l border-border/50 pl-3">
+              <p className="text-[8px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                Div
+              </p>
+              <p
+                className="text-[1.05rem] font-display font-semibold tabular-nums leading-none mt-0.5"
+                style={{ color: divColor }}
+              >
+                {divergence ?? "—"}
+              </p>
+            </div>
+            <div
+              className="flex items-center gap-1 min-h-[1.1rem]"
+              title="Week-over-week sentiment"
             >
-              {wow.delta > 0 ? "+" : ""}
-              {Math.round(wow.delta)}
-            </span>
-          )}
-        </div>
-        <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border/50 pt-2">
-          <div className="min-w-0 text-center">
-            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              Sent.
-            </p>
-            <p
-              className="text-[1.25rem] font-display font-semibold tabular-nums leading-none mt-0.5"
-              style={{ color: sentColor }}
-            >
-              {sentiment ?? "—"}
-            </p>
+              <WowIcon className="w-3.5 h-3.5 shrink-0" style={{ color: wowColor }} strokeWidth={2.5} />
+              {typeof wow?.delta === "number" && wow.delta !== 0 && (
+                <span
+                  className="text-[10px] font-mono font-semibold tabular-nums"
+                  style={{ color: wowColor }}
+                >
+                  {wow.delta > 0 ? "+" : ""}
+                  {Math.round(wow.delta)}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="min-w-0 text-center border-l border-border/50">
-            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              Div.
-            </p>
-            <p
-              className="text-[1.25rem] font-display font-semibold tabular-nums leading-none mt-0.5"
-              style={{ color: divColor }}
-            >
-              {divergence ?? "—"}
-            </p>
-          </div>
+          <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-cyan shrink-0">
+            Open
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          </span>
         </div>
-        <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-cyan">
-          Open briefing
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-        </span>
       </Link>
     </motion.div>
   );

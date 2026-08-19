@@ -26,13 +26,12 @@ function NewBadge({ className, strokeWidth: _ }: { className?: string; strokeWid
 }
 
 const TABS = [
-  { to: "/", label: "Dashboard", exact: true },
+  { to: "/", label: "Dashboard", exact: true, badge: null as null | "new" },
   /** Research opens Library content directly (no intermediate landing). */
-  { to: "/research/library", label: "Research", exact: false },
-  { to: "/pro", label: "Pro", exact: false },
-  { to: "/about", label: "About", exact: true },
+  { to: "/research/library", label: "Research", exact: false, badge: null as null | "new" },
+  { to: "/pro", label: "Pro", exact: false, badge: "new" as const },
+  { to: "/about", label: "About", exact: true, badge: null as null | "new" },
 ] as const;
-void NewBadge;
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
   return (
@@ -71,6 +70,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
                 activeOptions={{ exact: t.exact }}
               >
                 {t.label}
+                {t.badge === "new" ? <NewBadge /> : null}
               </Link>
             ))}
           </div>

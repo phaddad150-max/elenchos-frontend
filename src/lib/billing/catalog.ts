@@ -107,12 +107,41 @@ export const STRIPE_SETUP_CHECKLIST = [
   "Events: checkout.session.completed, invoice.paid, customer.subscription.updated, customer.subscription.deleted",
 ] as const;
 
+/**
+ * Stripe Test-mode Price IDs (Dashboard → Test mode → Products).
+ * Used only when STRIPE_SECRET_KEY is sk_test_… and the matching env var is unset.
+ * Live mode must set STRIPE_PRICE_PACK_* explicitly in Vercel.
+ */
+export const STRIPE_TEST_PRICE_FALLBACKS: Record<
+  | "STRIPE_PRICE_PACK_STARTER"
+  | "STRIPE_PRICE_PACK_PLUS"
+  | "STRIPE_PRICE_PACK_MEGA",
+  string
+> = {
+  STRIPE_PRICE_PACK_STARTER: "price_1U62rN2EYDynfsPbGBfZED8c",
+  STRIPE_PRICE_PACK_PLUS: "price_1U62u62EYDynfsPbCXLtpn39",
+  STRIPE_PRICE_PACK_MEGA: "price_1U62vt2EYDynfsPbFsNiomxK",
+};
+
 export function getStripePriceId(
   envKey: string,
   env: NodeJS.ProcessEnv = process.env,
 ): string | null {
-  const v = env[envKey]?.trim();
-  return v || null;
+  // Prefer exact key; also accept VITE_ prefix if someone set client-style names in Vercel.
+  const candidates = [envKey, `VITE_${envKey}`, envKey.replace(/^STRIPE_/, "VITE_STRIPE_")];
+  for (const key of candidates) {
+    const v = env[key]?.trim();
+    if (v) return v;
+  }
+  const secret = env.STRIPE_SECRET_KEY?.trim() || "";
+  if (secret.startsWith("sk_test_")) {
+    const fb =
+      STRIPE_TEST_PRICE_FALLBACKS[
+        envKey as keyof typeof STRIPE_TEST_PRICE_FALLBACKS
+      ];
+    if (fb) return fb;
+  }
+  return null;
 }
 
 export function planTokensGranted(planId: string): number {
