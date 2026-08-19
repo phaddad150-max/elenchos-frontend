@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { downloadLiveTopicPdf } from "@/lib/research-desk/topic-pdf";
 import { buildInsightShareText, buildTwitterShareHref } from "@/lib/share-insight";
+import { uniqueProse } from "@/lib/curated-text";
 import {
   Bar,
   BarChart,
@@ -360,27 +361,33 @@ export function TopicAnalysisPage({
             <Sparkles className="w-3.5 h-3.5" /> Curated synthesis
           </div>
           <h2 className="text-xl sm:text-2xl font-display font-semibold leading-tight">{curated.hero_headline}</h2>
-          {curated.hero_summary && (
-            <>
-              <p
-                className={`text-sm text-foreground/90 leading-relaxed ${
-                  curatedExpanded ? "" : "line-clamp-2 md:line-clamp-2"
-                }`}
-              >
-                {curated.hero_summary}
-              </p>
-              {/* Mobile: explicit read more when clamped */}
-              {curated.hero_summary.length > 100 && (
-                <button
-                  type="button"
-                  onClick={() => setCuratedExpanded((v) => !v)}
-                  className="md:hidden text-[11px] font-mono text-cyan hover:underline min-h-[40px] touch-manipulation"
+          {(() => {
+            const heroOnly = uniqueProse(curated.hero_summary, [
+              curated.hero_headline,
+              curated.evolution_note,
+            ]);
+            if (!heroOnly) return null;
+            return (
+              <>
+                <p
+                  className={`text-sm text-foreground/90 leading-relaxed ${
+                    curatedExpanded ? "" : "line-clamp-2 md:line-clamp-2"
+                  }`}
                 >
-                  {curatedExpanded ? "Show less" : "Read more"}
-                </button>
-              )}
-            </>
-          )}
+                  {heroOnly}
+                </p>
+                {heroOnly.length > 100 && (
+                  <button
+                    type="button"
+                    onClick={() => setCuratedExpanded((v) => !v)}
+                    className="md:hidden text-[11px] font-mono text-cyan hover:underline min-h-[40px] touch-manipulation"
+                  >
+                    {curatedExpanded ? "Show less" : "Read more"}
+                  </button>
+                )}
+              </>
+            );
+          })()}
           <div className="flex flex-wrap gap-2 text-[10px] font-mono">
             {formatDelta(curated.sentiment_delta) && (
               <span className="px-2 py-0.5 rounded-full border border-border">Sentiment {formatDelta(curated.sentiment_delta)}</span>
@@ -569,9 +576,9 @@ export function TopicAnalysisPage({
               <ComparePill label="WoW sentiment" value={formatDelta(curated?.sentiment_delta)} />
               <ComparePill label="WoW divergence" value={formatDelta(curated?.divergence_delta)} />
               <ComparePill label="Window" value={curated?.comparison_window?.toUpperCase() ?? "WOW"} />
-              {curated?.evolution_note && (
+              {curated?.evolution_note && uniqueProse(curated.evolution_note) && (
                 <p className="w-full text-[13px] text-muted-foreground leading-relaxed mt-2">
-                  {curated.evolution_note}
+                  {uniqueProse(curated.evolution_note)}
                 </p>
               )}
             </div>

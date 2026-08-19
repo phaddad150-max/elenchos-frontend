@@ -862,7 +862,8 @@ function curatedHighlightToFeedSignal(
     trend,
     headline: shortLine,
     summary: h.hero_summary ?? h.hero_headline ?? null,
-    excerpt: h.evolution_note ?? null,
+    // Do not mirror evolution_note into excerpt — modal shows evolution once.
+    excerpt: null,
     source: "Curated insight",
     sample_size: snapshot?.sample_size ?? null,
     last_updated: h.generated_at ?? snapshot?.last_updated ?? null,

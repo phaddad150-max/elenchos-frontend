@@ -13,6 +13,7 @@ import type { FeedCitizenSignal, TopicSnapshot } from "@/lib/dashboard-data";
 import { cleanHeadline } from "@/lib/utils";
 import { sentimentTone } from "@/lib/score-colors";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
+import { isMostlyCoveredBy, uniqueProse } from "@/lib/curated-text";
 
 function TrendIcon({ trend }: { trend?: string | null }) {
   const t = (trend ?? "").toLowerCase();
@@ -98,24 +99,6 @@ function shortenHeadline(text: string, maxChars = 110): string {
   return (lastSpace > 40 ? truncated.slice(0, lastSpace) : truncated).replace(/[,;:\-–—]+$/, "") + "…";
 }
 
-function dedupeSentences(...parts: Array<string | null | undefined>): string {
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const part of parts) {
-    if (!part) continue;
-    const sentences = part.replace(/\s+/g, " ").trim().split(/(?<=[.!?])\s+/);
-    for (const s of sentences) {
-      const trimmed = s.trim();
-      if (!trimmed) continue;
-      const key = trimmed.toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (key.length < 8 || seen.has(key)) continue;
-      seen.add(key);
-      out.push(trimmed);
-    }
-  }
-  return out.join(" ");
-}
-
 function Body({
   signal,
   snapshot,
@@ -147,8 +130,7 @@ function Body({
     : snapshot?.last_updated
       ? new Date(snapshot.last_updated).toLocaleString()
       : "—";
-  const insights = (snapshot?.key_insights ?? []).filter(Boolean).slice(0, 4) as string[];
-  const threads = curated?.insight_threads?.filter((t) => t.headline || t.summary).slice(0, 4) ?? [];
+  const rawInsights = (snapshot?.key_insights ?? []).filter(Boolean).slice(0, 4) as string[];
   const sampleSize =
     typeof signal.sample_size === "number" && signal.sample_size > 0
       ? signal.sample_size
@@ -160,15 +142,58 @@ function Body({
     curated?.hero_headline ??
       signal.headline ??
       signal.summary ??
-      insights[0] ??
+      rawInsights[0] ??
       signal.topic,
   );
   const headline = shortenHeadline(rawHeadline, 160);
-  const citizenNarrative = dedupeSentences(
-    curated?.hero_summary ?? signal.summary ?? signal.excerpt,
-    snapshot?.narrative_summary,
-    insights[0],
-  );
+
+  // Evolution first — strip internal repeats (same sentence pasted twice in the note).
+  const evolutionText = uniqueProse(curated?.evolution_note);
+
+  // Insight threads: drop summary lines that only repeat the headline.
+  const threads = (curated?.insight_threads ?? [])
+    .filter((t) => t.headline || t.summary)
+    .slice(0, 4)
+    .map((t) => {
+      const headlinePart = (t.headline ?? "").trim();
+      const summaryPart = uniqueProse(t.summary, [headlinePart, evolutionText, headline]);
+      return { headline: headlinePart || null, summary: summaryPart || null };
+    })
+    .filter((t) => t.headline || t.summary);
+
+  const threadCorpus = threads
+    .map((t) => [t.headline, t.summary].filter(Boolean).join(" "))
+    .join(" ");
+
+  // Key insights (non-curated fallback): drop lines already in evolution / threads / headline.
+  const insights = rawInsights
+    .map((it) => uniqueProse(it, [evolutionText, threadCorpus, headline]))
+    .filter((it) => it.length > 0)
+    .slice(0, 4);
+
+  const insightCorpus = insights.join(" ");
+
+  /**
+   * Citizen narrative — only keep prose that adds beyond threads/insights/evolution.
+   * Do NOT fold insight[0] into narrative (that caused double display).
+   */
+  const narrativeSource =
+    curated?.hero_summary?.trim() ||
+    signal.summary?.trim() ||
+    snapshot?.narrative_summary?.trim() ||
+    "";
+  const citizenNarrativeRaw = uniqueProse(narrativeSource, [
+    evolutionText,
+    threadCorpus,
+    insightCorpus,
+    headline,
+  ]);
+  const citizenNarrative =
+    citizenNarrativeRaw &&
+    !isMostlyCoveredBy(citizenNarrativeRaw, `${threadCorpus} ${insightCorpus} ${evolutionText}`)
+      ? citizenNarrativeRaw
+      : "";
+
   const divergence =
     typeof signal.divergence_score === "number"
       ? Math.round(signal.divergence_score)
@@ -176,18 +201,26 @@ function Body({
         ? Math.round(snapshot.divergence_score)
         : null;
   const windowLabel = (signal.comparison_window ?? "wow").toLowerCase() === "mom" ? "MoM" : "WoW";
-  const headlineKey = headline.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const excerptKey = (signal.excerpt ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const narrativeKey = citizenNarrative.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const showExcerpt =
-    !!signal.excerpt &&
-    excerptKey.length > 8 &&
-    !narrativeKey.includes(excerptKey) &&
-    !headlineKey.includes(excerptKey);
+
+  // Never treat evolution_note as a quote excerpt (feed used to set excerpt = evolution).
+  const excerptCandidate =
+    signal.excerpt &&
+    curated?.evolution_note &&
+    uniqueProse(signal.excerpt, [curated.evolution_note]) === ""
+      ? ""
+      : uniqueProse(signal.excerpt, [
+          evolutionText,
+          citizenNarrative,
+          threadCorpus,
+          insightCorpus,
+          headline,
+        ]);
+  const showExcerpt = excerptCandidate.length > 20;
 
   const pathId = topicPathId(signal.topic);
   const thin =
     !citizenNarrative &&
+    !evolutionText &&
     threads.length === 0 &&
     insights.length === 0 &&
     score === null &&
@@ -259,30 +292,12 @@ function Body({
         />
       </div>
 
-      {curated?.evolution_note && (
+      {evolutionText && (
         <div className="rounded-xl border border-cyan/30 bg-cyan/5 p-3.5 mb-3">
           <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan mb-1">
             Evolution · {windowLabel}
           </div>
-          <p className="text-[13px] text-foreground/90 leading-relaxed">{curated.evolution_note}</p>
-        </div>
-      )}
-
-      {citizenNarrative && (
-        <div className="rounded-xl border border-border bg-secondary/30 p-3.5 mb-3 border-l-2 border-l-cyan/60">
-          <div className="flex items-center gap-2 text-cyan mb-1.5">
-            <MessageSquare className="w-3.5 h-3.5" />
-            <h3 className="font-display font-semibold text-[12px] tracking-[0.14em] uppercase">
-              Citizen narrative
-            </h3>
-          </div>
-          <p className="text-[13px] text-foreground/90 leading-relaxed">{citizenNarrative}</p>
-        </div>
-      )}
-
-      {showExcerpt && (
-        <div className="rounded-xl border border-border bg-background/40 p-3.5 mb-3 italic text-[13px] text-foreground/85 leading-relaxed">
-          &ldquo;{signal.excerpt}&rdquo;
+          <p className="text-[13px] text-foreground/90 leading-relaxed">{evolutionText}</p>
         </div>
       )}
 
@@ -328,6 +343,25 @@ function Body({
           </ul>
         </div>
       ) : null}
+
+      {/* Narrative only when it adds something threads/insights/evolution do not already say */}
+      {citizenNarrative && (
+        <div className="rounded-xl border border-border bg-secondary/30 p-3.5 mb-3 border-l-2 border-l-cyan/60">
+          <div className="flex items-center gap-2 text-cyan mb-1.5">
+            <MessageSquare className="w-3.5 h-3.5" />
+            <h3 className="font-display font-semibold text-[12px] tracking-[0.14em] uppercase">
+              Citizen narrative
+            </h3>
+          </div>
+          <p className="text-[13px] text-foreground/90 leading-relaxed">{citizenNarrative}</p>
+        </div>
+      )}
+
+      {showExcerpt && (
+        <div className="rounded-xl border border-border bg-background/40 p-3.5 mb-3 italic text-[13px] text-foreground/85 leading-relaxed">
+          &ldquo;{excerptCandidate}&rdquo;
+        </div>
+      )}
 
       {thin && (
         <p className="text-[13px] text-muted-foreground leading-relaxed mb-3">
