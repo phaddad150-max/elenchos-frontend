@@ -668,19 +668,19 @@ function Dashboard() {
           </section>
         </motion.div>
 
-        {/* Under signals + heatmap: Leadership + Gaps aligned side by side */}
+        {/* Same 8+4 columns as Signals + Heatmap above — Leadership under signals, Gaps under heatmap */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-4 md:gap-5 lg:items-stretch min-w-0"
+          className="grid grid-cols-1 xl:grid-cols-12 gap-2.5 sm:gap-4 md:gap-5 xl:items-stretch min-w-0"
         >
-          <div className="min-w-0 lg:col-span-7 h-full">
+          <div className="min-w-0 xl:col-span-8 h-full flex">
             <LeadershipBoardPreview
               leaders={topLeaders}
               rankedTotal={trackerKpis.leadersRanked}
             />
           </div>
-          <div className="min-w-0 lg:col-span-5 h-full">
+          <div className="min-w-0 xl:col-span-4 h-full flex">
             <SampleStructureModules
               snapshots={snapshots}
               signals={mergedFeedSignals}
@@ -1417,8 +1417,9 @@ function SampleStructureModules({
   }, [signals]);
 
   return (
-    <aside className="dash-panel p-2.5 sm:p-3.5 min-w-0 h-full flex flex-col">
-      <div className="flex items-start justify-between gap-2 mb-2.5 min-w-0 shrink-0">
+  return (
+    <aside className="dash-panel p-2.5 sm:p-3.5 min-w-0 w-full h-full flex flex-col self-stretch">
+      <div className="flex items-start justify-between gap-2 mb-3 min-w-0 shrink-0 pb-2 border-b border-border/70">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 text-cyan shrink-0">
             <Brain className="w-3.5 h-3.5" />
@@ -1428,29 +1429,19 @@ function SampleStructureModules({
               Live signal gaps &amp; movers
             </p>
             <p className="text-[10px] font-mono text-muted-foreground truncate">
-              Gaps · rising &amp; falling
+              Strongest gaps · rising &amp; falling
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          {avgDiv != null && (
-            <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/10">
-              avg {avgDiv}
-            </span>
-          )}
-          {lastUpdated && (
-            <span
-              className="hidden sm:inline text-[10px] font-mono text-muted-foreground"
-              suppressHydrationWarning
-            >
-              {timeAgo(lastUpdated)}
-            </span>
-          )}
-        </div>
+        {avgDiv != null && (
+          <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/10 shrink-0">
+            avg {avgDiv}
+          </span>
+        )}
       </div>
 
-      <div className="flex flex-col gap-3 min-w-0 flex-1">
-        <div className="min-w-0 space-y-1.5 flex-1">
+      <div className="flex flex-col gap-3.5 min-w-0 flex-1">
+        <div className="min-w-0 space-y-2 flex-1">
           <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan">
             Strongest gaps
           </p>
@@ -1458,12 +1449,15 @@ function SampleStructureModules({
             <p className="text-[11.5px] text-muted-foreground py-1">No divergence scores yet.</p>
           ) : (
             gaps.map((g, i) => (
-              <div key={g.topic} className="min-w-0 space-y-1 py-0.5">
+              <div key={g.topic} className="min-w-0 space-y-1">
                 <div className="flex items-baseline justify-between gap-2 min-w-0">
-                  <span className="text-[11.5px] sm:text-[12px] truncate text-foreground/90 flex-1 min-w-0">
+                  <span
+                    className="text-[12px] truncate text-foreground/90 flex-1 min-w-0"
+                    title={g.topic}
+                  >
                     {g.topic}
                   </span>
-                  <span className="text-[12px] sm:text-[13px] font-display font-semibold tabular-nums text-cyan shrink-0">
+                  <span className="text-[13px] font-display font-semibold tabular-nums text-cyan shrink-0">
                     {g.score}
                   </span>
                 </div>
@@ -1487,31 +1481,31 @@ function SampleStructureModules({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 shrink-0 mt-auto">
-          <div className="rounded-lg border border-[#00C853]/30 bg-[#00C853]/[0.06] p-2 min-w-0">
-            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#00C853] flex items-center gap-0.5 mb-1">
+        <div className="grid grid-cols-1 gap-2 shrink-0 mt-auto">
+          <div className="rounded-lg border border-[#00C853]/30 bg-[#00C853]/[0.06] px-2.5 py-2 min-w-0">
+            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#00C853] flex items-center gap-0.5 mb-1.5">
               <ArrowUpRight className="w-3 h-3" /> Rising
             </p>
             {movers.rising.length === 0 ? (
               <p className="text-[10.5px] text-muted-foreground">—</p>
             ) : (
               movers.rising.map((r) => (
-                <p key={r.topic} className="text-[11px] leading-snug line-clamp-2 mb-0.5">
+                <p key={r.topic} className="text-[11.5px] leading-snug truncate mb-0.5">
                   <span className="font-mono text-[#00C853] tabular-nums">+{r.delta}</span>{" "}
                   <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
                 </p>
               ))
             )}
           </div>
-          <div className="rounded-lg border border-[#FF1744]/30 bg-[#FF1744]/[0.06] p-2 min-w-0">
-            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#FF1744] flex items-center gap-0.5 mb-1">
+          <div className="rounded-lg border border-[#FF1744]/30 bg-[#FF1744]/[0.06] px-2.5 py-2 min-w-0">
+            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#FF1744] flex items-center gap-0.5 mb-1.5">
               <ArrowDownRight className="w-3 h-3" /> Falling
             </p>
             {movers.falling.length === 0 ? (
               <p className="text-[10.5px] text-muted-foreground">—</p>
             ) : (
               movers.falling.map((r) => (
-                <p key={r.topic} className="text-[11px] leading-snug line-clamp-2 mb-0.5">
+                <p key={r.topic} className="text-[11.5px] leading-snug truncate mb-0.5">
                   <span className="font-mono text-[#FF1744] tabular-nums">{r.delta}</span>{" "}
                   <span className="text-foreground/85">{r.topic.split(/[:/]/)[0]}</span>
                 </p>
@@ -1520,6 +1514,14 @@ function SampleStructureModules({
           </div>
         </div>
       </div>
+      {lastUpdated && (
+        <p
+          className="mt-2 pt-2 border-t border-border/50 text-[10px] font-mono text-muted-foreground shrink-0"
+          suppressHydrationWarning
+        >
+          Updated {timeAgo(lastUpdated)}
+        </p>
+      )}
     </aside>
   );
 }
@@ -1564,7 +1566,7 @@ function LeadershipBoardPreview({
 
   return (
     <section
-      className="tracker-card relative rounded-2xl border border-border/60 overflow-hidden min-w-0 h-full flex flex-col"
+      className="tracker-card relative rounded-2xl border border-border/60 overflow-hidden min-w-0 w-full h-full flex flex-col self-stretch"
       style={{
         background:
           "linear-gradient(165deg, color-mix(in oklab, var(--card) 92%, #FFAB00 8%) 0%, var(--card) 45%, color-mix(in oklab, var(--card) 94%, var(--cyan) 4%) 100%)",
