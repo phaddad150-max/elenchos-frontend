@@ -1,5 +1,11 @@
 # Fix Google sign-in on `/pro`
 
+**Vercel (ops):** Team **elenchos** · slug `elenchos-live` · domain dashboard  
+https://vercel.com/elenchos-live/~/domains/elenchos.live  
+(GitHub repo remains `phaddad150-max/elenchos-frontend`.)
+
+---
+
 The frontend does **not** store Google Client IDs. Supabase Auth holds them.  
 Most failures are dashboard config — not app code.
 
