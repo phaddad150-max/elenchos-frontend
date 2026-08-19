@@ -570,7 +570,7 @@ function Dashboard() {
               <Header
                 icon={<Radio className="w-4 h-4" />}
                 title="Live Citizen Signals"
-                subtitle="From the latest sample. Tap a row for the full briefing."
+                subtitle="Tap a row for the full briefing."
               />
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll overscroll-x-contain">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
@@ -678,7 +678,11 @@ function Dashboard() {
         </motion.div>
 
         {/* Focused live tracker preview — Leadership board only (Library published panel removed) */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="min-w-0 md:max-w-xl xl:max-w-2xl md:mx-auto w-full"
+        >
           <LeadershipBoardPreview leaders={topLeaders} rankedTotal={trackerKpis.leadersRanked} />
         </motion.div>
 
@@ -1417,11 +1421,11 @@ function SampleStructureModules({
             <Brain className="w-3.5 h-3.5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[13px] font-medium text-foreground/95 leading-tight">
-              This sample · structure
+            <p className="text-[13px] sm:text-[14px] font-display font-semibold text-foreground/95 leading-tight">
+              Live signal gaps &amp; movers
             </p>
             <p className="text-[10px] font-mono text-muted-foreground truncate">
-              Live signal gaps & movers
+              Strongest gaps · rising &amp; falling
             </p>
           </div>
         </div>
@@ -1450,7 +1454,10 @@ function SampleStructureModules({
                 <span className="text-[12px] sm:text-[13px] font-display font-semibold tabular-nums text-cyan w-7 shrink-0">
                   {g.score}
                 </span>
-                <div className="flex-1 min-w-0 h-2 rounded-full bg-secondary overflow-hidden">
+                <span className="text-[11px] sm:text-[12px] truncate text-foreground/90 flex-1 min-w-0">
+                  {g.topic}
+                </span>
+                <div className="w-14 sm:w-20 shrink-0 h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{
@@ -1461,9 +1468,6 @@ function SampleStructureModules({
                     transition={{ duration: 0.65, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   />
                 </div>
-                <span className="text-[11px] sm:text-[11.5px] truncate text-foreground/90 max-w-[42%] sm:max-w-[48%]">
-                  {g.topic}
-                </span>
               </div>
             ))
           )}
@@ -1598,7 +1602,7 @@ function LeadershipBoardPreview({
                       setFocus(i);
                       setPaused(true);
                     }}
-                    className={`w-full text-left rounded-xl border px-2.5 py-2 sm:px-3 sm:py-2.5 flex items-center gap-2 sm:gap-2.5 min-h-[52px] sm:min-h-[56px] touch-manipulation transition-all ${
+                    className={`w-full text-left rounded-xl border px-2.5 py-2 md:px-2.5 md:py-2 sm:px-3 sm:py-2.5 flex items-center gap-2 sm:gap-2.5 min-h-[52px] md:min-h-[48px] sm:min-h-[56px] touch-manipulation transition-all ${
                       isFocus
                         ? "border-[#FFAB00]/55 bg-[#FFAB00]/[0.08] shadow-[0_0_20px_-8px_#FFAB0088]"
                         : "border-border/50 bg-background/45 hover:border-[#FFAB00]/35 hover:bg-background/70"
@@ -1607,8 +1611,8 @@ function LeadershipBoardPreview({
                     <span
                       className={
                         rank <= 3
-                          ? "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-display font-bold text-[11px] sm:text-[12px] tabular-nums shrink-0"
-                          : "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-secondary/70 border border-border/60 font-mono font-semibold text-[11px] text-muted-foreground tabular-nums shrink-0"
+                          ? "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-7 md:h-7 rounded-lg font-display font-bold text-[11px] sm:text-[12px] tabular-nums shrink-0"
+                          : "inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-7 md:h-7 rounded-lg bg-secondary/70 border border-border/60 font-mono font-semibold text-[11px] text-muted-foreground tabular-nums shrink-0"
                       }
                       style={
                         rank <= 3

@@ -6,9 +6,12 @@ import {
   BookOpen,
   FileText,
   Layers,
+  Minus,
   Radio,
   Share2,
   Shield,
+  TrendingDown,
+  TrendingUp,
   Trophy,
   Users,
   Zap,
@@ -16,8 +19,19 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ResearchBreadcrumb } from "@/components/research/ResearchDeskNav";
+import {
+  getWowTrendForTopic,
+  loadDashboardData,
+  loadWowSentimentTrends,
+  type TopicSnapshot,
+  type WowTrend,
+} from "@/lib/dashboard-data";
 import { FEATURE_TOPICS, getTopic } from "@/lib/feature-topics";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
+import {
+  divergenceColor,
+  sentimentColorCoarse,
+} from "@/lib/score-colors";
 import { LIBRARY_SOCIAL, socialMetaTags } from "@/lib/social-meta";
 import {
   activeLiveTopicCount,
@@ -203,12 +217,22 @@ function ResearchLibraryPage() {
   const [activeSec, setActiveSec] = useState<LibrarySection>(
     search.section ?? "topics",
   );
+  /** Bump after dashboard/WoW loads so topic cards re-read live scores. */
+  const [scoresTick, setScoresTick] = useState(0);
   const activeTopics = activeLiveTopicCount();
   const archivedTopics = archivedLiveTopicCount();
   const caseCount = cases.length + shared.length;
   const trackerCount = TRACKERS.length;
 
   const openTopic = search.topic;
+
+  const scrollToSection = (id: LibrarySection) => {
+    const el = document.getElementById(`lib-${id}`);
+    if (!el) return;
+    window.requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   const selectSection = (id: LibrarySection) => {
     setActiveSec(id);
@@ -217,6 +241,7 @@ function ResearchLibraryPage() {
       search: { section: id },
       replace: true,
     });
+    scrollToSection(id);
   };
 
   const clearTopic = () => {
@@ -242,9 +267,22 @@ function ResearchLibraryPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([loadDashboardData(), loadWowSentimentTrends()]).then(() => {
+      if (!cancelled) setScoresTick((n) => n + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Sync section from search; legacy hash #topics | #cases | #trackers still works
   useEffect(() => {
-    if (search.section) setActiveSec(search.section);
+    if (search.section) {
+      setActiveSec(search.section);
+      scrollToSection(search.section);
+    }
   }, [search.section]);
 
   useEffect(() => {
@@ -416,7 +454,7 @@ function ResearchLibraryPage() {
           {activeSec === "topics" && (
             <section
               id="lib-topics"
-              className="lib-panel lib-panel-cyan rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+              className="lib-panel lib-panel-cyan rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4 scroll-mt-24"
               aria-labelledby="h-topics"
             >
               <SectionHead
@@ -429,7 +467,11 @@ function ResearchLibraryPage() {
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
                 {topicList.map((t, i) => (
-                  <TopicLibraryCard key={t.id} topic={t} delay={i * 0.03} />
+                  <TopicLibraryCard
+                    key={`${t.id}-${scoresTick}`}
+                    topic={t}
+                    delay={i * 0.03}
+                  />
                 ))}
               </div>
               {topicList.length === 0 && (
@@ -444,7 +486,12 @@ function ResearchLibraryPage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
                     {archivedTopicList.map((t, i) => (
-                      <TopicLibraryCard key={t.id} topic={t} delay={i * 0.03} archived />
+                      <TopicLibraryCard
+                        key={`${t.id}-a-${scoresTick}`}
+                        topic={t}
+                        delay={i * 0.03}
+                        archived
+                      />
                     ))}
                   </div>
                 </div>
@@ -455,7 +502,7 @@ function ResearchLibraryPage() {
           {activeSec === "cases" && (
             <section
               id="lib-cases"
-              className="lib-panel lib-panel-emerald rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+              className="lib-panel lib-panel-emerald rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4 scroll-mt-24"
               aria-labelledby="h-cases"
             >
               <SectionHead
@@ -513,7 +560,7 @@ function ResearchLibraryPage() {
           {activeSec === "trackers" && (
             <section
               id="lib-trackers"
-              className="lib-panel lib-panel-amber rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4"
+              className="lib-panel lib-panel-amber rounded-2xl border p-4 sm:p-5 md:p-6 space-y-4 scroll-mt-24"
               aria-labelledby="h-trackers"
             >
               <SectionHead
@@ -771,6 +818,26 @@ function SectionHead({
   );
 }
 
+function readLibSnapshot(rootKey: string): TopicSnapshot | null {
+  if (typeof window === "undefined") return null;
+  const root = window.dashboardData;
+  if (!root) return null;
+  return (root[rootKey] as TopicSnapshot) ?? null;
+}
+
+function readLibDivergence(snapshot?: TopicSnapshot | null): number | undefined {
+  if (snapshot == null) return undefined;
+  if (typeof snapshot.divergence_score === "number") {
+    return Math.round(snapshot.divergence_score);
+  }
+  const raw = snapshot.narrative_divergence;
+  if (typeof raw === "number") return Math.round(raw);
+  if (raw && typeof raw === "object" && typeof (raw as { score?: number }).score === "number") {
+    return Math.round((raw as { score: number }).score);
+  }
+  return undefined;
+}
+
 function TopicLibraryCard({
   topic,
   delay,
@@ -781,17 +848,51 @@ function TopicLibraryCard({
   archived?: boolean;
 }) {
   const isNew = !archived && isNewTopicBadge(topic.id);
+  const rootKey = LIVE_TOPIC_KEYS[topic.id]?.rootKey;
+  const snap = rootKey ? readLibSnapshot(rootKey) : null;
+  const os = snap?.overall_sentiment;
+  const sentiment =
+    typeof os === "object" && os && typeof os.score === "number"
+      ? Math.round(os.score)
+      : undefined;
+  const divergence = readLibDivergence(snap);
+  const wow: WowTrend | null = rootKey
+    ? getWowTrendForTopic(rootKey) ?? getWowTrendForTopic(topic.title)
+    : null;
+  const sentColor =
+    typeof sentiment === "number"
+      ? sentimentColorCoarse(sentiment)
+      : "var(--muted-foreground)";
+  const divColor =
+    typeof divergence === "number"
+      ? divergenceColor(divergence)
+      : "var(--muted-foreground)";
+
+  const WowIcon =
+    wow?.direction === "up"
+      ? TrendingUp
+      : wow?.direction === "down"
+        ? TrendingDown
+        : Minus;
+  const wowColor =
+    wow?.direction === "up"
+      ? "var(--emerald-signal)"
+      : wow?.direction === "down"
+        ? "var(--rose-signal)"
+        : "var(--muted-foreground)";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
       transition={{ delay, duration: 0.3 }}
       className="h-full"
     >
       <Link
         to="/research/library"
         search={{ section: "topics", topic: topic.id }}
-        className={`group lib-case-card flex flex-col h-full min-h-[132px] rounded-2xl border p-3.5 sm:p-4 overflow-hidden transition-all touch-manipulation hover:-translate-y-0.5 ${
+        className={`group lib-case-card flex flex-col h-full min-h-[168px] rounded-2xl border p-3.5 sm:p-4 overflow-hidden transition-all touch-manipulation ${
           archived
             ? "border-border/70 bg-card/40 opacity-90 hover:border-border"
             : "border-cyan/30 bg-gradient-to-br from-cyan/[0.08] via-card/80 to-card/60 hover:border-cyan/55 hover:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.45)]"
@@ -828,9 +929,46 @@ function TopicLibraryCard({
         <h3 className="text-[13.5px] sm:text-[14px] font-display font-semibold leading-snug group-hover:text-cyan transition-colors break-words">
           {topic.title}
         </h3>
-        <p className="text-[12px] text-muted-foreground leading-snug mt-1.5 line-clamp-2 break-words flex-1">
-          {topic.description}
-        </p>
+        <div
+          className="mt-1.5 flex items-center gap-1.5 min-h-[1.25rem]"
+          title="Week-over-week sentiment"
+          aria-label="Week-over-week sentiment trend"
+        >
+          <WowIcon className="w-4 h-4 shrink-0" style={{ color: wowColor }} strokeWidth={2.5} />
+          {typeof wow?.delta === "number" && wow.delta !== 0 && (
+            <span
+              className="text-[11px] font-mono font-semibold tabular-nums"
+              style={{ color: wowColor }}
+            >
+              {wow.delta > 0 ? "+" : ""}
+              {Math.round(wow.delta)}
+            </span>
+          )}
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border/50 pt-2">
+          <div className="min-w-0 text-center">
+            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+              Sent.
+            </p>
+            <p
+              className="text-[1.25rem] font-display font-semibold tabular-nums leading-none mt-0.5"
+              style={{ color: sentColor }}
+            >
+              {sentiment ?? "—"}
+            </p>
+          </div>
+          <div className="min-w-0 text-center border-l border-border/50">
+            <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+              Div.
+            </p>
+            <p
+              className="text-[1.25rem] font-display font-semibold tabular-nums leading-none mt-0.5"
+              style={{ color: divColor }}
+            >
+              {divergence ?? "—"}
+            </p>
+          </div>
+        </div>
         <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-cyan">
           Open briefing
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

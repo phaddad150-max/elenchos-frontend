@@ -97,7 +97,7 @@ function AboutPage() {
             Free &amp; Pro
           </h2>
           <div className="grid sm:grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-emerald-signal/35 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px]">
+            <div className="rounded-2xl border border-emerald-signal/35 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px] transition-colors hover:border-emerald-signal/55 hover:bg-card/70">
               <div className="flex items-center gap-2">
                 <span className="w-9 h-9 rounded-lg border border-emerald-signal/35 bg-emerald-signal/10 text-emerald-signal grid place-items-center">
                   <Eye className="w-4 h-4" aria-hidden />
@@ -116,7 +116,7 @@ function AboutPage() {
                 Browse free work <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="rounded-2xl border border-cyan/40 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px]">
+            <div className="rounded-2xl border border-cyan/40 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px] transition-colors hover:border-cyan/60 hover:bg-card/70">
               <div className="flex items-center gap-2">
                 <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
                   <Sparkles className="w-4 h-4" aria-hidden />
@@ -146,8 +146,8 @@ function AboutPage() {
           >
             Why X
           </h2>
-          <div className="rounded-2xl border border-border/90 bg-card/50 p-4 sm:p-5 flex gap-3 sm:gap-4">
-            <span className="shrink-0 w-10 h-10 rounded-xl border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
+          <div className="rounded-2xl border border-amber-signal/30 bg-card/50 p-4 sm:p-5 flex gap-3 sm:gap-4 transition-colors hover:border-amber-signal/45 hover:bg-card/70">
+            <span className="shrink-0 w-10 h-10 rounded-xl border border-amber-signal/35 bg-amber-signal/10 text-amber-signal grid place-items-center">
               <MessageSquareQuote className="w-5 h-5" aria-hidden />
             </span>
             <div className="min-w-0 space-y-2">
@@ -202,7 +202,7 @@ function AboutPage() {
               return (
                 <div
                   key={s.t}
-                  className="rounded-xl border border-border bg-card/50 p-3.5 space-y-2"
+                  className="rounded-xl border border-border bg-card/50 p-3.5 space-y-2 transition-all hover:border-cyan/40 hover:bg-card/80 hover:-translate-y-0.5"
                 >
                   <div className="flex items-center gap-2">
                     <Icon className="w-3.5 h-3.5 text-cyan shrink-0" aria-hidden />
@@ -300,7 +300,7 @@ function ProductCard({
   return (
     <Link
       to={to}
-      className="group block rounded-2xl border border-border/90 bg-card/50 hover:border-cyan/45 p-4 min-h-[44px] touch-manipulation transition-colors"
+      className="group block rounded-2xl border border-border/90 bg-card/50 hover:border-cyan/50 hover:bg-card/80 hover:-translate-y-0.5 p-4 min-h-[44px] touch-manipulation transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan/40"
     >
       <div className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 grid place-items-center text-cyan mb-2.5">
         {icon}
