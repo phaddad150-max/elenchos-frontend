@@ -212,12 +212,12 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
               >
                 Research Desk
               </Link>
-              <a
-                href="/research/commission?pkg=topic-analysis"
+              <Link
+                to="/pro"
                 className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-full border border-border text-[12px] text-muted-foreground hover:text-cyan touch-manipulation"
               >
-                Commission new topic analysis · $10
-              </a>
+                Private analysis on Pro
+              </Link>
             </div>
           </div>
         </header>
@@ -568,13 +568,13 @@ function TopicsFilterableGrid({
             <p className="text-[13px] text-muted-foreground mb-3">
               No commissioned topic reports yet.
             </p>
-            <a
-              href="/research/commission?pkg=topic-analysis"
+            <Link
+              to="/pro"
               className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 rounded-full border border-amber-signal/40 bg-amber-signal/10 text-amber-signal text-[12px] font-semibold touch-manipulation"
             >
-              Commission topic analysis · $10
+              Start on Pro
               <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
         ) : (
           <div className={topicGridClass}>
@@ -1398,10 +1398,10 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
         </p>
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
           <Link
-            to="/research/commission"
+            to="/pro"
             className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/12 text-cyan text-[12px] font-medium touch-manipulation"
           >
-            Research Desk · commission · $10
+            Private analysis on Pro
           </Link>
           <Link
             to="/"

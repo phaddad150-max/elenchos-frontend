@@ -44,7 +44,7 @@ export const SPEECH_REACH_SOCIAL: SocialPageMeta = {
 export const HOME_SOCIAL: SocialPageMeta = {
   title: "Elenchos · Public Discourse Lens × Research Desk",
   description:
-    "Citizen voices vs official frames. Topics on X, free library, Networks Ledger, and privacy-first commission reports.",
+    "Citizen voices vs official frames. Free Library under Research, Networks Ledger, and Pro for private token runs.",
   url: SITE,
   image: DEFAULT_OG,
 };
@@ -52,7 +52,7 @@ export const HOME_SOCIAL: SocialPageMeta = {
 export const ABOUT_SOCIAL: SocialPageMeta = {
   title: "About Elenchos · Public Discourse Lens × Research Desk",
   description:
-    "A privacy-first desk for public discourse on X and research you can check. Topics, library, trackers, and commissioned reports.",
+    "A privacy-first desk for public discourse on X and research you can check. Dashboard, Research Library, Pro, and Enterprise.",
   url: `${SITE}/about`,
   image: DEFAULT_OG,
 };

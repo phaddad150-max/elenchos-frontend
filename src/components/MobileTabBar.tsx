@@ -1,30 +1,27 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Layers, Info, FlaskConical } from "lucide-react";
+import { LayoutDashboard, FlaskConical, Sparkles, Info } from "lucide-react";
 
+/** Main nav (mobile): Dashboard · Research · Pro · About — Library nested under Research only. */
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
-  {
-    to: "/research/library",
-    label: "Library",
-    match: (p: string) =>
-      p.startsWith("/research/library") ||
-      p === "/topics" ||
-      p.startsWith("/topics/"),
-    icon: Layers,
-  },
   {
     to: "/research",
     label: "Research",
     match: (p: string) =>
-      (p === "/research" ||
-        p.startsWith("/research/") ||
-        p.startsWith("/research-") ||
-        p === "/trackers" ||
-        p.startsWith("/trackers/") ||
-        p === "/pro" ||
-        p.startsWith("/pro/")) &&
-      !p.startsWith("/research/library"),
+      p === "/research" ||
+      p.startsWith("/research/") ||
+      p.startsWith("/research-") ||
+      p === "/trackers" ||
+      p.startsWith("/trackers/") ||
+      p === "/topics" ||
+      p.startsWith("/topics/"),
     icon: FlaskConical,
+  },
+  {
+    to: "/pro",
+    label: "Pro",
+    match: (p: string) => p === "/pro" || p.startsWith("/pro/"),
+    icon: Sparkles,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },
 ] as const;

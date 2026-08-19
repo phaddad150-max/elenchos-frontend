@@ -1,9 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, FilePenLine } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 /**
- * Research secondary nav — two modes only:
- * Library (free published work) · Commission (paid private reports)
+ * Research secondary nav — Library only (free published work).
+ * Private analyses live on /pro. Legacy /research/commission is unlinked.
  */
 const ITEMS = [
   {
@@ -21,13 +21,6 @@ const ITEMS = [
       p.startsWith("/research/speech-reach") ||
       p.startsWith("/trackers"),
   },
-  {
-    to: "/research/commission",
-    label: "Commission",
-    short: "Commission",
-    icon: FilePenLine,
-    match: (p: string) => p.startsWith("/research/commission"),
-  },
 ] as const;
 
 export function ResearchDeskNav({ className = "" }: { className?: string }) {
@@ -39,7 +32,7 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
       className={`sticky top-[3.25rem] md:top-[3.75rem] z-20 -mx-0.5 mb-4 sm:mb-5 ${className}`}
     >
       <div className="overflow-x-auto scrollbar-none -mx-1 px-1">
-        <ul className="rd-nav-shell flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-md rounded-xl p-1">
+        <ul className="rd-nav-shell flex items-stretch gap-1 min-w-0 w-max sm:w-full sm:max-w-xs rounded-xl p-1">
           {ITEMS.map((item) => {
             const active = item.match(pathname);
             const Icon = item.icon;

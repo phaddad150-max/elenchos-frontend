@@ -3,7 +3,7 @@ import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
 import { requestConsentPreferences } from "@/lib/privacy-consent";
 
-/** Site footer: nav CTAs + legal. Keep short; story lives on About. */
+/** Site footer: main nav + legal. Library lives under Research; no public commission CTAs. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/80 mt-8 pb-20 md:pb-0 bg-gradient-to-t from-card/40 to-transparent">
@@ -15,21 +15,17 @@ export function SiteFooter() {
           <Link to="/" className="text-cyan hover:underline">
             Dashboard
           </Link>
-          <Link
-            to="/research/library"
-            search={{ section: "topics" }}
-            className="text-cyan hover:underline"
-          >
-            Library
-          </Link>
           <Link to="/research" className="text-cyan hover:underline">
             Research
           </Link>
-          <Link to="/research/library" className="text-cyan hover:underline">
-            Library
+          <Link to="/pro" className="text-cyan hover:underline">
+            Pro
           </Link>
-          <Link to="/research/commission" className="text-cyan hover:underline">
-            Commission report · $10
+          <Link to="/about" className="hover:text-cyan hover:underline">
+            About
+          </Link>
+          <Link to="/privacy" className="hover:text-cyan hover:underline">
+            Privacy
           </Link>
           <ContactEmailMe
             source="footer-enterprise"
@@ -41,30 +37,19 @@ export function SiteFooter() {
           >
             Enterprise
           </ContactEmailMe>
-          <Link to="/about" className="hover:text-cyan hover:underline">
-            About
-          </Link>
-          <Link to="/privacy" className="hover:text-cyan hover:underline">
-            Privacy
-          </Link>
           <button
             type="button"
             onClick={() => requestConsentPreferences()}
-            className="hover:text-cyan hover:underline text-left"
+            className="hover:text-cyan hover:underline"
           >
             Cookies
           </button>
-          <ContactEmailMe
-            source="footer"
-            variant="inline"
-            className="text-[11px] sm:text-[12px] font-mono"
-          />
         </nav>
-        <p className="text-[10px] sm:text-[11px] font-mono leading-relaxed">
-          {ELENCHOS_TAGLINE} Independent experimental research. Provided &ldquo;as is&rdquo;. Not
-          professional advice.
-        </p>
-        <p className="text-[10px] sm:text-[11px] font-mono">&copy; 2026 Elenchos</p>
+        {ELENCHOS_TAGLINE ? (
+          <p className="text-[10.5px] sm:text-[11px] text-muted-foreground/90 max-w-3xl leading-relaxed">
+            {ELENCHOS_TAGLINE}
+          </p>
+        ) : null}
       </div>
     </footer>
   );

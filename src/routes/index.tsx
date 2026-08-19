@@ -90,7 +90,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Elenchos: Public Discourse Lens x Research Desk. Live Topics on X vs official frames, Dashboard signals, deep dives and commission reports. Privacy-first.",
+          "Elenchos: Public Discourse Lens x Research Desk. Live Topics on X vs official frames, Dashboard signals, free Library, and Pro private runs. Privacy-first.",
       },
       {
         property: "og:title",
@@ -99,7 +99,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Citizen voices vs official narratives. Topics analysis, crisis briefings, thesis-style case studies, commission reports from $10.",
+          "Citizen voices vs official narratives. Topics analysis, crisis briefings, thesis-style case studies, and Pro monthly plans.",
       },
       { property: "og:url", content: "https://elenchos.live/" },
     ],

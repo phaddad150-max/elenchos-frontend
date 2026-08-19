@@ -144,19 +144,11 @@ export function GlobalSearch() {
               <CommandShortcut>Library</CommandShortcut>
             </CommandItem>
             <CommandItem
-              value="commission report on demand paid multi-source deep dive"
-              onSelect={() => go("/research/commission")}
-            >
-              <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Commission report · $10 / $20</span>
-              <CommandShortcut>Research</CommandShortcut>
-            </CommandItem>
-            <CommandItem
-              value="pro subscription tokens private research desk wallet"
+              value="pro subscription tokens private research desk wallet monthly"
               onSelect={() => go("/pro")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Pro Research Desk · tokens</span>
+              <span className="truncate">Pro · monthly plans & private runs</span>
               <CommandShortcut>Pro</CommandShortcut>
             </CommandItem>
             <CommandItem

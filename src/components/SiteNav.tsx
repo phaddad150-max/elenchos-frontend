@@ -27,8 +27,7 @@ function NewBadge({ className, strokeWidth: _ }: { className?: string; strokeWid
 
 const TABS = [
   { to: "/", label: "Dashboard", exact: true },
-  { to: "/research/library", label: "Library", exact: false },
-  { to: "/research", label: "Research", exact: true },
+  { to: "/research", label: "Research", exact: false },
   { to: "/pro", label: "Pro", exact: false },
   { to: "/about", label: "About", exact: true },
 ] as const;

@@ -1,42 +1,26 @@
 # Stripe setup — monthly plans (v1)
 
-Guest Research Desk packages (`topic-analysis` / `deep-no-x` / `deep-with-x`) still use one-time Checkout. **Billing on `/pro` is monthly only** for now.
+## Product IA (final)
 
-## Products live (3 options)
+**Main nav:** Dashboard · Research · Pro · About  
+
+- Library lives under Research only (`/research/library`) — not in main nav.  
+- Public guest commission CTAs are **removed**. `/research/commission` may remain for legacy URLs but is not linked from nav, footer, sitemap, or landing pages.  
+- Private analyses: **Pro** monthly packs + token wallet.
+
+## Products live (3 monthly options)
 
 | Plan | Mode | Amount | Tokens / period | Env var |
 |------|------|--------|-----------------|---------|
-| Starter | **Recurring monthly** | $10 | 10 | `STRIPE_PRICE_PACK_STARTER` |
-| Plus | **Recurring monthly** | $40 | 50 | `STRIPE_PRICE_PACK_PLUS` |
-| Mega | **Recurring monthly** | $90 | 120 | `STRIPE_PRICE_PACK_MEGA` |
-
-Recommended Price metadata on each:
-
-- `plan_id` = `pack_starter` | `pack_plus` | `pack_mega`
-- `tokens` / `tokens_granted` = `10` | `50` | `120`
-
-## Deferred (not wired)
-
-- Separate “Elenchos Pro $29” product
-- One-time token packs
-
-## Checkout
-
-| Flow | Stripe `mode` | App effect |
-|------|---------------|------------|
-| Starter / Plus / Mega | `subscription` | Upsert `subscriptions`; grant tokens on `checkout.session.completed` + renewals via `invoice.paid` |
-| Guest commission | `payment` (existing) | Unchanged |
+| Starter | Recurring monthly | $10 | 10 | `STRIPE_PRICE_PACK_STARTER` |
+| Plus | Recurring monthly | $40 | 50 | `STRIPE_PRICE_PACK_PLUS` |
+| Mega | Recurring monthly | $90 | 120 | `STRIPE_PRICE_PACK_MEGA` |
 
 ## Webhook
 
-Keep: `https://elenchos.live/api/research/webhook`
+`https://elenchos.live/api/research/webhook`
 
-Events:
-
-- `checkout.session.completed`
-- `invoice.paid`
-- `customer.subscription.updated`
-- `customer.subscription.deleted`
+Events: `checkout.session.completed`, `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`
 
 ## Vercel env
 
@@ -49,4 +33,6 @@ STRIPE_PRICE_PACK_MEGA=price_...
 SITE_URL=https://elenchos.live
 ```
 
-Paste the three `price_…` IDs when ready to deploy.
+## Isolation
+
+Private Pro runs: `debit_tokens` → INSERT `research_desk_reports` only (`user_id`, `payment_source=token_balance`). Never public intelligence tables.

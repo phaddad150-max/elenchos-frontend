@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
   BookOpen,
-  Coins,
   FilePenLine,
   Loader2,
   LogIn,
@@ -20,15 +20,15 @@ import {
 import { DESK_PACKAGES, type DeskPackageId } from "@/lib/research-desk/packages";
 import { socialMetaTags } from "@/lib/social-meta";
 
-/** v1: only deep-no-x on /pro UI (API can still accept other packages later). */
-const PRO_RUN_PACKAGES: DeskPackageId[] = ["deep-no-x"];
-
 const PRO_SOCIAL = {
-  title: "Pro Research Desk · Elenchos",
+  title: "Pro · Private research · Elenchos",
   description:
-    "Monthly Starter, Plus, or Mega plans for research tokens and private analyses. Public Library stays free.",
+    "Monthly Starter, Plus, or Mega plans. Token wallet for private deep-dive analyses. Public Library stays free.",
   url: "https://elenchos.live/pro",
 };
+
+/** v1: deep-no-x only on /pro UI. */
+const PRO_RUN_PACKAGE: DeskPackageId = "deep-no-x";
 
 export const Route = createFileRoute("/pro")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -57,17 +57,20 @@ async function accessToken(): Promise<string | null> {
   return data.session?.access_token ?? null;
 }
 
+function planLabel(planId: string | undefined): string {
+  if (!planId) return "";
+  return MONTHLY_PLANS[planId as MonthlyPlanId]?.title ?? planId;
+}
+
 function ProDeskPage() {
   const search = Route.useSearch();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
   const [me, setMe] = useState<BillingMe | null>(null);
-  const [meError, setMeError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
-  const [runPkg, setRunPkg] = useState<DeskPackageId>("deep-no-x");
   const [runTopic, setRunTopic] = useState("");
   const [runQuestions, setRunQuestions] = useState("");
   const [runBusy, setRunBusy] = useState(false);
@@ -78,20 +81,17 @@ function ProDeskPage() {
       setMe(null);
       return;
     }
-    setMeError(null);
     try {
       const res = await fetch("/api/billing/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = (await res.json()) as BillingMe & { error?: string };
       if (!res.ok) {
-        setMeError(data.error || "Could not load wallet");
         setMe(null);
         return;
       }
       setMe({ balance: data.balance, subscription: data.subscription });
     } catch {
-      setMeError("Could not load wallet");
       setMe(null);
     }
   }, []);
@@ -103,13 +103,14 @@ function ProDeskPage() {
       const u = data.session?.user;
       setUserId(u?.id ?? null);
       setUserEmail(u?.email ?? u?.user_metadata?.preferred_username ?? null);
-      setAuthLoading(false);
+      setAuthReady(true);
       if (u) void refreshMe();
     });
     const { data: sub } = supabaseExternal.auth.onAuthStateChange((_e, session) => {
       const u = session?.user;
       setUserId(u?.id ?? null);
       setUserEmail(u?.email ?? u?.user_metadata?.preferred_username ?? null);
+      setAuthReady(true);
       if (u) void refreshMe();
       else setMe(null);
     });
@@ -121,9 +122,7 @@ function ProDeskPage() {
 
   useEffect(() => {
     if (search.billing === "success") {
-      setBanner(
-        "Subscription checkout complete — monthly tokens appear after Stripe confirms (usually a few seconds).",
-      );
+      setBanner("Subscription confirmed. Tokens appear within a few seconds.");
       void refreshMe();
       const t = window.setTimeout(() => void refreshMe(), 2500);
       return () => window.clearTimeout(t);
@@ -190,8 +189,9 @@ function ProDeskPage() {
     me?.subscription?.status === "active" ||
     me?.subscription?.status === "trialing";
 
-  const runCost = TOKEN_COSTS[runPkg] ?? 0;
+  const runCost = TOKEN_COSTS[PRO_RUN_PACKAGE];
   const canAfford = (me?.balance ?? 0) >= runCost;
+  const pkgMeta = DESK_PACKAGES[PRO_RUN_PACKAGE];
 
   const startPrivateRun = async () => {
     setActionError(null);
@@ -213,7 +213,7 @@ function ProDeskPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          packageId: runPkg,
+          packageId: PRO_RUN_PACKAGE,
           topic: runTopic.trim(),
           questions: runQuestions.trim(),
         }),
@@ -221,8 +221,6 @@ function ProDeskPage() {
       const data = (await res.json()) as {
         error?: string;
         reportUrl?: string;
-        status?: string;
-        tokensCharged?: number;
         balance?: number;
       };
       if (!res.ok || !data.reportUrl) {
@@ -250,31 +248,26 @@ function ProDeskPage() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
       <SiteNav />
 
-      <main className="max-w-[960px] mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-10 mobile-safe-bottom md:pb-14 relative flex-1 space-y-6">
-        <header className="page-hero-banner overflow-hidden relative rounded-2xl border border-cyan/25">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_20%_0%,color-mix(in_oklab,var(--cyan)_20%,transparent),transparent_55%)]" />
-          <div className="relative p-5 sm:p-7 space-y-3">
+      <main className="max-w-[920px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 space-y-5 sm:space-y-6">
+        <header className="page-hero-banner overflow-hidden min-w-0 relative rounded-2xl border border-cyan/25">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_15%_0%,color-mix(in_oklab,var(--cyan)_18%,transparent),transparent_55%)]" />
+          <div className="relative p-4 sm:p-5 md:p-7 space-y-2.5">
             <div className="page-hero-kicker inline-flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" aria-hidden />
-              Pro Research Desk
+              Pro
             </div>
-            <h1 className="page-hero-title text-[1.45rem] sm:text-2xl md:text-[1.85rem]">
-              Monthly plans · private token runs
+            <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[1.85rem]">
+              Private research with a token wallet
             </h1>
-            <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground leading-relaxed max-w-2xl">
-              Choose Starter, Plus, or Mega (monthly). Tokens refill each period for private
-              analyses. Free published work stays in the{" "}
-              <Link to="/research/library" className="text-cyan underline-offset-2 hover:underline">
-                Library
-              </Link>
-              . Guest one-time checkout:{" "}
+            <p className="text-[13px] sm:text-[14.5px] text-muted-foreground leading-relaxed max-w-2xl">
+              Monthly plans credit tokens for private deep dives. The free{" "}
               <Link
-                to="/research/commission"
+                to="/research/library"
                 className="text-cyan underline-offset-2 hover:underline"
               >
-                Commission
-              </Link>
-              .
+                Library
+              </Link>{" "}
+              stays open to everyone — no account required.
             </p>
           </div>
         </header>
@@ -282,80 +275,73 @@ function ProDeskPage() {
         {banner && (
           <p
             role="status"
-            className="rounded-xl border border-cyan/35 bg-cyan/10 px-4 py-3 text-[13px] text-foreground/90"
+            className="rounded-xl border border-cyan/30 bg-cyan/[0.08] px-4 py-3 text-[13px] text-foreground/90"
           >
             {banner}
           </p>
         )}
 
-        {/* Auth + wallet */}
-        <section className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5 space-y-3">
-          <h2 className="text-base font-display font-semibold tracking-tight">Account</h2>
-          {authLoading ? (
-            <p className="text-[13px] text-muted-foreground inline-flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> Checking session…
-            </p>
+        {/* Account / wallet */}
+        <section className="rounded-2xl border border-border/90 bg-card/50 p-4 sm:p-5 space-y-3">
+          {!authReady ? (
+            <div className="h-10 flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+              <span className="sr-only">Loading</span>
+            </div>
           ) : userId ? (
-            <div className="space-y-2">
-              <p className="text-[13px] text-foreground/90">
-                Signed in
-                {userEmail ? (
-                  <>
-                    {" "}
-                    as <span className="font-mono text-cyan">{userEmail}</span>
-                  </>
-                ) : null}
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <p className="text-sm font-mono">
-                  Balance:{" "}
-                  <span className="text-cyan text-lg font-semibold">
-                    {me?.balance ?? "—"}
-                  </span>{" "}
-                  tokens
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+              <div className="space-y-1.5 min-w-0">
+                <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                  Wallet
                 </p>
-                {proActive && (
-                  <span className="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-signal/40 text-emerald-signal">
-                    Pro {me?.subscription?.status}
+                <p className="text-[1.65rem] sm:text-3xl font-display font-semibold tracking-tight text-cyan tabular-nums">
+                  {me?.balance ?? "—"}
+                  <span className="text-[13px] sm:text-sm font-mono font-normal text-muted-foreground ml-2">
+                    tokens
                   </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => void refreshMe()}
-                  className="text-[12px] text-muted-foreground hover:text-cyan underline-offset-2 hover:underline"
-                >
-                  Refresh
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void signOut()}
-                  className="text-[12px] text-muted-foreground hover:text-cyan underline-offset-2 hover:underline"
-                >
-                  Sign out
-                </button>
+                </p>
+                <p className="text-[12.5px] text-muted-foreground truncate">
+                  {userEmail ? (
+                    <span className="font-mono text-foreground/80">{userEmail}</span>
+                  ) : (
+                    "Signed in"
+                  )}
+                  {proActive && (
+                    <>
+                      {" · "}
+                      <span className="text-emerald-signal">
+                        {planLabel(me?.subscription?.planId)} active
+                      </span>
+                    </>
+                  )}
+                </p>
               </div>
-              {meError && (
-                <p className="text-[12px] text-amber-signal">{meError}</p>
-              )}
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="self-start sm:self-auto text-[12px] text-muted-foreground hover:text-cyan underline-offset-2 hover:underline min-h-[36px]"
+              >
+                Sign out
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-[13px] text-muted-foreground">
-                Sign in to subscribe monthly and keep a private token balance. Browsing the Library
-                stays free and anonymous.
+              <p className="text-[13px] text-muted-foreground leading-relaxed max-w-lg">
+                Sign in to subscribe and run private analyses. Dashboard and Research stay free
+                without an account.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => void signInX()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-border bg-foreground text-background hover:bg-foreground/90"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-border bg-foreground text-background hover:bg-foreground/90 touch-manipulation"
                 >
                   <LogIn className="w-4 h-4" /> Continue with X
                 </button>
                 <button
                   type="button"
                   onClick={() => void signInGoogle()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15 touch-manipulation"
                 >
                   <LogIn className="w-4 h-4" /> Continue with Google
                 </button>
@@ -369,47 +355,54 @@ function ProDeskPage() {
           )}
         </section>
 
-        <section
-          aria-labelledby="pro-plans"
-          className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5 space-y-3"
-        >
-          <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-amber-signal" aria-hidden />
-            <h2 id="pro-plans" className="text-base font-display font-semibold tracking-tight">
+        {/* Monthly plans */}
+        <section aria-labelledby="pro-plans" className="space-y-3">
+          <div className="px-0.5">
+            <h2
+              id="pro-plans"
+              className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
+            >
               Monthly plans
             </h2>
+            <p className="text-[12.5px] text-muted-foreground mt-1">
+              Tokens credit on subscribe and each renewal. One active plan per account.
+            </p>
           </div>
-          <p className="text-[12.5px] text-muted-foreground">
-            Three paid options on Stripe. Tokens credit on subscribe and each renewal. One active
-            plan per account for now.
-          </p>
           <ul className="grid gap-2.5 sm:grid-cols-3">
-            {MONTHLY_PLAN_ORDER.map((id) => {
+            {MONTHLY_PLAN_ORDER.map((id, i) => {
               const p = MONTHLY_PLANS[id];
-              const isCurrent =
-                proActive && me?.subscription?.planId === id;
+              const isCurrent = proActive && me?.subscription?.planId === id;
               return (
-                <li
+                <motion.li
                   key={id}
-                  className={`rounded-xl border p-3.5 space-y-2 flex flex-col ${
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.3 }}
+                  className={`rounded-2xl border p-4 flex flex-col gap-2.5 min-h-[168px] ${
                     isCurrent
-                      ? "border-cyan/55 bg-cyan/10"
-                      : "border-border/80 bg-background/40"
+                      ? "border-cyan/50 bg-cyan/[0.08]"
+                      : "border-border/90 bg-card/50"
                   }`}
                 >
-                  <p className="text-sm font-semibold">{p.title}</p>
-                  <p className="text-[12px] text-muted-foreground flex-1">{p.blurb}</p>
-                  <p className="text-sm font-mono text-cyan">
-                    ${p.priceUsd}/mo · {p.tokensGranted} tokens
+                  <div className="space-y-1 flex-1">
+                    <p className="text-[15px] font-display font-semibold">{p.title}</p>
+                    <p className="text-[12px] text-muted-foreground leading-snug">{p.blurb}</p>
+                  </div>
+                  <p className="text-[15px] font-mono text-cyan tabular-nums">
+                    ${p.priceUsd}
+                    <span className="text-[11px] text-muted-foreground">/mo</span>
+                    <span className="text-[12px] text-muted-foreground ml-2">
+                      · {p.tokensGranted} tokens
+                    </span>
                   </p>
                   <button
                     type="button"
                     disabled={!userId || !!busy || proActive}
                     onClick={() => void startCheckout(id)}
-                    className="w-full inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 rounded-lg text-[12.5px] font-semibold border border-border hover:border-cyan/45 hover:bg-cyan/5 disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 rounded-full text-[13px] font-display font-semibold border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15 disabled:opacity-45 disabled:cursor-not-allowed touch-manipulation"
                   >
                     {busy === id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : isCurrent ? (
                       "Current plan"
                     ) : proActive ? (
@@ -417,63 +410,32 @@ function ProDeskPage() {
                     ) : userId ? (
                       "Subscribe"
                     ) : (
-                      "Sign in"
+                      "Sign in to subscribe"
                     )}
                   </button>
-                </li>
+                </motion.li>
               );
             })}
           </ul>
-          <p className="text-[11px] font-mono text-muted-foreground">
-            Env: STRIPE_PRICE_PACK_STARTER · _PLUS · _MEGA
-          </p>
         </section>
 
+        {/* Private run */}
         <section
           aria-labelledby="pro-run"
           className="rounded-2xl border border-cyan/30 bg-card/50 p-4 sm:p-5 space-y-4"
         >
           <div className="space-y-1">
-            <h2 id="pro-run" className="text-base font-display font-semibold tracking-tight">
+            <h2
+              id="pro-run"
+              className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
+            >
               Start a private run
             </h2>
-            <p className="text-[12.5px] text-muted-foreground leading-relaxed">
-              Debits your wallet and inserts a private desk report only — never public Topics /
-              dashboard KPIs. Same method as guest Commission.
+            <p className="text-[13px] text-muted-foreground leading-relaxed">
+              {pkgMeta.tierLabel} · {runCost} tokens. Writes a private desk report only — never the
+              public dashboard.
             </p>
           </div>
-
-          <fieldset className="space-y-2" disabled={!userId || runBusy}>
-            <legend className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
-              Package (v1)
-            </legend>
-            <div className="grid gap-2 sm:grid-cols-1 max-w-md">
-              {PRO_RUN_PACKAGES.map((id) => {
-                const pkg = DESK_PACKAGES[id];
-                const selected = runPkg === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setRunPkg(id)}
-                    className={`text-left rounded-xl border p-3 space-y-1 transition-colors ${
-                      selected
-                        ? "border-cyan/55 bg-cyan/10"
-                        : "border-border/80 bg-background/40 hover:border-cyan/35"
-                    }`}
-                  >
-                    <p className="text-[13px] font-semibold">{pkg.tierLabel}</p>
-                    <p className="text-[11px] text-muted-foreground leading-snug">
-                      {pkg.blurb} Topic-analysis and deep+X open later.
-                    </p>
-                    <p className="text-[12px] font-mono text-cyan">
-                      {TOKEN_COSTS[id]} tokens
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
 
           <label className="block space-y-1.5">
             <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
@@ -484,31 +446,33 @@ function ProDeskPage() {
               onChange={(e) => setRunTopic(e.target.value)}
               rows={3}
               disabled={!userId || runBusy}
-              placeholder="What should we analyse? (public-interest topic)"
+              placeholder="What should we analyse?"
               className="w-full rounded-xl border border-border bg-background/60 px-3 py-2.5 text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-cyan/40 disabled:opacity-50"
             />
           </label>
 
           <label className="block space-y-1.5">
             <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              Questions (optional)
+              Questions <span className="normal-case tracking-normal">(optional)</span>
             </span>
             <textarea
               value={runQuestions}
               onChange={(e) => setRunQuestions(e.target.value)}
-              rows={3}
+              rows={2}
               disabled={!userId || runBusy}
-              placeholder="One question per line — Socratic prompts help"
+              placeholder="One question per line"
               className="w-full rounded-xl border border-border bg-background/60 px-3 py-2.5 text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-cyan/40 disabled:opacity-50"
             />
           </label>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 pt-0.5">
             <button
               type="button"
-              disabled={!userId || runBusy || runTopic.trim().length < 8 || !canAfford}
+              disabled={
+                !userId || runBusy || runTopic.trim().length < 8 || !canAfford
+              }
               onClick={() => void startPrivateRun()}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/40 bg-cyan text-background hover:bg-cyan/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/50 bg-cyan text-background hover:bg-cyan/90 disabled:opacity-45 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
             >
               {runBusy ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -521,50 +485,23 @@ function ProDeskPage() {
                   ? `Need ${runCost} tokens`
                   : `Run · ${runCost} tokens`}
             </button>
-            <p className="text-[12px] text-muted-foreground font-mono">
-              Wallet: {me?.balance ?? "—"} · Cost: {runCost}
-            </p>
+            {userId && (
+              <span className="text-[12px] font-mono text-muted-foreground tabular-nums">
+                Balance {me?.balance ?? "—"}
+              </span>
+            )}
           </div>
         </section>
 
-        <section
-          aria-labelledby="pro-costs"
-          className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5 space-y-3"
-        >
-          <h2 id="pro-costs" className="text-base font-display font-semibold tracking-tight">
-            Token costs (provisional)
-          </h2>
-          <ul className="space-y-2 text-[13px]">
-            <li className="flex justify-between gap-3 border-b border-border/60 pb-2">
-              <span>Topic analysis (T1 · capped X)</span>
-              <span className="font-mono text-cyan shrink-0">
-                {TOKEN_COSTS["topic-analysis"]} tokens
-              </span>
-            </li>
-            <li className="flex justify-between gap-3 border-b border-border/60 pb-2">
-              <span>Deep dive · no X (T2)</span>
-              <span className="font-mono text-cyan shrink-0">
-                {TOKEN_COSTS["deep-no-x"]} tokens
-              </span>
-            </li>
-            <li className="flex justify-between gap-3">
-              <span>Deep dive · + X (T3)</span>
-              <span className="font-mono text-cyan shrink-0">
-                {TOKEN_COSTS["deep-with-x"]} tokens
-              </span>
-            </li>
-          </ul>
-        </section>
-
-        <aside className="rounded-xl border border-dashed border-border p-4 text-[12.5px] text-muted-foreground space-y-2">
-          <p className="flex items-start gap-2">
-            <BookOpen className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />
-            Free researched material lives only in the Library — Pro never replaces that surface.
-          </p>
-          <p className="flex items-start gap-2">
-            <FilePenLine className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />
-            Need a one-off report without an account? Use guest Commission (USD via Stripe).
-          </p>
+        <aside className="rounded-xl border border-dashed border-border/80 px-4 py-3 text-[12.5px] text-muted-foreground flex items-start gap-2">
+          <BookOpen className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" aria-hidden />
+          <span>
+            Free published research lives under{" "}
+            <Link to="/research" className="text-cyan hover:underline">
+              Research
+            </Link>
+            . Pro never replaces that surface.
+          </span>
         </aside>
       </main>
 
