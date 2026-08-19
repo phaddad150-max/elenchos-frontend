@@ -668,22 +668,25 @@ function Dashboard() {
           </section>
         </motion.div>
 
-        {/* Sample structure sits under Live Citizen Signals (not under Library/trackers) */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <SampleStructureModules
-            snapshots={snapshots}
-            signals={mergedFeedSignals}
-            overview={overview}
-          />
-        </motion.div>
-
-        {/* Focused live tracker preview — Leadership board only (Library published panel removed) */}
+        {/* Under signals + heatmap: Leadership + Gaps aligned side by side */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="min-w-0 md:max-w-xl xl:max-w-2xl md:mx-auto w-full"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-4 md:gap-5 lg:items-stretch min-w-0"
         >
-          <LeadershipBoardPreview leaders={topLeaders} rankedTotal={trackerKpis.leadersRanked} />
+          <div className="min-w-0 lg:col-span-7 h-full">
+            <LeadershipBoardPreview
+              leaders={topLeaders}
+              rankedTotal={trackerKpis.leadersRanked}
+            />
+          </div>
+          <div className="min-w-0 lg:col-span-5 h-full">
+            <SampleStructureModules
+              snapshots={snapshots}
+              signals={mergedFeedSignals}
+              overview={overview}
+            />
+          </div>
         </motion.div>
 
         {/* Contextual actions — end of page only, not mid-page marketing banners */}
@@ -1414,8 +1417,8 @@ function SampleStructureModules({
   }, [signals]);
 
   return (
-    <section className="dash-panel p-2.5 sm:p-3.5 min-w-0">
-      <div className="flex items-center justify-between gap-2 mb-2.5 min-w-0">
+    <aside className="dash-panel p-2.5 sm:p-3.5 min-w-0 h-full flex flex-col">
+      <div className="flex items-start justify-between gap-2 mb-2.5 min-w-0 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg grid place-items-center border border-cyan/35 bg-cyan/10 text-cyan shrink-0">
             <Brain className="w-3.5 h-3.5" />
@@ -1425,39 +1428,46 @@ function SampleStructureModules({
               Live signal gaps &amp; movers
             </p>
             <p className="text-[10px] font-mono text-muted-foreground truncate">
-              Strongest gaps · rising &amp; falling
+              Gaps · rising &amp; falling
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex flex-col items-end gap-1 shrink-0">
           {avgDiv != null && (
             <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded border border-cyan/30 text-cyan bg-cyan/10">
               avg {avgDiv}
             </span>
           )}
           {lastUpdated && (
-            <span className="hidden xs:inline sm:inline text-[10px] font-mono text-muted-foreground" suppressHydrationWarning>
+            <span
+              className="hidden sm:inline text-[10px] font-mono text-muted-foreground"
+              suppressHydrationWarning
+            >
               {timeAgo(lastUpdated)}
             </span>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 min-w-0">
-        <div className="sm:col-span-7 min-w-0 space-y-1">
-          <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan">Strongest gaps</p>
+      <div className="flex flex-col gap-3 min-w-0 flex-1">
+        <div className="min-w-0 space-y-1.5 flex-1">
+          <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-cyan">
+            Strongest gaps
+          </p>
           {gaps.length === 0 ? (
             <p className="text-[11.5px] text-muted-foreground py-1">No divergence scores yet.</p>
           ) : (
             gaps.map((g, i) => (
-              <div key={g.topic} className="flex items-center gap-2 min-w-0 py-0.5">
-                <span className="text-[12px] sm:text-[13px] font-display font-semibold tabular-nums text-cyan w-7 shrink-0">
-                  {g.score}
-                </span>
-                <span className="text-[11px] sm:text-[12px] truncate text-foreground/90 flex-1 min-w-0">
-                  {g.topic}
-                </span>
-                <div className="w-14 sm:w-20 shrink-0 h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
+              <div key={g.topic} className="min-w-0 space-y-1 py-0.5">
+                <div className="flex items-baseline justify-between gap-2 min-w-0">
+                  <span className="text-[11.5px] sm:text-[12px] truncate text-foreground/90 flex-1 min-w-0">
+                    {g.topic}
+                  </span>
+                  <span className="text-[12px] sm:text-[13px] font-display font-semibold tabular-nums text-cyan shrink-0">
+                    {g.score}
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{
@@ -1465,14 +1475,19 @@ function SampleStructureModules({
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, g.score)}%` }}
-                    transition={{ duration: 0.65, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{
+                      duration: 0.65,
+                      delay: i * 0.05,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
                   />
                 </div>
               </div>
             ))
           )}
         </div>
-        <div className="sm:col-span-5 min-w-0 grid grid-cols-2 gap-1.5 sm:gap-2">
+
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 shrink-0 mt-auto">
           <div className="rounded-lg border border-[#00C853]/30 bg-[#00C853]/[0.06] p-2 min-w-0">
             <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#00C853] flex items-center gap-0.5 mb-1">
               <ArrowUpRight className="w-3 h-3" /> Rising
@@ -1505,7 +1520,7 @@ function SampleStructureModules({
           </div>
         </div>
       </div>
-    </section>
+    </aside>
   );
 }
 
@@ -1549,7 +1564,7 @@ function LeadershipBoardPreview({
 
   return (
     <section
-      className="tracker-card relative rounded-2xl border border-border/60 overflow-hidden min-w-0"
+      className="tracker-card relative rounded-2xl border border-border/60 overflow-hidden min-w-0 h-full flex flex-col"
       style={{
         background:
           "linear-gradient(165deg, color-mix(in oklab, var(--card) 92%, #FFAB00 8%) 0%, var(--card) 45%, color-mix(in oklab, var(--card) 94%, var(--cyan) 4%) 100%)",
@@ -1558,8 +1573,8 @@ function LeadershipBoardPreview({
     >
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_10%_0%,rgba(255,213,79,0.14),transparent_50%),radial-gradient(ellipse_at_90%_20%,color-mix(in_oklab,var(--cyan)_10%,transparent),transparent_45%)]" />
 
-      <div className="relative p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-3.5">
-        <div className="flex flex-wrap items-start justify-between gap-2">
+      <div className="relative p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-3.5 flex flex-col flex-1 min-h-0">
+        <div className="flex flex-wrap items-start justify-between gap-2 shrink-0">
           <div className="min-w-0">
             <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-1">
               <Trophy className="w-3.5 h-3.5" />
@@ -1690,7 +1705,7 @@ function LeadershipBoardPreview({
 
         <Link
           to="/trackers/leaders"
-          className="group flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[42px] rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan text-[12.5px] font-semibold touch-manipulation transition-colors w-full sm:w-auto sm:self-end sm:px-5"
+          className="group mt-auto flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[42px] rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan text-[12.5px] font-semibold touch-manipulation transition-colors w-full sm:w-auto sm:self-end sm:px-5 shrink-0"
         >
           Open full leaderboard
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
