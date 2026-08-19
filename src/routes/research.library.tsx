@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import {
@@ -19,7 +19,7 @@ import {
   ResearchBreadcrumb,
   ResearchDeskNav,
 } from "@/components/research/ResearchDeskNav";
-import { FEATURE_TOPICS } from "@/lib/feature-topics";
+import { FEATURE_TOPICS, getTopic } from "@/lib/feature-topics";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
 import { LIBRARY_SOCIAL, socialMetaTags } from "@/lib/social-meta";
 import {
@@ -29,6 +29,7 @@ import {
   isNewTopicBadge,
   LIVE_TOPIC_KEYS,
 } from "@/lib/topic-catalog";
+import { TopicDetailPage } from "./-topics.shared";
 
 type SharedItem = {
   token: string;
@@ -50,14 +51,6 @@ type CaseStudy = {
   params?: { slug: string };
   pdf?: boolean;
 };
-
-export const Route = createFileRoute("/research/library")({
-  head: () => ({
-    meta: socialMetaTags(LIBRARY_SOCIAL),
-    links: [{ rel: "canonical", href: LIBRARY_SOCIAL.url }],
-  }),
-  component: ResearchLibraryPage,
-});
 
 function buildCaseStudies(): CaseStudy[] {
   const editorial: CaseStudy[] = [
@@ -136,16 +129,65 @@ const TRACKERS = [
 
 type LibrarySection = "topics" | "cases" | "trackers";
 
+type LibrarySearch = {
+  section?: LibrarySection;
+  topic?: string;
+};
+
 function isLibrarySection(v: string): v is LibrarySection {
   return v === "topics" || v === "cases" || v === "trackers";
 }
 
+export const Route = createFileRoute("/research/library")({
+  validateSearch: (search: Record<string, unknown>): LibrarySearch => {
+    const out: LibrarySearch = {};
+    if (typeof search.section === "string" && isLibrarySection(search.section)) {
+      out.section = search.section;
+    }
+    if (typeof search.topic === "string" && search.topic.trim()) {
+      out.topic = search.topic.trim();
+      out.section = out.section ?? "topics";
+    }
+    return out;
+  },
+  head: ({ match }) => {
+    const topicId = match.search.topic;
+    const topic = topicId ? getTopic(topicId) : null;
+    if (topic) {
+      const title = `${topic.title} · Library · Elenchos`;
+      const description =
+        topic.description?.slice(0, 160) ??
+        "Citizen sentiment and narrative divergence from public discourse on X.";
+      const url = `https://elenchos.live/research/library?section=topics&topic=${encodeURIComponent(topic.id)}`;
+      return {
+        meta: [
+          { title },
+          { name: "description", content: description },
+          { property: "og:title", content: title },
+          { property: "og:description", content: description },
+          { property: "og:url", content: url },
+          { property: "og:type", content: "article" },
+        ],
+        links: [{ rel: "canonical", href: url }],
+      };
+    }
+    return {
+      meta: socialMetaTags(LIBRARY_SOCIAL),
+      links: [{ rel: "canonical", href: LIBRARY_SOCIAL.url }],
+    };
+  },
+  component: ResearchLibraryPage,
+});
+
 /**
  * Premium interactive Library — one section at a time via Jump in.
+ * Topic detail deep-links: ?section=topics&topic=$id (standalone /topics retired).
  */
 function ResearchLibraryPage() {
+  const navigate = useNavigate({ from: "/research/library" });
+  const search = Route.useSearch();
   const cases = useMemo(() => buildCaseStudies(), []);
-  /** Same product surface as Topics page — active monitors only (presentation list). */
+  /** Active monitors only (presentation list). */
   const topicList = useMemo(
     () =>
       FEATURE_TOPICS.filter(
@@ -161,18 +203,31 @@ function ResearchLibraryPage() {
     [],
   );
   const [shared, setShared] = useState<SharedItem[]>([]);
-  const [activeSec, setActiveSec] = useState<LibrarySection>("topics");
+  const [activeSec, setActiveSec] = useState<LibrarySection>(
+    search.section ?? "topics",
+  );
   const activeTopics = activeLiveTopicCount();
   const archivedTopics = archivedLiveTopicCount();
   const caseCount = cases.length + shared.length;
   const trackerCount = TRACKERS.length;
 
+  const openTopic = search.topic;
+
   const selectSection = (id: LibrarySection) => {
     setActiveSec(id);
-    if (typeof window === "undefined") return;
-    const url = new URL(window.location.href);
-    url.hash = id;
-    window.history.replaceState(null, "", `${url.pathname}${url.search}#${id}`);
+    void navigate({
+      to: "/research/library",
+      search: { section: id },
+      replace: true,
+    });
+  };
+
+  const clearTopic = () => {
+    void navigate({
+      to: "/research/library",
+      search: { section: "topics" },
+      replace: true,
+    });
   };
 
   useEffect(() => {
@@ -190,19 +245,30 @@ function ResearchLibraryPage() {
     };
   }, []);
 
-  // Deep-link: #topics | #cases | #trackers (also legacy #lib-*)
+  // Sync section from search; legacy hash #topics | #cases | #trackers still works
+  useEffect(() => {
+    if (search.section) setActiveSec(search.section);
+  }, [search.section]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const raw = window.location.hash.replace(/^#/, "").replace(/^lib-/, "");
-    if (isLibrarySection(raw)) setActiveSec(raw);
+    if (isLibrarySection(raw) && !search.section) setActiveSec(raw);
 
     const onHash = () => {
       const h = window.location.hash.replace(/^#/, "").replace(/^lib-/, "");
-      if (isLibrarySection(h)) setActiveSec(h);
+      if (isLibrarySection(h)) {
+        setActiveSec(h);
+        void navigate({
+          to: "/research/library",
+          search: { section: h },
+          replace: true,
+        });
+      }
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+  }, [navigate, search.section]);
 
   const portals = [
     {
@@ -242,6 +308,15 @@ function ResearchLibraryPage() {
       bars: [60, 75, 55, 80, 45, 70, 88],
     },
   ];
+
+  if (openTopic) {
+    return (
+      <TopicDetailPage
+        topicId={openTopic}
+        onBack={clearTopic}
+      />
+    );
+  }
 
   return (
     <div className="page-shell dash-landing">
@@ -718,8 +793,8 @@ function TopicLibraryCard({
       className="h-full"
     >
       <Link
-        to="/topics/$topicId"
-        params={{ topicId: topic.id }}
+        to="/research/library"
+        search={{ section: "topics", topic: topic.id }}
         className={`group lib-case-card flex flex-col h-full min-h-[132px] rounded-2xl border p-3.5 sm:p-4 overflow-hidden transition-all touch-manipulation hover:-translate-y-0.5 ${
           archived
             ? "border-border/70 bg-card/40 opacity-90 hover:border-border"

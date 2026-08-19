@@ -14,13 +14,23 @@ import {
   dispatchCommissionPipeline,
   packageNeedsXPipeline,
 } from "@/lib/research-desk/dispatch-pipeline.server";
+import {
+  handleBillingCheckoutCompleted,
+  handleInvoicePaid,
+  handleSubscriptionUpdated,
+} from "@/lib/billing/webhook-handlers.server";
 
 /**
- * Stripe webhook for checkout.session.completed.
+ * Stripe webhook — guest Research Desk commissions + Pro billing.
  * Configure: https://elenchos.live/api/research/webhook
  *
- * X packages (topic-analysis, deep-with-x): dispatch backend Topics pipeline.
- * deep-no-x: generate via SpaceXAI on this server.
+ * Events:
+ * - checkout.session.completed → commission (metadata.token) OR pack/pro (metadata.kind)
+ * - invoice.paid → Pro renew token grant
+ * - customer.subscription.updated / deleted → sync subscriptions
+ *
+ * DATA PROTECTION: billing paths only touch billing tables.
+ * Commission path only INSERTs research_desk_reports (append-only). Never intelligence tables.
  */
 export const Route = createFileRoute("/api/research/webhook")({
   server: {
@@ -46,7 +56,11 @@ export const Route = createFileRoute("/api/research/webhook")({
           try {
             const Stripe = (await import("stripe")).default;
             const stripe = new Stripe(secret);
-            event = stripe.webhooks.constructEvent(raw, sig, whSecret) as unknown as typeof event;
+            event = stripe.webhooks.constructEvent(
+              raw,
+              sig,
+              whSecret,
+            ) as unknown as typeof event;
           } catch (e) {
             console.error("[webhook] signature failed", e);
             return Response.json({ error: "invalid signature" }, { status: 400 });
@@ -59,11 +73,55 @@ export const Route = createFileRoute("/api/research/webhook")({
           }
         }
 
-        if (event.type !== "checkout.session.completed") {
+        const type = event.type || "";
+        const obj = (event.data?.object || {}) as Record<string, unknown>;
+
+        // ── Billing: Pro + packs ──────────────────────────────────────────
+        if (type === "checkout.session.completed") {
+          const billing = await handleBillingCheckoutCompleted(
+            obj as Parameters<typeof handleBillingCheckoutCompleted>[0],
+          );
+          if (billing.handled) {
+            return Response.json({
+              received: true,
+              billing: true,
+              detail: billing.detail,
+            });
+          }
+          // else fall through to guest commission (metadata.token)
+        }
+
+        if (type === "invoice.paid") {
+          const r = await handleInvoicePaid(
+            obj as Parameters<typeof handleInvoicePaid>[0],
+          );
+          return Response.json({
+            received: true,
+            billing: true,
+            detail: r.detail,
+          });
+        }
+
+        if (
+          type === "customer.subscription.updated" ||
+          type === "customer.subscription.deleted"
+        ) {
+          const r = await handleSubscriptionUpdated(
+            obj as Parameters<typeof handleSubscriptionUpdated>[0],
+          );
+          return Response.json({
+            received: true,
+            billing: true,
+            detail: r.detail,
+          });
+        }
+
+        if (type !== "checkout.session.completed") {
           return Response.json({ received: true });
         }
 
-        const session = event.data?.object as {
+        // ── Guest commission (Research Desk) ──────────────────────────────
+        const session = obj as {
           id?: string;
           payment_status?: string;
           metadata?: Record<string, string>;
@@ -107,7 +165,6 @@ export const Route = createFileRoute("/api/research/webhook")({
         const reportUrl = `${origin}/research/report/${token}`;
         const pdfUrl = `${origin}/api/research/report/${token}?format=pdf`;
 
-        // X packages: backend Topics pipeline (same as manual workflow)
         if (packageNeedsXPipeline(packageId)) {
           const dispatched = await dispatchCommissionPipeline({
             token,
@@ -117,7 +174,6 @@ export const Route = createFileRoute("/api/research/webhook")({
           });
 
           if (dispatched.ok && dispatched.mode === "dispatched") {
-            // Leave status generating — runner appends ready row when done
             await notifyOpsReportReady({
               token,
               topic: commission.topic,
@@ -137,7 +193,6 @@ export const Route = createFileRoute("/api/research/webhook")({
             });
           }
 
-          // Dispatch failed — fall back to on-server AI so customer is not stuck
           console.warn("[webhook] dispatch failed, AI fallback", dispatched.detail);
         }
 
@@ -166,7 +221,8 @@ export const Route = createFileRoute("/api/research/webhook")({
           generatedBy: report.generatedBy,
         });
 
-        const email = session.customer_details?.email || session.customer_email || "";
+        const email =
+          session.customer_details?.email || session.customer_email || "";
         if (email) {
           await sendReportLinkEmail({
             to: email,

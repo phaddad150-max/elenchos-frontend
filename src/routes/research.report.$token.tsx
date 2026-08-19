@@ -214,8 +214,12 @@ function ReportPage() {
             <Home className="w-3.5 h-3.5" /> Home
           </Link>
           <span aria-hidden>/</span>
-          <Link to="/topics" className="hover:text-cyan min-h-[36px] inline-flex items-center">
-            Topics
+          <Link
+            to="/research/library"
+            search={{ section: "topics" }}
+            className="hover:text-cyan min-h-[36px] inline-flex items-center"
+          >
+            Library
           </Link>
           <span aria-hidden>/</span>
           <span className="text-foreground/85">Commissioned briefing</span>

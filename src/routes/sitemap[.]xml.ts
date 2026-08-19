@@ -18,15 +18,15 @@ export const Route = createFileRoute("/sitemap.xml")({
         const researchBriefs = listResearchBriefs();
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "daily", priority: "1.0" },
-          { path: "/topics", changefreq: "daily", priority: "0.9" },
+          { path: "/research/library", changefreq: "daily", priority: "0.95" },
           ...FEATURE_TOPICS.map((t) => ({
-            path: `/topics/${t.id}`,
+            path: `/research/library?section=topics&topic=${encodeURIComponent(t.id)}`,
             changefreq: "daily" as const,
             priority: "0.8",
           })),
           { path: "/research", changefreq: "weekly", priority: "0.9" },
-          { path: "/research/library", changefreq: "weekly", priority: "0.9" },
           { path: "/research/commission", changefreq: "weekly", priority: "0.85" },
+          { path: "/pro", changefreq: "weekly", priority: "0.85" },
           { path: "/research/networks-ledger", changefreq: "weekly", priority: "0.7" },
           {
             path: "/research/speech-reach",

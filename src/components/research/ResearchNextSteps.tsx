@@ -58,11 +58,12 @@ export function ResearchNextSteps({
         )}
         {showTopics && (
           <Link
-            to="/topics"
+            to="/research/library"
+            search={{ section: "topics" }}
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full border border-border text-[13px] font-medium text-muted-foreground hover:text-cyan hover:border-cyan/40 touch-manipulation"
           >
             <Layers className="w-4 h-4" aria-hidden />
-            Open Topics
+            Open Library topics
           </Link>
         )}
       </div>

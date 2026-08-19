@@ -65,10 +65,11 @@ export const LIBRARY_SOCIAL: SocialPageMeta = {
   image: DEFAULT_OG,
 };
 
+/** @deprecated Standalone /topics retired — use LIBRARY_SOCIAL / Library deep-links. */
 export const TOPICS_SOCIAL: SocialPageMeta = {
-  title: "Topics · Public discourse analysis · Elenchos",
+  title: "Topic analyses · Library · Elenchos",
   description:
-    "Open a topic for citizen vs official frames and scores from public X samples. Same method available as a commission.",
-  url: `${SITE}/topics`,
+    "Citizen vs official frames from public X samples — now inside the free Library.",
+  url: `${SITE}/research/library?section=topics`,
   image: DEFAULT_OG,
 };

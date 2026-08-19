@@ -375,9 +375,9 @@ export const RESEARCH_STYLES: {
     short: "Public discourse vs official & media frames",
     forWhom: "Citizens, journalists, operators who need the live pulse",
     method:
-      "X-grounded Topics analysis: citizen sample, sentiment, narrative divergence, human-curated insights. Contrasts ordinary speech with official and media messaging.",
-    cta: "Open Topics analysis",
-    href: "/topics",
+      "X-grounded topic analysis in the Library: citizen sample, sentiment, narrative divergence, human-curated insights. Contrasts ordinary speech with official and media messaging.",
+    cta: "Open Library topics",
+    href: "/research/library?section=topics",
   },
   {
     id: "thesis",

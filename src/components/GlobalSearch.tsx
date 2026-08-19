@@ -112,7 +112,11 @@ export function GlobalSearch() {
               <CommandItem
                 key={t.id}
                 value={`topic ${t.keywords}`}
-                onSelect={() => go(`/topics/${encodeURIComponent(t.id)}`)}
+                onSelect={() =>
+                  go(
+                    `/research/library?section=topics&topic=${encodeURIComponent(t.id)}`,
+                  )
+                }
               >
                 <Layers className="w-4 h-4 text-cyan" />
                 <span className="truncate">{t.label}</span>
@@ -148,6 +152,14 @@ export function GlobalSearch() {
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
             <CommandItem
+              value="pro subscription tokens private research desk wallet"
+              onSelect={() => go("/pro")}
+            >
+              <FlaskConical className="w-4 h-4 text-cyan" />
+              <span className="truncate">Pro Research Desk · tokens</span>
+              <CommandShortcut>Pro</CommandShortcut>
+            </CommandItem>
+            <CommandItem
               value="leadership board leader trust rankings"
               onSelect={() => go("/trackers/leaders")}
             >
@@ -173,7 +185,11 @@ export function GlobalSearch() {
                   <CommandItem
                     key={s.topicId}
                     value={`signal ${s.keywords}`}
-                    onSelect={() => go(`/topics/${encodeURIComponent(s.topicId)}`)}
+                    onSelect={() =>
+                      go(
+                        `/research/library?section=topics&topic=${encodeURIComponent(s.topicId)}`,
+                      )
+                    }
                   >
                     <Activity className="w-4 h-4 text-emerald-signal" />
                     <div className="flex flex-col min-w-0">

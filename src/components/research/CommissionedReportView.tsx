@@ -271,10 +271,11 @@ export function CommissionedReportView({
           {pkg?.title ?? "Topic analysis"}
         </span>
         <Link
-          to="/topics"
+          to="/research/library"
+          search={{ section: "topics" }}
           className="text-muted-foreground hover:text-cyan min-h-[36px] inline-flex items-center"
         >
-          Topics
+          Library
         </Link>
       </div>
 
@@ -695,10 +696,11 @@ export function CommissionedReportView({
                 Download text
               </a>
               <Link
-                to="/topics"
+                to="/research/library"
+                search={{ section: "topics" }}
                 className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-border text-[12px] text-muted-foreground touch-manipulation"
               >
-                Back to Topics
+                Back to Library
               </Link>
             </div>
             {onEmail && (

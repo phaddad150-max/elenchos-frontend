@@ -1,0 +1,121 @@
+/**
+ * Stripe catalog — monthly plans only (v1).
+ * Guest Research Desk USD packages stay in research-desk/packages.ts.
+ *
+ * Live Stripe prices (set in Vercel):
+ *   STRIPE_PRICE_PACK_STARTER  → $10/mo · 10 tokens/period
+ *   STRIPE_PRICE_PACK_PLUS     → $40/mo · 50 tokens/period
+ *   STRIPE_PRICE_PACK_MEGA     → $90/mo · 120 tokens/period
+ *
+ * Pro $29 one-tier + one-time packs: deferred until those Prices exist.
+ * Token unit ≈ $1 USD retail face value.
+ */
+
+export type MonthlyPlanId = "pack_starter" | "pack_plus" | "pack_mega";
+
+/** @deprecated alias — same as MonthlyPlanId (env keys kept for Stripe). */
+export type TokenPackId = MonthlyPlanId;
+
+export type PrivateRunKind = "topic-analysis" | "deep-no-x" | "deep-with-x";
+
+/** Provisional token debits — match guest desk retail ($10 / $10 / $20). */
+export const TOKEN_COSTS: Record<PrivateRunKind, number> = {
+  "topic-analysis": 10, // T1 — capped X + Grok; est. COGS ~$1–3
+  "deep-no-x": 10, // T2 — Grok multi-source; est. COGS ~$0.5–2
+  "deep-with-x": 20, // T3 — deep + X; est. COGS ~$1–4
+};
+
+export type MonthlyPlanMeta = {
+  id: MonthlyPlanId;
+  title: string;
+  priceUsd: number;
+  /** Tokens credited each billing period */
+  tokensGranted: number;
+  interval: "month";
+  blurb: string;
+  envPriceKey:
+    | "STRIPE_PRICE_PACK_STARTER"
+    | "STRIPE_PRICE_PACK_PLUS"
+    | "STRIPE_PRICE_PACK_MEGA";
+};
+
+/** Three paid options live on Stripe today — all monthly. */
+export const MONTHLY_PLANS: Record<MonthlyPlanId, MonthlyPlanMeta> = {
+  pack_starter: {
+    id: "pack_starter",
+    title: "Starter",
+    priceUsd: 10,
+    tokensGranted: 10,
+    interval: "month",
+    blurb: "10 tokens each month — one topic analysis or deep dive (no X).",
+    envPriceKey: "STRIPE_PRICE_PACK_STARTER",
+  },
+  pack_plus: {
+    id: "pack_plus",
+    title: "Plus",
+    priceUsd: 40,
+    tokensGranted: 50,
+    interval: "month",
+    blurb: "50 tokens each month (~20% better than $1/token).",
+    envPriceKey: "STRIPE_PRICE_PACK_PLUS",
+  },
+  pack_mega: {
+    id: "pack_mega",
+    title: "Mega",
+    priceUsd: 90,
+    tokensGranted: 120,
+    interval: "month",
+    blurb: "120 tokens each month — best for regular private research.",
+    envPriceKey: "STRIPE_PRICE_PACK_MEGA",
+  },
+};
+
+export const MONTHLY_PLAN_ORDER: MonthlyPlanId[] = [
+  "pack_starter",
+  "pack_plus",
+  "pack_mega",
+];
+
+/** Back-compat aliases used by older checkout code. */
+export const TOKEN_PACKS = MONTHLY_PLANS;
+export const TOKEN_PACK_ORDER = MONTHLY_PLAN_ORDER;
+
+export function isMonthlyPlanId(v: string): v is MonthlyPlanId {
+  return v === "pack_starter" || v === "pack_plus" || v === "pack_mega";
+}
+
+export const isTokenPackId = isMonthlyPlanId;
+
+/** Deferred — not on Stripe yet. Kept for future enablement. */
+export const PRO_PLAN_ENABLED = false;
+
+export const PRO_PLAN = {
+  id: "pro_monthly" as const,
+  title: "Elenchos Pro",
+  priceUsd: 29,
+  tokensGranted: 40,
+  interval: "month" as const,
+  blurb: "Deferred — use Starter / Plus / Mega monthly plans for now.",
+  envPriceKey: "STRIPE_PRICE_PRO_MONTHLY" as const,
+};
+
+export const STRIPE_SETUP_CHECKLIST = [
+  "Monthly Starter $10 → STRIPE_PRICE_PACK_STARTER (metadata tokens=10, plan_id=pack_starter)",
+  "Monthly Plus $40 → STRIPE_PRICE_PACK_PLUS (metadata tokens=50, plan_id=pack_plus)",
+  "Monthly Mega $90 → STRIPE_PRICE_PACK_MEGA (metadata tokens=120, plan_id=pack_mega)",
+  "Webhook: https://elenchos.live/api/research/webhook",
+  "Events: checkout.session.completed, invoice.paid, customer.subscription.updated, customer.subscription.deleted",
+] as const;
+
+export function getStripePriceId(
+  envKey: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  const v = env[envKey]?.trim();
+  return v || null;
+}
+
+export function planTokensGranted(planId: string): number {
+  if (isMonthlyPlanId(planId)) return MONTHLY_PLANS[planId].tokensGranted;
+  return 0;
+}

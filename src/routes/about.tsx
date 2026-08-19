@@ -52,10 +52,11 @@ function AboutPage() {
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               <Link
-                to="/topics"
+                to="/research/library"
+                search={{ section: "topics" }}
                 className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full bg-cyan text-background text-[13px] font-semibold touch-manipulation"
               >
-                Explore Topics <ArrowRight className="w-3.5 h-3.5" />
+                Explore Library <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
                 to="/research"
@@ -93,16 +94,16 @@ function AboutPage() {
               body="Live citizen signals, globe, and cross-topic read for active topics."
             />
             <ProductCard
-              to="/topics"
+              to="/research/library"
               icon={<Layers className="w-4 h-4" />}
-              title="Topics"
-              body="Per-topic public discourse analysis: Socratic questions, sentiment, narrative gap."
+              title="Library"
+              body="Free researched material: topic analyses, case studies, trackers, and ledgers."
             />
             <ProductCard
               to="/research"
               icon={<FlaskConical className="w-4 h-4" />}
               title="Research Desk"
-              body="Free library (topics, case studies, trackers), commission reports from $10, and Enterprise (personalized dashboards — contact us)."
+              body="Library, guest commission from $10, Pro tokens at /pro, and Enterprise (contact us)."
             />
           </div>
         </section>

@@ -36,6 +36,11 @@ export type CommissionRow = {
   shared_at: string | null;
   status: DeskReportStatus;
   error_message: string | null;
+  /** Null = guest commission. Set for Pro/token private runs. */
+  user_id?: string | null;
+  visibility?: "token_link" | "private_account";
+  tokens_charged?: number | null;
+  payment_source?: "stripe_checkout" | "token_balance" | "pro_grant" | null;
 };
 
 /** In-memory append log (dev / missing service role). Latest per token is last write. */
@@ -102,6 +107,11 @@ async function appendRow(row: CommissionRow): Promise<boolean> {
         shared_at: row.shared_at,
         status: row.status,
         error_message: row.error_message,
+        // Pro / token fields (null for guest commissions)
+        user_id: row.user_id ?? null,
+        visibility: row.visibility ?? "token_link",
+        tokens_charged: row.tokens_charged ?? null,
+        payment_source: row.payment_source ?? null,
       }),
     });
     if (!res.ok) {
@@ -158,6 +168,50 @@ export async function createPendingCommission(input: {
     shared_at: null,
     status: "pending_payment",
     error_message: null,
+    user_id: null,
+    visibility: "token_link",
+    tokens_charged: null,
+    payment_source: "stripe_checkout",
+  });
+}
+
+/**
+ * Pro / token private run — INSERT only into research_desk_reports.
+ * Never writes topic_snapshots / curated_* / dashboard_* / public KPIs.
+ */
+export async function createPrivateTokenRun(input: {
+  token: string;
+  userId: string;
+  packageId: DeskPackageId;
+  topic: string;
+  questions: string;
+  tokensCharged: number;
+}): Promise<void> {
+  const created_at = new Date().toISOString();
+  const placeholder = buildDeskReport({
+    token: input.token,
+    packageId: input.packageId,
+    topic: input.topic,
+    questionsRaw: input.questions,
+    generationStatus: "generating",
+  });
+  await appendRow({
+    id: newId(),
+    token: input.token,
+    stripe_session_id: null,
+    package_id: input.packageId,
+    topic: input.topic,
+    questions: input.questions,
+    report: placeholder,
+    created_at,
+    shared_public: false,
+    shared_at: null,
+    status: "generating",
+    error_message: null,
+    user_id: input.userId,
+    visibility: "private_account",
+    tokens_charged: input.tokensCharged,
+    payment_source: "token_balance",
   });
 }
 
@@ -192,6 +246,10 @@ export async function getCommission(token: string): Promise<CommissionRow | null
       shared_at: row.shared_at ?? null,
       status: (row.status as DeskReportStatus) || "ready",
       error_message: row.error_message ?? null,
+      user_id: row.user_id ?? null,
+      visibility: row.visibility ?? "token_link",
+      tokens_charged: row.tokens_charged ?? null,
+      payment_source: row.payment_source ?? null,
     };
     // Keep mem aligned for same-process reads (does not overwrite DB)
     if (!local || local.created_at < normalized.created_at) {
@@ -278,6 +336,11 @@ export async function appendCommissionEvent(
     status: patch.status !== undefined ? patch.status : existing.status,
     error_message:
       patch.errorMessage !== undefined ? patch.errorMessage : existing.error_message,
+    // Preserve Pro fields across append-only status events
+    user_id: existing.user_id ?? null,
+    visibility: existing.visibility ?? "token_link",
+    tokens_charged: existing.tokens_charged ?? null,
+    payment_source: existing.payment_source ?? null,
   });
 }
 

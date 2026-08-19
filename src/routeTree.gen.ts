@@ -9,68 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
-import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PeaceRouteImport } from './routes/peace'
-import { Route as LeadersRouteImport } from './routes/leaders'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
-import { Route as TopicsIndexRouteImport } from './routes/topics.index'
-import { Route as ResearchIndexRouteImport } from './routes/research.index'
-import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
-import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
-import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
-import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.networks-ledger'
-import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
-import { Route as ResearchSpeechReachRouteImport } from './routes/research.speech-reach'
-import { Route as ResearchLibraryRouteImport } from './routes/research.library'
-import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
-import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as LeadersRouteImport } from './routes/leaders'
+import { Route as PeaceRouteImport } from './routes/peace'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProRouteImport } from './routes/pro'
+import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
+import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
-import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
-import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
-import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
-import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
-import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
-import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
-import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
-import { Route as ApiResearchEmailRouteImport } from './routes/api/research/email'
-import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
+import { Route as ResearchIndexRouteImport } from './routes/research.index'
+import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
+import { Route as ResearchLibraryRouteImport } from './routes/research.library'
+import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.networks-ledger'
+import { Route as ResearchSpeechReachRouteImport } from './routes/research.speech-reach'
+import { Route as TopicsIndexRouteImport } from './routes/topics.index'
+import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
+import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
+import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
+import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
+import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
+import { Route as ApiBillingMeRouteImport } from './routes/api/billing/me'
+import { Route as ApiProRunRouteImport } from './routes/api/pro/run'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
-import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
+import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
+import { Route as ApiResearchEmailRouteImport } from './routes/api/research/email'
+import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/finalize'
+import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
+import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
+import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
+import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
+import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
+import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
+import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
 import { Route as ApiResearchAdminCommissionRouteImport } from './routes/api/research/admin/commission'
+import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchMigrationRoute = ResearchMigrationRouteImport.update({
-  id: '/research-migration',
-  path: '/research-migration',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchAviationRoute = ResearchAviationRouteImport.update({
-  id: '/research-aviation',
-  path: '/research-aviation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PeaceRoute = PeaceRouteImport.update({
-  id: '/peace',
-  path: '/peace',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LeadersRoute = LeadersRouteImport.update({
-  id: '/leaders',
-  path: '/leaders',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -78,70 +57,39 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const LeadersRoute = LeadersRouteImport.update({
+  id: '/leaders',
+  path: '/leaders',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersIndexRoute = TrackersIndexRouteImport.update({
-  id: '/trackers/',
-  path: '/trackers/',
+const PeaceRoute = PeaceRouteImport.update({
+  id: '/peace',
+  path: '/peace',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TopicsIndexRoute = TopicsIndexRouteImport.update({
-  id: '/topics/',
-  path: '/topics/',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchIndexRoute = ResearchIndexRouteImport.update({
-  id: '/research/',
-  path: '/research/',
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
-  id: '/trackers/peace',
-  path: '/trackers/peace',
+const ResearchAviationRoute = ResearchAviationRouteImport.update({
+  id: '/research-aviation',
+  path: '/research-aviation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
-  id: '/trackers/leaders',
-  path: '/trackers/leaders',
+const ResearchMigrationRoute = ResearchMigrationRouteImport.update({
+  id: '/research-migration',
+  path: '/research-migration',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
-  id: '/topics/$topicId',
-  path: '/topics/$topicId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchNetworksLedgerRoute = ResearchNetworksLedgerRouteImport.update({
-  id: '/research/networks-ledger',
-  path: '/research/networks-ledger',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchNetworksLedgerSpeechReachRoute =
-  ResearchNetworksLedgerSpeechReachRouteImport.update({
-    id: '/research/networks-ledger/speech-reach',
-    path: '/research/networks-ledger/speech-reach',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ResearchSpeechReachRoute = ResearchSpeechReachRouteImport.update({
-  id: '/research/speech-reach',
-  path: '/research/speech-reach',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
-  id: '/research/library',
-  path: '/research/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchCommissionRoute = ResearchCommissionRouteImport.update({
-  id: '/research/commission',
-  path: '/research/commission',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchSlugRoute = ResearchSlugRouteImport.update({
-  id: '/research/$slug',
-  path: '/research/$slug',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCurationRoute = AdminCurationRouteImport.update({
@@ -149,49 +97,74 @@ const AdminCurationRoute = AdminCurationRouteImport.update({
   path: '/admin/curation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
-  id: '/research/preview/',
-  path: '/research/preview/',
+const ResearchIndexRoute = ResearchIndexRouteImport.update({
+  id: '/research/',
+  path: '/research/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
-  id: '/research/report/$token',
-  path: '/research/report/$token',
+const ResearchSlugRoute = ResearchSlugRouteImport.update({
+  id: '/research/$slug',
+  path: '/research/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
-  id: '/research/preview/$slug',
-  path: '/research/preview/$slug',
+const ResearchCommissionRoute = ResearchCommissionRouteImport.update({
+  id: '/research/commission',
+  path: '/research/commission',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
-  id: '/api/research/webhook',
-  path: '/api/research/webhook',
+const ResearchLibraryRoute = ResearchLibraryRouteImport.update({
+  id: '/research/library',
+  path: '/research/library',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchSharedRoute = ApiResearchSharedRouteImport.update({
-  id: '/api/research/shared',
-  path: '/api/research/shared',
+const ResearchNetworksLedgerRoute = ResearchNetworksLedgerRouteImport.update({
+  id: '/research/networks-ledger',
+  path: '/research/networks-ledger',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchShareRoute = ApiResearchShareRouteImport.update({
-  id: '/api/research/share',
-  path: '/api/research/share',
+const ResearchSpeechReachRoute = ResearchSpeechReachRouteImport.update({
+  id: '/research/speech-reach',
+  path: '/research/speech-reach',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
-  id: '/api/research/finalize',
-  path: '/api/research/finalize',
+const TopicsIndexRoute = TopicsIndexRouteImport.update({
+  id: '/topics/',
+  path: '/topics/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchEmailRoute = ApiResearchEmailRouteImport.update({
-  id: '/api/research/email',
-  path: '/api/research/email',
+const TopicsTopicIdRoute = TopicsTopicIdRouteImport.update({
+  id: '/topics/$topicId',
+  path: '/topics/$topicId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchCheckoutRoute = ApiResearchCheckoutRouteImport.update({
-  id: '/api/research/checkout',
-  path: '/api/research/checkout',
+const TrackersIndexRoute = TrackersIndexRouteImport.update({
+  id: '/trackers/',
+  path: '/trackers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
+  id: '/trackers/leaders',
+  path: '/trackers/leaders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
+  id: '/trackers/peace',
+  path: '/trackers/peace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingCheckoutRoute = ApiBillingCheckoutRouteImport.update({
+  id: '/api/billing/checkout',
+  path: '/api/billing/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingMeRoute = ApiBillingMeRouteImport.update({
+  id: '/api/billing/me',
+  path: '/api/billing/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProRunRoute = ApiProRunRouteImport.update({
+  id: '/api/pro/run',
+  path: '/api/pro/run',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
@@ -199,9 +172,55 @@ const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   path: '/api/public/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResearchReportTokenRoute = ApiResearchReportTokenRouteImport.update({
-  id: '/api/research/report/$token',
-  path: '/api/research/report/$token',
+const ApiResearchCheckoutRoute = ApiResearchCheckoutRouteImport.update({
+  id: '/api/research/checkout',
+  path: '/api/research/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchEmailRoute = ApiResearchEmailRouteImport.update({
+  id: '/api/research/email',
+  path: '/api/research/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchFinalizeRoute = ApiResearchFinalizeRouteImport.update({
+  id: '/api/research/finalize',
+  path: '/api/research/finalize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchShareRoute = ApiResearchShareRouteImport.update({
+  id: '/api/research/share',
+  path: '/api/research/share',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchSharedRoute = ApiResearchSharedRouteImport.update({
+  id: '/api/research/shared',
+  path: '/api/research/shared',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
+  id: '/api/research/webhook',
+  path: '/api/research/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchNetworksLedgerSpeechReachRoute =
+  ResearchNetworksLedgerSpeechReachRouteImport.update({
+    id: '/speech-reach',
+    path: '/speech-reach',
+    getParentRoute: () => ResearchNetworksLedgerRoute,
+  } as any)
+const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
+  id: '/research/preview/',
+  path: '/research/preview/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
+  id: '/research/preview/$slug',
+  path: '/research/preview/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
+  id: '/research/report/$token',
+  path: '/research/report/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiResearchAdminCommissionRoute =
@@ -210,6 +229,11 @@ const ApiResearchAdminCommissionRoute =
     path: '/api/research/admin/commission',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiResearchReportTokenRoute = ApiResearchReportTokenRouteImport.update({
+  id: '/api/research/report/$token',
+  path: '/api/research/report/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -217,15 +241,15 @@ export interface FileRoutesByFullPath {
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
-  '/research-migration': typeof ResearchMigrationRoute
+  '/pro': typeof ProRoute
   '/research-aviation': typeof ResearchAviationRoute
+  '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
-  '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
-  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
+  '/research/networks-ledger': typeof ResearchNetworksLedgerRouteWithChildren
   '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -233,6 +257,9 @@ export interface FileRoutesByFullPath {
   '/research/': typeof ResearchIndexRoute
   '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
+  '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/me': typeof ApiBillingMeRoute
+  '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
   '/api/research/email': typeof ApiResearchEmailRoute
@@ -240,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
@@ -252,15 +280,15 @@ export interface FileRoutesByTo {
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
-  '/research-migration': typeof ResearchMigrationRoute
+  '/pro': typeof ProRoute
   '/research-aviation': typeof ResearchAviationRoute
+  '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
-  '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
-  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
+  '/research/networks-ledger': typeof ResearchNetworksLedgerRouteWithChildren
   '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -268,6 +296,9 @@ export interface FileRoutesByTo {
   '/research': typeof ResearchIndexRoute
   '/topics': typeof TopicsIndexRoute
   '/trackers': typeof TrackersIndexRoute
+  '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/me': typeof ApiBillingMeRoute
+  '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
   '/api/research/email': typeof ApiResearchEmailRoute
@@ -275,6 +306,7 @@ export interface FileRoutesByTo {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview': typeof ResearchPreviewIndexRoute
@@ -288,15 +320,15 @@ export interface FileRoutesById {
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
-  '/research-migration': typeof ResearchMigrationRoute
+  '/pro': typeof ProRoute
   '/research-aviation': typeof ResearchAviationRoute
+  '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
-  '/research/networks-ledger': typeof ResearchNetworksLedgerRoute
-  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
+  '/research/networks-ledger': typeof ResearchNetworksLedgerRouteWithChildren
   '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
@@ -304,6 +336,9 @@ export interface FileRoutesById {
   '/research/': typeof ResearchIndexRoute
   '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
+  '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/me': typeof ApiBillingMeRoute
+  '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
   '/api/research/email': typeof ApiResearchEmailRoute
@@ -311,6 +346,7 @@ export interface FileRoutesById {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
@@ -325,15 +361,15 @@ export interface FileRouteTypes {
     | '/leaders'
     | '/peace'
     | '/privacy'
-    | '/research-migration'
+    | '/pro'
     | '/research-aviation'
+    | '/research-migration'
     | '/sitemap.xml'
     | '/admin/curation'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
     | '/research/networks-ledger'
-    | '/research/networks-ledger/speech-reach'
     | '/research/speech-reach'
     | '/topics/$topicId'
     | '/trackers/leaders'
@@ -341,6 +377,9 @@ export interface FileRouteTypes {
     | '/research/'
     | '/topics/'
     | '/trackers/'
+    | '/api/billing/checkout'
+    | '/api/billing/me'
+    | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
     | '/api/research/email'
@@ -348,6 +387,7 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/preview/'
@@ -360,15 +400,15 @@ export interface FileRouteTypes {
     | '/leaders'
     | '/peace'
     | '/privacy'
-    | '/research-migration'
+    | '/pro'
     | '/research-aviation'
+    | '/research-migration'
     | '/sitemap.xml'
     | '/admin/curation'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
     | '/research/networks-ledger'
-    | '/research/networks-ledger/speech-reach'
     | '/research/speech-reach'
     | '/topics/$topicId'
     | '/trackers/leaders'
@@ -376,6 +416,9 @@ export interface FileRouteTypes {
     | '/research'
     | '/topics'
     | '/trackers'
+    | '/api/billing/checkout'
+    | '/api/billing/me'
+    | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
     | '/api/research/email'
@@ -383,6 +426,7 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/preview'
@@ -395,15 +439,15 @@ export interface FileRouteTypes {
     | '/leaders'
     | '/peace'
     | '/privacy'
-    | '/research-migration'
+    | '/pro'
     | '/research-aviation'
+    | '/research-migration'
     | '/sitemap.xml'
     | '/admin/curation'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
     | '/research/networks-ledger'
-    | '/research/networks-ledger/speech-reach'
     | '/research/speech-reach'
     | '/topics/$topicId'
     | '/trackers/leaders'
@@ -411,6 +455,9 @@ export interface FileRouteTypes {
     | '/research/'
     | '/topics/'
     | '/trackers/'
+    | '/api/billing/checkout'
+    | '/api/billing/me'
+    | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
     | '/api/research/email'
@@ -418,6 +465,7 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/preview/'
@@ -431,15 +479,15 @@ export interface RootRouteChildren {
   LeadersRoute: typeof LeadersRoute
   PeaceRoute: typeof PeaceRoute
   PrivacyRoute: typeof PrivacyRoute
-  ResearchMigrationRoute: typeof ResearchMigrationRoute
+  ProRoute: typeof ProRoute
   ResearchAviationRoute: typeof ResearchAviationRoute
+  ResearchMigrationRoute: typeof ResearchMigrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdminCurationRoute: typeof AdminCurationRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
   ResearchCommissionRoute: typeof ResearchCommissionRoute
   ResearchLibraryRoute: typeof ResearchLibraryRoute
-  ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRoute
-  ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
+  ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRouteWithChildren
   ResearchSpeechReachRoute: typeof ResearchSpeechReachRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
@@ -447,6 +495,9 @@ export interface RootRouteChildren {
   ResearchIndexRoute: typeof ResearchIndexRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
   TrackersIndexRoute: typeof TrackersIndexRoute
+  ApiBillingCheckoutRoute: typeof ApiBillingCheckoutRoute
+  ApiBillingMeRoute: typeof ApiBillingMeRoute
+  ApiProRunRoute: typeof ApiProRunRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiResearchCheckoutRoute: typeof ApiResearchCheckoutRoute
   ApiResearchEmailRoute: typeof ApiResearchEmailRoute
@@ -463,46 +514,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research-migration': {
-      id: '/research-migration'
-      path: '/research-migration'
-      fullPath: '/research-migration'
-      preLoaderRoute: typeof ResearchMigrationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research-aviation': {
-      id: '/research-aviation'
-      path: '/research-aviation'
-      fullPath: '/research-aviation'
-      preLoaderRoute: typeof ResearchAviationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/peace': {
-      id: '/peace'
-      path: '/peace'
-      fullPath: '/peace'
-      preLoaderRoute: typeof PeaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/leaders': {
-      id: '/leaders'
-      path: '/leaders'
-      fullPath: '/leaders'
-      preLoaderRoute: typeof LeadersRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -512,95 +528,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/leaders': {
+      id: '/leaders'
+      path: '/leaders'
+      fullPath: '/leaders'
+      preLoaderRoute: typeof LeadersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trackers/': {
-      id: '/trackers/'
-      path: '/trackers'
-      fullPath: '/trackers/'
-      preLoaderRoute: typeof TrackersIndexRouteImport
+    '/peace': {
+      id: '/peace'
+      path: '/peace'
+      fullPath: '/peace'
+      preLoaderRoute: typeof PeaceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/topics/': {
-      id: '/topics/'
-      path: '/topics'
-      fullPath: '/topics/'
-      preLoaderRoute: typeof TopicsIndexRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/': {
-      id: '/research/'
-      path: '/research'
-      fullPath: '/research/'
-      preLoaderRoute: typeof ResearchIndexRouteImport
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trackers/peace': {
-      id: '/trackers/peace'
-      path: '/trackers/peace'
-      fullPath: '/trackers/peace'
-      preLoaderRoute: typeof TrackersPeaceRouteImport
+    '/research-aviation': {
+      id: '/research-aviation'
+      path: '/research-aviation'
+      fullPath: '/research-aviation'
+      preLoaderRoute: typeof ResearchAviationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trackers/leaders': {
-      id: '/trackers/leaders'
-      path: '/trackers/leaders'
-      fullPath: '/trackers/leaders'
-      preLoaderRoute: typeof TrackersLeadersRouteImport
+    '/research-migration': {
+      id: '/research-migration'
+      path: '/research-migration'
+      fullPath: '/research-migration'
+      preLoaderRoute: typeof ResearchMigrationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/topics/$topicId': {
-      id: '/topics/$topicId'
-      path: '/topics/$topicId'
-      fullPath: '/topics/$topicId'
-      preLoaderRoute: typeof TopicsTopicIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/networks-ledger': {
-      id: '/research/networks-ledger'
-      path: '/research/networks-ledger'
-      fullPath: '/research/networks-ledger'
-      preLoaderRoute: typeof ResearchNetworksLedgerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/networks-ledger/speech-reach': {
-      id: '/research/networks-ledger/speech-reach'
-      path: '/research/networks-ledger/speech-reach'
-      fullPath: '/research/networks-ledger/speech-reach'
-      preLoaderRoute: typeof ResearchNetworksLedgerSpeechReachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/speech-reach': {
-      id: '/research/speech-reach'
-      path: '/research/speech-reach'
-      fullPath: '/research/speech-reach'
-      preLoaderRoute: typeof ResearchSpeechReachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/library': {
-      id: '/research/library'
-      path: '/research/library'
-      fullPath: '/research/library'
-      preLoaderRoute: typeof ResearchLibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/commission': {
-      id: '/research/commission'
-      path: '/research/commission'
-      fullPath: '/research/commission'
-      preLoaderRoute: typeof ResearchCommissionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research/$slug': {
-      id: '/research/$slug'
-      path: '/research/$slug'
-      fullPath: '/research/$slug'
-      preLoaderRoute: typeof ResearchSlugRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/curation': {
@@ -610,67 +584,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCurationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/preview/': {
-      id: '/research/preview/'
-      path: '/research/preview'
-      fullPath: '/research/preview/'
-      preLoaderRoute: typeof ResearchPreviewIndexRouteImport
+    '/research/': {
+      id: '/research/'
+      path: '/research'
+      fullPath: '/research/'
+      preLoaderRoute: typeof ResearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/report/$token': {
-      id: '/research/report/$token'
-      path: '/research/report/$token'
-      fullPath: '/research/report/$token'
-      preLoaderRoute: typeof ResearchReportTokenRouteImport
+    '/research/$slug': {
+      id: '/research/$slug'
+      path: '/research/$slug'
+      fullPath: '/research/$slug'
+      preLoaderRoute: typeof ResearchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/preview/$slug': {
-      id: '/research/preview/$slug'
-      path: '/research/preview/$slug'
-      fullPath: '/research/preview/$slug'
-      preLoaderRoute: typeof ResearchPreviewSlugRouteImport
+    '/research/commission': {
+      id: '/research/commission'
+      path: '/research/commission'
+      fullPath: '/research/commission'
+      preLoaderRoute: typeof ResearchCommissionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/webhook': {
-      id: '/api/research/webhook'
-      path: '/api/research/webhook'
-      fullPath: '/api/research/webhook'
-      preLoaderRoute: typeof ApiResearchWebhookRouteImport
+    '/research/library': {
+      id: '/research/library'
+      path: '/research/library'
+      fullPath: '/research/library'
+      preLoaderRoute: typeof ResearchLibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/shared': {
-      id: '/api/research/shared'
-      path: '/api/research/shared'
-      fullPath: '/api/research/shared'
-      preLoaderRoute: typeof ApiResearchSharedRouteImport
+    '/research/networks-ledger': {
+      id: '/research/networks-ledger'
+      path: '/research/networks-ledger'
+      fullPath: '/research/networks-ledger'
+      preLoaderRoute: typeof ResearchNetworksLedgerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/share': {
-      id: '/api/research/share'
-      path: '/api/research/share'
-      fullPath: '/api/research/share'
-      preLoaderRoute: typeof ApiResearchShareRouteImport
+    '/research/speech-reach': {
+      id: '/research/speech-reach'
+      path: '/research/speech-reach'
+      fullPath: '/research/speech-reach'
+      preLoaderRoute: typeof ResearchSpeechReachRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/finalize': {
-      id: '/api/research/finalize'
-      path: '/api/research/finalize'
-      fullPath: '/api/research/finalize'
-      preLoaderRoute: typeof ApiResearchFinalizeRouteImport
+    '/topics/': {
+      id: '/topics/'
+      path: '/topics'
+      fullPath: '/topics/'
+      preLoaderRoute: typeof TopicsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/email': {
-      id: '/api/research/email'
-      path: '/api/research/email'
-      fullPath: '/api/research/email'
-      preLoaderRoute: typeof ApiResearchEmailRouteImport
+    '/topics/$topicId': {
+      id: '/topics/$topicId'
+      path: '/topics/$topicId'
+      fullPath: '/topics/$topicId'
+      preLoaderRoute: typeof TopicsTopicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/checkout': {
-      id: '/api/research/checkout'
-      path: '/api/research/checkout'
-      fullPath: '/api/research/checkout'
-      preLoaderRoute: typeof ApiResearchCheckoutRouteImport
+    '/trackers/': {
+      id: '/trackers/'
+      path: '/trackers'
+      fullPath: '/trackers/'
+      preLoaderRoute: typeof TrackersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/leaders': {
+      id: '/trackers/leaders'
+      path: '/trackers/leaders'
+      fullPath: '/trackers/leaders'
+      preLoaderRoute: typeof TrackersLeadersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/peace': {
+      id: '/trackers/peace'
+      path: '/trackers/peace'
+      fullPath: '/trackers/peace'
+      preLoaderRoute: typeof TrackersPeaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/checkout': {
+      id: '/api/billing/checkout'
+      path: '/api/billing/checkout'
+      fullPath: '/api/billing/checkout'
+      preLoaderRoute: typeof ApiBillingCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/me': {
+      id: '/api/billing/me'
+      path: '/api/billing/me'
+      fullPath: '/api/billing/me'
+      preLoaderRoute: typeof ApiBillingMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pro/run': {
+      id: '/api/pro/run'
+      path: '/api/pro/run'
+      fullPath: '/api/pro/run'
+      preLoaderRoute: typeof ApiProRunRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/contact': {
@@ -680,11 +689,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/research/report/$token': {
-      id: '/api/research/report/$token'
-      path: '/api/research/report/$token'
-      fullPath: '/api/research/report/$token'
-      preLoaderRoute: typeof ApiResearchReportTokenRouteImport
+    '/api/research/checkout': {
+      id: '/api/research/checkout'
+      path: '/api/research/checkout'
+      fullPath: '/api/research/checkout'
+      preLoaderRoute: typeof ApiResearchCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/email': {
+      id: '/api/research/email'
+      path: '/api/research/email'
+      fullPath: '/api/research/email'
+      preLoaderRoute: typeof ApiResearchEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/finalize': {
+      id: '/api/research/finalize'
+      path: '/api/research/finalize'
+      fullPath: '/api/research/finalize'
+      preLoaderRoute: typeof ApiResearchFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/share': {
+      id: '/api/research/share'
+      path: '/api/research/share'
+      fullPath: '/api/research/share'
+      preLoaderRoute: typeof ApiResearchShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/shared': {
+      id: '/api/research/shared'
+      path: '/api/research/shared'
+      fullPath: '/api/research/shared'
+      preLoaderRoute: typeof ApiResearchSharedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/research/webhook': {
+      id: '/api/research/webhook'
+      path: '/api/research/webhook'
+      fullPath: '/api/research/webhook'
+      preLoaderRoute: typeof ApiResearchWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/networks-ledger/speech-reach': {
+      id: '/research/networks-ledger/speech-reach'
+      path: '/speech-reach'
+      fullPath: '/research/networks-ledger/speech-reach'
+      preLoaderRoute: typeof ResearchNetworksLedgerSpeechReachRouteImport
+      parentRoute: typeof ResearchNetworksLedgerRoute
+    }
+    '/research/preview/': {
+      id: '/research/preview/'
+      path: '/research/preview'
+      fullPath: '/research/preview/'
+      preLoaderRoute: typeof ResearchPreviewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/preview/$slug': {
+      id: '/research/preview/$slug'
+      path: '/research/preview/$slug'
+      fullPath: '/research/preview/$slug'
+      preLoaderRoute: typeof ResearchPreviewSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/report/$token': {
+      id: '/research/report/$token'
+      path: '/research/report/$token'
+      fullPath: '/research/report/$token'
+      preLoaderRoute: typeof ResearchReportTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/research/admin/commission': {
@@ -694,8 +766,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiResearchAdminCommissionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/research/report/$token': {
+      id: '/api/research/report/$token'
+      path: '/api/research/report/$token'
+      fullPath: '/api/research/report/$token'
+      preLoaderRoute: typeof ApiResearchReportTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface ResearchNetworksLedgerRouteChildren {
+  ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
+}
+
+const ResearchNetworksLedgerRouteChildren: ResearchNetworksLedgerRouteChildren =
+  {
+    ResearchNetworksLedgerSpeechReachRoute:
+      ResearchNetworksLedgerSpeechReachRoute,
+  }
+
+const ResearchNetworksLedgerRouteWithChildren =
+  ResearchNetworksLedgerRoute._addFileChildren(
+    ResearchNetworksLedgerRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -703,15 +797,15 @@ const rootRouteChildren: RootRouteChildren = {
   LeadersRoute: LeadersRoute,
   PeaceRoute: PeaceRoute,
   PrivacyRoute: PrivacyRoute,
-  ResearchMigrationRoute: ResearchMigrationRoute,
+  ProRoute: ProRoute,
   ResearchAviationRoute: ResearchAviationRoute,
+  ResearchMigrationRoute: ResearchMigrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdminCurationRoute: AdminCurationRoute,
   ResearchSlugRoute: ResearchSlugRoute,
   ResearchCommissionRoute: ResearchCommissionRoute,
   ResearchLibraryRoute: ResearchLibraryRoute,
-  ResearchNetworksLedgerRoute: ResearchNetworksLedgerRoute,
-  ResearchNetworksLedgerSpeechReachRoute: ResearchNetworksLedgerSpeechReachRoute,
+  ResearchNetworksLedgerRoute: ResearchNetworksLedgerRouteWithChildren,
   ResearchSpeechReachRoute: ResearchSpeechReachRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
@@ -719,6 +813,9 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchIndexRoute: ResearchIndexRoute,
   TopicsIndexRoute: TopicsIndexRoute,
   TrackersIndexRoute: TrackersIndexRoute,
+  ApiBillingCheckoutRoute: ApiBillingCheckoutRoute,
+  ApiBillingMeRoute: ApiBillingMeRoute,
+  ApiProRunRoute: ApiProRunRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiResearchCheckoutRoute: ApiResearchCheckoutRoute,
   ApiResearchEmailRoute: ApiResearchEmailRoute,
@@ -735,13 +832,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

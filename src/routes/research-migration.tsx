@@ -226,8 +226,11 @@ function MigrationIntelligencePage() {
                 <Home className="w-3.5 h-3.5" /> Home
               </Link>
               <Link
-                to="/topics/$topicId"
-                params={{ topicId: "eu-migration-green-divisions" }}
+                to="/research/library"
+                search={{
+                  section: "topics",
+                  topic: "eu-migration-green-divisions",
+                }}
                 className="inline-flex items-center gap-1 text-muted-foreground hover:text-cyan min-h-[36px]"
               >
                 Live X topic pulse <ArrowRight className="w-3 h-3" />
@@ -531,8 +534,11 @@ function MigrationIntelligencePage() {
                 buried re-entered mass feeds. Full receipts pass next — structure first, not
                 personality cult. Live pulse:{" "}
                 <Link
-                  to="/topics/$topicId"
-                  params={{ topicId: "eu-migration-green-divisions" }}
+                  to="/research/library"
+                  search={{
+                    section: "topics",
+                    topic: "eu-migration-green-divisions",
+                  }}
                   className="text-cyan hover:underline"
                 >
                   EU migration topic

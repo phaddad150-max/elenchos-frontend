@@ -602,8 +602,12 @@ function Dashboard() {
                 !simMode && (
                   <p className="mt-3 text-[13px] text-muted-foreground leading-relaxed">
                     No citizen signal rows in this sample yet. Open{" "}
-                    <Link to="/topics" className="text-cyan hover:underline">
-                      Topics
+                    <Link
+                      to="/research/library"
+                      search={{ section: "topics" }}
+                      className="text-cyan hover:underline"
+                    >
+                      Library topics
                     </Link>{" "}
                     for full briefings, or check back after the next sample.
                   </p>
@@ -1696,18 +1700,24 @@ function LeadershipBoardPreview({
 function DashboardActionRow() {
   const actions = [
     {
-      href: "/topics" as const,
-      label: "Open full Topics desk",
+      id: "library-topics",
+      href: "/research/library" as const,
+      search: { section: "topics" as const },
+      label: "Open Library topics",
       icon: Layers,
     },
     {
+      id: "library",
       href: "/research/library" as const,
+      search: undefined,
       label: "Browse free Library",
       icon: BookOpen,
     },
     {
-      href: "/research/commission" as const,
-      label: "Commission a private report",
+      id: "pro",
+      href: "/pro" as const,
+      search: undefined,
+      label: "Pro Research Desk",
       icon: FilePenLine,
     },
   ];
@@ -1724,8 +1734,9 @@ function DashboardActionRow() {
         <div className="flex flex-col sm:flex-row flex-1 gap-1.5 sm:gap-2 min-w-0">
           {actions.map((a) => (
             <Link
-              key={a.href}
+              key={a.id}
               to={a.href}
+              search={a.search}
               className="group flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[40px] px-3 rounded-lg border border-border/90 bg-background/60 hover:border-cyan/50 hover:bg-cyan/5 text-[12.5px] font-medium text-foreground/90 hover:text-cyan transition-colors touch-manipulation"
             >
               <a.icon className="w-3.5 h-3.5 text-cyan shrink-0" aria-hidden />
@@ -2229,7 +2240,7 @@ type KpiHeroHref =
   | "/research/library"
   | "/research/commission"
   | "/research/networks-ledger"
-  | "/topics"
+  | "/pro"
   | "/trackers"
   | "/trackers/leaders"
   | "/trackers/peace";
@@ -2780,7 +2791,7 @@ function DashboardKpiGrid({
           : "Core refresh count not in this sample yet.",
       ],
       links: [
-        { label: "Open topics", href: "/topics" },
+        { label: "Open topics", href: "/research/library" },
         { label: "Method & limits", href: "/about" },
       ],
     },
@@ -2858,7 +2869,7 @@ function DashboardKpiGrid({
       ],
       links: [
         { label: "Sampling method", href: "/about" },
-        { label: "Browse topics", href: "/topics" },
+        { label: "Browse topics", href: "/research/library" },
       ],
     },
     {

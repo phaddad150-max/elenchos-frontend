@@ -229,7 +229,7 @@ export function TopicsListPage({ onOpen }: { onOpen: (id: string) => void }) {
   );
 }
 
-/** Topic detail: /topics/$topicId */
+/** Topic detail — rendered from Library (?section=topics&topic=id). */
 export function TopicDetailPage({
   topicId,
   onBack,
@@ -1120,7 +1120,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   });
   const liveScore = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.score : undefined;
   const liveLabel = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.label : undefined;
-  const shareUrl = `https://elenchos.live/topics/${encodeURIComponent(topic.id)}`;
+  const shareUrl = `https://elenchos.live/research/library?section=topics&topic=${encodeURIComponent(topic.id)}`;
   const liveDiv =
     useLive && liveData && typeof liveData.divergence_score === "number"
       ? Math.round(liveData.divergence_score)

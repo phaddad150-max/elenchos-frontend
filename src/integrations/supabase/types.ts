@@ -74,12 +74,159 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          status: string
+          plan_id: string
+          current_period_end: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          status?: string
+          plan_id?: string
+          current_period_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          status?: string
+          plan_id?: string
+          current_period_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      token_balances: {
+        Row: {
+          user_id: string
+          balance: number
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          balance?: number
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          balance?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      token_ledger: {
+        Row: {
+          id: string
+          user_id: string
+          delta: number
+          reason: string
+          ref_type: string | null
+          ref_id: string | null
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          delta: number
+          reason: string
+          ref_type?: string | null
+          ref_id?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          delta?: number
+          reason?: string
+          ref_type?: string | null
+          ref_id?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      connected_accounts: {
+        Row: {
+          id: string
+          user_id: string
+          provider: string
+          provider_user_id: string
+          access_token_enc: string | null
+          refresh_token_enc: string | null
+          scopes: string[]
+          meta: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: string
+          provider_user_id: string
+          access_token_enc?: string | null
+          refresh_token_enc?: string | null
+          scopes?: string[]
+          meta?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: string
+          provider_user_id?: string
+          access_token_enc?: string | null
+          refresh_token_enc?: string | null
+          scopes?: string[]
+          meta?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      credit_tokens: {
+        Args: {
+          p_user_id: string
+          p_delta: number
+          p_reason: string
+          p_ref_type?: string | null
+          p_ref_id?: string | null
+          p_metadata?: Json
+        }
+        Returns: number
+      }
+      debit_tokens: {
+        Args: {
+          p_user_id: string
+          p_amount: number
+          p_reason?: string
+          p_ref_type?: string | null
+          p_ref_id?: string | null
+          p_metadata?: Json
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

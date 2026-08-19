@@ -12,11 +12,12 @@ export function ResearchModeBanner({ message }: { message: string }) {
         <p className="text-[12.5px] sm:text-[13px] text-foreground/90 leading-snug">{message}</p>
       </div>
       <Link
-        to="/topics"
+        to="/research/library"
+        search={{ section: "topics" }}
         className="inline-flex items-center gap-1.5 text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground hover:text-cyan shrink-0 self-start sm:self-center"
       >
         <Layers className="w-3.5 h-3.5" aria-hidden />
-        Topics (separate)
+        Library topics
       </Link>
     </div>
   );

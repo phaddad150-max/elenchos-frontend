@@ -4,20 +4,26 @@ import { LayoutDashboard, Layers, Info, FlaskConical } from "lucide-react";
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
   {
-    to: "/topics",
-    label: "Topics",
-    match: (p: string) => p === "/topics" || p.startsWith("/topics/"),
+    to: "/research/library",
+    label: "Library",
+    match: (p: string) =>
+      p.startsWith("/research/library") ||
+      p === "/topics" ||
+      p.startsWith("/topics/"),
     icon: Layers,
   },
   {
     to: "/research",
     label: "Research",
     match: (p: string) =>
-      p === "/research" ||
-      p.startsWith("/research/") ||
-      p.startsWith("/research-") ||
-      p === "/trackers" ||
-      p.startsWith("/trackers/"),
+      (p === "/research" ||
+        p.startsWith("/research/") ||
+        p.startsWith("/research-") ||
+        p === "/trackers" ||
+        p.startsWith("/trackers/") ||
+        p === "/pro" ||
+        p.startsWith("/pro/")) &&
+      !p.startsWith("/research/library"),
     icon: FlaskConical,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },
