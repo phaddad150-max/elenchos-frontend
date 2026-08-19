@@ -34,6 +34,8 @@ import {
   type TrackerDefinition,
   type TrackerRow,
 } from "@/lib/trackers-data";
+import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
+import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
 import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Quote } from "lucide-react";
 
 
@@ -1411,7 +1413,9 @@ function TrackersPage() {
     return m;
   }, [rows]);
 
-  const live = TRACKER_CATALOG.filter((t) => t.status === "live");
+  const live = TRACKER_CATALOG.filter(
+    (t) => t.status === "live" || t.status === "preview",
+  );
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -1471,8 +1475,8 @@ function TrackersPage() {
             </span>
           </h1>
           <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Three live surfaces: Leadership board, Peace index, and the Networks Ledger — citizen
-            discourse rankings plus official-action intelligence.
+            Leadership, AI & Business, Citizen Discourse, Peace, and the Networks Ledger — citizen
+            rankings plus official-action intelligence.
           </p>
           <div className="pt-1 flex flex-wrap items-center gap-3">
             <SimulatedDataBadge />
@@ -1487,10 +1491,25 @@ function TrackersPage() {
         <h2 className="sr-only">Live trackers</h2>
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
           {live.map((def, idx) => {
-            const row = byType.get(def.tracker_type);
+            const liveRow = byType.get(def.tracker_type);
+            const row =
+              liveRow ??
+              (def.tracker_type === "ai_business_leader_trust"
+                ? seedAiBusinessTrackerRow()
+                : def.tracker_type === "citizen_discourse_index"
+                  ? seedCitizenDiscourseTrackerRow()
+                  : undefined);
             const inner =
               def.tracker_type === "global_leader_trust" ? (
                 <LeaderOverviewCard def={def} row={row} href="/trackers/leaders" />
+              ) : def.tracker_type === "ai_business_leader_trust" ? (
+                <LeaderOverviewCard def={def} row={row} href="/trackers/business" />
+              ) : def.tracker_type === "citizen_discourse_index" ? (
+                <LeaderOverviewCard
+                  def={def}
+                  row={row}
+                  href="/trackers/citizen-discourse"
+                />
               ) : def.tracker_type === "peace_normalization" ? (
                 <PeaceOverviewCard def={def} row={row} href="/trackers/peace" />
               ) : null;

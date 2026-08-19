@@ -185,7 +185,11 @@ function trackerRowQuality(row: TrackerRow): number {
   const data = (row.data ?? {}) as Record<string, unknown>;
   const itemCount = typeof row.item_count === "number" ? row.item_count : null;
 
-  if (row.tracker_type === "global_leader_trust") {
+  if (
+    row.tracker_type === "global_leader_trust" ||
+    row.tracker_type === "ai_business_leader_trust" ||
+    row.tracker_type === "citizen_discourse_index"
+  ) {
     // Prefer explicit item_count when backend sets it; still validate payload.
     const active = countActiveScoredLeaders(data);
     if (active <= 0) return -1;
@@ -589,11 +593,11 @@ export type TrackerDefinition = {
   tracker_type: string;
   title: string;
   tagline: string;
-  status: "live" | "coming_soon";
-  accent: "cyan" | "amber" | "violet" | "emerald" | "rose";
+  status: "live" | "preview" | "coming_soon";
+  accent: "cyan" | "amber" | "violet" | "emerald" | "rose" | "magenta";
 };
 
-/** Live trackers only: Leadership + Peace. Networks Ledger lives under Research. */
+/** Leadership family + Peace. Networks Ledger lives under Research. */
 export const TRACKER_CATALOG: TrackerDefinition[] = [
   {
     key: "global-leader-trust",
@@ -603,6 +607,24 @@ export const TRACKER_CATALOG: TrackerDefinition[] = [
       "Live citizen trust scores for world leaders measured against official approval narratives.",
     status: "live",
     accent: "amber",
+  },
+  {
+    key: "ai-business-leaders",
+    tracker_type: "ai_business_leader_trust",
+    title: "AI & Business Leaders",
+    tagline:
+      "Public trust in AI / tech economy figures — how citizens talk about CEOs and builders, not follower counts.",
+    status: "preview",
+    accent: "amber",
+  },
+  {
+    key: "citizen-discourse",
+    tracker_type: "citizen_discourse_index",
+    title: "Citizen Discourse & Awareness",
+    tagline:
+      "Public voices in social-awareness conversations (migration, accountability, free speech, conflict). Not an endorsement.",
+    status: "preview",
+    accent: "magenta",
   },
   {
     key: "peace-normalization",

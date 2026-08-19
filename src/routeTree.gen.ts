@@ -28,6 +28,8 @@ import { Route as ResearchSpeechReachRouteImport } from './routes/research.speec
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as TopicsTopicIdRouteImport } from './routes/topics.$topicId'
 import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
+import { Route as TrackersBusinessRouteImport } from './routes/trackers.business'
+import { Route as TrackersCitizenDiscourseRouteImport } from './routes/trackers.citizen-discourse'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
@@ -142,6 +144,17 @@ const TrackersIndexRoute = TrackersIndexRouteImport.update({
   path: '/trackers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackersBusinessRoute = TrackersBusinessRouteImport.update({
+  id: '/trackers/business',
+  path: '/trackers/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackersCitizenDiscourseRoute =
+  TrackersCitizenDiscourseRouteImport.update({
+    id: '/trackers/citizen-discourse',
+    path: '/trackers/citizen-discourse',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TrackersLeadersRoute = TrackersLeadersRouteImport.update({
   id: '/trackers/leaders',
   path: '/trackers/leaders',
@@ -252,6 +265,8 @@ export interface FileRoutesByFullPath {
   '/research/networks-ledger': typeof ResearchNetworksLedgerRouteWithChildren
   '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
+  '/trackers/business': typeof TrackersBusinessRoute
+  '/trackers/citizen-discourse': typeof TrackersCitizenDiscourseRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research/': typeof ResearchIndexRoute
@@ -291,6 +306,8 @@ export interface FileRoutesByTo {
   '/research/networks-ledger': typeof ResearchNetworksLedgerRouteWithChildren
   '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
+  '/trackers/business': typeof TrackersBusinessRoute
+  '/trackers/citizen-discourse': typeof TrackersCitizenDiscourseRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research': typeof ResearchIndexRoute
@@ -331,6 +348,8 @@ export interface FileRoutesById {
   '/research/networks-ledger': typeof ResearchNetworksLedgerRouteWithChildren
   '/research/speech-reach': typeof ResearchSpeechReachRoute
   '/topics/$topicId': typeof TopicsTopicIdRoute
+  '/trackers/business': typeof TrackersBusinessRoute
+  '/trackers/citizen-discourse': typeof TrackersCitizenDiscourseRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
   '/research/': typeof ResearchIndexRoute
@@ -372,6 +391,8 @@ export interface FileRouteTypes {
     | '/research/networks-ledger'
     | '/research/speech-reach'
     | '/topics/$topicId'
+    | '/trackers/business'
+    | '/trackers/citizen-discourse'
     | '/trackers/leaders'
     | '/trackers/peace'
     | '/research/'
@@ -411,6 +432,8 @@ export interface FileRouteTypes {
     | '/research/networks-ledger'
     | '/research/speech-reach'
     | '/topics/$topicId'
+    | '/trackers/business'
+    | '/trackers/citizen-discourse'
     | '/trackers/leaders'
     | '/trackers/peace'
     | '/research'
@@ -450,6 +473,8 @@ export interface FileRouteTypes {
     | '/research/networks-ledger'
     | '/research/speech-reach'
     | '/topics/$topicId'
+    | '/trackers/business'
+    | '/trackers/citizen-discourse'
     | '/trackers/leaders'
     | '/trackers/peace'
     | '/research/'
@@ -490,6 +515,8 @@ export interface RootRouteChildren {
   ResearchNetworksLedgerRoute: typeof ResearchNetworksLedgerRouteWithChildren
   ResearchSpeechReachRoute: typeof ResearchSpeechReachRoute
   TopicsTopicIdRoute: typeof TopicsTopicIdRoute
+  TrackersBusinessRoute: typeof TrackersBusinessRoute
+  TrackersCitizenDiscourseRoute: typeof TrackersCitizenDiscourseRoute
   TrackersLeadersRoute: typeof TrackersLeadersRoute
   TrackersPeaceRoute: typeof TrackersPeaceRoute
   ResearchIndexRoute: typeof ResearchIndexRoute
@@ -645,6 +672,20 @@ declare module '@tanstack/react-router' {
       path: '/trackers'
       fullPath: '/trackers/'
       preLoaderRoute: typeof TrackersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/business': {
+      id: '/trackers/business'
+      path: '/trackers/business'
+      fullPath: '/trackers/business'
+      preLoaderRoute: typeof TrackersBusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trackers/citizen-discourse': {
+      id: '/trackers/citizen-discourse'
+      path: '/trackers/citizen-discourse'
+      fullPath: '/trackers/citizen-discourse'
+      preLoaderRoute: typeof TrackersCitizenDiscourseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trackers/leaders': {
@@ -808,6 +849,8 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchNetworksLedgerRoute: ResearchNetworksLedgerRouteWithChildren,
   ResearchSpeechReachRoute: ResearchSpeechReachRoute,
   TopicsTopicIdRoute: TopicsTopicIdRoute,
+  TrackersBusinessRoute: TrackersBusinessRoute,
+  TrackersCitizenDiscourseRoute: TrackersCitizenDiscourseRoute,
   TrackersLeadersRoute: TrackersLeadersRoute,
   TrackersPeaceRoute: TrackersPeaceRoute,
   ResearchIndexRoute: ResearchIndexRoute,

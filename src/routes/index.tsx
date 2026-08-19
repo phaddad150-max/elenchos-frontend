@@ -73,6 +73,8 @@ import {
   type FeedCitizenSignal,
 } from "@/lib/dashboard-data";
 import { Compass } from "lucide-react";
+import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
+import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
 import {
   extractPeaceCountries,
   extractRankedLeaders,
@@ -257,9 +259,55 @@ function Dashboard() {
   }>({});
   /** Top leaders for the focused Leadership board preview. */
   const [topLeaders, setTopLeaders] = useState<RankedLeader[]>([]);
+  const [businessLeaders] = useState(() =>
+    extractRankedLeaders(seedAiBusinessTrackerRow()),
+  );
+  const [discourseLeaders] = useState(() =>
+    extractRankedLeaders(seedCitizenDiscourseTrackerRow()),
+  );
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [dashReady, setDashReady] = useState(false);
   const [simMode] = useSimMode();
+
+  const boardPreview = useMemo(() => {
+    if (topicFilter === "Economic") {
+      return {
+        leaders: businessLeaders,
+        rankedTotal: businessLeaders.length,
+        title: "AI & Business leaders",
+        titleAccent: "by citizens",
+        href: "/trackers/business" as const,
+        ctaLabel: "Open business board",
+        kicker: "Economy board",
+      };
+    }
+    if (topicFilter === "Social") {
+      return {
+        leaders: discourseLeaders,
+        rankedTotal: discourseLeaders.filter((l) => l.status !== "waiting").length,
+        title: "Citizen discourse",
+        titleAccent: "awareness",
+        href: "/trackers/citizen-discourse" as const,
+        ctaLabel: "Open discourse board",
+        kicker: "Social board",
+      };
+    }
+    return {
+      leaders: topLeaders,
+      rankedTotal: trackerKpis.leadersRanked,
+      title: "Leadership board",
+      titleAccent: "by citizens",
+      href: "/trackers/leaders" as const,
+      ctaLabel: "Open full leaderboard",
+      kicker: "Live leaderboard",
+    };
+  }, [
+    topicFilter,
+    topLeaders,
+    businessLeaders,
+    discourseLeaders,
+    trackerKpis.leadersRanked,
+  ]);
 
   const [, setTickKey] = useState(0);
 
@@ -676,8 +724,13 @@ function Dashboard() {
         >
           <div className="min-w-0 xl:col-span-8 h-full flex">
             <LeadershipBoardPreview
-              leaders={topLeaders}
-              rankedTotal={trackerKpis.leadersRanked}
+              leaders={boardPreview.leaders}
+              rankedTotal={boardPreview.rankedTotal}
+              title={boardPreview.title}
+              titleAccent={boardPreview.titleAccent}
+              href={boardPreview.href}
+              ctaLabel={boardPreview.ctaLabel}
+              kicker={boardPreview.kicker}
             />
           </div>
           <div className="min-w-0 xl:col-span-4 h-full flex">
@@ -1537,15 +1590,26 @@ function leaderScoreHex(s?: number | null): string {
 
 /**
  * Leadership board preview — top 5, tracker-theme gold ranks + score bars, interactive.
+ * title / href / kicker swap when Economic or Social signal tabs are active.
  */
 function LeadershipBoardPreview({
   leaders,
   rankedTotal,
+  title = "Leadership board",
+  titleAccent = "by citizens",
+  href = "/trackers/leaders",
+  ctaLabel = "Open full leaderboard",
+  kicker = "Live leaderboard",
 }: {
   leaders: RankedLeader[];
   rankedTotal?: number;
+  title?: string;
+  titleAccent?: string;
+  href?: "/trackers/leaders" | "/trackers/business" | "/trackers/citizen-discourse";
+  ctaLabel?: string;
+  kicker?: string;
 }) {
-  const top = leaders.slice(0, 5);
+  const top = leaders.filter((l) => l.status !== "waiting").slice(0, 5);
   const [focus, setFocus] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -1579,11 +1643,11 @@ function LeadershipBoardPreview({
           <div className="min-w-0">
             <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.22em] text-cyan mb-1">
               <Trophy className="w-3.5 h-3.5" />
-              Live leaderboard
+              {kicker}
             </div>
             <h2 className="text-[1.05rem] sm:text-xl font-display font-semibold leading-tight">
-              Leadership board{" "}
-              <span className="text-cyan">by citizens</span>
+              {title}{" "}
+              <span className="text-cyan">{titleAccent}</span>
             </h2>
             <p className="text-[11.5px] sm:text-[12px] text-muted-foreground mt-0.5">
               Top {top.length || 5}
@@ -1705,10 +1769,10 @@ function LeadershipBoardPreview({
         )}
 
         <Link
-          to="/trackers/leaders"
+          to={href}
           className="group mt-auto flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[42px] rounded-full border border-cyan/40 bg-cyan/10 hover:bg-cyan/18 text-cyan text-[12.5px] font-semibold touch-manipulation transition-colors w-full sm:w-auto sm:self-end sm:px-5 shrink-0"
         >
-          Open full leaderboard
+          {ctaLabel}
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
         </Link>
       </div>
