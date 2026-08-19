@@ -27,7 +27,8 @@ function NewBadge({ className, strokeWidth: _ }: { className?: string; strokeWid
 
 const TABS = [
   { to: "/", label: "Dashboard", exact: true },
-  { to: "/research", label: "Research", exact: false },
+  /** Research opens Library content directly (no intermediate landing). */
+  { to: "/research/library", label: "Research", exact: false },
   { to: "/pro", label: "Pro", exact: false },
   { to: "/about", label: "About", exact: true },
 ] as const;

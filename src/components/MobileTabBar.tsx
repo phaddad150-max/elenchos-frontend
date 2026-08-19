@@ -5,7 +5,7 @@ import { LayoutDashboard, FlaskConical, Sparkles, Info } from "lucide-react";
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
   {
-    to: "/research",
+    to: "/research/library",
     label: "Research",
     match: (p: string) =>
       p === "/research" ||

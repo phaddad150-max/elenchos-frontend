@@ -4,8 +4,8 @@
 
 **Main nav:** Dashboard · Research · Pro · About  
 
-- Library lives under Research only (`/research/library`) — not in main nav.  
-- Public guest commission CTAs are **removed**. `/research/commission` may remain for legacy URLs but is not linked from nav, footer, sitemap, or landing pages.  
+- **Research** tab opens Library content directly (`/research/library`). `/research` redirects there — no intermediate landing.  
+- Public guest commission CTAs are **removed**. `/research/commission` may remain for legacy URLs but is not linked.  
 - Private analyses: **Pro** monthly packs + token wallet.
 
 ## Products live (3 monthly options)

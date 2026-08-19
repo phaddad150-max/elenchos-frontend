@@ -129,19 +129,11 @@ export function GlobalSearch() {
           <CommandGroup heading="Research">
             <CommandItem
               value="research briefs multi-source case study desk"
-              onSelect={() => go("/research")}
-            >
-              <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Research Desk</span>
-              <CommandShortcut>Research</CommandShortcut>
-            </CommandItem>
-            <CommandItem
-              value="library case studies trackers topics discourse networks ledger designations leaders peace"
               onSelect={() => go("/research/library")}
             >
               <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Library · free reports & trackers</span>
-              <CommandShortcut>Library</CommandShortcut>
+              <span className="truncate">Research · topics, cases & trackers</span>
+              <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
             <CommandItem
               value="pro subscription tokens private research desk wallet monthly"

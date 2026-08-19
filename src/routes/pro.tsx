@@ -497,7 +497,7 @@ function ProDeskPage() {
           <BookOpen className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" aria-hidden />
           <span>
             Free published research lives under{" "}
-            <Link to="/research" className="text-cyan hover:underline">
+            <Link to="/research/library" className="text-cyan hover:underline">
               Research
             </Link>
             . Pro never replaces that surface.

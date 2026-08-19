@@ -15,10 +15,7 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import {
-  ResearchBreadcrumb,
-  ResearchDeskNav,
-} from "@/components/research/ResearchDeskNav";
+import { ResearchBreadcrumb } from "@/components/research/ResearchDeskNav";
 import { FEATURE_TOPICS, getTopic } from "@/lib/feature-topics";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
 import { LIBRARY_SOCIAL, socialMetaTags } from "@/lib/social-meta";
@@ -324,8 +321,7 @@ function ResearchLibraryPage() {
       <SiteNav />
 
       <main className="max-w-[1400px] mx-auto w-full min-w-0 px-2.5 sm:px-4 md:px-6 py-5 sm:py-8 mobile-safe-bottom md:pb-14 relative flex-1 overflow-x-clip space-y-5 sm:space-y-7">
-        <ResearchBreadcrumb trail={[{ label: "Library" }]} />
-        <ResearchDeskNav />
+        <ResearchBreadcrumb />
 
         {/* Hero + at-a-glance KPIs */}
         <header className="page-hero-banner overflow-hidden min-w-0 relative">
@@ -333,7 +329,7 @@ function ResearchLibraryPage() {
           <div className="relative p-4 sm:p-5 md:p-7 space-y-4 min-w-0">
             <div className="page-hero-kicker">
               <BookOpen className="w-3.5 h-3.5" aria-hidden />
-              Library · Free published work
+              Research · Free published work
             </div>
             <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:justify-between">
               <div className="min-w-0 max-w-2xl space-y-2">

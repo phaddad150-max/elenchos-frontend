@@ -59,10 +59,10 @@ function AboutPage() {
                 Explore Library <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
-                to="/research"
+                to="/research/library"
                 className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
               >
-                Research Desk
+                Research
               </Link>
             </div>
           </div>

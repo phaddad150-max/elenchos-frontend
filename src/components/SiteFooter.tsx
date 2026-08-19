@@ -15,7 +15,7 @@ export function SiteFooter() {
           <Link to="/" className="text-cyan hover:underline">
             Dashboard
           </Link>
-          <Link to="/research" className="text-cyan hover:underline">
+          <Link to="/research/library" className="text-cyan hover:underline">
             Research
           </Link>
           <Link to="/pro" className="text-cyan hover:underline">
