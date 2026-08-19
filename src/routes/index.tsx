@@ -1417,7 +1417,6 @@ function SampleStructureModules({
   }, [signals]);
 
   return (
-  return (
     <aside className="dash-panel p-2.5 sm:p-3.5 min-w-0 w-full h-full flex flex-col self-stretch">
       <div className="flex items-start justify-between gap-2 mb-3 min-w-0 shrink-0 pb-2 border-b border-border/70">
         <div className="flex items-center gap-2 min-w-0">

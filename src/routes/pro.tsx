@@ -11,6 +11,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
+import { oauthReturnTo } from "@/lib/auth-redirect";
 import {
   MONTHLY_PLAN_ORDER,
   MONTHLY_PLANS,
@@ -136,18 +137,28 @@ function ProDeskPage() {
     setActionError(null);
     const { error } = await supabaseExternal.auth.signInWithOAuth({
       provider: "x",
-      options: { redirectTo: `${window.location.origin}/pro` },
+      options: { redirectTo: oauthReturnTo("/pro") },
     });
-    if (error) setActionError(error.message);
+    if (error) {
+      setActionError(
+        error.message || "X sign-in failed. Check that the app URL is allowed in Supabase Auth.",
+      );
+    }
   };
 
   const signInGoogle = async () => {
     setActionError(null);
     const { error } = await supabaseExternal.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/pro` },
+      options: { redirectTo: oauthReturnTo("/pro") },
     });
-    if (error) setActionError(error.message);
+    if (error) {
+      setActionError(
+        error.message.includes("redirect") || error.status === 400
+          ? "Google blocked sign-in (redirect URI mismatch). Add the Supabase callback URL in Google Cloud Console — see Auth setup notes."
+          : error.message || "Google sign-in failed.",
+      );
+    }
   };
 
   const signOut = async () => {
