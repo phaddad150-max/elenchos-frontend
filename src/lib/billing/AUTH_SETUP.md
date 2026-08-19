@@ -1,14 +1,25 @@
-# Fix Google sign-in: `Error 400: redirect_uri_mismatch`
+# Fix Google sign-in on `/pro`
 
-Google rejects the OAuth request when the **redirect URI** sent by Supabase is not listed on your Google OAuth client.
+The frontend does **not** store Google Client IDs. Supabase Auth holds them.  
+Most failures are dashboard config — not app code.
 
-Supabase always redirects Google to **its own callback**, not directly to elenchos.live.
+---
 
-## 1. Google Cloud Console
+## Error A — `401: deleted_client` (current)
 
-Open [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → your **OAuth 2.0 Client ID** (Web application).
+**Meaning:** The OAuth **Client ID** saved in Supabase was **deleted** (or disabled) in Google Cloud. Google refuses any login with that dead client.
 
-### Authorized JavaScript origins
+### Fix — create a new Web client and paste it into Supabase
+
+#### 1. Google Cloud Console
+
+1. Open [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials)
+2. Select the correct GCP project (the one you use for Elenchos)
+3. **+ Create credentials** → **OAuth client ID**
+4. Application type: **Web application**
+5. Name: e.g. `Elenchos Supabase Auth`
+
+**Authorized JavaScript origins**
 
 ```
 https://elenchos.live
@@ -16,48 +27,62 @@ https://www.elenchos.live
 https://jacbalsongvqvaqlfsbx.supabase.co
 ```
 
-### Authorized redirect URIs (critical)
-
-Paste **exactly**:
+**Authorized redirect URIs** (exact)
 
 ```
 https://jacbalsongvqvaqlfsbx.supabase.co/auth/v1/callback
 ```
 
-Save. Wait 1–5 minutes for Google to propagate.
+6. Create → copy **Client ID** and **Client Secret**
 
-## 2. Supabase Dashboard
+If OAuth consent screen is not set: APIs & Services → **OAuth consent screen** → External (or Internal) → add app name, support email, save. For testing, add your Google account under **Test users**.
 
-Project `jacbalsongvqvaqlfsbx` → **Authentication** → **URL Configuration**
+#### 2. Supabase — replace the dead client
+
+1. [Supabase Dashboard](https://supabase.com/dashboard) → project **`jacbalsongvqvaqlfsbx`**
+2. **Authentication** → **Providers** → **Google**
+3. Enable Google
+4. Paste the **new** Client ID and Client Secret (overwrite the old ones)
+5. Save
+
+#### 3. Supabase URL allowlist
+
+**Authentication** → **URL Configuration**
 
 | Field | Value |
 |-------|--------|
 | Site URL | `https://elenchos.live` |
 | Redirect URLs | `https://elenchos.live/**` |
 | | `https://www.elenchos.live/**` |
-| | `http://localhost:5173/**` (local Vite if needed) |
+| | `http://localhost:5173/**` (local) |
 
-### Google provider
+#### 4. Test
 
-Authentication → Providers → **Google**
+1. Incognito window → https://elenchos.live/pro  
+2. **Continue with Google**  
+3. Should return signed-in to `/pro`
 
-- Enabled: on  
-- Client ID / Client Secret: same Web client as above  
+Do **not** reuse a deleted client ID — always create a new Web client and update Supabase.
 
-## 3. App behaviour
+---
+
+## Error B — `400: redirect_uri_mismatch`
+
+Google’s authorized redirect URI is missing or mistyped.  
+It must be exactly:
+
+```
+https://jacbalsongvqvaqlfsbx.supabase.co/auth/v1/callback
+```
+
+(Not `elenchos.live/...` — Google talks to Supabase first.)
+
+---
+
+## App behaviour (already in code)
 
 `/pro` uses `oauthReturnTo("/pro")` → `https://elenchos.live/pro` after Supabase finishes the exchange.
 
-Flow:
-
 ```text
-User → Google → supabase.co/auth/v1/callback → elenchos.live/pro
+User → Google → jacbalsongvqvaqlfsbx.supabase.co/auth/v1/callback → elenchos.live/pro
 ```
-
-## 4. Quick test
-
-1. Incognito → https://elenchos.live/pro  
-2. Continue with Google  
-3. Should land signed-in on `/pro` with wallet section  
-
-If still blocked, open Google’s error URL and confirm `redirect_uri=` equals the Supabase callback above (character-for-character).
