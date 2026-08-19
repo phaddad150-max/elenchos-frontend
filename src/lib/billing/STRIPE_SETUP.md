@@ -43,7 +43,16 @@ SITE_URL=https://elenchos.live
 
 Code falls back to these IDs automatically **only when** `STRIPE_SECRET_KEY` starts with `sk_test_` and the env var is empty. For Live mode, create Live prices and set the env vars — no test fallback applies.
 
-**Important:** set vars on the Vercel project that serves `elenchos.live` (not a paused sibling project), for **Production + Preview + Development**, then redeploy.
+**Important:** set vars on the Vercel project that serves `elenchos.live` (not CatchSnap / paused siblings), for **Production + Preview + Development**, then redeploy.
+
+Known project names under team `elenchos-live` (may both exist):
+
+- `elenchos-frontend`
+- `frontend-elenchos`
+
+Dashboard: [Vercel team elenchos-live](https://vercel.com/elenchos-live) → open the project whose Domains include `elenchos.live` / `www.elenchos.live` → **Settings → Environment Variables** → add the three `STRIPE_PRICE_PACK_*` values above → **Deployments → Redeploy** (or push to `main`).
+
+Confirm `STRIPE_SECRET_KEY` is `sk_test_…` while these Test Price IDs are in use.
 
 ## Isolation
 
