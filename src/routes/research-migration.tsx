@@ -24,6 +24,7 @@ import {
   CORRIDORS,
   DISCOURSE_THEMES,
   EU_IBC_SERIES,
+  EU_IBC_SERIES_SUM,
   FRONTLINE_STATES,
   HOOK_HEADLINE,
   HOOK_KPIS,
@@ -34,6 +35,7 @@ import {
   POLICY_STANCE,
   REMEDIES,
   RETURNS_HONESTY,
+  SCALE_DISCREPANCY_RAIL,
   SCENARIOS,
   TIMELINE,
   X_THREAD_DRAFT,
@@ -57,7 +59,7 @@ export const Route = createFileRoute("/research-migration")({
       {
         property: "og:description",
         content:
-          "Since 2011 · peak ~1.8M detections · frontline GR/IT/ES/UK Channel. Interactive corridors and returns honesty. Research Desk crisis briefing.",
+          "Since 2011 · 2015 peak year ~1.8M detections · multi-year series already multi-million events · frontline GR/IT/ES/UK Channel. X vs official scale rail included.",
       },
       { property: "og:url", content: "https://elenchos.live/research-migration" },
     ],
@@ -281,21 +283,60 @@ function MigrationIntelligencePage() {
             <p>
               <strong className="text-foreground/90">A · Stats</strong> (Frontex / national) ·{" "}
               <strong className="text-foreground/90">B · Power</strong> (deals, courts, media,
-              NGOs) · <strong className="text-foreground/90">C · Citizens</strong> (X pulse —
-              linked topic; full sample phase next). Detections are{" "}
-              <em>events</em>, not unique people. Not a US border product.
+              NGOs) · <strong className="text-foreground/90">C · Citizens / X</strong> (scale
+              slogans vs peak-year charts; linked live topic). Detections are{" "}
+              <em>events</em>, not unique people. Peak year ≠ cumulative. Not a US border product.
             </p>
           </div>
 
           {/* CH 01 Scale */}
           <Chapter id="scale" meta={CHAPTERS[0]!}>
             <p className="text-[14px] sm:text-[15px] text-foreground/90 leading-relaxed mb-4">
-              From the Syrian war era (2011+) Europe faced multi-year irregular pressure that
-              peaked in <strong className="text-rose-signal">2015 (~1.8M detections)</strong>,
-              fell, then re-accelerated into the 2020s.{" "}
-              <strong className="text-cyan">2024–2025 drops prove policy and enforcement
-              matter</strong> — they do not erase years of elite failure or citizen distrust.
+              From the Syrian war era (2011+) Europe faced multi-year irregular pressure. The{" "}
+              <strong className="text-rose-signal">2015 peak year (~1.8M detections)</strong> is
+              a single calendar year of Frontex-linked illegal border-crossing{" "}
+              <em>events</em> — not unique people, and not the multi-year total. The incomplete
+              yearly series on this page already sums to about{" "}
+              <strong className="text-amber-signal">
+                {(EU_IBC_SERIES_SUM / 1_000_000).toFixed(1)}M detection events
+              </strong>
+              . That is why citizen discourse on X often rejects soft “only 1.8–2M” slogans.{" "}
+              <strong className="text-cyan">2024–2025 drops prove enforcement matters</strong> —
+              they do not erase years of elite failure or distrust.
             </p>
+
+            <div className="rounded-xl border border-cyan/35 bg-cyan/[0.07] p-3 sm:p-4 mb-4 space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan">
+                X / citizen scale rail · counters soft slogans
+              </p>
+              <p className="text-[13px] text-foreground/90 leading-relaxed">
+                <strong className="text-foreground">{SCALE_DISCREPANCY_RAIL.title}</strong>
+              </p>
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed">
+                <span className="text-foreground/85 font-medium">Official chart: </span>
+                {SCALE_DISCREPANCY_RAIL.officialClaim}
+              </p>
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed">
+                <span className="text-foreground/85 font-medium">Citizen / X frame: </span>
+                {SCALE_DISCREPANCY_RAIL.citizenClaim}
+              </p>
+              <ul className="space-y-1.5 pt-1">
+                {SCALE_DISCREPANCY_RAIL.whyBothCanBeTrue.map((line) => (
+                  <li
+                    key={line}
+                    className="text-[12.5px] text-foreground/85 leading-snug flex gap-2"
+                  >
+                    <span className="text-cyan shrink-0">·</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[12px] text-muted-foreground leading-relaxed pt-1 border-t border-border/50">
+                <span className="text-cyan font-medium">When X is selected: </span>
+                {SCALE_DISCREPANCY_RAIL.xUse}
+              </p>
+            </div>
+
             <div className="space-y-1.5">
               {EU_IBC_SERIES.map((row) => {
                 const pct = Math.max(4, Math.round((row.detections / maxDet) * 100));
@@ -317,6 +358,11 @@ function MigrationIntelligencePage() {
                 );
               })}
             </div>
+            <p className="mt-2 text-[11px] font-mono text-muted-foreground">
+              Chart = detections per year. Sum of listed years ≈{" "}
+              {(EU_IBC_SERIES_SUM / 1_000_000).toFixed(1)}M events (several years omitted from
+              this simplified series).
+            </p>
             <p className="mt-3 text-[11px] font-mono text-muted-foreground leading-relaxed">
               Sources: Frontex public releases (2023–2025 figures) and historical public series.
               See footnotes. Always re-check the latest FRAN/JORA file.

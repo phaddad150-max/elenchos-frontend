@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Trophy,
   Users,
-  Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -81,7 +80,7 @@ function buildCaseStudies(): CaseStudy[] {
       id: "aviation-race-digital-ai",
       title: "Aviation after disruption — OEM race, satcom, AI readiness",
       subtitle:
-        "Interactive deep dive: delivery trust, networks, cabin bandwidth, payments, AI ops KPIs.",
+        "After COVID: delivery trust, cabin bandwidth, and who can run AI ops — not seats alone.",
       region: "Global",
       statusLabel: "Published",
       updatedAt: "2026-08-15",
@@ -324,45 +323,6 @@ function ResearchLibraryPage() {
     return () => window.removeEventListener("hashchange", onHash);
   }, [navigate, search.section]);
 
-  const portals = [
-    {
-      id: "topics" as const,
-      title: "Topic analyses",
-      kicker: "On X",
-      blurb: "Citizen voices vs official frames — live scores & briefings.",
-      cta: "Show topics",
-      icon: Layers,
-      count: activeTopics,
-      countLabel: "active",
-      tone: "cyan" as const,
-      bars: [72, 58, 81, 44, 66, 90, 55],
-    },
-    {
-      id: "cases" as const,
-      title: "Case studies",
-      kicker: "Deep dives",
-      blurb: "Multi-source thesis briefs with claims you can check.",
-      cta: "Show cases",
-      icon: FileText,
-      count: caseCount,
-      countLabel: "published",
-      tone: "emerald" as const,
-      bars: [40, 65, 50, 85, 70, 48, 92],
-    },
-    {
-      id: "trackers" as const,
-      title: "Trackers",
-      kicker: "Indexes",
-      blurb: "Leaders, peace, and Networks Ledger branches.",
-      cta: "Show trackers",
-      icon: Trophy,
-      count: trackerCount,
-      countLabel: "surfaces",
-      tone: "amber" as const,
-      bars: [60, 75, 55, 80, 45, 70, 88],
-    },
-  ];
-
   if (openTopic) {
     return (
       <TopicDetailPage
@@ -391,10 +351,10 @@ function ResearchLibraryPage() {
             <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:justify-between">
               <div className="min-w-0 flex-1 space-y-2">
                 <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] break-words">
-                  Three free ways into Elenchos
+                  Research Library
                 </h1>
                 <p className="page-hero-sub text-[13px] sm:text-[14.5px]">
-                  Topics on X · Case studies · Trackers. Choose a collection below to open it.
+                  Tap Topics, Cases, or Trackers — then open any card in one click.
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full lg:w-auto lg:min-w-[320px]">
@@ -430,44 +390,49 @@ function ResearchLibraryPage() {
           </div>
         </header>
 
-        {/* Jump in — selects which collection appears below (only one at a time) */}
-        <section aria-label="Choose a collection" className="space-y-3">
-          <div className="flex items-center justify-between gap-2 px-0.5 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-cyan" aria-hidden />
-              <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                Jump in
-              </p>
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Showing{" "}
-              <span className="text-foreground/90 font-medium">
-                {activeSec === "topics"
-                  ? "Topic analyses"
-                  : activeSec === "cases"
-                    ? "Case studies"
-                    : "Trackers"}
-              </span>
-            </p>
-          </div>
-          <div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5"
-            role="tablist"
-            aria-label="Library collections"
-          >
-            {portals.map((p, i) => (
-              <PortalCard
-                key={p.id}
-                {...p}
-                delay={i * 0.04}
-                active={activeSec === p.id}
-                onSelect={() => selectSection(p.id)}
-              />
-            ))}
-          </div>
-        </section>
+        {/* One-tap switcher — StatTiles in the hero already select; keep a thin rail only */}
+        <div
+          role="tablist"
+          aria-label="Research collections"
+          className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-0.5"
+        >
+          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground mr-1">
+            Show
+          </span>
+          {(
+            [
+              { id: "topics" as const, label: "Topics", tone: "cyan" },
+              { id: "cases" as const, label: "Case studies", tone: "emerald" },
+              { id: "trackers" as const, label: "Trackers", tone: "amber" },
+            ] as const
+          ).map((t) => {
+            const on = activeSec === t.id;
+            const activeCls =
+              t.tone === "emerald"
+                ? "bg-emerald-signal/15 text-emerald-signal border-emerald-signal/45"
+                : t.tone === "amber"
+                  ? "bg-amber-signal/15 text-amber-signal border-amber-signal/45"
+                  : "bg-cyan/15 text-cyan border-cyan/45";
+            return (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                onClick={() => selectSection(t.id)}
+                className={`inline-flex items-center min-h-[40px] px-3 rounded-full text-[12.5px] font-medium border touch-manipulation transition-colors ${
+                  on
+                    ? activeCls
+                    : "border-border/80 text-muted-foreground hover:border-cyan/35 hover:text-foreground"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
 
-        {/* Active collection only — no stacked sections, no extra CTA banners */}
+        {/* Active collection only — one click from card → destination */}
         <div className="min-w-0" role="tabpanel" aria-live="polite">
           {activeSec === "topics" && (
             <section
@@ -652,138 +617,6 @@ function StatTile({
         {label}
       </p>
       <p className="text-[10px] text-muted-foreground/80 mt-0.5">{sub}</p>
-    </motion.button>
-  );
-}
-
-function PortalCard({
-  title,
-  kicker,
-  blurb,
-  cta,
-  icon: Icon,
-  count,
-  countLabel,
-  tone,
-  bars,
-  delay,
-  active,
-  onSelect,
-}: {
-  title: string;
-  kicker: string;
-  blurb: string;
-  cta: string;
-  icon: React.ComponentType<{ className?: string }>;
-  count: number;
-  countLabel: string;
-  tone: "cyan" | "emerald" | "amber";
-  bars: number[];
-  delay: number;
-  active: boolean;
-  onSelect: () => void;
-}) {
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const glow = useMotionTemplate`radial-gradient(420px circle at ${mx}px ${my}px, ${
-    tone === "emerald"
-      ? "color-mix(in oklab, var(--emerald-signal) 18%, transparent)"
-      : tone === "amber"
-        ? "color-mix(in oklab, var(--amber-signal) 16%, transparent)"
-        : "color-mix(in oklab, var(--cyan) 20%, transparent)"
-  }, transparent 55%)`;
-
-  const border =
-    tone === "emerald"
-      ? active
-        ? "border-emerald-signal/55 ring-1 ring-emerald-signal/30 bg-emerald-signal/[0.06]"
-        : "border-emerald-signal/30 hover:border-emerald-signal/55"
-      : tone === "amber"
-        ? active
-          ? "border-amber-signal/55 ring-1 ring-amber-signal/30 bg-amber-signal/[0.06]"
-          : "border-amber-signal/30 hover:border-amber-signal/55"
-        : active
-          ? "border-cyan/55 ring-1 ring-cyan/35 bg-cyan/[0.06]"
-          : "border-cyan/30 hover:border-cyan/55";
-
-  const iconTone =
-    tone === "emerald"
-      ? "text-emerald-signal border-emerald-signal/40 bg-emerald-signal/10"
-      : tone === "amber"
-        ? "text-amber-signal border-amber-signal/40 bg-amber-signal/10"
-        : "text-cyan border-cyan/40 bg-cyan/10";
-
-  const barTone =
-    tone === "emerald"
-      ? "bg-emerald-signal"
-      : tone === "amber"
-        ? "bg-amber-signal"
-        : "bg-cyan";
-
-  const ctaTone =
-    tone === "emerald"
-      ? "text-emerald-signal"
-      : tone === "amber"
-        ? "text-amber-signal"
-        : "text-cyan";
-
-  return (
-    <motion.button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.3 }}
-      whileTap={{ scale: 0.99 }}
-      onClick={onSelect}
-      onMouseMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        mx.set(e.clientX - r.left);
-        my.set(e.clientY - r.top);
-      }}
-      className={`lib-portal group relative flex flex-row sm:flex-col items-center sm:items-stretch gap-3 sm:gap-2 rounded-xl border bg-card/70 p-3 sm:p-3.5 overflow-hidden transition-shadow touch-manipulation text-left w-full cursor-pointer min-h-[64px] sm:min-h-[112px] ${border} hover:shadow-[0_12px_32px_-24px_rgba(0,0,0,0.5)]`}
-    >
-      <motion.div
-        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ background: glow }}
-      />
-      <div className="relative flex items-center gap-2.5 sm:justify-between w-full min-w-0">
-        <span
-          className={`w-9 h-9 rounded-lg border grid place-items-center shrink-0 ${iconTone}`}
-        >
-          <Icon className="w-4 h-4" />
-        </span>
-        <div className="min-w-0 flex-1 sm:flex-none sm:text-right">
-          <p className="text-lg sm:text-xl font-display font-semibold tabular-nums text-foreground leading-none">
-            {count}
-          </p>
-          <p className="text-[9px] font-mono uppercase tracking-[0.12em] text-muted-foreground mt-0.5">
-            {countLabel}
-          </p>
-        </div>
-      </div>
-      <div className="relative min-w-0 flex-1 sm:flex-none">
-        <p className="text-[9px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-          {kicker}
-        </p>
-        <h2 className="text-[14px] font-display font-semibold text-foreground leading-tight truncate">
-          {title}
-        </h2>
-        <p className="hidden sm:block text-[11.5px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
-          {blurb}
-        </p>
-      </div>
-      <span
-        className={`relative hidden sm:inline-flex items-center gap-1 text-[12px] font-semibold mt-auto ${ctaTone}`}
-      >
-        {active ? "Viewing" : cta}
-        <ArrowRight
-          className={`w-3.5 h-3.5 transition-transform ${active ? "" : "group-hover:translate-x-0.5"}`}
-        />
-      </span>
-      {/* keep bars prop referenced without large empty chrome */}
-      <span className="sr-only">{bars.length} signals</span>
     </motion.button>
   );
 }

@@ -233,7 +233,7 @@ function AviationIntelligencePage() {
                 to="/research-migration"
                 className="inline-flex items-center gap-1 text-muted-foreground hover:text-cyan min-h-[36px]"
               >
-                Migration deep dive (style reference) <ArrowRight className="w-3 h-3" />
+                Irregular migration brief (scale vs X) <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>

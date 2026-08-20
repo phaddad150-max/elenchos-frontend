@@ -40,19 +40,58 @@ export const MIGRATION_SOURCES: SourceRef[] = [
   },
 ];
 
-/** EU external-border illegal/irregular border-crossing detections (approx. public totals). */
+/**
+ * EU external-border illegal/irregular border-crossing detections (approx. public totals).
+ * IMPORTANT: these are detection *events* in a calendar year — not unique people,
+ * not the stock of irregular residents, and not a multi-year cumulative total.
+ * Same person may be counted more than once (Frontex FRAN/JORA).
+ */
 export const EU_IBC_SERIES: { year: number; detections: number; note?: string }[] = [
   { year: 2011, detections: 141_000, note: "Order of magnitude pre-crisis baseline (public series)" },
   { year: 2014, detections: 283_000 },
-  { year: 2015, detections: 1_822_000, note: "Crisis peak after Syria war escalation" },
+  { year: 2015, detections: 1_822_000, note: "Single-year crisis peak after Syria war escalation — NOT the multi-year total" },
   { year: 2016, detections: 511_000 },
   { year: 2019, detections: 142_000 },
   { year: 2021, detections: 200_000, note: "~199.9k reported" },
   { year: 2022, detections: 330_000 },
   { year: 2023, detections: 380_000, note: "Frontex: +17% vs 2022" },
-  { year: 2024, detections: 239_000, note: "Frontex preliminary: −38% vs 2023" },
+  { year: 2024, detections: 239_000, note: "Frontex: −38% vs 2023 (order of magnitude)" },
   { year: 2025, detections: 178_000, note: "Frontex preliminary: −26% vs 2024; lowest since 2021" },
 ];
+
+/** Sum of the published series years above (incomplete years omitted — still multi-million). */
+export const EU_IBC_SERIES_SUM = EU_IBC_SERIES.reduce((s, r) => s + r.detections, 0);
+
+/**
+ * Why citizen / X discourse often rejects “only 1.8–2M”.
+ * Use as counter-rail next to Frontex year charts — not a substitute series.
+ */
+export const SCALE_DISCREPANCY_RAIL: {
+  title: string;
+  officialClaim: string;
+  citizenClaim: string;
+  whyBothCanBeTrue: string[];
+  xUse: string;
+  falsifier: string;
+} = {
+  title: "Why X says ‘far more than 1.8–2M’ — and what the chart actually is",
+  officialClaim:
+    "~1.8M is the Frontex-linked peak for detections in the single year 2015 at EU external borders.",
+  citizenClaim:
+    "Public discourse on X often treats 1.8–2M as if it were the whole crisis — then correctly notes multi-year pressure, secondary movements, and stock effects feel far larger.",
+  whyBothCanBeTrue: [
+    "Peak year ≠ cumulative: summing published detection years already exceeds ~4M events in this incomplete series alone (missing several years).",
+    "Detections ≠ unique persons: the same person can be counted on multiple attempts or corridors.",
+    "Flow ≠ stock: people who entered earlier and stayed (asylum backlog, absconding, secondary movement) are not the annual detection number.",
+    "UK Channel + national landing stats are separate products — not inside the Frontex external-border peak figure.",
+    "US CBP encounter totals are a different geography — mixing them into an EU ‘2M’ meme confuses the ledger.",
+    "Undetected crossings and inland discovery are under-counted in external-border detection charts by design.",
+  ],
+  xUse:
+    "When X samples are selected for this brief, use them to surface how citizens talk about scale (cumulative, stock, crime, speech) and to flag when official messaging cites only the softest year or only the peak-year slogan. Do not invent a fake cumulative ‘official total’ — demand corridor-year ledgers.",
+  falsifier:
+    "If a public EU ledger publishes unique-person estimates + multi-year corridor-matched returns beside detections, update the hook KPIs to that ledger and retire the discrepancy rail for that claim.",
+};
 
 export const CORRIDORS: {
   id: string;
@@ -106,8 +145,8 @@ export const TIMELINE: { year: string; title: string; body: string }[] = [
   },
   {
     year: "2015",
-    title: "Crisis peak",
-    body: "Frontex-linked public series show detections on the order of ~1.8 million illegal border-crossings at EU external borders — the scale that redefined European politics.",
+    title: "Crisis peak (single year)",
+    body: "Frontex-linked public series show ~1.8 million illegal border-crossing detections in 2015 alone — the peak year that redefined European politics. Multi-year pressure is larger; see the scale discrepancy rail.",
   },
   {
     year: "2016",
@@ -286,15 +325,15 @@ export const HOOK_KPIS: {
     tone: "emerald",
   },
   {
-    label: "2015 peak detections",
+    label: "2015 peak year",
     value: "~1.8M",
-    sub: "EU external illegal border-crossings (order of magnitude)",
+    sub: "One year of detections — not the multi-year total",
     tone: "rose",
   },
   {
-    label: "2023 detections",
-    value: "~380k",
-    sub: "Frontex: still a mass-security scale year",
+    label: "Series sum (listed years)",
+    value: `~${(EU_IBC_SERIES_SUM / 1_000_000).toFixed(1)}M`,
+    sub: "Detection events across published years in this brief (incomplete; still multi-million)",
     tone: "amber",
   },
   {
@@ -550,9 +589,9 @@ export const RETURNS_HONESTY = {
 };
 
 export const X_THREAD_DRAFT: string[] = [
-  "1/ Illegal entry at EU scale was normalised. Speech against it was often policed. Citizens paid. Full brief (10 sec → under 10 min): https://elenchos.live/research-migration",
-  "2/ Since 2011 (Syria war era) → 2015 peak ~1.8M detections → 2023 ~380k → 2025 ~178k (Frontex). Lower crossings ≠ trust restored. Corridors, elites, reverse options inside.",
-  "3/ Frontline pressure: GR · IT · ES · UK Channel. Open vs resist is policy reality — not a vibe. Enforcement states get ‘racist’ frames while illegal entry gets soft language. Evidence rails, not slogans. — @elenchospulse",
+  "1/ Illegal entry at EU scale was normalised. Speech against it was often policed. Citizens paid. Full brief: https://elenchos.live/research-migration",
+  "2/ Don’t confuse charts: 2015 ~1.8M is the peak YEAR of Frontex detections — not the multi-year total. Listed years in our series already sum past ~4M detection events (not unique people). X is right to reject the soft ‘only 2M ever’ slogan.",
+  "3/ 2024–25 detections fell (~239k → ~178k). Lower flow ≠ restored trust, returns ledger, or free speech. Corridors + open vs resist inside. — @elenchospulse",
 ];
 
 export const HOOK_HEADLINE =
