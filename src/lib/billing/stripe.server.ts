@@ -81,7 +81,7 @@ export async function createMonthlyPlanCheckout(opts: {
     return {
       ok: false,
       message:
-        "Stripe mode mismatch: server is using sk_live_ but pack prices are Test. In Vercel Production add STRIPE_SECRET_KEY_TEST = sk_test_… (exact name), enable Production, Redeploy, then retry. Checkout prefers that key over STRIPE_SECRET_KEY.",
+        "Stripe mode mismatch: Production is using sk_live_ (from STRIPE_SECRET_KEY) but pack prices are Test. Fastest fix: in Vercel → Environment Variables → edit STRIPE_SECRET_KEY → paste your sk_test_… secret → Production checked → Save → Redeploy. (STRIPE_SECRET_KEY_TEST is optional if STRIPE_SECRET_KEY itself is sk_test_.)",
     };
   }
 

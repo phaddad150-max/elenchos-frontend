@@ -246,10 +246,7 @@ function ProDeskPage() {
         let envHint = "";
         if (data.env?.secret_mode === "live") {
           envHint =
-            " · Server still sees sk_live_ only — add STRIPE_SECRET_KEY_TEST (sk_test_…) on Production and Redeploy.";
-        } else if (data.env && data.env.STRIPE_SECRET_KEY_TEST === false) {
-          envHint =
-            " · STRIPE_SECRET_KEY_TEST not visible to the server yet — confirm Production env + Redeploy.";
+            " · Fastest fix: set STRIPE_SECRET_KEY itself to sk_test_… on Production, then Redeploy.";
         }
         setActionError((data.error || "Checkout failed") + envHint);
         return;

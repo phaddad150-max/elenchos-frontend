@@ -124,14 +124,25 @@ export const STRIPE_TEST_PRICE_FALLBACKS: Record<
 
 const KNOWN_TEST_PRICE_IDS = new Set(Object.values(STRIPE_TEST_PRICE_FALLBACKS));
 
+/** Runtime env bag — bracket access avoids Vite static inlining of process.env.FOO. */
+function runtimeEnv(): NodeJS.ProcessEnv {
+  try {
+    return (
+      (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env ||
+      process.env ||
+      {}
+    );
+  } catch {
+    return {};
+  }
+}
+
 /** Dynamic env read — avoids Vite build-time inlining of process.env.FOO → undefined. */
 export function readProcessEnv(key: string): string | null {
   try {
-    const env =
-      (typeof globalThis !== "undefined" &&
-        (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env) ||
-      process.env;
-    const v = env?.[key];
+    const env = runtimeEnv();
+    // Bracket notation — do not use process.env.KEY (bundlers may replace with "").
+    const v = env[key];
     if (typeof v !== "string") return null;
     const t = v.trim();
     return t.length > 0 ? t : null;
@@ -140,51 +151,78 @@ export function readProcessEnv(key: string): string | null {
   }
 }
 
+function classifySecret(v: string): "test" | "live" | "unknown" {
+  if (v.startsWith("sk_test_")) return "test";
+  if (v.startsWith("sk_live_")) return "live";
+  return "unknown";
+}
+
 /**
- * Prefer dedicated test secret when present (Pro packs are Test prices today).
- * Order: STRIPE_SECRET_KEY_TEST → STRIPE_TEST_SECRET_KEY → STRIPE_SECRET_KEY
+ * Resolve Stripe secret for Pro pack checkout (Test prices today).
+ * Prefer ANY sk_test_ value found under Stripe-related env names, then sk_live_.
  */
 export function resolveStripeSecret(): {
   secret: string | null;
   mode: "test" | "live" | "unknown" | "missing";
   source: string | null;
 } {
-  const candidates: Array<{ key: string; preferTest: boolean }> = [
-    { key: "STRIPE_SECRET_KEY_TEST", preferTest: true },
-    { key: "STRIPE_TEST_SECRET_KEY", preferTest: true },
-    { key: "STRIPE_SECRET_KEY", preferTest: false },
+  const env = runtimeEnv();
+  const preferredNames = [
+    "STRIPE_SECRET_KEY_TEST",
+    "STRIPE_TEST_SECRET_KEY",
+    "STRIPE_SECRET_KEY",
   ];
-  for (const c of candidates) {
-    const v = readProcessEnv(c.key);
-    if (!v) continue;
-    if (v.startsWith("sk_test_")) {
-      return { secret: v, mode: "test", source: c.key };
+
+  // Pass 1: preferred names that are sk_test_
+  for (const key of preferredNames) {
+    const v = readProcessEnv(key);
+    if (v && classifySecret(v) === "test") {
+      return { secret: v, mode: "test", source: key };
     }
-    if (v.startsWith("sk_live_")) {
-      // Skip non-sk_test values on dedicated test slots.
-      if (c.preferTest) continue;
-      return { secret: v, mode: "live", source: c.key };
-    }
-    return { secret: v, mode: "unknown", source: c.key };
   }
 
-  // Last resort: any STRIPE*SECRET* env whose value is sk_test_ (catches naming typos).
-  try {
-    const env =
-      (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env ||
-      process.env;
-    for (const [k, raw] of Object.entries(env ?? {})) {
-      if (!/stripe/i.test(k) || !/secret/i.test(k)) continue;
-      const v = typeof raw === "string" ? raw.trim() : "";
-      if (v.startsWith("sk_test_")) {
-        return { secret: v, mode: "test", source: k };
-      }
+  // Pass 2: any env key mentioning stripe whose value is sk_test_
+  for (const [k, raw] of Object.entries(env)) {
+    if (!/stripe/i.test(k)) continue;
+    const v = typeof raw === "string" ? raw.trim() : "";
+    if (classifySecret(v) === "test") {
+      return { secret: v, mode: "test", source: k };
     }
-  } catch {
-    /* ignore */
+  }
+
+  // Pass 3: preferred names that are sk_live_ / unknown
+  for (const key of preferredNames) {
+    const v = readProcessEnv(key);
+    if (!v) continue;
+    const mode = classifySecret(v);
+    if (mode === "live") return { secret: v, mode: "live", source: key };
+    if (mode === "unknown") return { secret: v, mode: "unknown", source: key };
   }
 
   return { secret: null, mode: "missing", source: null };
+}
+
+/** Safe diagnostic: Stripe-related env key names + mode only (never secret values). */
+export function listStripeEnvKeyModes(): Array<{
+  key: string;
+  mode: "test" | "live" | "empty" | "other";
+}> {
+  const env = runtimeEnv();
+  const out: Array<{ key: string; mode: "test" | "live" | "empty" | "other" }> = [];
+  for (const [k, raw] of Object.entries(env)) {
+    if (!/stripe/i.test(k)) continue;
+    const v = typeof raw === "string" ? raw.trim() : "";
+    let mode: "test" | "live" | "empty" | "other" = "empty";
+    if (!v) mode = "empty";
+    else if (v.startsWith("sk_test_")) mode = "test";
+    else if (v.startsWith("sk_live_")) mode = "live";
+    else if (v.startsWith("price_")) mode = "other";
+    else if (v.startsWith("whsec_")) mode = "other";
+    else mode = "other";
+    out.push({ key: k, mode });
+  }
+  out.sort((a, b) => a.key.localeCompare(b.key));
+  return out;
 }
 
 export function getStripePriceId(
@@ -210,7 +248,7 @@ export function isKnownTestPriceId(priceId: string): boolean {
 }
 
 /** Debug helper for checkout errors (booleans / mode only — never echo secrets). */
-export function stripeEnvPresence(): Record<string, boolean | string | null> {
+export function stripeEnvPresence(): Record<string, boolean | string | null | unknown> {
   const resolved = resolveStripeSecret();
   return {
     STRIPE_SECRET_KEY: Boolean(readProcessEnv("STRIPE_SECRET_KEY")),
@@ -221,6 +259,7 @@ export function stripeEnvPresence(): Record<string, boolean | string | null> {
     secret_mode: resolved.mode,
     secret_source: resolved.source,
     using_starter_fallback: !readProcessEnv("STRIPE_PRICE_PACK_STARTER"),
+    stripe_env_keys: listStripeEnvKeyModes(),
   };
 }
 
