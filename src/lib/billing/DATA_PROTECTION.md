@@ -12,6 +12,7 @@ Never `UPDATE`, `DELETE`, `TRUNCATE`, or `DROP`:
 - `trackers`
 - `citizen_signals`
 - `research_runs`, `research_sources`
+- `case_study_snapshots` (deep dives / case studies — **not** topics or trackers)
 - Any other historical intelligence tables / `topic_question_registry`
 
 **Never write private Pro runs into these tables.** Public KPIs and snapshots stay admin-pipeline only.

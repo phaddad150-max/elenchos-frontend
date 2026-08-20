@@ -64,6 +64,47 @@ export const HOOK_HEADLINE =
 export const HOOK_SUB =
   "Commercial passenger spine · OEMs · network carriers · LCC · satcom · payments · AI readiness. Free open sources. Interactive under 10 minutes. Not investment advice.";
 
+/** One-screen thesis for Library cards + case_study_snapshots.summary */
+export const EXECUTIVE_SUMMARY =
+  "Post-2020 aviation competition shifted from filling seats to three harder races: which OEM can deliver aircraft on trust, which networks win cabin connectivity (Starlink-class vs legacy IFC), and which operators can turn AI into measurable ops KPIs (AOG, pricing, rostering) — not slogans. This brief maps OEMs, carriers, innovation lanes, and falsifiable claims from free public sources.";
+
+/** Deep-dive section teasers (also stored on case_study_snapshots.subheadlines) */
+export const SUBHEADLINES: { id: string; title: string; blurb: string }[] = [
+  {
+    id: "shock",
+    title: "Shock & uneven recovery",
+    blurb: "2020 collapse → cargo masks → labor and airframe bottlenecks; traffic rebuild ≠ margin rebuild.",
+  },
+  {
+    id: "oem",
+    title: "OEM delivery trust",
+    blurb: "Airbus vs Boeing: backlog credibility, certification risk, and industrial rate limits.",
+  },
+  {
+    id: "networks",
+    title: "Network & product race",
+    blurb: "Hub carriers and LCCs compete on network design and cabin product — not seat cost alone.",
+  },
+  {
+    id: "cabin",
+    title: "Cabin bandwidth",
+    blurb: "Starlink Aviation-class deals ≠ fleet-wide install; announced IFC ≠ every frame connected.",
+  },
+  {
+    id: "ai-ops",
+    title: "Who can run AI ops",
+    blurb: "Score AOG hours, dynamic pricing, and rostering stability — ignore ‘AI airline’ press releases.",
+  },
+  {
+    id: "claims",
+    title: "Claims you can falsify",
+    blurb: "Every thesis has a kill-switch: delivery slips, IFC install rates, or ops KPIs that don’t move.",
+  },
+];
+
+/** Stable slug for case_study_snapshots.case_slug */
+export const CASE_SLUG = "aviation-race-digital-ai";
+
 export const HOOK_KPIS: {
   label: string;
   value: string;

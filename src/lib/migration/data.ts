@@ -600,6 +600,47 @@ export const HOOK_HEADLINE =
 export const HOOK_SUB =
   "EU + UK Channel · free open data first · what ordinary people need to see in 10 seconds — full picture under 10 minutes.";
 
+/** One-screen thesis for Library cards + case_study_snapshots.summary */
+export const EXECUTIVE_SUMMARY =
+  "Since the Syrian war era (2011+), Europe faced multi-year irregular pressure. The often-cited ~1.8M figure is the 2015 peak year of Frontex-linked illegal border-crossing detections — not unique people and not the multi-year total. This brief separates peak-year charts from cumulative pressure, maps corridors and frontline states, contrasts open vs resist policy eras, and uses an X/citizen scale rail to counter soft slogans when discourse claims ‘far more than 1.8–2M.’";
+
+/** Deep-dive section teasers (also stored on case_study_snapshots.subheadlines) */
+export const SUBHEADLINES: { id: string; title: string; blurb: string }[] = [
+  {
+    id: "scale",
+    title: "Peak year vs multi-year pressure",
+    blurb: "~1.8M = 2015 detections alone; listed years already sum multi-million events — not unique persons.",
+  },
+  {
+    id: "x-rail",
+    title: "Why X rejects ‘only 2M’",
+    blurb: "Cumulative, stock, Channel, and undetected crossings explain citizen scale claims without inventing fake official totals.",
+  },
+  {
+    id: "corridors",
+    title: "Corridors & frontline states",
+    blurb: "Eastern/Central/Western Med, Balkans, Channel — GR · IT · ES · UK first.",
+  },
+  {
+    id: "stance",
+    title: "Open vs resist",
+    blurb: "Policy archetypes and dated examples — magnet eras vs barriers and court fights.",
+  },
+  {
+    id: "returns",
+    title: "Crossings vs returns ledger",
+    blurb: "Arrival stats are public; corridor-matched multi-year returns often are not — refuse slogan returns.",
+  },
+  {
+    id: "speech",
+    title: "Discourse & speech cost",
+    blurb: "Illegal entry softened in language; enforcement speech often framed as ‘racist’ — evidence rails, not vibes.",
+  },
+];
+
+/** Stable slug for case_study_snapshots.case_slug */
+export const CASE_SLUG = "irregular-migration";
+
 /** Chapters designed for <10 min total (~1–1.5 min each) */
 export const CHAPTERS: { id: string; n: string; title: string; seconds: string; blurb: string }[] = [
   { id: "scale", n: "01", title: "Scale since 2011", seconds: "~75s", blurb: "How big, how long, detections ≠ persons." },

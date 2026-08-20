@@ -26,6 +26,7 @@ import {
   EU_IBC_SERIES,
   EU_IBC_SERIES_SUM,
   FRONTLINE_STATES,
+  EXECUTIVE_SUMMARY,
   HOOK_HEADLINE,
   HOOK_KPIS,
   HOOK_SUB,
@@ -37,6 +38,7 @@ import {
   RETURNS_HONESTY,
   SCALE_DISCREPANCY_RAIL,
   SCENARIOS,
+  SUBHEADLINES,
   TIMELINE,
   X_THREAD_DRAFT,
 } from "@/lib/migration/data";
@@ -135,6 +137,29 @@ function MigrationIntelligencePage() {
             <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-2xl leading-relaxed">
               {HOOK_SUB}
             </p>
+            <p className="text-[13.5px] sm:text-[14.5px] text-foreground/90 max-w-3xl leading-relaxed">
+              {EXECUTIVE_SUMMARY}
+            </p>
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan">
+                Deep dive · subheadlines
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {SUBHEADLINES.map((s) => (
+                  <a
+                    key={s.id}
+                    href={`#ch-${s.id === "x-rail" || s.id === "returns" || s.id === "speech" ? (s.id === "x-rail" ? "scale" : s.id === "returns" ? "corridors" : "discourse") : s.id}`}
+                    className="rounded-xl border border-border/90 bg-card/60 hover:border-cyan/40 px-3 py-2.5 space-y-1 touch-manipulation transition-colors"
+                  >
+                    <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
+                      {s.title}
+                    </p>
+                    <p className="text-[12px] text-muted-foreground leading-snug">{s.blurb}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
 
             {/* Since 2011 is first in HOOK_KPIS */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
