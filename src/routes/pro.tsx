@@ -99,24 +99,48 @@ function ProDeskPage() {
 
   useEffect(() => {
     let cancelled = false;
-    supabaseExternal.auth.getSession().then(({ data }) => {
+    // Never leave the Pro auth panel spinning forever if getSession hangs.
+    const failSafe = window.setTimeout(() => {
+      if (!cancelled) setAuthReady(true);
+    }, 3500);
+
+    const finish = (session: { user?: { id?: string; email?: string | null; user_metadata?: Record<string, unknown> } } | null) => {
       if (cancelled) return;
-      const u = data.session?.user;
-      setUserId(u?.id ?? null);
-      setUserEmail(u?.email ?? u?.user_metadata?.preferred_username ?? null);
-      setAuthReady(true);
-      if (u) void refreshMe();
-    });
-    const { data: sub } = supabaseExternal.auth.onAuthStateChange((_e, session) => {
       const u = session?.user;
       setUserId(u?.id ?? null);
-      setUserEmail(u?.email ?? u?.user_metadata?.preferred_username ?? null);
+      setUserEmail(
+        (u?.email as string | undefined) ??
+          (u?.user_metadata?.preferred_username as string | undefined) ??
+          (u?.user_metadata?.user_name as string | undefined) ??
+          null,
+      );
       setAuthReady(true);
-      if (u) void refreshMe();
+      window.clearTimeout(failSafe);
+      if (u?.id) void refreshMe();
       else setMe(null);
+    };
+
+    void supabaseExternal.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (error) {
+          console.warn("[pro] getSession", error.message);
+          finish(null);
+          return;
+        }
+        finish(data.session);
+      })
+      .catch((e) => {
+        console.warn("[pro] getSession failed", e);
+        finish(null);
+      });
+
+    const { data: sub } = supabaseExternal.auth.onAuthStateChange((_e, session) => {
+      finish(session);
     });
     return () => {
       cancelled = true;
+      window.clearTimeout(failSafe);
       sub.subscription.unsubscribe();
     };
   }, [refreshMe]);
@@ -135,29 +159,59 @@ function ProDeskPage() {
 
   const signInX = async () => {
     setActionError(null);
-    const { error } = await supabaseExternal.auth.signInWithOAuth({
-      provider: "x",
-      options: { redirectTo: oauthReturnTo("/pro") },
-    });
-    if (error) {
-      setActionError(
-        error.message || "X sign-in failed. Check that the app URL is allowed in Supabase Auth.",
-      );
+    setBusy("oauth-x");
+    try {
+      const { data, error } = await supabaseExternal.auth.signInWithOAuth({
+        provider: "x",
+        options: {
+          redirectTo: oauthReturnTo("/pro"),
+          skipBrowserRedirect: false,
+        },
+      });
+      if (error) {
+        setActionError(
+          error.message || "X sign-in failed. Check that the app URL is allowed in Supabase Auth.",
+        );
+        return;
+      }
+      if (!data?.url) {
+        setActionError("X sign-in did not return a redirect URL. Is the X provider enabled in Supabase?");
+      }
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "X sign-in failed");
+    } finally {
+      setBusy(null);
     }
   };
 
   const signInGoogle = async () => {
     setActionError(null);
-    const { error } = await supabaseExternal.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: oauthReturnTo("/pro") },
-    });
-    if (error) {
-      setActionError(
-        error.message.includes("redirect") || error.status === 400
-          ? "Google blocked sign-in (redirect URI mismatch). Add the Supabase callback URL in Google Cloud Console — see Auth setup notes."
-          : error.message || "Google sign-in failed.",
-      );
+    setBusy("oauth-google");
+    try {
+      const { data, error } = await supabaseExternal.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: oauthReturnTo("/pro"),
+          skipBrowserRedirect: false,
+        },
+      });
+      if (error) {
+        setActionError(
+          error.message.includes("redirect") || error.status === 400
+            ? "Google blocked sign-in (redirect URI mismatch). In Google Cloud Console add: https://jacbalsongvqvaqlfsbx.supabase.co/auth/v1/callback — then enable Google in Supabase Auth providers."
+            : error.message || "Google sign-in failed.",
+        );
+        return;
+      }
+      if (!data?.url) {
+        setActionError(
+          "Google sign-in did not return a redirect URL. Enable Google provider in Supabase Auth.",
+        );
+      }
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Google sign-in failed");
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -183,9 +237,17 @@ function ProDeskPage() {
         },
         body: JSON.stringify({ kind: "monthly_plan", planId }),
       });
-      const data = (await res.json()) as { url?: string; error?: string };
+      const data = (await res.json()) as {
+        url?: string;
+        error?: string;
+        env?: Record<string, boolean>;
+      };
       if (!res.ok || !data.url) {
-        setActionError(data.error || "Checkout failed");
+        const envHint =
+          data.env && !data.env.STRIPE_SECRET_KEY
+            ? " · STRIPE_SECRET_KEY not visible to the server — Redeploy after setting it."
+            : "";
+        setActionError((data.error || "Checkout failed") + envHint);
         return;
       }
       window.location.href = data.url;
@@ -312,7 +374,7 @@ function ProDeskPage() {
           {!authReady ? (
             <div className="h-10 flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-              <span className="sr-only">Loading</span>
+              <span className="text-[12.5px]">Checking sign-in…</span>
             </div>
           ) : userId ? (
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
@@ -359,17 +421,29 @@ function ProDeskPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
+                  disabled={!!busy}
                   onClick={() => void signInX()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-border bg-foreground text-background hover:bg-foreground/90 touch-manipulation"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-border bg-foreground text-background hover:bg-foreground/90 touch-manipulation disabled:opacity-50 min-h-[44px]"
                 >
-                  <LogIn className="w-4 h-4" /> Continue with X
+                  {busy === "oauth-x" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <LogIn className="w-4 h-4" />
+                  )}
+                  Continue with X
                 </button>
                 <button
                   type="button"
+                  disabled={!!busy}
                   onClick={() => void signInGoogle()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15 touch-manipulation"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15 touch-manipulation disabled:opacity-50 min-h-[44px]"
                 >
-                  <LogIn className="w-4 h-4" /> Continue with Google
+                  {busy === "oauth-google" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <LogIn className="w-4 h-4" />
+                  )}
+                  Continue with Google
                 </button>
               </div>
             </div>

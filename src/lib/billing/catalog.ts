@@ -109,8 +109,8 @@ export const STRIPE_SETUP_CHECKLIST = [
 
 /**
  * Stripe Test-mode Price IDs (Dashboard → Test mode → Products).
- * Used only when STRIPE_SECRET_KEY is sk_test_… and the matching env var is unset.
- * Live mode must set STRIPE_PRICE_PACK_* explicitly in Vercel.
+ * Always used as fallback when Vercel/Nitro does not surface the env var at runtime
+ * (common with TanStack Start serverless). Override via env for Live prices.
  */
 export const STRIPE_TEST_PRICE_FALLBACKS: Record<
   | "STRIPE_PRICE_PACK_STARTER"
@@ -123,25 +123,47 @@ export const STRIPE_TEST_PRICE_FALLBACKS: Record<
   STRIPE_PRICE_PACK_MEGA: "price_1U62vt2EYDynfsPbFsNiomxK",
 };
 
-export function getStripePriceId(
-  envKey: string,
-  env: NodeJS.ProcessEnv = process.env,
-): string | null {
+/** Dynamic env read — avoids Vite build-time inlining of process.env.FOO → undefined. */
+function readProcessEnv(key: string): string | null {
+  try {
+    const env =
+      (typeof globalThis !== "undefined" &&
+        (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env) ||
+      process.env;
+    const v = env?.[key];
+    if (typeof v !== "string") return null;
+    const t = v.trim();
+    return t.length > 0 ? t : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getStripePriceId(envKey: string): string | null {
   // Prefer exact key; also accept VITE_ prefix if someone set client-style names in Vercel.
   const candidates = [envKey, `VITE_${envKey}`, envKey.replace(/^STRIPE_/, "VITE_STRIPE_")];
   for (const key of candidates) {
-    const v = env[key]?.trim();
+    const v = readProcessEnv(key);
     if (v) return v;
   }
-  const secret = env.STRIPE_SECRET_KEY?.trim() || "";
-  if (secret.startsWith("sk_test_")) {
-    const fb =
-      STRIPE_TEST_PRICE_FALLBACKS[
-        envKey as keyof typeof STRIPE_TEST_PRICE_FALLBACKS
-      ];
-    if (fb) return fb;
-  }
-  return null;
+  // Hard fallback — price IDs are not secrets; prevents "Missing STRIPE_PRICE_*" when
+  // Nitro/Vercel fails to inject env into the serverless function.
+  return (
+    STRIPE_TEST_PRICE_FALLBACKS[
+      envKey as keyof typeof STRIPE_TEST_PRICE_FALLBACKS
+    ] ?? null
+  );
+}
+
+/** Debug helper for checkout errors (booleans only — never echo secrets). */
+export function stripeEnvPresence(): Record<string, boolean> {
+  return {
+    STRIPE_SECRET_KEY: Boolean(readProcessEnv("STRIPE_SECRET_KEY")),
+    STRIPE_PRICE_PACK_STARTER: Boolean(readProcessEnv("STRIPE_PRICE_PACK_STARTER")),
+    STRIPE_PRICE_PACK_PLUS: Boolean(readProcessEnv("STRIPE_PRICE_PACK_PLUS")),
+    STRIPE_PRICE_PACK_MEGA: Boolean(readProcessEnv("STRIPE_PRICE_PACK_MEGA")),
+    using_starter_fallback: !readProcessEnv("STRIPE_PRICE_PACK_STARTER"),
+  };
 }
 
 export function planTokensGranted(planId: string): number {

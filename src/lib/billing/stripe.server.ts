@@ -18,7 +18,16 @@ export function siteOrigin(request: Request): string {
 }
 
 export function stripeSecret(): string | null {
-  return process.env.STRIPE_SECRET_KEY?.trim() || null;
+  // Dynamic access — do not use process.env.STRIPE_SECRET_KEY directly (Vite may inline empty).
+  try {
+    const env =
+      (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env ||
+      process.env;
+    const v = env?.STRIPE_SECRET_KEY?.trim();
+    return v || null;
+  } catch {
+    return null;
+  }
 }
 
 async function createSession(

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { requireBillingUser } from "@/lib/billing/auth.server";
-import { isMonthlyPlanId } from "@/lib/billing/catalog";
+import { isMonthlyPlanId, stripeEnvPresence } from "@/lib/billing/catalog";
 import {
   createMonthlyPlanCheckout,
   stripeSecret,
@@ -23,7 +23,8 @@ export const Route = createFileRoute("/api/billing/checkout")({
             return Response.json(
               {
                 error:
-                  "Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_PRICE_PACK_* env vars.",
+                  "Stripe is not configured. Set STRIPE_SECRET_KEY (sk_test_…) on the Vercel project that serves elenchos.live, then Redeploy.",
+                env: stripeEnvPresence(),
               },
               { status: 503 },
             );
@@ -71,7 +72,10 @@ export const Route = createFileRoute("/api/billing/checkout")({
             customerId: sub?.stripe_customer_id ?? null,
           });
           if (!session.ok) {
-            return Response.json({ error: session.message }, { status: 502 });
+            return Response.json(
+              { error: session.message, env: stripeEnvPresence() },
+              { status: 502 },
+            );
           }
           return Response.json({
             url: session.url,
