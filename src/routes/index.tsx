@@ -327,6 +327,19 @@ function Dashboard() {
     const bizCount = businessLeaders.length;
     const cjCount = discourseLeaders.filter((l) => l.status !== "waiting").length;
 
+    // Seed boards available immediately — show combined total before network returns.
+    setTrackerKpis((prev) => ({
+      ...prev,
+      businessLeaders: bizCount > 0 ? bizCount : undefined,
+      citizenJournalists: cjCount > 0 ? cjCount : undefined,
+      leadersRanked:
+        (prev.worldLeaders ?? 0) + bizCount + cjCount > 0
+          ? (prev.worldLeaders ?? 0) + bizCount + cjCount
+          : bizCount + cjCount > 0
+            ? bizCount + cjCount
+            : undefined,
+    }));
+
     // Critical path first (overview + signals + world leaders) — paint sooner.
     // Curated highlights deferred so they don't block first paint.
     void (async () => {
@@ -352,21 +365,24 @@ function Dashboard() {
         }
         const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
         const worldCount = leaders.length;
+        const totalLeaders = worldCount + bizCount + cjCount;
         setTrackerKpis({
-          worldLeaders: worldCount || undefined,
-          businessLeaders: bizCount || undefined,
-          citizenJournalists: cjCount || undefined,
-          // KPI reflects all indexed leader types on Elenchos
-          leadersRanked: worldCount + bizCount + cjCount || undefined,
+          worldLeaders: worldCount > 0 ? worldCount : undefined,
+          businessLeaders: bizCount > 0 ? bizCount : undefined,
+          citizenJournalists: cjCount > 0 ? cjCount : undefined,
+          // KPI = all indexed leader types on Elenchos
+          leadersRanked: totalLeaders > 0 ? totalLeaders : undefined,
           countriesMonitored: peaceCountries.length || undefined,
         });
         setTopLeaders(leaders.slice(0, 5));
       } else {
+        // Trackers fetch failed — still count seed business + citizen boards
+        const totalLeaders = bizCount + cjCount;
         setTrackerKpis({
           worldLeaders: undefined,
-          businessLeaders: bizCount || undefined,
-          citizenJournalists: cjCount || undefined,
-          leadersRanked: bizCount + cjCount || undefined,
+          businessLeaders: bizCount > 0 ? bizCount : undefined,
+          citizenJournalists: cjCount > 0 ? cjCount : undefined,
+          leadersRanked: totalLeaders > 0 ? totalLeaders : undefined,
         });
       }
       setDashReady(true);
@@ -2798,11 +2814,13 @@ function DashboardKpiGrid({
   const topicsMonitored =
     ready && activeTopicCount > 0 ? activeTopicCount : ready ? activeTopicCount || undefined : undefined;
 
+  // Always prefer the combined index total (world + AI/business + citizen journalists).
+  // Do NOT fall back to overview.kpis.leaders_ranked — that count is world leaders only.
   const leadersRanked = !ready
     ? undefined
-    : typeof k.leaders_ranked === "number" && k.leaders_ranked > 0
-      ? k.leaders_ranked
-      : trackerKpis?.leadersRanked;
+    : typeof trackerKpis?.leadersRanked === "number" && trackerKpis.leadersRanked > 0
+      ? trackerKpis.leadersRanked
+      : undefined;
 
   const countriesMonitored = !ready
     ? undefined
