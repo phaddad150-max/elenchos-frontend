@@ -57,7 +57,7 @@ export function MobileTabBar() {
                     aria-hidden
                   />
                   {t.to === "/pro" && (
-                    <span className="absolute -top-1.5 -right-2.5 inline-flex items-center justify-center rounded-[3px] bg-cyan px-[3px] py-[1px] text-[6px] font-bold uppercase leading-none tracking-wider text-background">
+                    <span className="absolute -top-2 -right-3.5 inline-flex items-center justify-center rounded-md bg-cyan px-1 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wide text-background shadow-[0_0_8px_-1px_rgba(0,200,200,0.7)]">
                       NEW
                     </span>
                   )}

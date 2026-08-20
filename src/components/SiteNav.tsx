@@ -18,7 +18,7 @@ function XLogo({ className }: { className?: string }) {
 function NewBadge({ className, strokeWidth: _ }: { className?: string; strokeWidth?: number }) {
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-[3px] bg-cyan px-[3px] py-[1px] text-[7px] font-bold uppercase leading-none tracking-wider text-background ${className ?? ""}`}
+      className={`inline-flex items-center justify-center rounded-md bg-cyan px-1.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase leading-none tracking-wide text-background shadow-[0_0_10px_-2px_var(--cyan-glow)] ${className ?? ""}`}
     >
       NEW
     </span>
