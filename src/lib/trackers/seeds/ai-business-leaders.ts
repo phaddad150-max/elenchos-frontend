@@ -54,7 +54,7 @@ export const AI_BUSINESS_LEADERS_SEED: RankedLeader[] = [
   {
     rank: 2,
     name: "Jensen Huang",
-    flag: "🇹🇼",
+    flag: "🇺🇸", // NVIDIA HQ — Santa Clara, US (not dual-nationality personal flag)
     country: "United States",
     region: "Americas",
     role: "NVIDIA",
@@ -78,7 +78,7 @@ export const AI_BUSINESS_LEADERS_SEED: RankedLeader[] = [
   {
     rank: 3,
     name: "Satya Nadella",
-    flag: "🇮🇳",
+    flag: "🇺🇸", // Microsoft HQ — Redmond, US
     country: "United States",
     region: "Americas",
     role: "Microsoft",
@@ -126,7 +126,7 @@ export const AI_BUSINESS_LEADERS_SEED: RankedLeader[] = [
   {
     rank: 5,
     name: "Lisa Su",
-    flag: "🇹🇼",
+    flag: "🇺🇸", // AMD HQ — Santa Clara, US
     country: "United States",
     region: "Americas",
     role: "AMD",
@@ -246,7 +246,7 @@ export const AI_BUSINESS_LEADERS_SEED: RankedLeader[] = [
   {
     rank: 10,
     name: "Sundar Pichai",
-    flag: "🇮🇳",
+    flag: "🇺🇸", // Alphabet / Google HQ — Mountain View, US
     country: "United States",
     region: "Americas",
     role: "Google / Alphabet",
@@ -270,9 +270,9 @@ export const AI_BUSINESS_LEADERS_SEED: RankedLeader[] = [
   {
     rank: 11,
     name: "Yann LeCun",
-    flag: "🇫🇷",
+    flag: "🇺🇸", // Meta HQ — Menlo Park, US
     country: "United States",
-    region: "Europe",
+    region: "Americas",
     role: "Meta AI / NYU",
     overall_score: 62,
     divergence: 44,
@@ -318,9 +318,9 @@ export const AI_BUSINESS_LEADERS_SEED: RankedLeader[] = [
   {
     rank: 13,
     name: "Mustafa Suleyman",
-    flag: "🇬🇧",
+    flag: "🇺🇸", // Microsoft AI — US HQ
     country: "United States",
-    region: "Europe",
+    region: "Americas",
     role: "Microsoft AI",
     overall_score: 59,
     divergence: 30,

@@ -25,13 +25,20 @@ Events: `checkout.session.completed`, `invoice.paid`, `customer.subscription.upd
 ## Vercel env
 
 ```
-STRIPE_SECRET_KEY=sk_test_...   # must match Test mode when using test prices below
+# Preferred while packs are Test-mode prices (avoids live/test mismatch):
+STRIPE_SECRET_KEY_TEST=sk_test_...
+# Optional: keep live key for later Live prices (checkout ignores it if TEST is set)
+STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_PACK_STARTER=price_1U62rN2EYDynfsPbGBfZED8c
 STRIPE_PRICE_PACK_PLUS=price_1U62u62EYDynfsPbCXLtpn39
 STRIPE_PRICE_PACK_MEGA=price_1U62vt2EYDynfsPbFsNiomxK
 SITE_URL=https://elenchos.live
 ```
+
+**Mode rule:** Test Price IDs only work with `sk_test_`. A `sk_live_` key + test prices → Stripe error
+`No such price … exists in test mode, but a live mode key was used`. Checkout prefers
+`STRIPE_SECRET_KEY_TEST` when present.
 
 ### Test-mode Price IDs (Aug 2026)
 

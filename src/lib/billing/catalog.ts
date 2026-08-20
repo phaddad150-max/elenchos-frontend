@@ -109,8 +109,7 @@ export const STRIPE_SETUP_CHECKLIST = [
 
 /**
  * Stripe Test-mode Price IDs (Dashboard → Test mode → Products).
- * Always used as fallback when Vercel/Nitro does not surface the env var at runtime
- * (common with TanStack Start serverless). Override via env for Live prices.
+ * Used only when the active secret is sk_test_… (never with sk_live_).
  */
 export const STRIPE_TEST_PRICE_FALLBACKS: Record<
   | "STRIPE_PRICE_PACK_STARTER"
@@ -123,8 +122,10 @@ export const STRIPE_TEST_PRICE_FALLBACKS: Record<
   STRIPE_PRICE_PACK_MEGA: "price_1U62vt2EYDynfsPbFsNiomxK",
 };
 
+const KNOWN_TEST_PRICE_IDS = new Set(Object.values(STRIPE_TEST_PRICE_FALLBACKS));
+
 /** Dynamic env read — avoids Vite build-time inlining of process.env.FOO → undefined. */
-function readProcessEnv(key: string): string | null {
+export function readProcessEnv(key: string): string | null {
   try {
     const env =
       (typeof globalThis !== "undefined" &&
@@ -139,15 +140,48 @@ function readProcessEnv(key: string): string | null {
   }
 }
 
-export function getStripePriceId(envKey: string): string | null {
-  // Prefer exact key; also accept VITE_ prefix if someone set client-style names in Vercel.
+/**
+ * Prefer dedicated test secret when present (Pro packs are Test prices today).
+ * Order: STRIPE_SECRET_KEY_TEST → STRIPE_TEST_SECRET_KEY → STRIPE_SECRET_KEY
+ */
+export function resolveStripeSecret(): {
+  secret: string | null;
+  mode: "test" | "live" | "unknown" | "missing";
+  source: string | null;
+} {
+  const candidates: Array<{ key: string; preferTest: boolean }> = [
+    { key: "STRIPE_SECRET_KEY_TEST", preferTest: true },
+    { key: "STRIPE_TEST_SECRET_KEY", preferTest: true },
+    { key: "STRIPE_SECRET_KEY", preferTest: false },
+  ];
+  for (const c of candidates) {
+    const v = readProcessEnv(c.key);
+    if (!v) continue;
+    if (v.startsWith("sk_test_")) {
+      return { secret: v, mode: "test", source: c.key };
+    }
+    if (v.startsWith("sk_live_")) {
+      // Skip live keys when a dedicated test slot was requested later — only
+      // accept live from STRIPE_SECRET_KEY if no test key exists (loop order).
+      if (c.preferTest) continue;
+      return { secret: v, mode: "live", source: c.key };
+    }
+    return { secret: v, mode: "unknown", source: c.key };
+  }
+  return { secret: null, mode: "missing", source: null };
+}
+
+export function getStripePriceId(
+  envKey: string,
+  opts?: { allowTestFallback?: boolean },
+): string | null {
+  const allowTestFallback = opts?.allowTestFallback !== false;
   const candidates = [envKey, `VITE_${envKey}`, envKey.replace(/^STRIPE_/, "VITE_STRIPE_")];
   for (const key of candidates) {
     const v = readProcessEnv(key);
     if (v) return v;
   }
-  // Hard fallback — price IDs are not secrets; prevents "Missing STRIPE_PRICE_*" when
-  // Nitro/Vercel fails to inject env into the serverless function.
+  if (!allowTestFallback) return null;
   return (
     STRIPE_TEST_PRICE_FALLBACKS[
       envKey as keyof typeof STRIPE_TEST_PRICE_FALLBACKS
@@ -155,13 +189,21 @@ export function getStripePriceId(envKey: string): string | null {
   );
 }
 
-/** Debug helper for checkout errors (booleans only — never echo secrets). */
-export function stripeEnvPresence(): Record<string, boolean> {
+export function isKnownTestPriceId(priceId: string): boolean {
+  return KNOWN_TEST_PRICE_IDS.has(priceId);
+}
+
+/** Debug helper for checkout errors (booleans / mode only — never echo secrets). */
+export function stripeEnvPresence(): Record<string, boolean | string | null> {
+  const resolved = resolveStripeSecret();
   return {
     STRIPE_SECRET_KEY: Boolean(readProcessEnv("STRIPE_SECRET_KEY")),
+    STRIPE_SECRET_KEY_TEST: Boolean(readProcessEnv("STRIPE_SECRET_KEY_TEST")),
     STRIPE_PRICE_PACK_STARTER: Boolean(readProcessEnv("STRIPE_PRICE_PACK_STARTER")),
     STRIPE_PRICE_PACK_PLUS: Boolean(readProcessEnv("STRIPE_PRICE_PACK_PLUS")),
     STRIPE_PRICE_PACK_MEGA: Boolean(readProcessEnv("STRIPE_PRICE_PACK_MEGA")),
+    secret_mode: resolved.mode,
+    secret_source: resolved.source,
     using_starter_fallback: !readProcessEnv("STRIPE_PRICE_PACK_STARTER"),
   };
 }

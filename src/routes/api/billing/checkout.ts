@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/billing/checkout")({
             return Response.json(
               {
                 error:
-                  "Stripe is not configured. Set STRIPE_SECRET_KEY (sk_test_…) on the Vercel project that serves elenchos.live, then Redeploy.",
+                  "Stripe is not configured. Add STRIPE_SECRET_KEY_TEST=sk_test_… (preferred) or STRIPE_SECRET_KEY on Vercel Production, then Redeploy.",
                 env: stripeEnvPresence(),
               },
               { status: 503 },

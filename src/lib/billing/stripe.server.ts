@@ -1,10 +1,15 @@
 /**
  * Stripe Checkout helpers — monthly plans (Starter / Plus / Mega).
  * Guest Research Desk checkout stays in /api/research/checkout (unchanged).
+ *
+ * Test vs Live: Pro packs today use Test Price IDs. Prefer STRIPE_SECRET_KEY_TEST
+ * (sk_test_…) when set alongside a live STRIPE_SECRET_KEY.
  */
 import {
   MONTHLY_PLANS,
   getStripePriceId,
+  isKnownTestPriceId,
+  resolveStripeSecret,
   type MonthlyPlanId,
 } from "./catalog";
 
@@ -18,24 +23,13 @@ export function siteOrigin(request: Request): string {
 }
 
 export function stripeSecret(): string | null {
-  // Dynamic access — do not use process.env.STRIPE_SECRET_KEY directly (Vite may inline empty).
-  try {
-    const env =
-      (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env ||
-      process.env;
-    const v = env?.STRIPE_SECRET_KEY?.trim();
-    return v || null;
-  } catch {
-    return null;
-  }
+  return resolveStripeSecret().secret;
 }
 
 async function createSession(
   params: URLSearchParams,
+  secret: string,
 ): Promise<{ ok: true; id: string; url: string } | { ok: false; message: string }> {
-  const secret = stripeSecret();
-  if (!secret) return { ok: false, message: "Stripe is not configured" };
-
   const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
@@ -64,13 +58,38 @@ export async function createMonthlyPlanCheckout(opts: {
   customerId?: string | null;
 }): Promise<{ ok: true; url: string; sessionId: string } | { ok: false; message: string }> {
   const plan = MONTHLY_PLANS[opts.planId];
-  const priceId = getStripePriceId(plan.envPriceKey);
+  const resolved = resolveStripeSecret();
+  if (!resolved.secret) {
+    return {
+      ok: false,
+      message:
+        "Stripe is not configured. Set STRIPE_SECRET_KEY_TEST=sk_test_… (preferred) or STRIPE_SECRET_KEY on Vercel, then Redeploy.",
+    };
+  }
+
+  // Test prices only work with a test secret.
+  const allowTestFallback = resolved.mode === "test";
+  const priceId = getStripePriceId(plan.envPriceKey, { allowTestFallback });
   if (!priceId) {
     return {
       ok: false,
       message: `Missing ${plan.envPriceKey} — set the Stripe Price id in Vercel env.`,
     };
   }
+
+  if (resolved.mode === "live" && isKnownTestPriceId(priceId)) {
+    return {
+      ok: false,
+      message:
+        "Stripe mode mismatch: STRIPE_SECRET_KEY is live (sk_live_) but pack prices are Test mode. Add STRIPE_SECRET_KEY_TEST=sk_test_… on Vercel (Production) and Redeploy — checkout will prefer the test key.",
+    };
+  }
+
+  if (resolved.mode === "live" && priceId.startsWith("price_")) {
+    // Env may still hold test IDs even if not in our known set — Stripe will error; pre-warn when source is live-only.
+    // No-op: live prices are fine with live key.
+  }
+
   const origin = siteOrigin(opts.request);
   const params = new URLSearchParams();
   params.set("mode", "subscription");
@@ -103,7 +122,17 @@ export async function createMonthlyPlanCheckout(opts: {
     params.set("customer_email", opts.email);
   }
 
-  const session = await createSession(params);
-  if (!session.ok) return session;
+  const session = await createSession(params, resolved.secret);
+  if (!session.ok) {
+    // Soften Stripe's raw mode-mismatch into an actionable message
+    if (/test mode|live mode/i.test(session.message)) {
+      return {
+        ok: false,
+        message:
+          "Stripe mode mismatch (live key + test prices). Add STRIPE_SECRET_KEY_TEST with your sk_test_… key in Vercel Production env, Redeploy, then retry.",
+      };
+    }
+    return session;
+  }
   return { ok: true, url: session.url, sessionId: session.id };
 }
