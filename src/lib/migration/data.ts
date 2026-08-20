@@ -641,6 +641,10 @@ export const SUBHEADLINES: { id: string; title: string; blurb: string }[] = [
 /** Stable slug for case_study_snapshots.case_slug */
 export const CASE_SLUG = "irregular-migration";
 
+/** Editorial timestamps (ISO date) — shown on case page + Library cards */
+export const PUBLISHED_AT = "2026-08-20";
+export const UPDATED_AT = "2026-08-20";
+
 /** Chapters designed for <10 min total (~1–1.5 min each) */
 export const CHAPTERS: { id: string; n: string; title: string; seconds: string; blurb: string }[] = [
   { id: "scale", n: "01", title: "Scale since 2011", seconds: "~75s", blurb: "How big, how long, detections ≠ persons." },

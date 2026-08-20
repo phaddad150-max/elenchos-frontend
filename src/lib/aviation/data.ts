@@ -105,6 +105,10 @@ export const SUBHEADLINES: { id: string; title: string; blurb: string }[] = [
 /** Stable slug for case_study_snapshots.case_slug */
 export const CASE_SLUG = "aviation-race-digital-ai";
 
+/** Editorial timestamps (ISO date) — shown on case page + Library cards */
+export const PUBLISHED_AT = "2026-08-20";
+export const UPDATED_AT = "2026-08-20";
+
 export const HOOK_KPIS: {
   label: string;
   value: string;

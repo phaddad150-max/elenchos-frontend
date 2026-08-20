@@ -29,8 +29,11 @@ import {
   SUBHEADLINES,
   TIMELINE,
   TRAFFIC_RECOVERY,
+  PUBLISHED_AT,
+  UPDATED_AT,
   X_THREAD_DRAFT,
 } from "@/lib/aviation/data";
+import { caseStudyTimestampLine } from "@/lib/case-study-meta";
 
 export const Route = createFileRoute("/research-aviation")({
   head: () => ({
@@ -126,6 +129,16 @@ function AviationIntelligencePage() {
                 <Timer className="w-3 h-3" aria-hidden />
                 10 sec summary → full under 10 min
               </span>
+              <span className="text-border">·</span>
+              <time
+                dateTime={UPDATED_AT}
+                className="normal-case tracking-normal text-muted-foreground/90"
+              >
+                {caseStudyTimestampLine({
+                  publishedAt: PUBLISHED_AT,
+                  updatedAt: UPDATED_AT,
+                })}
+              </time>
             </div>
 
             <h1 className="font-display font-semibold text-[1.45rem] sm:text-2xl md:text-[2rem] lg:text-[2.25rem] leading-[1.15] text-foreground max-w-4xl">

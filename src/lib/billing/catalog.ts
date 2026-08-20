@@ -47,7 +47,8 @@ export const MONTHLY_PLANS: Record<MonthlyPlanId, MonthlyPlanMeta> = {
     priceUsd: 10,
     tokensGranted: 10,
     interval: "month",
-    blurb: "10 tokens each month — one topic analysis or deep dive (no X).",
+    blurb:
+      "10 tokens/mo · ~1 private deep dive. Testing — full workspace connectors & value pack TBD.",
     envPriceKey: "STRIPE_PRICE_PACK_STARTER",
   },
   pack_plus: {
@@ -56,7 +57,8 @@ export const MONTHLY_PLANS: Record<MonthlyPlanId, MonthlyPlanMeta> = {
     priceUsd: 40,
     tokensGranted: 50,
     interval: "month",
-    blurb: "50 tokens each month (~20% better than $1/token).",
+    blurb:
+      "50 tokens/mo · regular private runs. Testing — richer descriptions & API connectors coming.",
     envPriceKey: "STRIPE_PRICE_PACK_PLUS",
   },
   pack_mega: {
@@ -65,7 +67,8 @@ export const MONTHLY_PLANS: Record<MonthlyPlanId, MonthlyPlanMeta> = {
     priceUsd: 90,
     tokensGranted: 120,
     interval: "month",
-    blurb: "120 tokens each month — best for regular private research.",
+    blurb:
+      "120 tokens/mo · heavy private research. Testing — locked offers after workspace integrations.",
     envPriceKey: "STRIPE_PRICE_PACK_MEGA",
   },
 };

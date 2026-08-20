@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   BookOpen,
   FilePenLine,
+  FlaskConical,
   Loader2,
   LogIn,
   Sparkles,
@@ -326,9 +327,18 @@ function ProDeskPage() {
         <header className="page-hero-banner overflow-hidden min-w-0 relative">
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_15%_0%,color-mix(in_oklab,var(--cyan)_22%,transparent),transparent_50%),radial-gradient(ellipse_at_85%_30%,color-mix(in_oklab,var(--amber-signal)_12%,transparent),transparent_45%)]" />
           <div className="relative p-4 sm:p-5 md:p-7 min-w-0">
-            <div className="page-hero-kicker inline-flex items-center gap-1.5 mb-2">
-              <Sparkles className="w-3.5 h-3.5" aria-hidden />
-              Pro
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <div className="page-hero-kicker inline-flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" aria-hidden />
+                Pro
+              </div>
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-signal/50 bg-amber-signal/15 px-2.5 py-1 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.14em] text-amber-signal"
+                title="Offers and package value props are not final"
+              >
+                <FlaskConical className="w-3.5 h-3.5" aria-hidden />
+                Testing mode
+              </span>
             </div>
             {userId ? (
               <>
@@ -361,6 +371,26 @@ function ProDeskPage() {
         </header>
 
         <div className="max-w-[920px] mx-auto w-full space-y-5 sm:space-y-6">
+        <aside
+          role="status"
+          aria-label="Pro testing mode"
+          className="rounded-2xl border border-amber-signal/45 bg-amber-signal/[0.1] px-4 py-3.5 sm:px-5 sm:py-4 space-y-2"
+        >
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.16em] text-amber-signal">
+            <FlaskConical className="w-3.5 h-3.5" aria-hidden />
+            Testing mode · offers not locked
+          </p>
+          <p className="text-[13px] sm:text-[13.5px] text-foreground/90 leading-relaxed">
+            Starter / Plus / Mega are early checkout experiments. Package copy is still thin —
+            full value descriptions, workspace outcomes, and{" "}
+            <strong className="font-semibold text-foreground">
+              API connectors to popular user workspaces
+            </strong>{" "}
+            (Notion, Slack, Drive, and similar) land before we lock pricing. Public Library stays
+            free; treat paid plans as beta until that ship.
+          </p>
+        </aside>
+
         {banner && (
           <p
             role="status"
@@ -466,7 +496,8 @@ function ProDeskPage() {
               Monthly plans
             </h2>
             <p className="text-[12.5px] text-muted-foreground mt-1">
-              Tokens credit on subscribe and each renewal. One active plan per account.
+              Tokens credit on subscribe and each renewal. One active plan per account.{" "}
+              <span className="text-amber-signal">Testing — value pack not final.</span>
             </p>
           </div>
           <ul className="grid gap-2.5 sm:grid-cols-3">

@@ -29,6 +29,15 @@ import {
 import { FEATURE_TOPICS, getTopic } from "@/lib/feature-topics";
 import { listResearchBriefs, researchStatusLabel } from "@/lib/research-catalog";
 import {
+  PUBLISHED_AT as AVIATION_PUBLISHED_AT,
+  UPDATED_AT as AVIATION_UPDATED_AT,
+} from "@/lib/aviation/data";
+import {
+  PUBLISHED_AT as MIGRATION_PUBLISHED_AT,
+  UPDATED_AT as MIGRATION_UPDATED_AT,
+} from "@/lib/migration/data";
+import { formatCaseStudyDate } from "@/lib/case-study-meta";
+import {
   divergenceColor,
   sentimentColorCoarse,
 } from "@/lib/score-colors";
@@ -72,7 +81,7 @@ function buildCaseStudies(): CaseStudy[] {
         "Peak year ~1.8M ≠ multi-year total · X scale rail · corridors · open vs resist · returns honesty.",
       region: "EU · UK Channel",
       statusLabel: "Published",
-      updatedAt: "2026-08-20",
+      updatedAt: MIGRATION_UPDATED_AT || MIGRATION_PUBLISHED_AT,
       href: "/research-migration",
       pdf: false,
     },
@@ -83,7 +92,7 @@ function buildCaseStudies(): CaseStudy[] {
         "After COVID: delivery trust, cabin bandwidth, and who can run AI ops — not seats alone.",
       region: "Global",
       statusLabel: "Published",
-      updatedAt: "2026-08-20",
+      updatedAt: AVIATION_UPDATED_AT || AVIATION_PUBLISHED_AT,
       href: "/research-aviation",
       pdf: true,
     },
@@ -867,7 +876,15 @@ function CaseCard({
           )}
         </div>
       </div>
-      <p className="text-[10px] font-mono text-muted-foreground">{item.statusLabel}</p>
+      <p className="text-[10px] font-mono text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+        <span>{item.statusLabel}</span>
+        <span className="text-border" aria-hidden>
+          ·
+        </span>
+        <time dateTime={item.updatedAt}>
+          Updated {formatCaseStudyDate(item.updatedAt)}
+        </time>
+      </p>
       <h3 className="text-[14px] sm:text-[15px] font-display font-semibold group-hover:text-cyan transition-colors leading-snug mt-0.5 break-words">
         {item.title}
       </h3>

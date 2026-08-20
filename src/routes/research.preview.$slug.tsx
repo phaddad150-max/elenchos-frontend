@@ -20,6 +20,7 @@ import {
   type ResearchBrief,
   type ResearchClaimSlot,
 } from "@/lib/research-catalog";
+import { formatCaseStudyDate } from "@/lib/case-study-meta";
 
 export const Route = createFileRoute("/research/preview/$slug")({
   beforeLoad: ({ params }) => {
@@ -122,7 +123,7 @@ function ResearchPreviewBriefPage() {
                 Deep-dive · not live Topics
               </span>
               <span className="text-[10.5px] font-mono text-muted-foreground break-words">
-                {brief.region} · Updated {brief.updatedAt}
+                {brief.region} · Updated {formatCaseStudyDate(brief.updatedAt)}
               </span>
             </div>
             <h1 className="text-[1.15rem] sm:text-2xl md:text-[1.65rem] font-display font-semibold tracking-tight leading-snug max-w-4xl break-words [overflow-wrap:anywhere]">
