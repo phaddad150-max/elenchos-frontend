@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  AlertTriangle,
   ArrowRight,
   BookOpen,
   ChevronDown,
@@ -26,10 +25,8 @@ import {
   EU_IBC_SERIES,
   EU_IBC_SERIES_SUM,
   FRONTLINE_STATES,
-  EXECUTIVE_SUMMARY,
   HOOK_HEADLINE,
   HOOK_KPIS,
-  HOOK_SUB,
   LABELING_PATTERN,
   MIGRATION_SOURCES,
   ORIGINS_NOTE,
@@ -134,34 +131,8 @@ function MigrationIntelligencePage() {
             <h1 className="font-display font-semibold text-[1.45rem] sm:text-2xl md:text-[2rem] lg:text-[2.25rem] leading-[1.15] text-foreground max-w-4xl">
               {HOOK_HEADLINE}
             </h1>
-            <p className="text-[13px] sm:text-[14px] text-muted-foreground max-w-2xl leading-relaxed">
-              {HOOK_SUB}
-            </p>
-            <p className="text-[13.5px] sm:text-[14.5px] text-foreground/90 max-w-3xl leading-relaxed">
-              {EXECUTIVE_SUMMARY}
-            </p>
 
-            <div className="space-y-2">
-              <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-cyan">
-                Deep dive · subheadlines
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {SUBHEADLINES.map((s) => (
-                  <a
-                    key={s.id}
-                    href={`#ch-${s.id === "x-rail" || s.id === "returns" || s.id === "speech" ? (s.id === "x-rail" ? "scale" : s.id === "returns" ? "corridors" : "discourse") : s.id}`}
-                    className="rounded-xl border border-border/90 bg-card/60 hover:border-cyan/40 px-3 py-2.5 space-y-1 touch-manipulation transition-colors"
-                  >
-                    <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
-                      {s.title}
-                    </p>
-                    <p className="text-[12px] text-muted-foreground leading-snug">{s.blurb}</p>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Since 2011 is first in HOOK_KPIS */}
+            {/* Numbers first */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
               {HOOK_KPIS.map((k, i) => (
                 <div
@@ -187,43 +158,20 @@ function MigrationIntelligencePage() {
               ))}
             </div>
 
-            {/* Threat strip — 10s secondary signals */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="rounded-xl border border-rose-signal/35 bg-rose-signal/10 px-3 py-2.5">
-                <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-rose-signal mb-1">
-                  Frontline pressure
-                </p>
-                <p className="text-[12.5px] text-foreground/95 leading-snug font-medium">
-                  GR · IT · ES · UK Channel first — then secondary Schengen load.
-                </p>
-              </div>
-              <div className="rounded-xl border border-amber-signal/40 bg-amber-signal/10 px-3 py-2.5">
-                <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-amber-signal mb-1">
-                  Open vs resist
-                </p>
-                <p className="text-[12.5px] text-foreground/95 leading-snug font-medium">
-                  Some eras magnetised intake; others built barriers and fought courts. Policy, not vibes.
-                </p>
-              </div>
-              <div className="rounded-xl border border-cyan/40 bg-cyan/10 px-3 py-2.5">
-                <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-cyan mb-1">
-                  Speech cost
-                </p>
-                <p className="text-[12.5px] text-foreground/95 leading-snug font-medium">
-                  Illegal entry softened in language; enforcement speech often framed as “racist.”
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-amber-signal/40 bg-amber-signal/10 px-3 py-2.5 sm:px-4 sm:py-3 flex gap-2.5 items-start">
-              <AlertTriangle
-                className="w-4 h-4 text-amber-signal shrink-0 mt-0.5"
-                aria-hidden
-              />
-              <p className="text-[12.5px] sm:text-[13.5px] text-foreground/95 leading-snug font-medium">
-                Illegal entry was treated as manageable politics. Dissent was often treated as the
-                problem. That inversion is the legitimacy crisis — not a single chart.
-              </p>
+            {/* Insight boxes — main landing content */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {SUBHEADLINES.map((s) => (
+                <a
+                  key={s.id}
+                  href={`#ch-${s.id === "x-rail" || s.id === "returns" || s.id === "speech" ? (s.id === "x-rail" ? "scale" : s.id === "returns" ? "corridors" : "discourse") : s.id}`}
+                  className="rounded-xl border border-border/90 bg-card/60 hover:border-cyan/40 px-3 py-2.5 space-y-1 touch-manipulation transition-colors"
+                >
+                  <p className="text-[13px] font-display font-semibold text-foreground leading-snug">
+                    {s.title}
+                  </p>
+                  <p className="text-[12px] text-muted-foreground leading-snug">{s.blurb}</p>
+                </a>
+              ))}
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
@@ -231,12 +179,9 @@ function MigrationIntelligencePage() {
                 href="#chapters"
                 className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-full bg-cyan/15 border border-cyan/45 text-cyan text-[13px] font-display font-semibold hover:bg-cyan/25 touch-manipulation"
               >
-                Start 7 chapters
+                Open deep dive
                 <ChevronDown className="w-4 h-4" aria-hidden />
               </a>
-              <p className="text-[11px] font-mono text-muted-foreground">
-                Designed so the first screen is the thesis. Scroll only if you want proof.
-              </p>
             </div>
 
             <div className="flex flex-wrap gap-2 text-[11px]">
