@@ -67,9 +67,9 @@ export async function createMonthlyPlanCheckout(opts: {
     };
   }
 
-  // Test prices only work with a test secret.
-  const allowTestFallback = resolved.mode === "test";
-  const priceId = getStripePriceId(plan.envPriceKey, { allowTestFallback });
+  // Always resolve a pack price (env or built-in Test IDs). Never return "Missing PRICE"
+  // for Starter/Plus/Mega — those IDs are known. Live/test mismatch is checked next.
+  const priceId = getStripePriceId(plan.envPriceKey, { allowTestFallback: true });
   if (!priceId) {
     return {
       ok: false,
@@ -81,13 +81,8 @@ export async function createMonthlyPlanCheckout(opts: {
     return {
       ok: false,
       message:
-        "Stripe mode mismatch: STRIPE_SECRET_KEY is live (sk_live_) but pack prices are Test mode. Add STRIPE_SECRET_KEY_TEST=sk_test_… on Vercel (Production) and Redeploy — checkout will prefer the test key.",
+        "Stripe mode mismatch: server is using sk_live_ but pack prices are Test. In Vercel Production add STRIPE_SECRET_KEY_TEST = sk_test_… (exact name), enable Production, Redeploy, then retry. Checkout prefers that key over STRIPE_SECRET_KEY.",
     };
-  }
-
-  if (resolved.mode === "live" && priceId.startsWith("price_")) {
-    // Env may still hold test IDs even if not in our known set — Stripe will error; pre-warn when source is live-only.
-    // No-op: live prices are fine with live key.
   }
 
   const origin = siteOrigin(opts.request);

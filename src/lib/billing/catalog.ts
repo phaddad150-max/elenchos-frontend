@@ -161,13 +161,29 @@ export function resolveStripeSecret(): {
       return { secret: v, mode: "test", source: c.key };
     }
     if (v.startsWith("sk_live_")) {
-      // Skip live keys when a dedicated test slot was requested later — only
-      // accept live from STRIPE_SECRET_KEY if no test key exists (loop order).
+      // Skip non-sk_test values on dedicated test slots.
       if (c.preferTest) continue;
       return { secret: v, mode: "live", source: c.key };
     }
     return { secret: v, mode: "unknown", source: c.key };
   }
+
+  // Last resort: any STRIPE*SECRET* env whose value is sk_test_ (catches naming typos).
+  try {
+    const env =
+      (globalThis as { process?: { env?: NodeJS.ProcessEnv } }).process?.env ||
+      process.env;
+    for (const [k, raw] of Object.entries(env ?? {})) {
+      if (!/stripe/i.test(k) || !/secret/i.test(k)) continue;
+      const v = typeof raw === "string" ? raw.trim() : "";
+      if (v.startsWith("sk_test_")) {
+        return { secret: v, mode: "test", source: k };
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
   return { secret: null, mode: "missing", source: null };
 }
 

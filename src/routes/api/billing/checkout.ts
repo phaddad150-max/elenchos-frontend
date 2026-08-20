@@ -73,7 +73,11 @@ export const Route = createFileRoute("/api/billing/checkout")({
           });
           if (!session.ok) {
             return Response.json(
-              { error: session.message, env: stripeEnvPresence() },
+              {
+                error: session.message,
+                // Booleans / mode only — helps confirm whether STRIPE_SECRET_KEY_TEST reached the server
+                env: stripeEnvPresence(),
+              },
               { status: 502 },
             );
           }

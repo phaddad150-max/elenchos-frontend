@@ -240,13 +240,17 @@ function ProDeskPage() {
       const data = (await res.json()) as {
         url?: string;
         error?: string;
-        env?: Record<string, boolean>;
+        env?: Record<string, boolean | string | null>;
       };
       if (!res.ok || !data.url) {
-        const envHint =
-          data.env && !data.env.STRIPE_SECRET_KEY
-            ? " · STRIPE_SECRET_KEY not visible to the server — Redeploy after setting it."
-            : "";
+        let envHint = "";
+        if (data.env?.secret_mode === "live") {
+          envHint =
+            " · Server still sees sk_live_ only — add STRIPE_SECRET_KEY_TEST (sk_test_…) on Production and Redeploy.";
+        } else if (data.env && data.env.STRIPE_SECRET_KEY_TEST === false) {
+          envHint =
+            " · STRIPE_SECRET_KEY_TEST not visible to the server yet — confirm Production env + Redeploy.";
+        }
         setActionError((data.error || "Checkout failed") + envHint);
         return;
       }
