@@ -120,11 +120,11 @@ function AviationIntelligencePage() {
               <span className="text-border">·</span>
               <span>Global commercial</span>
               <span className="text-border">·</span>
-              <span>COVID → now</span>
+              <span>AVIATION → now</span>
               <span className="text-border">·</span>
               <span className="inline-flex items-center gap-1 text-cyan">
                 <Timer className="w-3 h-3" aria-hidden />
-                10 sec → full under 10 min
+                10 sec summary → full under 10 min
               </span>
             </div>
 
