@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { requireBillingUser } from "@/lib/billing/auth.server";
+import { requireAdminBillingUser } from "@/lib/billing/auth.server";
 import { MONTHLY_PLANS, TOKEN_COSTS } from "@/lib/billing/catalog";
 import { getSubscription, getTokenBalance } from "@/lib/billing/tokens.server";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/billing/me")({
     handlers: {
       GET: async ({ request }) => {
         try {
-          const auth = await requireBillingUser(request);
+          const auth = await requireAdminBillingUser(request);
           if ("error" in auth) return auth.error;
           const { user } = auth;
 

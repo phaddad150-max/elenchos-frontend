@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { requireBillingUser } from "@/lib/billing/auth.server";
+import { requireAdminBillingUser } from "@/lib/billing/auth.server";
 import { TOKEN_COSTS, type PrivateRunKind } from "@/lib/billing/catalog";
 import { creditTokens, debitTokens } from "@/lib/billing/tokens.server";
 import { parseQuestions } from "@/lib/research-desk/build-report";
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/api/pro/run")({
     handlers: {
       POST: async ({ request }) => {
         try {
-          const auth = await requireBillingUser(request);
+          const auth = await requireAdminBillingUser(request);
           if ("error" in auth) return auth.error;
           const { user } = auth;
 

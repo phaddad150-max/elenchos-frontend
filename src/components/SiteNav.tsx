@@ -6,6 +6,7 @@ import { MobileTabBar } from "@/components/MobileTabBar";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import type { ReactNode } from "react";
 import { ELENCHOS_NAV_LINE } from "@/lib/brand";
+import { useAdminSession } from "@/lib/use-admin-session";
 
 function XLogo({ className }: { className?: string }) {
   return (
@@ -34,6 +35,8 @@ const TABS = [
 ] as const;
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
+  const showPro = useAdminSession();
+  const tabs = showPro ? TABS : TABS.filter((t) => t.to !== "/pro");
   return (
     <>
       <nav className="sticky top-0 z-30 nav-shell" aria-label="Main">
@@ -59,7 +62,7 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
             role="navigation"
             aria-label="Primary pages"
           >
-            {TABS.map((t) => (
+            {tabs.map((t) => (
               <Link
                 key={t.to}
                 to={t.to}

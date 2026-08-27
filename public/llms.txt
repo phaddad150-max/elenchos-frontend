@@ -12,7 +12,7 @@ Elenchos (ἔλεγχος) applies the Socratic method to public conversation: c
 - [Aviation case study](/research/casestudy/aviation)
 - [Irregular migration case study](/research/casestudy/irregular-migration)
 - [Trackers](/trackers): Leadership, AI & business, citizen journalism, peace. Preview rosters are labeled; empty indexes stay empty.
-- [Pro](/pro): Monthly token plans — currently Testing Mode; subscriptions inactive. Enterprise by contact.
+- Pro is operator-only (allowlisted login email) while in testing. Public surfaces stay free.
 - [About](/about): Method, DNA, limits.
 - [Privacy](/privacy): GDPR notice. Contact citizen.pulse101@gmail.com.
 

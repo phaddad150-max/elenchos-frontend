@@ -5,24 +5,12 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
 import type { CuratedTopicInsights } from "@/lib/dashboard-data";
 import { assertAppendOnlyFetch } from "@/lib/supabase-append-only";
+import { isAdminEmail } from "@/lib/admin-emails";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 
 const SUPABASE_URL = "https://jacbalsongvqvaqlfsbx.supabase.co";
 const ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphY2JhbHNvbmd2cXZhcWxmc2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NDg1MjgsImV4cCI6MjA5NTEyNDUyOH0.NZI55Xy8KpqQHdPfQohojnnc-GDef0L8dKQ2oOYI1EU";
-
-function adminEmails(): string[] {
-  const raw = import.meta.env.VITE_ADMIN_EMAILS as string | undefined;
-  if (!raw) return [];
-  return raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-}
-
-function isAdminEmail(email?: string | null): boolean {
-  if (!email) return false;
-  const allowed = adminEmails();
-  if (!allowed.length) return false;
-  return allowed.includes(email.toLowerCase());
-}
 
 export const Route = createFileRoute("/admin/curation")({
   component: AdminCurationPage,

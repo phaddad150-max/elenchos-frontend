@@ -133,14 +133,7 @@ export function GlobalSearch() {
               <span className="truncate">Research · topics, cases & trackers</span>
               <CommandShortcut>Research</CommandShortcut>
             </CommandItem>
-            <CommandItem
-              value="pro subscription tokens private research desk wallet monthly"
-              onSelect={() => go("/pro")}
-            >
-              <FlaskConical className="w-4 h-4 text-cyan" />
-              <span className="truncate">Pro · monthly plans & private runs</span>
-              <CommandShortcut>Pro</CommandShortcut>
-            </CommandItem>
+
             <CommandItem
               value="leadership board leader trust rankings world leaders"
               onSelect={() => go("/trackers/leaders")}

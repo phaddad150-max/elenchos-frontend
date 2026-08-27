@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, FlaskConical, Sparkles, Info } from "lucide-react";
+import { useAdminSession } from "@/lib/use-admin-session";
 
 /** Main nav (mobile): Dashboard · Research · Pro · About — Library nested under Research only. */
 const TABS = [
@@ -28,6 +29,8 @@ const TABS = [
 
 export function MobileTabBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const showPro = useAdminSession();
+  const tabs = showPro ? TABS : TABS.filter((t) => t.to !== "/pro");
 
   return (
     <nav
@@ -35,8 +38,8 @@ export function MobileTabBar() {
       className="mobile-tab-bar md:hidden fixed bottom-0 inset-x-0 z-40"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="grid grid-cols-4 gap-0.5 px-1 pt-1 pb-0.5">
-        {TABS.map((t) => {
+      <ul className={`grid gap-0.5 px-1 pt-1 pb-0.5 ${showPro ? "grid-cols-4" : "grid-cols-3"}`}>
+        {tabs.map((t) => {
           const Icon = t.icon;
           const active = t.match(pathname);
           return (

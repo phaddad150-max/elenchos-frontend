@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { requireBillingUser } from "@/lib/billing/auth.server";
+import { requireAdminBillingUser } from "@/lib/billing/auth.server";
 import { isMonthlyPlanId, proSubscriptionsActive } from "@/lib/billing/catalog";
 import {
   createMonthlyPlanCheckout,
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/billing/checkout")({
             );
           }
 
-          const auth = await requireBillingUser(request);
+          const auth = await requireAdminBillingUser(request);
           if ("error" in auth) return auth.error;
           const { user } = auth;
 

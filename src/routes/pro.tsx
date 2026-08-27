@@ -21,6 +21,7 @@ import {
   type MonthlyPlanId,
 } from "@/lib/billing/catalog";
 import { socialMetaTags } from "@/lib/social-meta";
+import { isAdminEmail } from "@/lib/admin-emails";
 
 const PRO_SOCIAL = {
   title: "Pro · Private research · Elenchos",
@@ -36,7 +37,10 @@ export const Route = createFileRoute("/pro")({
     plan: typeof s.plan === "string" ? s.plan : undefined,
   }),
   head: () => ({
-    meta: socialMetaTags(PRO_SOCIAL),
+    meta: [
+      ...socialMetaTags(PRO_SOCIAL),
+      { name: "robots", content: "noindex, nofollow" },
+    ],
     links: [{ rel: "canonical", href: PRO_SOCIAL.url }],
   }),
   component: ProDeskPage,
@@ -64,6 +68,7 @@ function planLabel(planId: string | undefined): string {
 function ProDeskPage() {
   const search = Route.useSearch();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loginEmail, setLoginEmail] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [me, setMe] = useState<BillingMe | null>(null);
@@ -102,16 +107,21 @@ function ProDeskPage() {
     const finish = (session: { user?: { id?: string; email?: string | null; user_metadata?: Record<string, unknown> } } | null) => {
       if (cancelled) return;
       const u = session?.user;
+      const email =
+        (typeof u?.email === "string" && u.email) ||
+        (typeof u?.user_metadata?.email === "string" && u.user_metadata.email) ||
+        null;
       setUserId(u?.id ?? null);
+      setLoginEmail(email);
       setUserEmail(
-        (u?.email as string | undefined) ??
+        email ??
           (u?.user_metadata?.preferred_username as string | undefined) ??
           (u?.user_metadata?.user_name as string | undefined) ??
           null,
       );
       setAuthReady(true);
       window.clearTimeout(failSafe);
-      if (u?.id) void refreshMe();
+      if (u?.id && isAdminEmail(email)) void refreshMe();
       else setMe(null);
     };
 
@@ -263,6 +273,7 @@ function ProDeskPage() {
   const proActive =
     me?.subscription?.status === "active" ||
     me?.subscription?.status === "trialing";
+  const adminOk = isAdminEmail(loginEmail);
 
   return (
     <div className="page-shell dash-landing">
@@ -286,7 +297,7 @@ function ProDeskPage() {
                 Testing Mode. Subscriptions inactive
               </span>
             </div>
-            {userId ? (
+            {adminOk ? (
               <>
                 <h1 className="page-hero-title text-[1.4rem] sm:text-2xl md:text-[2rem] whitespace-normal md:whitespace-nowrap">
                   Your Pro desk · token wallet ready
@@ -326,12 +337,42 @@ function ProDeskPage() {
           </p>
         )}
 
-        {/* Account / wallet */}
+        {/* Account / wallet — Pro desk is admin-email only while testing */}
         <section className="rounded-2xl border border-border/90 bg-card/50 p-4 sm:p-5 space-y-3">
           {!authReady ? (
             <div className="h-10 flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
               <span className="text-[12.5px]">Checking sign-in…</span>
+            </div>
+          ) : userId && !adminOk ? (
+            <div className="space-y-3">
+              <h2 className="text-[15px] font-display font-semibold">
+                Pro is in private testing
+              </h2>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
+                This desk is limited to authorized operator emails. The Dashboard and
+                Research Library stay free for everyone.
+              </p>
+              {userEmail && (
+                <p className="text-[12px] font-mono text-muted-foreground">
+                  Signed in as {userEmail}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="text-[12px] text-muted-foreground hover:text-cyan underline-offset-2 hover:underline min-h-[36px]"
+                >
+                  Sign out
+                </button>
+                <Link
+                  to="/research/library"
+                  className="inline-flex items-center min-h-[36px] text-[13px] text-cyan hover:underline"
+                >
+                  Research Library
+                </Link>
+              </div>
             </div>
           ) : userId ? (
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
@@ -372,8 +413,8 @@ function ProDeskPage() {
           ) : (
             <div className="space-y-3">
               <p className="text-[13px] text-muted-foreground leading-relaxed max-w-lg">
-                Sign in to subscribe and run private analyses. Dashboard and Research stay free
-                without an account.
+                Operator sign-in only (allowlisted email). Use Google with that address.
+                Dashboard and Research stay free without an account.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -412,7 +453,7 @@ function ProDeskPage() {
           )}
         </section>
 
-        {/* Monthly plans */}
+        {adminOk && (
         <section aria-labelledby="pro-plans" className="space-y-3">
           <div className="px-0.5">
             <h2
@@ -517,6 +558,7 @@ function ProDeskPage() {
             </div>
           </div>
         </section>
+        )}
 
         <aside className="rounded-xl border border-dashed border-border/80 px-4 py-3 text-[12.5px] text-muted-foreground flex items-start gap-2">
           <BookOpen className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" aria-hidden />

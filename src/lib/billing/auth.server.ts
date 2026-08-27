@@ -3,6 +3,7 @@
  * Uses the same jacbalsongvqvaqlfsbx project as supabaseExternal (X / Google OAuth).
  */
 import { createClient } from "@supabase/supabase-js";
+import { isAdminEmail } from "@/lib/admin-emails";
 
 function supabaseUrl() {
   return (
@@ -70,4 +71,21 @@ export async function requireBillingUser(
       email: data.user.email ?? null,
     },
   };
+}
+
+/** Pro / billing APIs — signed-in allowlisted email only. */
+export async function requireAdminBillingUser(
+  request: Request,
+): Promise<{ user: BillingUser } | { error: Response }> {
+  const auth = await requireBillingUser(request);
+  if ("error" in auth) return auth;
+  if (!isAdminEmail(auth.user.email)) {
+    return {
+      error: Response.json(
+        { error: "Admin only", code: "admin_required" },
+        { status: 403 },
+      ),
+    };
+  }
+  return auth;
 }
