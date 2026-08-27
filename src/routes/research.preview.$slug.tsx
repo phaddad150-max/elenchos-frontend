@@ -25,8 +25,25 @@ import { formatCaseStudyDate } from "@/lib/case-study-meta";
 export const Route = createFileRoute("/research/preview/$slug")({
   beforeLoad: ({ params }) => {
     // Interactive deep dives live on dedicated routes (migration-style UX)
-    if (params.slug === "aviation-race-digital-ai") {
-      throw redirect({ to: "/research-aviation", replace: true });
+    if (
+      params.slug === "aviation-race-digital-ai" ||
+      params.slug === "aviation"
+    ) {
+      throw redirect({
+        to: "/research/casestudy/$slug",
+        params: { slug: "aviation" },
+        replace: true,
+      });
+    }
+    if (
+      params.slug === "irregular-migration" ||
+      params.slug === "illegal-migration"
+    ) {
+      throw redirect({
+        to: "/research/casestudy/$slug",
+        params: { slug: "irregular-migration" },
+        replace: true,
+      });
     }
   },
   head: ({ params }) => {

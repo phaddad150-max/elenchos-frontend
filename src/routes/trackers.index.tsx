@@ -1603,20 +1603,20 @@ function TrackersPage() {
 
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
-            Want a private brief on leaders, peace, or terror-finance networks?
+            Want a private analysis on leaders, peace, or networks?
           </p>
           <div className="flex flex-wrap gap-2">
             <Link
-              to="/research/commission"
+              to="/pro"
               className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full text-[13px] font-semibold"
             >
-              Commission a report
+              Private analyses on Pro
             </Link>
             <Link
               to="/research/library"
               className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan"
             >
-              Back to Library
+              Research Library
             </Link>
           </div>
         </section>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -15,6 +15,11 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import {
+  ResearchBackBar,
+  ResearchBreadcrumb,
+} from "@/components/research/ResearchDeskNav";
+import { ResearchNextSteps } from "@/components/research/ResearchNextSteps";
 import { CorridorMap } from "@/components/migration/CorridorMap";
 import {
   ACTORS,
@@ -43,31 +48,15 @@ import {
 } from "@/lib/migration/data";
 import { caseStudyTimestampLine } from "@/lib/case-study-meta";
 
+/** Legacy URL → SEO path */
 export const Route = createFileRoute("/research-migration")({
-  head: () => ({
-    meta: [
-      {
-        title: "Irregular migration analysis · Since 2011 · EU & UK · Elenchos Research",
-      },
-      {
-        name: "description",
-        content:
-          "Crisis briefing: irregular migration since 2011 — Frontex-scale detections, EU frontline states, corridors map, open vs resist, public discourse. Under 10 minutes. Free open data. Not legal advice.",
-      },
-      {
-        property: "og:title",
-        content: "Illegal entry normalised. Speech against it policed. · Elenchos",
-      },
-      {
-        property: "og:description",
-        content:
-          "Since 2011 · 2015 peak year ~1.8M detections · multi-year series already multi-million events · frontline GR/IT/ES/UK Channel. X vs official scale rail included.",
-      },
-      { property: "og:url", content: "https://elenchos.live/research-migration" },
-    ],
-    links: [{ rel: "canonical", href: "https://elenchos.live/research-migration" }],
-  }),
-  component: MigrationIntelligencePage,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/research/casestudy/$slug",
+      params: { slug: "irregular-migration" },
+      replace: true,
+    });
+  },
 });
 
 const toneColor: Record<string, string> = {
@@ -77,7 +66,7 @@ const toneColor: Record<string, string> = {
   emerald: "var(--emerald-signal)",
 };
 
-function MigrationIntelligencePage() {
+export function MigrationIntelligencePage() {
   const [active, setActive] = useState(CHAPTERS[0]!.id);
   const [copied, setCopied] = useState(false);
 
@@ -109,21 +98,29 @@ function MigrationIntelligencePage() {
       <SiteNav />
 
       <main className="relative flex-1 mobile-safe-bottom overflow-x-clip">
+        <div className="max-w-[1100px] mx-auto px-3 sm:px-4 md:px-8 pt-4 sm:pt-5">
+          <ResearchBreadcrumb
+            trail={[
+              { label: "Library", to: "/research/library" },
+              { label: "Case studies", to: "/research/library" },
+              { label: "Illegal migration crisis" },
+            ]}
+          />
+          <ResearchBackBar to="/research/library" label="Back to Library" />
+        </div>
         {/* ═══════════════ 10-SECOND HOOK ═══════════════ */}
         <section
           aria-label="10-second overview"
           className="border-b border-rose-signal/30 bg-gradient-to-b from-rose-signal/10 via-background/80 to-background"
         >
-          <div className="max-w-[1100px] mx-auto px-3 sm:px-4 md:px-8 pt-5 sm:pt-8 pb-6 sm:pb-8 space-y-4 sm:space-y-5">
+          <div className="max-w-[1100px] mx-auto px-3 sm:px-4 md:px-8 pt-3 sm:pt-5 pb-6 sm:pb-8 space-y-4 sm:space-y-5">
             <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 text-rose-signal">
                 <ShieldAlert className="w-3.5 h-3.5" aria-hidden />
-                Research · crisis briefing
+                Research · Illegal migration crisis
               </span>
               <span className="text-border">·</span>
               <span>EU + UK Channel</span>
-              <span className="text-border">·</span>
-              <span>MIGRATION → now</span>
               <span className="text-border">·</span>
               <span className="inline-flex items-center gap-1 text-cyan">
                 <Timer className="w-3 h-3" aria-hidden />
@@ -202,7 +199,7 @@ function MigrationIntelligencePage() {
                 to="/research"
                 className="inline-flex items-center gap-1 text-cyan hover:underline min-h-[36px]"
               >
-                <FlaskConical className="w-3.5 h-3.5" /> Research desk
+                <FlaskConical className="w-3.5 h-3.5" /> Research Library
               </Link>
               <Link
                 to="/"
@@ -763,6 +760,8 @@ function MigrationIntelligencePage() {
               claim list expands without inventing numbers.
             </p>
           </section>
+
+          <ResearchNextSteps contextHint="Illegal migration crisis · EU & UK Channel" />
         </div>
       </main>
 

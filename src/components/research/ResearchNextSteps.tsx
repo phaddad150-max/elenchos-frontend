@@ -1,29 +1,34 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, FilePenLine, Layers } from "lucide-react";
+import { ArrowRight, BookOpen, Home, Sparkles } from "lucide-react";
 
 type Props = {
-  /** Short context for commission prefill (topic or report name) */
+  /** Short context for Pro analyses hint */
   contextHint?: string;
-  showTopics?: boolean;
+  showHome?: boolean;
   showLibrary?: boolean;
+  showPro?: boolean;
+  /** @deprecated use showPro — guest commission removed */
   showCommission?: boolean;
+  showTopics?: boolean;
   className?: string;
 };
 
 /**
- * One primary CTA + optional secondary next steps at the bottom of free reports.
+ * Bottom journey CTAs for free reports: Pro analyses + Research Library (+ Home).
+ * Guest commission / $10 deepen CTAs are retired.
  */
 export function ResearchNextSteps({
   contextHint,
-  showTopics = true,
+  showHome = true,
   showLibrary = true,
-  showCommission = true,
+  showPro = true,
+  showCommission: _showCommission,
+  showTopics: _showTopics,
   className = "",
 }: Props) {
-  const commissionTo = "/research/commission";
-  const commissionNote = contextHint
-    ? `Want a private brief on “${contextHint.slice(0, 80)}${contextHint.length > 80 ? "…" : ""}”?`
-    : "Want a private multi-source brief on your own question?";
+  const proNote = contextHint
+    ? `Want a private analysis on “${contextHint.slice(0, 80)}${contextHint.length > 80 ? "…" : ""}”? Run it on Pro.`
+    : "Want a private analysis on your own question? Run Pro analyses with a token wallet.";
 
   return (
     <section
@@ -33,17 +38,15 @@ export function ResearchNextSteps({
       <h2 className="text-[13px] font-display font-semibold text-foreground">
         What’s next
       </h2>
-      <p className="text-[12.5px] text-muted-foreground leading-snug">
-        {commissionNote}
-      </p>
+      <p className="text-[12.5px] text-muted-foreground leading-snug">{proNote}</p>
       <div className="flex flex-col sm:flex-row flex-wrap gap-2">
-        {showCommission && (
+        {showPro && (
           <Link
-            to={commissionTo}
+            to="/pro"
             className="btn-intel-primary inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full text-[13px] font-semibold touch-manipulation"
           >
-            <FilePenLine className="w-4 h-4" aria-hidden />
-            Commission a report · $10 / $20
+            <Sparkles className="w-4 h-4" aria-hidden />
+            Private analyses on Pro
             <ArrowRight className="w-4 h-4" />
           </Link>
         )}
@@ -53,17 +56,16 @@ export function ResearchNextSteps({
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full border border-border text-[13px] font-medium text-muted-foreground hover:text-cyan hover:border-cyan/40 touch-manipulation"
           >
             <BookOpen className="w-4 h-4" aria-hidden />
-            Back to Library
+            Research Library
           </Link>
         )}
-        {showTopics && (
+        {showHome && (
           <Link
-            to="/research/library"
-            search={{ section: "topics" }}
+            to="/"
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full border border-border text-[13px] font-medium text-muted-foreground hover:text-cyan hover:border-cyan/40 touch-manipulation"
           >
-            <Layers className="w-4 h-4" aria-hidden />
-            Open Library topics
+            <Home className="w-4 h-4" aria-hidden />
+            Home
           </Link>
         )}
       </div>

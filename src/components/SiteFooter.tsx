@@ -3,7 +3,10 @@ import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
 import { requestConsentPreferences } from "@/lib/privacy-consent";
 
-/** Site footer: main nav + legal. Library lives under Research; no public commission CTAs. */
+const linkClass =
+  "text-cyan hover:underline touch-manipulation min-h-[32px] inline-flex items-center";
+
+/** Site footer: main nav + legal. Cyan links. Contact me > Enterprise. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/80 mt-8 pb-20 md:pb-0 bg-gradient-to-t from-card/40 to-transparent">
@@ -12,35 +15,35 @@ export function SiteFooter() {
           aria-label="Footer"
           className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[11px] sm:text-[12px] font-mono"
         >
-          <Link to="/" className="text-cyan hover:underline">
+          <Link to="/" className={linkClass}>
             Dashboard
           </Link>
-          <Link to="/research/library" className="text-cyan hover:underline">
-            Research
+          <Link to="/research/library" className={linkClass}>
+            Research Library
           </Link>
-          <Link to="/pro" className="text-cyan hover:underline">
+          <Link to="/pro" className={linkClass}>
             Pro
           </Link>
-          <Link to="/about" className="hover:text-cyan hover:underline">
+          <Link to="/about" className={linkClass}>
             About
           </Link>
-          <Link to="/privacy" className="hover:text-cyan hover:underline">
+          <Link to="/privacy" className={linkClass}>
             Privacy
           </Link>
           <ContactEmailMe
-            source="footer-enterprise"
+            source="footer-contact"
             variant="inline"
-            className="text-[11px] sm:text-[12px] font-mono text-cyan"
-            defaultMessage="Hi — I'm interested in Enterprise: personalized dashboards and custom research.\n\n"
-            dialogTitle="Enterprise inquiry"
-            dialogDescription="Personalized dashboards, custom topics, team research. Contact only — no self-serve checkout."
+            className={`${linkClass} text-[11px] sm:text-[12px] font-mono`}
+            defaultMessage="Hi — I’d like to get in touch about Elenchos.\n\n"
+            dialogTitle="Contact me"
+            dialogDescription="Corrections, partnerships, privacy rights, or custom research. We read every message."
           >
-            Enterprise
+            Contact me
           </ContactEmailMe>
           <button
             type="button"
             onClick={() => requestConsentPreferences()}
-            className="hover:text-cyan hover:underline"
+            className={linkClass}
           >
             Cookies
           </button>

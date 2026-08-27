@@ -20,7 +20,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "daily", priority: "1.0" },
           { path: "/research/library", changefreq: "daily", priority: "0.95" },
           ...FEATURE_TOPICS.map((t) => ({
-            path: `/research/library?section=topics&topic=${encodeURIComponent(t.id)}`,
+            path: `/research/topic/${encodeURIComponent(t.id)}`,
             changefreq: "daily" as const,
             priority: "0.8",
           })),
@@ -32,9 +32,36 @@ export const Route = createFileRoute("/sitemap.xml")({
             changefreq: "weekly",
             priority: "0.7",
           },
-          // Shared community reports are token URLs (noindex private by default); library lists them.
-          { path: "/research-migration", changefreq: "weekly", priority: "0.8" },
-          { path: "/research-aviation", changefreq: "weekly", priority: "0.8" },
+          {
+            path: "/research/casestudy/irregular-migration",
+            changefreq: "weekly",
+            priority: "0.8",
+          },
+          {
+            path: "/research/casestudy/aviation",
+            changefreq: "weekly",
+            priority: "0.8",
+          },
+          {
+            path: "/research/trackers/country-leader-index",
+            changefreq: "weekly",
+            priority: "0.75",
+          },
+          {
+            path: "/research/trackers/ai-business-index",
+            changefreq: "weekly",
+            priority: "0.7",
+          },
+          {
+            path: "/research/trackers/citizen-journalism-index",
+            changefreq: "weekly",
+            priority: "0.7",
+          },
+          {
+            path: "/research/trackers/peace-normalization-index",
+            changefreq: "weekly",
+            priority: "0.75",
+          },
           ...researchBriefs.map((b) => ({
             path: `/research/preview/${b.slug}`,
             changefreq: "weekly" as const,

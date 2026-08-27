@@ -8,11 +8,14 @@ import { BookOpen } from "lucide-react";
 const ITEMS = [
   {
     to: "/research/library",
-    label: "Library",
+    label: "Research Library",
     short: "Library",
     icon: BookOpen,
     match: (p: string) =>
       p.startsWith("/research/library") ||
+      p.startsWith("/research/topic") ||
+      p.startsWith("/research/casestudy") ||
+      p.startsWith("/research/trackers") ||
       p.startsWith("/research/preview") ||
       p.startsWith("/research/report") ||
       p.startsWith("/research-migration") ||
@@ -62,7 +65,7 @@ export function ResearchDeskNav({ className = "" }: { className?: string }) {
 type Crumb = { label: string; to?: string };
 
 /**
- * Consistent breadcrumbs: Home > Research > [segments]
+ * Consistent breadcrumbs: Home > Research Library > [segments]
  */
 export function ResearchBreadcrumb({
   current,
@@ -70,7 +73,7 @@ export function ResearchBreadcrumb({
 }: {
   /** Final segment label when trail is not provided */
   current?: string;
-  /** Optional full trail after Research (overrides current) */
+  /** Optional full trail after Research Library (overrides current) */
   trail?: Crumb[];
 }) {
   const segments: Crumb[] = trail?.length
@@ -94,10 +97,10 @@ export function ResearchBreadcrumb({
         /
       </span>
       <Link
-        to="/research"
+        to="/research/library"
         className="hover:text-cyan touch-manipulation min-h-[32px] inline-flex items-center shrink-0"
       >
-        Research
+        Research Library
       </Link>
       {segments.map((seg, i) => {
         const isLast = i === segments.length - 1;

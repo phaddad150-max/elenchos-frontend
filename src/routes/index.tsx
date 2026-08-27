@@ -647,16 +647,35 @@ function Dashboard() {
 
       <SiteNav />
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-3 sm:py-6 md:py-7 space-y-3 sm:space-y-5 md:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
-        {/* KPI hero — one grid for all viewports; same data mobile + desktop */}
-        <DashboardKpiGrid
-          overview={overview}
-          snapshots={snapshots}
-          citizenSignals={citizenSignals}
-          trackerKpis={trackerKpis}
-          curatedCount={curatedHighlights.length}
-          postsAnalyzed={kpis.postsAnalyzed}
-          ready={dashReady}
-        />
+        {/* Mobile: desktop-first product banner (KPI grid is desktop-only) */}
+        <aside
+          role="status"
+          className="md:hidden rounded-2xl border border-cyan/35 bg-cyan/[0.08] px-4 py-3.5 space-y-1.5"
+        >
+          <p className="text-[12px] font-mono uppercase tracking-[0.14em] text-cyan">
+            Desktop recommended
+          </p>
+          <p className="text-[13.5px] text-foreground/90 leading-snug font-display font-semibold">
+            Open in desktop view for the full product experience.
+          </p>
+          <p className="text-[12px] text-muted-foreground leading-snug">
+            KPI boards, globe, and deep layouts are built for larger screens. Browse signals below
+            anytime.
+          </p>
+        </aside>
+
+        {/* KPI hero — desktop only */}
+        <div className="hidden md:block">
+          <DashboardKpiGrid
+            overview={overview}
+            snapshots={snapshots}
+            citizenSignals={citizenSignals}
+            trackerKpis={trackerKpis}
+            curatedCount={curatedHighlights.length}
+            postsAnalyzed={kpis.postsAnalyzed}
+            ready={dashReady}
+          />
+        </div>
 
         {/* Signals + heatmap — side by side, independent heights (signal flips must not move globe) */}
         <motion.div

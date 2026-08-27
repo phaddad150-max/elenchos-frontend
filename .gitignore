@@ -38,3 +38,5 @@ dist-ssr
 
 # Offline named terror-finance research (never ship party identifiers)
 src/lib/networks-ledger/archive/data.named.json
+.vercel
+.env*

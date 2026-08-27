@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -82,7 +82,7 @@ function buildCaseStudies(): CaseStudy[] {
       region: "EU · UK Channel",
       statusLabel: "Published",
       updatedAt: MIGRATION_UPDATED_AT || MIGRATION_PUBLISHED_AT,
-      href: "/research-migration",
+      href: "/research/casestudy/irregular-migration",
       pdf: false,
     },
     {
@@ -93,7 +93,7 @@ function buildCaseStudies(): CaseStudy[] {
       region: "Global",
       statusLabel: "Published",
       updatedAt: AVIATION_UPDATED_AT || AVIATION_PUBLISHED_AT,
-      href: "/research-aviation",
+      href: "/research/casestudy/aviation",
       pdf: true,
     },
   ];
@@ -119,7 +119,7 @@ function buildCaseStudies(): CaseStudy[] {
 
 const TRACKERS = [
   {
-    href: "/trackers/leaders",
+    href: "/research/trackers/country-leader-index",
     title: "Leadership board",
     body: "Current world leaders — citizen trust vs official narratives.",
     icon: Users,
@@ -128,7 +128,7 @@ const TRACKERS = [
     metric: "15 leaders",
   },
   {
-    href: "/trackers/business",
+    href: "/research/trackers/ai-business-index",
     title: "AI & Business leaders",
     body: "AI / tech builders scored on vision, execution, and free-speech stance.",
     icon: Layers,
@@ -137,7 +137,7 @@ const TRACKERS = [
     metric: "15 figures",
   },
   {
-    href: "/trackers/citizen-discourse",
+    href: "/research/trackers/citizen-journalism-index",
     title: "Citizen journalism",
     body: "Individual reporters only — trust, authenticity, rigor, independence.",
     icon: Radio,
@@ -146,7 +146,7 @@ const TRACKERS = [
     metric: "15 journalists",
   },
   {
-    href: "/trackers/peace",
+    href: "/research/trackers/peace-normalization-index",
     title: "Peace index",
     body: "Normalization & peace diagnostics — support, momentum, official gap.",
     icon: Trophy,
@@ -188,32 +188,20 @@ export const Route = createFileRoute("/research/library")({
     }
     return out;
   },
-  head: ({ match }) => {
-    const topicId = match.search.topic;
-    const topic = topicId ? getTopic(topicId) : null;
-    if (topic) {
-      const title = `${topic.title} · Library · Elenchos`;
-      const description =
-        topic.description?.slice(0, 160) ??
-        "Citizen sentiment and narrative divergence from public discourse on X.";
-      const url = `https://elenchos.live/research/library?section=topics&topic=${encodeURIComponent(topic.id)}`;
-      return {
-        meta: [
-          { title },
-          { name: "description", content: description },
-          { property: "og:title", content: title },
-          { property: "og:description", content: description },
-          { property: "og:url", content: url },
-          { property: "og:type", content: "article" },
-        ],
-        links: [{ rel: "canonical", href: url }],
-      };
+  beforeLoad: ({ search }) => {
+    // Legacy deep-link → shareable SEO URL
+    if (search.topic?.trim()) {
+      throw redirect({
+        to: "/research/topic/$topicId",
+        params: { topicId: search.topic.trim() },
+        replace: true,
+      });
     }
-    return {
-      meta: socialMetaTags(LIBRARY_SOCIAL),
-      links: [{ rel: "canonical", href: LIBRARY_SOCIAL.url }],
-    };
   },
+  head: () => ({
+    meta: socialMetaTags(LIBRARY_SOCIAL),
+    links: [{ rel: "canonical", href: LIBRARY_SOCIAL.url }],
+  }),
   component: ResearchLibraryPage,
 });
 
@@ -746,8 +734,8 @@ function TopicLibraryCard({
       className="h-full"
     >
       <Link
-        to="/research/library"
-        search={{ section: "topics", topic: topic.id }}
+        to="/research/topic/$topicId"
+        params={{ topicId: topic.id }}
         className={`group lib-case-card relative flex flex-col h-full min-h-0 rounded-xl border p-3 overflow-hidden transition-all touch-manipulation ${
           archived
             ? "border-border/70 bg-card/40 opacity-90 hover:border-border"

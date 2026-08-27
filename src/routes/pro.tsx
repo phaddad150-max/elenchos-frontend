@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
-  FilePenLine,
+  Building2,
   FlaskConical,
   Loader2,
   LogIn,
@@ -11,15 +11,14 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { supabaseExternal } from "@/integrations/supabase/external-client";
 import { oauthReturnTo } from "@/lib/auth-redirect";
 import {
   MONTHLY_PLAN_ORDER,
   MONTHLY_PLANS,
-  TOKEN_COSTS,
   type MonthlyPlanId,
 } from "@/lib/billing/catalog";
-import { DESK_PACKAGES, type DeskPackageId } from "@/lib/research-desk/packages";
 import { socialMetaTags } from "@/lib/social-meta";
 
 const PRO_SOCIAL = {
@@ -28,9 +27,6 @@ const PRO_SOCIAL = {
     "Monthly Starter, Plus, or Mega plans. Token wallet for private deep-dive analyses. Public Library stays free.",
   url: "https://elenchos.live/pro",
 };
-
-/** v1: deep-no-x only on /pro UI. */
-const PRO_RUN_PACKAGE: DeskPackageId = "deep-no-x";
 
 export const Route = createFileRoute("/pro")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -73,9 +69,6 @@ function ProDeskPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
-  const [runTopic, setRunTopic] = useState("");
-  const [runQuestions, setRunQuestions] = useState("");
-  const [runBusy, setRunBusy] = useState(false);
 
   const refreshMe = useCallback(async () => {
     const token = await accessToken();
@@ -264,60 +257,6 @@ function ProDeskPage() {
     me?.subscription?.status === "active" ||
     me?.subscription?.status === "trialing";
 
-  const runCost = TOKEN_COSTS[PRO_RUN_PACKAGE];
-  const canAfford = (me?.balance ?? 0) >= runCost;
-  const pkgMeta = DESK_PACKAGES[PRO_RUN_PACKAGE];
-
-  const startPrivateRun = async () => {
-    setActionError(null);
-    const token = await accessToken();
-    if (!token) {
-      setActionError("Sign in to run a private analysis.");
-      return;
-    }
-    if (runTopic.trim().length < 8) {
-      setActionError("Topic must be at least 8 characters.");
-      return;
-    }
-    setRunBusy(true);
-    try {
-      const res = await fetch("/api/pro/run", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          packageId: PRO_RUN_PACKAGE,
-          topic: runTopic.trim(),
-          questions: runQuestions.trim(),
-        }),
-      });
-      const data = (await res.json()) as {
-        error?: string;
-        reportUrl?: string;
-        balance?: number;
-      };
-      if (!res.ok || !data.reportUrl) {
-        setActionError(data.error || "Private run failed");
-        void refreshMe();
-        return;
-      }
-      if (typeof data.balance === "number") {
-        setMe((prev) =>
-          prev ? { ...prev, balance: data.balance as number } : prev,
-        );
-      } else {
-        void refreshMe();
-      }
-      window.location.href = data.reportUrl;
-    } catch {
-      setActionError("Private run failed");
-    } finally {
-      setRunBusy(false);
-    }
-  };
-
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
@@ -334,10 +273,10 @@ function ProDeskPage() {
               </div>
               <span
                 className="inline-flex items-center gap-1.5 rounded-full border border-amber-signal/50 bg-amber-signal/15 px-2.5 py-1 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.14em] text-amber-signal"
-                title="Offers and package value props are not final"
+                title="Subscriptions are inactive while Pro is in testing"
               >
                 <FlaskConical className="w-3.5 h-3.5" aria-hidden />
-                Testing mode
+                Testing Mode. Subscriptions inactive
               </span>
             </div>
             {userId ? (
@@ -371,26 +310,6 @@ function ProDeskPage() {
         </header>
 
         <div className="max-w-[920px] mx-auto w-full space-y-5 sm:space-y-6">
-        <aside
-          role="status"
-          aria-label="Pro testing mode"
-          className="rounded-2xl border border-amber-signal/45 bg-amber-signal/[0.1] px-4 py-3.5 sm:px-5 sm:py-4 space-y-2"
-        >
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.16em] text-amber-signal">
-            <FlaskConical className="w-3.5 h-3.5" aria-hidden />
-            Testing mode · offers not locked
-          </p>
-          <p className="text-[13px] sm:text-[13.5px] text-foreground/90 leading-relaxed">
-            Starter / Plus / Mega are early checkout experiments. Package copy is still thin —
-            full value descriptions, workspace outcomes, and{" "}
-            <strong className="font-semibold text-foreground">
-              API connectors to popular user workspaces
-            </strong>{" "}
-            (Notion, Slack, Drive, and similar) land before we lock pricing. Public Library stays
-            free; treat paid plans as beta until that ship.
-          </p>
-        </aside>
-
         {banner && (
           <p
             role="status"
@@ -497,7 +416,7 @@ function ProDeskPage() {
             </h2>
             <p className="text-[12.5px] text-muted-foreground mt-1">
               Tokens credit on subscribe and each renewal. One active plan per account.{" "}
-              <span className="text-amber-signal">Testing — value pack not final.</span>
+              <span className="text-amber-signal">Testing Mode — subscriptions inactive.</span>
             </p>
           </div>
           <ul className="grid gap-2.5 sm:grid-cols-3">
@@ -551,86 +470,51 @@ function ProDeskPage() {
           </ul>
         </section>
 
-        {/* Private run */}
+        {/* Enterprise — contact only (replaces private-run form) */}
         <section
-          aria-labelledby="pro-run"
-          className="rounded-2xl border border-cyan/30 bg-card/50 p-4 sm:p-5 space-y-4"
+          aria-labelledby="pro-enterprise"
+          className="rounded-2xl border border-amber-signal/40 bg-amber-signal/[0.07] p-4 sm:p-5 space-y-3"
         >
-          <div className="space-y-1">
-            <h2
-              id="pro-run"
-              className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
-            >
-              Start a private run
-            </h2>
-            <p className="text-[13px] text-muted-foreground leading-relaxed">
-              {pkgMeta.tierLabel} · {runCost} tokens. Writes a private desk report only — never the
-              public dashboard.
-            </p>
-          </div>
-
-          <label className="block space-y-1.5">
-            <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              Topic
+          <div className="flex items-start gap-3">
+            <span className="w-10 h-10 shrink-0 rounded-xl border border-amber-signal/40 bg-amber-signal/10 text-amber-signal grid place-items-center">
+              <Building2 className="w-4 h-4" aria-hidden />
             </span>
-            <textarea
-              value={runTopic}
-              onChange={(e) => setRunTopic(e.target.value)}
-              rows={3}
-              disabled={!userId || runBusy}
-              placeholder="What should we analyse?"
-              className="w-full rounded-xl border border-border bg-background/60 px-3 py-2.5 text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-cyan/40 disabled:opacity-50"
-            />
-          </label>
-
-          <label className="block space-y-1.5">
-            <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              Questions <span className="normal-case tracking-normal">(optional)</span>
-            </span>
-            <textarea
-              value={runQuestions}
-              onChange={(e) => setRunQuestions(e.target.value)}
-              rows={2}
-              disabled={!userId || runBusy}
-              placeholder="One question per line"
-              className="w-full rounded-xl border border-border bg-background/60 px-3 py-2.5 text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-cyan/40 disabled:opacity-50"
-            />
-          </label>
-
-          <div className="flex flex-wrap items-center gap-3 pt-0.5">
-            <button
-              type="button"
-              disabled={
-                !userId || runBusy || runTopic.trim().length < 8 || !canAfford
-              }
-              onClick={() => void startPrivateRun()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-display font-semibold border border-cyan/50 bg-cyan text-background hover:bg-cyan/90 disabled:opacity-45 disabled:cursor-not-allowed touch-manipulation min-h-[44px]"
-            >
-              {runBusy ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <FilePenLine className="w-4 h-4" aria-hidden />
-              )}
-              {!userId
-                ? "Sign in to run"
-                : !canAfford
-                  ? `Need ${runCost} tokens`
-                  : `Run · ${runCost} tokens`}
-            </button>
-            {userId && (
-              <span className="text-[12px] font-mono text-muted-foreground tabular-nums">
-                Balance {me?.balance ?? "—"}
-              </span>
-            )}
+            <div className="min-w-0 space-y-1.5 flex-1">
+              <h2
+                id="pro-enterprise"
+                className="text-[11px] font-mono uppercase tracking-[0.16em] text-amber-signal"
+              >
+                Enterprise
+              </h2>
+              <p className="text-[15px] font-display font-semibold text-foreground">
+                Personalized dashboards & custom research
+              </p>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
+                Team topics, custom trackers, and private briefings — contact only. No self-serve
+                checkout. Message goes to the Elenchos inbox.
+              </p>
+              <ContactEmailMe
+                source="pro-enterprise"
+                variant="button"
+                className="mt-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full border border-amber-signal/50 bg-amber-signal/15 text-amber-signal text-[13px] font-display font-semibold touch-manipulation hover:bg-amber-signal/25"
+                defaultMessage={
+                  "Hi — I’m interested in Enterprise: personalized dashboards and custom research.\n\n"
+                }
+                dialogTitle="Enterprise inquiry"
+                dialogDescription="Tell us what you need. We’ll reply from the Elenchos contact inbox."
+              >
+                Contact me
+              </ContactEmailMe>
+            </div>
           </div>
         </section>
 
         <aside className="rounded-xl border border-dashed border-border/80 px-4 py-3 text-[12.5px] text-muted-foreground flex items-start gap-2">
           <BookOpen className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" aria-hidden />
           <span>
-            Free published research lives under{" "}
+            Free published research lives in the{" "}
             <Link to="/research/library" className="text-cyan hover:underline">
-              Research
+              Research Library
             </Link>
             . Pro never replaces that surface.
           </span>

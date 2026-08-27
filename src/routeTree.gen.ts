@@ -34,6 +34,7 @@ import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
 import { Route as ApiBillingMeRouteImport } from './routes/api/billing/me'
+import { Route as ApiBillingStripeStatusRouteImport } from './routes/api/billing/stripe-status'
 import { Route as ApiProRunRouteImport } from './routes/api/pro/run'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
@@ -42,10 +43,14 @@ import { Route as ApiResearchFinalizeRouteImport } from './routes/api/research/f
 import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
 import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
 import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
+import { Route as ResearchCasestudySlugRouteImport } from './routes/research.casestudy.$slug'
 import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
 import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
 import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
+import { Route as ResearchTopicTopicIdRouteImport } from './routes/research.topic.$topicId'
+import { Route as ResearchTrackersIndexRouteImport } from './routes/research.trackers.index'
+import { Route as ResearchTrackersIndexIdRouteImport } from './routes/research.trackers.$indexId'
 import { Route as ApiResearchAdminCommissionRouteImport } from './routes/api/research/admin/commission'
 import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
 
@@ -175,6 +180,11 @@ const ApiBillingMeRoute = ApiBillingMeRouteImport.update({
   path: '/api/billing/me',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBillingStripeStatusRoute = ApiBillingStripeStatusRouteImport.update({
+  id: '/api/billing/stripe-status',
+  path: '/api/billing/stripe-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProRunRoute = ApiProRunRouteImport.update({
   id: '/api/pro/run',
   path: '/api/pro/run',
@@ -215,6 +225,11 @@ const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
   path: '/api/research/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchCasestudySlugRoute = ResearchCasestudySlugRouteImport.update({
+  id: '/research/casestudy/$slug',
+  path: '/research/casestudy/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResearchNetworksLedgerSpeechReachRoute =
   ResearchNetworksLedgerSpeechReachRouteImport.update({
     id: '/speech-reach',
@@ -234,6 +249,21 @@ const ResearchPreviewSlugRoute = ResearchPreviewSlugRouteImport.update({
 const ResearchReportTokenRoute = ResearchReportTokenRouteImport.update({
   id: '/research/report/$token',
   path: '/research/report/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchTopicTopicIdRoute = ResearchTopicTopicIdRouteImport.update({
+  id: '/research/topic/$topicId',
+  path: '/research/topic/$topicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchTrackersIndexRoute = ResearchTrackersIndexRouteImport.update({
+  id: '/research/trackers/',
+  path: '/research/trackers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchTrackersIndexIdRoute = ResearchTrackersIndexIdRouteImport.update({
+  id: '/research/trackers/$indexId',
+  path: '/research/trackers/$indexId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiResearchAdminCommissionRoute =
@@ -274,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/trackers/': typeof TrackersIndexRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/me': typeof ApiBillingMeRoute
+  '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
   '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
@@ -282,10 +313,14 @@ export interface FileRoutesByFullPath {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
+  '/research/topic/$topicId': typeof ResearchTopicTopicIdRoute
+  '/research/trackers/$indexId': typeof ResearchTrackersIndexIdRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/research/trackers/': typeof ResearchTrackersIndexRoute
   '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
   '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
@@ -315,6 +350,7 @@ export interface FileRoutesByTo {
   '/trackers': typeof TrackersIndexRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/me': typeof ApiBillingMeRoute
+  '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
   '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
@@ -323,10 +359,14 @@ export interface FileRoutesByTo {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
+  '/research/topic/$topicId': typeof ResearchTopicTopicIdRoute
+  '/research/trackers/$indexId': typeof ResearchTrackersIndexIdRoute
   '/research/preview': typeof ResearchPreviewIndexRoute
+  '/research/trackers': typeof ResearchTrackersIndexRoute
   '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
   '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
@@ -357,6 +397,7 @@ export interface FileRoutesById {
   '/trackers/': typeof TrackersIndexRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/me': typeof ApiBillingMeRoute
+  '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
   '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
@@ -365,10 +406,14 @@ export interface FileRoutesById {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
+  '/research/topic/$topicId': typeof ResearchTopicTopicIdRoute
+  '/research/trackers/$indexId': typeof ResearchTrackersIndexIdRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
+  '/research/trackers/': typeof ResearchTrackersIndexRoute
   '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
   '/api/research/report/$token': typeof ApiResearchReportTokenRoute
 }
@@ -400,6 +445,7 @@ export interface FileRouteTypes {
     | '/trackers/'
     | '/api/billing/checkout'
     | '/api/billing/me'
+    | '/api/billing/stripe-status'
     | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
@@ -408,10 +454,14 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
+    | '/research/topic/$topicId'
+    | '/research/trackers/$indexId'
     | '/research/preview/'
+    | '/research/trackers/'
     | '/api/research/admin/commission'
     | '/api/research/report/$token'
   fileRoutesByTo: FileRoutesByTo
@@ -441,6 +491,7 @@ export interface FileRouteTypes {
     | '/trackers'
     | '/api/billing/checkout'
     | '/api/billing/me'
+    | '/api/billing/stripe-status'
     | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
@@ -449,10 +500,14 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
+    | '/research/topic/$topicId'
+    | '/research/trackers/$indexId'
     | '/research/preview'
+    | '/research/trackers'
     | '/api/research/admin/commission'
     | '/api/research/report/$token'
   id:
@@ -482,6 +537,7 @@ export interface FileRouteTypes {
     | '/trackers/'
     | '/api/billing/checkout'
     | '/api/billing/me'
+    | '/api/billing/stripe-status'
     | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
@@ -490,10 +546,14 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
+    | '/research/topic/$topicId'
+    | '/research/trackers/$indexId'
     | '/research/preview/'
+    | '/research/trackers/'
     | '/api/research/admin/commission'
     | '/api/research/report/$token'
   fileRoutesById: FileRoutesById
@@ -524,6 +584,7 @@ export interface RootRouteChildren {
   TrackersIndexRoute: typeof TrackersIndexRoute
   ApiBillingCheckoutRoute: typeof ApiBillingCheckoutRoute
   ApiBillingMeRoute: typeof ApiBillingMeRoute
+  ApiBillingStripeStatusRoute: typeof ApiBillingStripeStatusRoute
   ApiProRunRoute: typeof ApiProRunRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiResearchCheckoutRoute: typeof ApiResearchCheckoutRoute
@@ -532,9 +593,13 @@ export interface RootRouteChildren {
   ApiResearchShareRoute: typeof ApiResearchShareRoute
   ApiResearchSharedRoute: typeof ApiResearchSharedRoute
   ApiResearchWebhookRoute: typeof ApiResearchWebhookRoute
+  ResearchCasestudySlugRoute: typeof ResearchCasestudySlugRoute
   ResearchPreviewSlugRoute: typeof ResearchPreviewSlugRoute
   ResearchReportTokenRoute: typeof ResearchReportTokenRoute
+  ResearchTopicTopicIdRoute: typeof ResearchTopicTopicIdRoute
+  ResearchTrackersIndexIdRoute: typeof ResearchTrackersIndexIdRoute
   ResearchPreviewIndexRoute: typeof ResearchPreviewIndexRoute
+  ResearchTrackersIndexRoute: typeof ResearchTrackersIndexRoute
   ApiResearchAdminCommissionRoute: typeof ApiResearchAdminCommissionRoute
   ApiResearchReportTokenRoute: typeof ApiResearchReportTokenRoute
 }
@@ -716,6 +781,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBillingMeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/billing/stripe-status': {
+      id: '/api/billing/stripe-status'
+      path: '/api/billing/stripe-status'
+      fullPath: '/api/billing/stripe-status'
+      preLoaderRoute: typeof ApiBillingStripeStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/pro/run': {
       id: '/api/pro/run'
       path: '/api/pro/run'
@@ -772,6 +844,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiResearchWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research/casestudy/$slug': {
+      id: '/research/casestudy/$slug'
+      path: '/research/casestudy/$slug'
+      fullPath: '/research/casestudy/$slug'
+      preLoaderRoute: typeof ResearchCasestudySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/networks-ledger/speech-reach': {
       id: '/research/networks-ledger/speech-reach'
       path: '/speech-reach'
@@ -798,6 +877,27 @@ declare module '@tanstack/react-router' {
       path: '/research/report/$token'
       fullPath: '/research/report/$token'
       preLoaderRoute: typeof ResearchReportTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/topic/$topicId': {
+      id: '/research/topic/$topicId'
+      path: '/research/topic/$topicId'
+      fullPath: '/research/topic/$topicId'
+      preLoaderRoute: typeof ResearchTopicTopicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/trackers/': {
+      id: '/research/trackers/'
+      path: '/research/trackers'
+      fullPath: '/research/trackers/'
+      preLoaderRoute: typeof ResearchTrackersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/trackers/$indexId': {
+      id: '/research/trackers/$indexId'
+      path: '/research/trackers/$indexId'
+      fullPath: '/research/trackers/$indexId'
+      preLoaderRoute: typeof ResearchTrackersIndexIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/research/admin/commission': {
@@ -858,6 +958,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackersIndexRoute: TrackersIndexRoute,
   ApiBillingCheckoutRoute: ApiBillingCheckoutRoute,
   ApiBillingMeRoute: ApiBillingMeRoute,
+  ApiBillingStripeStatusRoute: ApiBillingStripeStatusRoute,
   ApiProRunRoute: ApiProRunRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiResearchCheckoutRoute: ApiResearchCheckoutRoute,
@@ -866,9 +967,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiResearchShareRoute: ApiResearchShareRoute,
   ApiResearchSharedRoute: ApiResearchSharedRoute,
   ApiResearchWebhookRoute: ApiResearchWebhookRoute,
+  ResearchCasestudySlugRoute: ResearchCasestudySlugRoute,
   ResearchPreviewSlugRoute: ResearchPreviewSlugRoute,
   ResearchReportTokenRoute: ResearchReportTokenRoute,
+  ResearchTopicTopicIdRoute: ResearchTopicTopicIdRoute,
+  ResearchTrackersIndexIdRoute: ResearchTrackersIndexIdRoute,
   ResearchPreviewIndexRoute: ResearchPreviewIndexRoute,
+  ResearchTrackersIndexRoute: ResearchTrackersIndexRoute,
   ApiResearchAdminCommissionRoute: ApiResearchAdminCommissionRoute,
   ApiResearchReportTokenRoute: ApiResearchReportTokenRoute,
 }

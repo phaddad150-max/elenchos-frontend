@@ -6,8 +6,8 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/topics/$topicId")({
   beforeLoad: ({ params }) => {
     throw redirect({
-      to: "/research/library",
-      search: { section: "topics", topic: params.topicId },
+      to: "/research/topic/$topicId",
+      params: { topicId: params.topicId },
       replace: true,
     });
   },

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowRight,
@@ -14,6 +14,11 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import {
+  ResearchBackBar,
+  ResearchBreadcrumb,
+} from "@/components/research/ResearchDeskNav";
+import { ResearchNextSteps } from "@/components/research/ResearchNextSteps";
 import {
   AVIATION_SOURCES,
   CHAPTERS,
@@ -35,32 +40,15 @@ import {
 } from "@/lib/aviation/data";
 import { caseStudyTimestampLine } from "@/lib/case-study-meta";
 
+/** Legacy URL → SEO path */
 export const Route = createFileRoute("/research-aviation")({
-  head: () => ({
-    meta: [
-      {
-        title:
-          "Aviation after disruption · OEM · satcom · AI readiness · Elenchos Research",
-      },
-      {
-        name: "description",
-        content:
-          "Interactive deep dive: commercial aviation after COVID — OEM race, networks, Starlink-class satcom, payments, AI ops readiness. Free open sources. Not investment advice.",
-      },
-      {
-        property: "og:title",
-        content: "Aviation after disruption · Elenchos Research",
-      },
-      {
-        property: "og:description",
-        content:
-          "Delivery trust, cabin bandwidth, AI ops KPIs — interactive readiness index. Under 10 minutes.",
-      },
-      { property: "og:url", content: "https://elenchos.live/research-aviation" },
-    ],
-    links: [{ rel: "canonical", href: "https://elenchos.live/research-aviation" }],
-  }),
-  component: AviationIntelligencePage,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/research/casestudy/$slug",
+      params: { slug: "aviation" },
+      replace: true,
+    });
+  },
 });
 
 const toneColor: Record<string, string> = {
@@ -70,7 +58,7 @@ const toneColor: Record<string, string> = {
   emerald: "var(--emerald-signal)",
 };
 
-function AviationIntelligencePage() {
+export function AviationIntelligencePage() {
   const [active, setActive] = useState(CHAPTERS[0]!.id);
   const [copied, setCopied] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(READINESS_ROWS[2]!.id);
@@ -109,21 +97,29 @@ function AviationIntelligencePage() {
       <SiteNav />
 
       <main className="relative flex-1 mobile-safe-bottom overflow-x-clip">
+        <div className="max-w-[1100px] mx-auto px-3 sm:px-4 md:px-8 pt-4 sm:pt-5">
+          <ResearchBreadcrumb
+            trail={[
+              { label: "Library", to: "/research/library" },
+              { label: "Case studies", to: "/research/library" },
+              { label: "Aviation after disruption" },
+            ]}
+          />
+          <ResearchBackBar to="/research/library" label="Back to Library" />
+        </div>
         {/* ═══════════════ HOOK ═══════════════ */}
         <section
           aria-label="10-second overview"
           className="border-b border-cyan/30 bg-gradient-to-b from-cyan/10 via-background/80 to-background"
         >
-          <div className="max-w-[1100px] mx-auto px-3 sm:px-4 md:px-8 pt-5 sm:pt-8 pb-6 sm:pb-8 space-y-4 sm:space-y-5">
+          <div className="max-w-[1100px] mx-auto px-3 sm:px-4 md:px-8 pt-3 sm:pt-5 pb-6 sm:pb-8 space-y-4 sm:space-y-5">
             <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 text-cyan">
                 <Plane className="w-3.5 h-3.5" aria-hidden />
-                Research · deep dive
+                Research · Aviation after disruption
               </span>
               <span className="text-border">·</span>
               <span>Global commercial</span>
-              <span className="text-border">·</span>
-              <span>AVIATION → now</span>
               <span className="text-border">·</span>
               <span className="inline-flex items-center gap-1 text-cyan">
                 <Timer className="w-3 h-3" aria-hidden />
@@ -659,6 +655,8 @@ function AviationIntelligencePage() {
               GDELT (M) and thin X (D) remain owner-gated.
             </p>
           </section>
+
+          <ResearchNextSteps contextHint="Aviation after disruption · OEM · satcom · AI" />
         </div>
       </main>
 

@@ -47,7 +47,7 @@ function CitizenDiscoursePage() {
             className="hover:text-cyan transition-colors inline-flex items-center gap-1.5 min-h-[36px]"
           >
             <ArrowLeft className="w-3 h-3" />
-            Research
+            Library
           </Link>
           <span aria-hidden className="text-border">
             /
