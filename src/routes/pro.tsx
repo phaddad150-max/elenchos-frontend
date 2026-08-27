@@ -454,6 +454,7 @@ function ProDeskPage() {
         </section>
 
         {adminOk && (
+        <>
         <section aria-labelledby="pro-plans" className="space-y-3">
           <div className="px-0.5">
             <h2
@@ -558,6 +559,7 @@ function ProDeskPage() {
             </div>
           </div>
         </section>
+        </>
         )}
 
         <aside className="rounded-xl border border-dashed border-border/80 px-4 py-3 text-[12.5px] text-muted-foreground flex items-start gap-2">
