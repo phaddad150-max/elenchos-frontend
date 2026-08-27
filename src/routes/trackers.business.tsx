@@ -5,6 +5,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { BUSINESS_LEADER_DIMENSIONS, TRACKER_CATALOG } from "@/lib/trackers-data";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
@@ -88,14 +89,15 @@ function BusinessLeadersPage() {
         <LeaderboardDetail row={row} dimensions={BUSINESS_LEADER_DIMENSIONS} />
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
-            Need a private brief on an AI company, founder, or market narrative?
+            Need a custom brief on an AI company, founder, or market narrative?
           </p>
-          <Link
-            to="/pro"
+          <ContactEmailMe
+            source="trackers-business"
+            variant="button"
             className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full text-[13px] font-semibold border border-cyan/40 bg-cyan/12 text-cyan"
           >
-            Open Pro
-          </Link>
+            Custom research · contact
+          </ContactEmailMe>
         </section>
       </main>
       <SiteFooter />

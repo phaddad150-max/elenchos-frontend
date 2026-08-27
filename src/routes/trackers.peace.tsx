@@ -5,6 +5,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { fetchLatestTrackers, TRACKER_CATALOG, type TrackerRow } from "@/lib/trackers-data";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { PeaceDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/peace")({
@@ -88,15 +89,16 @@ function PeacePage() {
         <PeaceDetail row={row} />
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
-            Want a deeper private analysis on peace or normalization?
+            Want a deeper custom brief on peace or normalization? Contact us.
           </p>
           <div className="flex flex-wrap gap-2">
-            <Link
-              to="/pro"
+            <ContactEmailMe
+              source="trackers-peace"
+              variant="button"
               className="btn-intel-primary inline-flex items-center justify-center min-h-[44px] px-4 rounded-full text-[13px] font-semibold"
             >
-              Private analyses on Pro
-            </Link>
+              Custom research · contact
+            </ContactEmailMe>
             <Link
               to="/research/library"
               className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan"

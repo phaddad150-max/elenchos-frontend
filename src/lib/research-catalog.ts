@@ -377,7 +377,7 @@ export const RESEARCH_STYLES: {
     method:
       "X-grounded topic analysis in the Library: citizen sample, sentiment, narrative divergence, human-curated insights. Contrasts ordinary speech with official and media messaging.",
     cta: "Open Library topics",
-    href: "/research/library?section=topics",
+    href: "/research/library",
   },
   {
     id: "thesis",

@@ -373,8 +373,8 @@ function Body({
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         {pathId ? (
           <Link
-            to="/research/library"
-            search={{ section: "topics", topic: pathId }}
+            to="/research/topic/$topicId"
+            params={{ topicId: pathId }}
             onClick={onClose}
             className="text-[12px] font-medium text-cyan hover:underline"
           >

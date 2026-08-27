@@ -11,6 +11,7 @@ import {
   type TrackerRow,
 } from "@/lib/trackers-data";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import {
   seedWorldLeadersTrackerRow,
   worldLeadersRosterIsOutdated,
@@ -125,15 +126,16 @@ function LeadersPage() {
         <LeaderboardDetail row={row} dimensions={LEADER_DIMENSIONS} />
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
-            Need a private multi-source brief on a leader or region?
+            Need a custom brief on a leader or region? Contact us.
           </p>
           <div className="flex flex-wrap gap-2">
-            <Link
-              to="/pro"
+            <ContactEmailMe
+              source="trackers-leaders"
+              variant="button"
               className="btn-intel-primary inline-flex items-center justify-center min-h-[44px] px-4 rounded-full text-[13px] font-semibold"
             >
-              Open Pro
-            </Link>
+              Custom research · contact
+            </ContactEmailMe>
             <Link
               to="/research/library"
               search={{ section: "trackers" }}

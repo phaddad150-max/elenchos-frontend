@@ -2,6 +2,9 @@
 
 Presentation layer for [elenchos.live](https://elenchos.live). Reads all scores, topics, and trackers from Supabase; the backend (`phaddad150-max/elenchos-backend`) is the single source of truth.
 
+**GitHub Actions for Topics / Dashboard / Trackers are not in this repo.**  
+Run them at https://github.com/phaddad150-max/elenchos-backend/actions (see backend `docs/GITHUB_ACTIONS.md`). This frontend repo only has **Seed commissioned report**.
+
 ## Stack
 
 - TanStack Start + Vite

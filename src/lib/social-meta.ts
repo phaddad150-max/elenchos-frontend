@@ -44,7 +44,7 @@ export const SPEECH_REACH_SOCIAL: SocialPageMeta = {
 export const HOME_SOCIAL: SocialPageMeta = {
   title: "Elenchos · Public Discourse Lens × Research Desk",
   description:
-    "Citizen voices vs official frames. Free Library under Research, Networks Ledger, and Pro for private token runs.",
+    "Citizen voices vs official frames. Free Dashboard and Research Library — topics, case studies, trackers, and ledgers.",
   url: SITE,
   image: DEFAULT_OG,
 };
@@ -52,7 +52,7 @@ export const HOME_SOCIAL: SocialPageMeta = {
 export const ABOUT_SOCIAL: SocialPageMeta = {
   title: "About Elenchos · ἔλεγχος · Public Discourse Lens × Research Desk",
   description:
-    "Elenchos (ἔλεγχος) means cross-examination. Free Dashboard and Research Library; Pro monthly tokens for private analyses. Citizen voices vs official narratives.",
+    "Elenchos (ἔλεγχος) means cross-examination. Free Dashboard and Research Library. Citizen voices vs official narratives.",
   url: `${SITE}/about`,
   image: DEFAULT_OG,
 };
@@ -70,6 +70,6 @@ export const TOPICS_SOCIAL: SocialPageMeta = {
   title: "Topic analyses · Library · Elenchos",
   description:
     "Citizen vs official frames from public X samples — now inside the free Library.",
-  url: `${SITE}/research/library?section=topics`,
+  url: `${SITE}/research/library`,
   image: DEFAULT_OG,
 };

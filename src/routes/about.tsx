@@ -82,12 +82,13 @@ function AboutPage() {
                   >
                     Open Research <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
-                  <Link
-                    to="/pro"
+                  <ContactEmailMe
+                    source="about-hero"
+                    variant="button"
                     className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-cyan/40 bg-cyan/10 text-cyan text-[13px] font-medium touch-manipulation"
                   >
-                    Open Pro
-                  </Link>
+                    Contact me
+                  </ContactEmailMe>
                 </div>
               </div>
             </div>
@@ -100,7 +101,7 @@ function AboutPage() {
             id="about-freemium"
             className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3"
           >
-            Free &amp; Pro
+            Free work &amp; custom research
           </h2>
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="rounded-2xl border border-emerald-signal/35 bg-card/50 p-4 sm:p-5 space-y-2.5 flex flex-col min-h-[160px] transition-colors hover:border-emerald-signal/55 hover:bg-card/70">
@@ -127,19 +128,20 @@ function AboutPage() {
                 <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
                   <Sparkles className="w-4 h-4" aria-hidden />
                 </span>
-                <p className="font-display font-semibold text-[15px]">Pro</p>
+                <p className="font-display font-semibold text-[15px]">Custom research</p>
               </div>
               <p className="text-[13px] text-muted-foreground leading-relaxed flex-1">
-                <strong className="text-foreground/90 font-medium">Monthly token packs</strong> —
-                Starter ($10 / 10 tokens), Plus ($40 / 50), Mega ($90 / 120). Soft sign-in. Private
-                deep-dive runs; reports stay off the public dashboard.
+                <strong className="text-foreground/90 font-medium">Contact only</strong> —
+                private briefs, custom topics, or team dashboards. No public self-serve checkout
+                while Pro is in operator testing.
               </p>
-              <Link
-                to="/pro"
+              <ContactEmailMe
+                source="about-custom"
+                variant="link"
                 className="inline-flex items-center gap-1 text-[13px] font-semibold text-cyan self-start min-h-[36px]"
               >
-                View plans <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                Contact me <ArrowRight className="w-3.5 h-3.5" />
+              </ContactEmailMe>
             </div>
           </div>
         </section>
@@ -242,12 +244,22 @@ function AboutPage() {
               title="Research"
               body="Free published Library — topics, case studies, trackers, and ledgers."
             />
-            <ProductCard
-              to="/pro"
-              icon={<Sparkles className="w-4 h-4" />}
-              title="Pro"
-              body="Monthly tokens for private analyses. Enterprise by contact."
-            />
+            <div className="rounded-2xl border border-border/90 bg-card/50 p-4 min-h-[44px] space-y-2">
+              <div className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 grid place-items-center text-cyan">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <p className="font-display font-semibold text-[15px]">Custom research</p>
+              <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">
+                Private briefs and team work — contact only. Public Library stays free.
+              </p>
+              <ContactEmailMe
+                source="about-surfaces"
+                variant="link"
+                className="inline-flex items-center gap-1 text-[12px] text-cyan mt-3 font-medium"
+              >
+                Contact me <ArrowRight className="w-3.5 h-3.5" />
+              </ContactEmailMe>
+            </div>
           </div>
         </section>
 
@@ -272,12 +284,13 @@ function AboutPage() {
           >
             Open Research
           </Link>
-          <Link
-            to="/pro"
+          <ContactEmailMe
+            source="about-footer"
+            variant="button"
             className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-border text-[13px] text-muted-foreground hover:text-cyan hover:border-cyan/40 touch-manipulation"
           >
-            Open Pro
-          </Link>
+            Contact me
+          </ContactEmailMe>
           <Link
             to="/privacy"
             className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-full border border-border text-[13px] text-muted-foreground touch-manipulation"

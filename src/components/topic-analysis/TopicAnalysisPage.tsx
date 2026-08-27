@@ -23,6 +23,7 @@ import {
   liveShareScore,
 } from "@/lib/share-insight";
 import { uniqueProse } from "@/lib/curated-text";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import {
   Bar,
   BarChart,
@@ -640,16 +641,17 @@ export function TopicAnalysisPage({
           What’s next
         </p>
         <p className="text-[13px] sm:text-[14px] text-foreground/90 leading-relaxed">
-          This page is a live public topic analysis. Run a private analysis on Pro, or keep browsing
-          free published work in the Research Library.
+          This page is a public topic analysis. Keep browsing free published work in the Research
+          Library, or contact us for custom research.
         </p>
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
-          <Link
-            to="/pro"
+          <ContactEmailMe
+            source="topic-analysis-next"
+            variant="button"
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[13px] font-medium touch-manipulation"
           >
-            Private analyses on Pro
-          </Link>
+            Custom research · contact
+          </ContactEmailMe>
           <Link
             to="/research/library"
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-border text-muted-foreground hover:text-cyan text-[13px] touch-manipulation"

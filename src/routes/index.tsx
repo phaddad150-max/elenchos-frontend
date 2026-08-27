@@ -97,7 +97,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Elenchos: Public Discourse Lens x Research Desk. Live Topics on X vs official frames, Dashboard signals, free Library, and Pro private runs. Privacy-first.",
+          "Elenchos: Public Discourse Lens x Research Desk. Citizen voices on X vs official frames. Free Dashboard and Research Library. Privacy-first.",
       },
       {
         property: "og:title",
@@ -106,7 +106,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Citizen voices vs official narratives. Topics analysis, crisis briefings, thesis-style case studies, and Pro monthly plans.",
+          "Citizen voices vs official narratives. Topic analysis, crisis briefings, thesis-style case studies, and free Library.",
       },
       { property: "og:url", content: "https://elenchos.live/" },
     ],
@@ -288,6 +288,7 @@ function Dashboard() {
         href: "/trackers/business" as const,
         ctaLabel: "Open business board",
         kicker: "Economy board",
+        preview: true,
       };
     }
     if (topicFilter === "Social") {
@@ -300,6 +301,7 @@ function Dashboard() {
         href: "/trackers/citizen-discourse" as const,
         ctaLabel: "Open journalism board",
         kicker: "Social board",
+        preview: true,
       };
     }
     // Political tab or no filter → world leaders only
@@ -311,6 +313,7 @@ function Dashboard() {
       href: "/trackers/leaders" as const,
       ctaLabel: "Open full leaderboard",
       kicker: "Political board",
+      preview: true,
     };
   }, [
     topicFilter,
@@ -802,6 +805,7 @@ function Dashboard() {
               href={boardPreview.href}
               ctaLabel={boardPreview.ctaLabel}
               kicker={boardPreview.kicker}
+              preview={boardPreview.preview}
             />
           </div>
           <div className="min-w-0 xl:col-span-4 h-full flex">
@@ -1665,7 +1669,8 @@ function LeadershipBoardPreview({
   titleAccent = "by citizens",
   href = "/trackers/leaders",
   ctaLabel = "Open full leaderboard",
-  kicker = "Live leaderboard",
+  kicker = "Leadership board",
+  preview = true,
 }: {
   leaders: RankedLeader[];
   rankedTotal?: number;
@@ -1674,6 +1679,7 @@ function LeadershipBoardPreview({
   href?: "/trackers/leaders" | "/trackers/business" | "/trackers/citizen-discourse";
   ctaLabel?: string;
   kicker?: string;
+  preview?: boolean;
 }) {
   const top = leaders.filter((l) => l.status !== "waiting").slice(0, 5);
   const [focus, setFocus] = useState(0);
@@ -1722,12 +1728,14 @@ function LeadershipBoardPreview({
           </div>
           <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.16em] inline-flex items-center gap-1 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
-            {href === "/trackers/leaders" ? "Live" : "Preview"}
+            {preview ? "Preview" : "Live"}
           </span>
         </div>
 
         {top.length === 0 ? (
-          <p className="text-[12px] text-muted-foreground py-6 text-center">Loading leaders…</p>
+          <p className="text-[12px] text-muted-foreground py-6 text-center">
+            {preview ? "Illustrative roster loading, or no live sample yet." : "No leaders in this sample yet."}
+          </p>
         ) : (
           <ul
             className="space-y-1.5 sm:space-y-2"
@@ -2996,7 +3004,7 @@ function DashboardKpiGrid({
       value: ready ? trackersActive : undefined,
       icon: Radar,
       format: "number",
-      liveNote: "Live product trackers and indexes on the desk.",
+      liveNote: "Public trackers and indexes. Seed boards are labeled preview, not live X ranks.",
       liveFacts: DASHBOARD_TRACKERS.map((t) => `${t.title} · ${t.badge}`),
       links: [
         { label: "Leadership board", href: "/trackers/leaders" },
