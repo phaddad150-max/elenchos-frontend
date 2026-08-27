@@ -119,7 +119,7 @@ function LeadersPage() {
                 {row.item_count} entries
               </span>
             )}
-            <SimulatedDataBadge />
+            {usingSeed ? <SimulatedDataBadge /> : null}
           </div>
         </header>
         <LeaderboardDetail row={row} dimensions={LEADER_DIMENSIONS} />

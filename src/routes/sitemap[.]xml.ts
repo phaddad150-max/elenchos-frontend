@@ -42,31 +42,19 @@ export const Route = createFileRoute("/sitemap.xml")({
             changefreq: "weekly",
             priority: "0.8",
           },
-          {
-            path: "/research/trackers/country-leader-index",
-            changefreq: "weekly",
-            priority: "0.75",
-          },
-          {
-            path: "/research/trackers/ai-business-index",
-            changefreq: "weekly",
-            priority: "0.7",
-          },
-          {
-            path: "/research/trackers/citizen-journalism-index",
-            changefreq: "weekly",
-            priority: "0.7",
-          },
-          {
-            path: "/research/trackers/peace-normalization-index",
-            changefreq: "weekly",
-            priority: "0.75",
-          },
-          ...researchBriefs.map((b) => ({
-            path: `/research/preview/${b.slug}`,
-            changefreq: "weekly" as const,
-            priority: "0.75",
-          })),
+          { path: "/trackers", changefreq: "weekly", priority: "0.7" },
+          ...researchBriefs
+            .filter(
+              (b) =>
+                b.slug !== "aviation-race-digital-ai" &&
+                b.slug !== "aviation" &&
+                b.slug !== "irregular-migration",
+            )
+            .map((b) => ({
+              path: `/research/preview/${b.slug}`,
+              changefreq: "weekly" as const,
+              priority: "0.75",
+            })),
           { path: "/about", changefreq: "monthly", priority: "0.65" },
           { path: "/privacy", changefreq: "yearly", priority: "0.4" },
         ];

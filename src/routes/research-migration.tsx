@@ -208,11 +208,8 @@ export function MigrationIntelligencePage() {
                 <Home className="w-3.5 h-3.5" /> Home
               </Link>
               <Link
-                to="/research/library"
-                search={{
-                  section: "topics",
-                  topic: "eu-migration-green-divisions",
-                }}
+                to="/research/topic/$topicId"
+                params={{ topicId: "eu-migration-green-divisions" }}
                 className="inline-flex items-center gap-1 text-muted-foreground hover:text-cyan min-h-[36px]"
               >
                 Live X topic pulse <ArrowRight className="w-3 h-3" />
@@ -703,10 +700,10 @@ export function MigrationIntelligencePage() {
             <p className="text-[11px] text-muted-foreground">
               Pin:{" "}
               <a
-                href="https://elenchos.live/research-migration"
+                href="https://elenchos.live/research/casestudy/irregular-migration"
                 className="text-cyan hover:underline break-all"
               >
-                https://elenchos.live/research-migration
+                https://elenchos.live/research/casestudy/irregular-migration
               </a>
             </p>
           </section>

@@ -17,6 +17,7 @@ import { oauthReturnTo } from "@/lib/auth-redirect";
 import {
   MONTHLY_PLAN_ORDER,
   MONTHLY_PLANS,
+  PRO_CHECKOUT_ENABLED,
   type MonthlyPlanId,
 } from "@/lib/billing/catalog";
 import { socialMetaTags } from "@/lib/social-meta";
@@ -216,6 +217,12 @@ function ProDeskPage() {
 
   const startCheckout = async (planId: MonthlyPlanId) => {
     setActionError(null);
+    if (!PRO_CHECKOUT_ENABLED) {
+      setActionError(
+        "Subscriptions are inactive while Pro is in testing. Use Contact me for Enterprise.",
+      );
+      return;
+    }
     const token = await accessToken();
     if (!token) {
       setActionError("Sign in to continue.");
@@ -448,12 +455,14 @@ function ProDeskPage() {
                   </p>
                   <button
                     type="button"
-                    disabled={!userId || !!busy || proActive}
+                    disabled={!PRO_CHECKOUT_ENABLED || !userId || !!busy || proActive}
                     onClick={() => void startCheckout(id)}
                     className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 rounded-full text-[13px] font-display font-semibold border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15 disabled:opacity-45 disabled:cursor-not-allowed touch-manipulation"
                   >
                     {busy === id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : !PRO_CHECKOUT_ENABLED ? (
+                      "Testing — inactive"
                     ) : isCurrent ? (
                       "Current plan"
                     ) : proActive ? (

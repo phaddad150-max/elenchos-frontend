@@ -5,14 +5,27 @@ import {
   stripeEnvPresence,
 } from "@/lib/billing/catalog";
 
+function assertAdmin(request: Request): boolean {
+  const secret =
+    process.env.ADMIN_SECRET?.trim() ||
+    process.env.RESEARCH_ADMIN_SECRET?.trim() ||
+    "";
+  if (!secret) return false;
+  const hdr = request.headers.get("x-admin-secret")?.trim() || "";
+  return hdr.length > 0 && hdr === secret;
+}
+
 /**
- * Safe Stripe env diagnostic — no secret values, only key names + test/live/empty.
- * Open: https://elenchos.live/api/billing/stripe-status
+ * Stripe env diagnostic — no secret values.
+ * Not public: requires x-admin-secret (ADMIN_SECRET or RESEARCH_ADMIN_SECRET).
  */
 export const Route = createFileRoute("/api/billing/stripe-status")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
+        if (!assertAdmin(request)) {
+          return new Response(null, { status: 404 });
+        }
         const resolved = resolveStripeSecret();
         return Response.json({
           ok: true,
@@ -22,10 +35,6 @@ export const Route = createFileRoute("/api/billing/stripe-status")({
           can_checkout_test_packs: resolved.mode === "test",
           env: stripeEnvPresence(),
           stripe_keys_seen: listStripeEnvKeyModes(),
-          hint:
-            resolved.mode === "test"
-              ? "Test secret is active — Pro pack checkout should work."
-              : "No sk_test_ secret visible. Edit STRIPE_SECRET_KEY on Vercel Production to your sk_test_… value, Save, Redeploy, then reopen this URL.",
         });
       },
     },

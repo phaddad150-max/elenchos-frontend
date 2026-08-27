@@ -40,3 +40,9 @@ dist-ssr
 src/lib/networks-ledger/archive/data.named.json
 .vercel
 .env*
+
+# Local build dumps / Windows helpers (never ship)
+build-*.txt
+tsc-output.txt
+launch.vbs
+

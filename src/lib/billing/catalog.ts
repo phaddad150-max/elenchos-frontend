@@ -11,6 +11,12 @@
  * Token unit ≈ $1 USD retail face value.
  */
 
+/**
+ * Pro monthly checkout is frozen while Testing Mode is on.
+ * Server also requires PRO_SUBSCRIPTIONS_ACTIVE=true to create Stripe sessions.
+ */
+export const PRO_CHECKOUT_ENABLED = false;
+
 export type MonthlyPlanId = "pack_starter" | "pack_plus" | "pack_mega";
 
 /** @deprecated alias — same as MonthlyPlanId (env keys kept for Stripe). */
@@ -138,6 +144,10 @@ function runtimeEnv(): NodeJS.ProcessEnv {
   } catch {
     return {};
   }
+}
+
+export function proSubscriptionsActive(): boolean {
+  return readProcessEnv("PRO_SUBSCRIPTIONS_ACTIVE") === "true";
 }
 
 /** Dynamic env read — avoids Vite build-time inlining of process.env.FOO → undefined. */

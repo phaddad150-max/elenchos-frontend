@@ -113,9 +113,7 @@ export function GlobalSearch() {
                 key={t.id}
                 value={`topic ${t.keywords}`}
                 onSelect={() =>
-                  go(
-                    `/research/library?section=topics&topic=${encodeURIComponent(t.id)}`,
-                  )
+                  go(`/research/topic/${encodeURIComponent(t.id)}`)
                 }
               >
                 <Layers className="w-4 h-4 text-cyan" />
@@ -186,9 +184,7 @@ export function GlobalSearch() {
                     key={s.topicId}
                     value={`signal ${s.keywords}`}
                     onSelect={() =>
-                      go(
-                        `/research/library?section=topics&topic=${encodeURIComponent(s.topicId)}`,
-                      )
+                      go(`/research/topic/${encodeURIComponent(s.topicId)}`)
                     }
                   >
                     <Activity className="w-4 h-4 text-emerald-signal" />

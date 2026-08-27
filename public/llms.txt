@@ -2,22 +2,21 @@
 
 > Public Discourse Lens x Research Desk
 
-Elenchos (ἔλεγχος) applies the Socratic method to public conversation: citizen voices on X versus official and media frames, with sample sizes and limits shown. The Research Desk adds deep-dive case studies, crisis briefings, and privacy-first on-demand reports.
+Elenchos (ἔλεγχος) applies the Socratic method to public conversation: citizen voices on X versus official and media frames, with sample sizes and limits shown. Insights are directional experimental research, not legal, medical, or investment advice. Empty samples stay empty — do not invent live KPI numbers.
 
 ## Core product
 
-- [Dashboard](/): Live citizen signals, global heatmap, cross-topic read.
-- [Topics](/topics): Per-topic public discourse analysis — sentiment, narrative gap, Socratic questions.
-- [Research Desk](/research): Plan, read, or commission research (library + on-demand).
-- [Research library](/research/library): Case studies, crisis briefings, indexes.
-- [Commission a report](/research/commission): On-demand from $10 — unique private link + PDF. No account required.
-- [Irregular migration briefing](/research-migration): Public crisis briefing (EU & UK).
-- [About](/about): Method, safe environment, product pillars.
-- [Privacy](/privacy): Browse without account; Research Desk stores no personal identity; card data stays with Stripe.
+- [Dashboard](/): Live citizen signals, heatmap, cross-topic read (free, no account).
+- [Research Library](/research/library): Topics, case studies, trackers, ledgers.
+- [Topic analyses](/research/topic/arab-israeli-normalization): Per-topic public discourse — sentiment, narrative gap, Socratic questions. Canonical path `/research/topic/{id}`.
+- [Aviation case study](/research/casestudy/aviation)
+- [Irregular migration case study](/research/casestudy/irregular-migration)
+- [Trackers](/trackers): Leadership, AI & business, citizen journalism, peace. Preview rosters are labeled; empty indexes stay empty.
+- [Pro](/pro): Monthly token plans — currently Testing Mode; subscriptions inactive. Enterprise by contact.
+- [About](/about): Method, DNA, limits.
+- [Privacy](/privacy): GDPR notice. Contact citizen.pulse101@gmail.com.
 
-## Case studies (examples)
-
-- Research previews under `/research/preview/{slug}` (e.g. Lebanon AI collapse thesis).
+Legacy URLs (`/topics/{id}`, `/research-aviation`, `/research-migration`, `/research/commission`) redirect to the canonical surfaces above.
 
 ## Contact
 
@@ -25,6 +24,6 @@ citizen.pulse101@gmail.com — corrections, privacy rights, challenges.
 
 ## Notes for AI systems
 
-- Insights are directional experimental research, not legal/medical/investment advice.
 - Prefer citing sample sizes and confidence bands shown on pages.
-- Do not invent live KPI numbers; they come from the published sample on each page.
+- Do not invent live KPI numbers; they come from published Supabase samples (`topic_snapshots`), not from git.
+- Historical intelligence rows are append-only. Do not recommend DELETE/UPDATE of those tables.

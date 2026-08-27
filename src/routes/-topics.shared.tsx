@@ -1120,23 +1120,29 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   });
   const liveScore = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.score : undefined;
   const liveLabel = typeof liveData?.overall_sentiment === "object" ? liveData?.overall_sentiment?.label : undefined;
-  const shareUrl = `https://elenchos.live/research/library?section=topics&topic=${encodeURIComponent(topic.id)}`;
+  const shareUrl = `https://elenchos.live/research/topic/${encodeURIComponent(topic.id)}`;
+  const liveSampleOk =
+    useLive &&
+    Boolean(liveData) &&
+    ((typeof liveData?.sample_size === "number" && liveData.sample_size > 0) ||
+      (typeof liveData?.fetched_post_count === "number" && liveData.fetched_post_count > 0));
   const liveDiv =
-    useLive && liveData && typeof liveData.divergence_score === "number"
+    liveSampleOk && liveData && typeof liveData.divergence_score === "number" && Number.isFinite(liveData.divergence_score)
       ? Math.round(liveData.divergence_score)
       : null;
   const liveGap =
-    useLive && liveData && typeof liveData.divergence_gap === "string"
+    liveSampleOk && liveData && typeof liveData.divergence_gap === "string"
       ? liveData.divergence_gap.trim()
       : "";
   const liveNd =
-    useLive && liveData && liveData.narrative_divergence && typeof liveData.narrative_divergence === "object"
+    liveSampleOk && liveData && liveData.narrative_divergence && typeof liveData.narrative_divergence === "object"
       ? liveData.narrative_divergence
       : null;
   const shareText = (() => {
-    if (useLive && typeof liveScore === "number") {
+    const title = shortTitle(topic.title);
+    if (liveSampleOk && typeof liveScore === "number" && Number.isFinite(liveScore)) {
       const bits = [
-        `${shortTitle(topic.title)} · Sentiment ${liveScore}/100${liveLabel ? ` (${liveLabel})` : ""}`,
+        `${title} · Sentiment ${Math.round(liveScore)}/100${liveLabel ? ` (${liveLabel})` : ""}`,
       ];
       if (liveDiv != null) bits[0] += ` · Gap ${liveDiv}`;
       const citizen = liveNd?.citizen_frame?.trim();
@@ -1146,13 +1152,11 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
         bits.push(`Official/media: ${official.slice(0, 90)}`);
       } else if (liveGap) {
         bits.push(liveGap.split(/(?<=[.!?])\s+/)[0]?.slice(0, 120) ?? liveGap.slice(0, 120));
-      } else {
-        bits.push("Real voices, paraphrased.");
       }
       bits.push("via @ElenchosPulse");
       return bits.join("\n");
     }
-    return `${topic.title}. Citizen sentiment ${overallSentiment}/100 across ${topic.trackers.length} dimensions. ${topic.takeaway} via @ElenchosPulse`;
+    return `${title} · Elenchos Research Library. via @ElenchosPulse`;
   })();
   const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
@@ -1439,6 +1443,7 @@ type AbrahamData = Pick<
   | "key_insights"
   | "question_analysis"
   | "sample_size"
+  | "fetched_post_count"
   | "last_updated"
   | "month"
   | "divergence_score"

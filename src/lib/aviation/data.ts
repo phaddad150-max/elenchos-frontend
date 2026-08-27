@@ -466,7 +466,7 @@ export const TIMELINE: { year: string; title: string; body: string }[] = [
 ];
 
 export const X_THREAD_DRAFT = [
-  "1/ After COVID, aviation isn’t only “seats back.” It’s who can deliver aircraft, who owns cabin bandwidth, and who runs AI on ops metrics — not slogans. Deep dive: elenchos.live/research-aviation",
+  "1/ After COVID, aviation isn’t only “seats back.” It’s who can deliver aircraft, who owns cabin bandwidth, and who runs AI on ops metrics — not slogans. Deep dive: elenchos.live/research/casestudy/aviation",
   "2/ OEM dual oligopoly still rules the West. Delivery credibility is a strategic asset. COMAC is a horizon risk, not a 5-year Western fleet swap. Not investment advice.",
   "3/ Starlink-class satcom + experimental payments + AI maintenance: announcement ≠ fleet install. Score install base and AOG hours. Full interactive brief on Elenchos.",
 ];

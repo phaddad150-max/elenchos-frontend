@@ -597,10 +597,10 @@ export function AviationIntelligencePage() {
             <p className="text-[11px] text-muted-foreground">
               Pin:{" "}
               <a
-                href="https://elenchos.live/research-aviation"
+                href="https://elenchos.live/research/casestudy/aviation"
                 className="text-cyan hover:underline break-all"
               >
-                https://elenchos.live/research-aviation
+                https://elenchos.live/research/casestudy/aviation
               </a>
             </p>
           </section>

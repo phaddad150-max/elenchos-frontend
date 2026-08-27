@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { requireBillingUser } from "@/lib/billing/auth.server";
-import { isMonthlyPlanId, stripeEnvPresence } from "@/lib/billing/catalog";
+import { isMonthlyPlanId, proSubscriptionsActive } from "@/lib/billing/catalog";
 import {
   createMonthlyPlanCheckout,
   stripeSecret,
@@ -19,12 +19,20 @@ export const Route = createFileRoute("/api/billing/checkout")({
     handlers: {
       POST: async ({ request }) => {
         try {
-          if (!stripeSecret()) {
+          if (!proSubscriptionsActive()) {
             return Response.json(
               {
                 error:
-                  "Stripe is not configured. Add STRIPE_SECRET_KEY_TEST=sk_test_… (preferred) or STRIPE_SECRET_KEY on Vercel Production, then Redeploy.",
-                env: stripeEnvPresence(),
+                  "Pro subscriptions are inactive while Testing Mode is on. Contact Elenchos for Enterprise.",
+              },
+              { status: 503 },
+            );
+          }
+
+          if (!stripeSecret()) {
+            return Response.json(
+              {
+                error: "Checkout is not available right now.",
               },
               { status: 503 },
             );
@@ -74,9 +82,7 @@ export const Route = createFileRoute("/api/billing/checkout")({
           if (!session.ok) {
             return Response.json(
               {
-                error: session.message,
-                // Booleans / mode only — helps confirm whether STRIPE_SECRET_KEY_TEST reached the server
-                env: stripeEnvPresence(),
+                error: session.message || "Checkout failed.",
               },
               { status: 502 },
             );

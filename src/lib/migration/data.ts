@@ -589,7 +589,7 @@ export const RETURNS_HONESTY = {
 };
 
 export const X_THREAD_DRAFT: string[] = [
-  "1/ Illegal entry at EU scale was normalised. Speech against it was often policed. Citizens paid. Full brief: https://elenchos.live/research-migration",
+  "1/ Illegal entry at EU scale was normalised. Speech against it was often policed. Citizens paid. Full brief: https://elenchos.live/research/casestudy/irregular-migration",
   "2/ Don’t confuse charts: 2015 ~1.8M is the peak YEAR of Frontex detections — not the multi-year total. Listed years in our series already sum past ~4M detection events (not unique people). X is right to reject the soft ‘only 2M ever’ slogan.",
   "3/ 2024–25 detections fell (~239k → ~178k). Lower flow ≠ restored trust, returns ledger, or free speech. Corridors + open vs resist inside. — @elenchospulse",
 ];

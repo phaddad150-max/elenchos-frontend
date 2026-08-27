@@ -1,3 +1,24 @@
+/** True when a snapshot has a real public-discourse sample (not empty / catalog). */
+export function hasLiveDiscourseSample(
+  sampleSize?: number | null,
+  fetchedPostCount?: number | null,
+): boolean {
+  const sample = typeof sampleSize === "number" ? sampleSize : 0;
+  const fetched = typeof fetchedPostCount === "number" ? fetchedPostCount : 0;
+  return sample > 0 || fetched > 0;
+}
+
+/** Share only finite scores from a live sample. Empty stays empty — no catalog / NaN. */
+export function liveShareScore(
+  score: unknown,
+  sampleSize?: number | null,
+  fetchedPostCount?: number | null,
+): number | null {
+  if (!hasLiveDiscourseSample(sampleSize, fetchedPostCount)) return null;
+  if (typeof score !== "number" || !Number.isFinite(score)) return null;
+  return Math.round(score);
+}
+
 /** Build compact X share text for topic insights + narrative gap frames. */
 
 function firstSentence(text: string, max = 140): string {

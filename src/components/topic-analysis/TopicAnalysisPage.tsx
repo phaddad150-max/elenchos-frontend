@@ -17,7 +17,11 @@ import {
   X,
 } from "lucide-react";
 import { downloadLiveTopicPdf } from "@/lib/research-desk/topic-pdf";
-import { buildInsightShareText, buildTwitterShareHref } from "@/lib/share-insight";
+import {
+  buildInsightShareText,
+  buildTwitterShareHref,
+  liveShareScore,
+} from "@/lib/share-insight";
 import { uniqueProse } from "@/lib/curated-text";
 import {
   Bar,
@@ -703,8 +707,16 @@ export function TopicAnalysisPage({
                 buildInsightShareText({
                   topicLabel: headerLabel,
                   insightTitle: pickedCard.title,
-                  sentimentScore: pickedCard.score,
-                  divergenceScore: divergence,
+                  sentimentScore: liveShareScore(
+                    pickedCard.score,
+                    data?.sample_size,
+                    data?.fetched_post_count,
+                  ),
+                  divergenceScore: liveShareScore(
+                    divergence,
+                    data?.sample_size,
+                    data?.fetched_post_count,
+                  ),
                   divergenceGap: gapFrames.fullOverview,
                   citizenFrame: gapFrames.citizenFrame,
                   officialMediaFrame: gapFrames.officialMediaFrame,

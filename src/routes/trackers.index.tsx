@@ -364,11 +364,13 @@ function LeaderOverviewCard({
             </motion.div>
             <LivePulseBadge
               label={
-                def.tracker_type === "ai_business_leader_trust"
-                  ? "Economy board"
-                  : def.tracker_type === "citizen_discourse_index"
-                    ? "Social board"
-                    : "Live Leaderboard"
+                row?.snapshot_label?.startsWith("seed-")
+                  ? "Preview roster"
+                  : def.tracker_type === "ai_business_leader_trust"
+                    ? "Economy board"
+                    : def.tracker_type === "citizen_discourse_index"
+                      ? "Social board"
+                      : "Live Leaderboard"
               }
             />
           </div>
@@ -414,14 +416,20 @@ function LeaderOverviewCard({
           </div>
         ) : (
           <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border bg-background/30 text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground inline-flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 animate-pulse" /> Waiting for tracker data
+            <Radio className="w-3.5 h-3.5" /> No leaders in this sample yet
           </div>
         )}
 
         <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
           <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-            {leaders.length > 0 ? `${leaders.length} leaders ranked` : "—"}
-            {snapshotDate ? ` · ${snapshotDate}` : ""}
+            {row?.snapshot_label?.startsWith("seed-")
+              ? "Illustrative roster · not a live X sample"
+              : leaders.length > 0
+                ? `${leaders.length} leaders ranked`
+                : "No leaders in this sample yet"}
+            {!row?.snapshot_label?.startsWith("seed-") && snapshotDate
+              ? ` · ${snapshotDate}`
+              : ""}
           </span>
           <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan group-hover:gap-2.5 transition-all duration-300">
             Open leaderboard
@@ -473,7 +481,9 @@ function PeaceOverviewCard({
             <motion.div animate={{ rotate: [0, 12, -12, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
               <Sparkles className="w-4 h-4 text-cyan" />
             </motion.div>
-            <LivePulseBadge label="Diagnostic Index" />
+            <LivePulseBadge
+              label={countries.length > 0 ? "Diagnostic Index" : "No live sample"}
+            />
           </div>
           <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-cyan transition-colors" />
         </div>
@@ -519,14 +529,16 @@ function PeaceOverviewCard({
           </div>
         ) : (
           <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border bg-background/30 text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground inline-flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 animate-pulse" /> Waiting for tracker data
+            <Radio className="w-3.5 h-3.5" /> No countries in this sample yet
           </div>
         )}
 
         <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
           <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-            {countries.length > 0 ? `${countries.length} countries · avg health ${avg ?? "—"}` : "—"}
-            {snapshotDate ? ` · ${snapshotDate}` : ""}
+            {countries.length > 0
+              ? `${countries.length} countries · avg health ${avg ?? "—"}`
+              : "Empty index — no invented scores"}
+            {countries.length > 0 && snapshotDate ? ` · ${snapshotDate}` : ""}
           </span>
           <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan group-hover:gap-2.5 transition-all duration-300">
             Open index
