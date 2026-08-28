@@ -64,7 +64,7 @@ export const MONTHLY_PLANS: Record<MonthlyPlanId, MonthlyPlanMeta> = {
     tokensGranted: 50,
     interval: "month",
     blurb:
-      "50 tokens/mo · regular private runs. Testing — richer descriptions & API connectors coming.",
+      "50 tokens/mo. Private deep-dives on topics we already sample.",
     envPriceKey: "STRIPE_PRICE_PACK_PLUS",
   },
   pack_mega: {
@@ -79,11 +79,7 @@ export const MONTHLY_PLANS: Record<MonthlyPlanId, MonthlyPlanMeta> = {
   },
 };
 
-export const MONTHLY_PLAN_ORDER: MonthlyPlanId[] = [
-  "pack_starter",
-  "pack_plus",
-  "pack_mega",
-];
+export const MONTHLY_PLAN_ORDER: MonthlyPlanId[] = ["pack_plus"];
 
 /** Back-compat aliases used by older checkout code. */
 export const TOKEN_PACKS = MONTHLY_PLANS;
