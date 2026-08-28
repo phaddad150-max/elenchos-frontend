@@ -26,7 +26,7 @@ import { isAdminEmail } from "@/lib/admin-emails";
 const PRO_SOCIAL = {
   title: "Pro · Private research · Elenchos",
   description:
-    "Monthly Starter, Plus, or Mega plans. Token wallet for private deep-dive analyses. Public Library stays free.",
+    "Plus · $40/month · 50 tokens. Private deep-dives on topics we already sample. Public Library stays free, no account required.",
   url: "https://elenchos.live/pro",
 };
 
@@ -313,7 +313,7 @@ function ProDeskPage() {
                   Private research with a token wallet
                 </h1>
                 <p className="page-hero-sub mt-2 text-[13px] sm:text-[14.5px] md:whitespace-nowrap md:overflow-hidden md:text-ellipsis">
-                  Monthly plans credit tokens for private deep dives · free{" "}
+                  Plus · $40/month · 50 tokens for private deep dives · free{" "}
                   <Link
                     to="/research/library"
                     className="text-cyan underline-offset-2 hover:underline"
@@ -461,14 +461,14 @@ function ProDeskPage() {
               id="pro-plans"
               className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
             >
-              Monthly plans
+              Plus plan
             </h2>
             <p className="text-[12.5px] text-muted-foreground mt-1">
               Tokens credit on subscribe and each renewal. One active plan per account.{" "}
               <span className="text-amber-signal">Testing Mode — subscriptions inactive.</span>
             </p>
           </div>
-          <ul className="grid gap-2.5 sm:grid-cols-3">
+          <ul className="grid gap-2.5">
             {MONTHLY_PLAN_ORDER.map((id, i) => {
               const p = MONTHLY_PLANS[id];
               const isCurrent = proActive && me?.subscription?.planId === id;
