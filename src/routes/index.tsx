@@ -668,8 +668,8 @@ function Dashboard() {
             <div className="flex flex-col gap-1.5 sm:gap-2.5 mb-2 sm:mb-2.5 pb-2 sm:pb-2.5 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
-                title="Live Citizen Signals"
-                subtitle="Tap a row for the full briefing."
+                title="Citizen signals"
+                subtitle="Dated sample. Not a live pulse. Tap a row for the briefing."
               />
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll overscroll-x-contain">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
@@ -700,15 +700,7 @@ function Dashboard() {
                 intelGroups.critical.length + intelGroups.elevated.length + intelGroups.monitor.length === 0 &&
                 !simMode && (
                   <p className="mt-3 text-[13px] text-muted-foreground leading-relaxed">
-                    No citizen signal rows in this sample yet. Open{" "}
-                    <Link
-                      to="/research/library"
-                      search={{ section: "topics" }}
-                      className="text-cyan hover:underline"
-                    >
-                      Library topics
-                    </Link>{" "}
-                    for full briefings, or check back after the next sample.
+No rows in this sample. Empty stays empty.
                   </p>
                 )}
             </div>
@@ -729,8 +721,7 @@ function Dashboard() {
                 {dashReady && effectiveSignals.length === 0 ? (
                   <div className="absolute inset-0 grid place-items-center bg-background/40 px-4 text-center">
                     <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
-                      No region markers in this sample yet. Signals may still load — try again after
-                      the next pipeline run.
+No map points in this sample.
                     </p>
                   </div>
                 ) : (
@@ -1161,7 +1152,7 @@ function CitizenSignalsFeed({
           fallback
         ) : signals.length === 0 ? (
           <div className="text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
-            Loading real citizen signals from X…
+            No rows in this sample.
           </div>
         ) : (
           <div className="text-center text-xs font-mono text-muted-foreground py-10 border border-dashed border-border rounded-lg">
