@@ -37,12 +37,6 @@ import {
   type TrackerDefinition,
   type TrackerRow,
 } from "@/lib/trackers-data";
-import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
-import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
-import {
-  seedWorldLeadersTrackerRow,
-  worldLeadersRosterIsOutdated,
-} from "@/lib/trackers/seeds/world-leaders";
 import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Quote } from "lucide-react";
 
 
@@ -1532,21 +1526,7 @@ function TrackersPage() {
         <h2 className="sr-only">Live trackers</h2>
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
           {live.map((def, idx) => {
-            const liveRow = byType.get(def.tracker_type);
-            let row =
-              liveRow ??
-              (def.tracker_type === "ai_business_leader_trust"
-                ? seedAiBusinessTrackerRow()
-                : def.tracker_type === "citizen_discourse_index"
-                  ? seedCitizenDiscourseTrackerRow()
-                  : undefined);
-            // Swap outdated world-leader roster (AMLO / Scholz / Petro / Boric) for current officeholders.
-            if (def.tracker_type === "global_leader_trust") {
-              const liveLeaders = liveRow ? extractRankedLeaders(liveRow) : [];
-              if (worldLeadersRosterIsOutdated(liveLeaders)) {
-                row = seedWorldLeadersTrackerRow();
-              }
-            }
+            const row = byType.get(def.tracker_type);
             const inner =
               def.tracker_type === "global_leader_trust" ? (
                 <LeaderOverviewCard def={def} row={row} href="/trackers/leaders" />

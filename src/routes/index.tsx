@@ -74,12 +74,6 @@ import {
   type FeedCitizenSignal,
 } from "@/lib/dashboard-data";
 import { Compass } from "lucide-react";
-import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
-import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
-import {
-  seedWorldLeadersTrackerRow,
-  worldLeadersRosterIsOutdated,
-} from "@/lib/trackers/seeds/world-leaders";
 import {
   extractPeaceCountries,
   extractRankedLeaders,
@@ -267,12 +261,8 @@ function Dashboard() {
   }>({});
   /** Top leaders for the focused Leadership board preview. */
   const [topLeaders, setTopLeaders] = useState<RankedLeader[]>([]);
-  const [businessLeaders] = useState(() =>
-    extractRankedLeaders(seedAiBusinessTrackerRow()),
-  );
-  const [discourseLeaders] = useState(() =>
-    extractRankedLeaders(seedCitizenDiscourseTrackerRow()),
-  );
+  const [businessLeaders, setBusinessLeaders] = useState<RankedLeader[]>([]);
+  const [discourseLeaders, setDiscourseLeaders] = useState<RankedLeader[]>([]);
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [dashReady, setDashReady] = useState(false);
   const [simMode] = useSimMode();
@@ -282,7 +272,7 @@ function Dashboard() {
     if (topicFilter === "Economic") {
       return {
         leaders: businessLeaders.slice(0, 5),
-        rankedTotal: businessLeaders.length,
+        rankedTotal: businessLeaders.length > 0 ? businessLeaders.length : undefined,
         title: "AI & Business leaders",
         titleAccent: "by citizens",
         href: "/trackers/business" as const,
@@ -295,7 +285,7 @@ function Dashboard() {
       const scored = discourseLeaders.filter((l) => l.status !== "waiting");
       return {
         leaders: scored.slice(0, 5),
-        rankedTotal: scored.length,
+        rankedTotal: scored.length > 0 ? scored.length : undefined,
         title: "Citizen journalism",
         titleAccent: "index",
         href: "/trackers/citizen-discourse" as const,
@@ -327,21 +317,6 @@ function Dashboard() {
 
   useEffect(() => {
     let cancelled = false;
-    const bizCount = businessLeaders.length;
-    const cjCount = discourseLeaders.filter((l) => l.status !== "waiting").length;
-
-    // Seed boards available immediately — show combined total before network returns.
-    setTrackerKpis((prev) => ({
-      ...prev,
-      businessLeaders: bizCount > 0 ? bizCount : undefined,
-      citizenJournalists: cjCount > 0 ? cjCount : undefined,
-      leadersRanked:
-        (prev.worldLeaders ?? 0) + bizCount + cjCount > 0
-          ? (prev.worldLeaders ?? 0) + bizCount + cjCount
-          : bizCount + cjCount > 0
-            ? bizCount + cjCount
-            : undefined,
-    }));
 
     // Critical path first (overview + signals + world leaders) — paint sooner.
     // Curated highlights deferred so they don't block first paint.
@@ -360,32 +335,36 @@ function Dashboard() {
         const rows = trackRes.value;
         const byType = new Map(rows.map((r) => [r.tracker_type, r]));
         const leaderRow = byType.get("global_leader_trust");
+        const businessRow = byType.get("ai_business_leader_trust");
+        const citizenRow = byType.get("citizen_discourse_index");
         const peaceRow = byType.get("peace_normalization");
-        let leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
-        // Live DB still lists departed leaders → use current-officeholder seed (max 15).
-        if (worldLeadersRosterIsOutdated(leaders)) {
-          leaders = extractRankedLeaders(seedWorldLeadersTrackerRow());
-        }
+        const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
+        const bizLeaders = businessRow ? extractRankedLeaders(businessRow) : [];
+        const cjLeaders = citizenRow ? extractRankedLeaders(citizenRow) : [];
         const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
         const worldCount = leaders.length;
+        const bizCount = bizLeaders.length;
+        const cjCount = cjLeaders.filter((l) => l.status !== "waiting").length;
         const totalLeaders = worldCount + bizCount + cjCount;
+        setBusinessLeaders(bizLeaders);
+        setDiscourseLeaders(cjLeaders);
         setTrackerKpis({
           worldLeaders: worldCount > 0 ? worldCount : undefined,
           businessLeaders: bizCount > 0 ? bizCount : undefined,
           citizenJournalists: cjCount > 0 ? cjCount : undefined,
-          // KPI = all indexed leader types on Elenchos
+          // KPI = live indexed leader types only (empty stays empty)
           leadersRanked: totalLeaders > 0 ? totalLeaders : undefined,
           countriesMonitored: peaceCountries.length || undefined,
         });
         setTopLeaders(leaders.slice(0, 5));
       } else {
-        // Trackers fetch failed — still count seed business + citizen boards
-        const totalLeaders = bizCount + cjCount;
+        setBusinessLeaders([]);
+        setDiscourseLeaders([]);
         setTrackerKpis({
           worldLeaders: undefined,
-          businessLeaders: bizCount > 0 ? bizCount : undefined,
-          citizenJournalists: cjCount > 0 ? cjCount : undefined,
-          leadersRanked: totalLeaders > 0 ? totalLeaders : undefined,
+          businessLeaders: undefined,
+          citizenJournalists: undefined,
+          leadersRanked: undefined,
         });
       }
       setDashReady(true);
@@ -398,7 +377,7 @@ function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [businessLeaders, discourseLeaders]);
+  }, []);
 
   // Simulated signal stream — only used when simMode is explicitly on.
   // Live data comes from Supabase (dashboard_overviews, topic_snapshots, citizen_signals).
@@ -532,7 +511,6 @@ function Dashboard() {
         regions,
         highAlert: overview.high_alert_topics ?? 0,
         avgVelocity: overview.trend_velocity ?? 0,
-        precision: 94.2,
       };
     }
     const highAlert = effectiveSignals.filter(
@@ -540,7 +518,7 @@ function Dashboard() {
     ).length || liveCitizens.filter((s) => (s.sentiment_score ?? 100) < 50).length;
     const avgVelocity =
       effectiveSignals.reduce((s, x) => s + x.velocity, 0) / Math.max(effectiveSignals.length, 1);
-    return { postsAnalyzed, topics: topicsCount, regions, highAlert, avgVelocity, precision: 94.2 };
+    return { postsAnalyzed, topics: topicsCount, regions, highAlert, avgVelocity };
   }, [effectiveSignals, isLive, overview, citizenSignals, snapshots, topicsCount]);
 
   // Citizen signals: prefer the inline `citizen_signals` array on the

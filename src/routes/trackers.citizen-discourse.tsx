@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Megaphone } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { JOURNALIST_DIMENSIONS, TRACKER_CATALOG } from "@/lib/trackers-data";
+import {
+  JOURNALIST_DIMENSIONS,
+  TRACKER_CATALOG,
+  fetchLatestTrackers,
+  type TrackerRow,
+} from "@/lib/trackers-data";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
-import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/citizen-discourse")({
@@ -32,9 +36,16 @@ export const Route = createFileRoute("/trackers/citizen-discourse")({
 });
 
 function CitizenDiscoursePage() {
-  const row = useMemo(() => seedCitizenDiscourseTrackerRow(), []);
+  const [rows, setRows] = useState<TrackerRow[]>([]);
+  useEffect(() => {
+    fetchLatestTrackers().then(setRows);
+  }, []);
+  const row = useMemo(
+    () => rows.find((r) => r.tracker_type === "citizen_discourse_index"),
+    [rows],
+  );
   const def = TRACKER_CATALOG.find((t) => t.tracker_type === "citizen_discourse_index");
-  const snapshotDate = formatDate(row.created_at ?? new Date().toISOString());
+  const snapshotDate = row ? formatDate(row.created_at) : null;
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -77,17 +88,19 @@ function CitizenDiscoursePage() {
             {def?.tagline}
           </p>
           <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="px-2 py-0.5 rounded-full border border-[color:var(--magenta)]/35 bg-[color:var(--magenta)]/10 text-[color:var(--magenta)] text-[10px] font-mono uppercase tracking-[0.18em]">
-              Seed preview
+            <span className="px-2 py-0.5 rounded-full border border-[color:var(--magenta)]/35 bg-[color:var(--magenta)]/10 text-[color:var(--magenta)] text-[10px] font-mono uppercase tracking-[0.18em] inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--magenta)] animate-pulse" /> Live
             </span>
             {snapshotDate && (
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                 {snapshotDate}
               </span>
             )}
-            <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              {row.item_count} entries
-            </span>
+            {typeof row?.item_count === "number" && (
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                {row.item_count} entries
+              </span>
+            )}
             <SimulatedDataBadge />
           </div>
         </header>
