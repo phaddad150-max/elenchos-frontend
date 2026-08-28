@@ -1146,6 +1146,14 @@ function PeaceCountryCard({
                 {c.progress}
               </div>
             )}
+            {typeof score === "number" && (
+              <div className="mt-2 h-1.5 w-full rounded-full bg-border/70 overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${Math.max(0, Math.min(100, score))}%`, background: hex }}
+                />
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-end shrink-0">
             <span

@@ -4,7 +4,6 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { fetchLatestTrackers, TRACKER_CATALOG, type TrackerRow } from "@/lib/trackers-data";
-import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { PeaceDetail, formatDate } from "./trackers.index";
 
@@ -70,9 +69,6 @@ function PeacePage() {
             {def?.tagline}
           </p>
           <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em] inline-flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" /> Live
-            </span>
             {snapshotDate && (
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                 {snapshotDate}
@@ -83,7 +79,6 @@ function PeacePage() {
                 {row.item_count} entries
               </span>
             )}
-            <SimulatedDataBadge />
           </div>
         </header>
         <PeaceDetail row={row} />
