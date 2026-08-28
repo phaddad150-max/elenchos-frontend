@@ -1504,14 +1504,10 @@ function TrackersPage() {
             Library · Trackers
           </motion.div>
           <h1 className="text-[1.6rem] sm:text-3xl md:text-[2.4rem] lg:text-[2.85rem] font-display font-semibold tracking-tight leading-[1.08] break-words">
-            Citizens Speak. AI Ranks.{" "}
-            <span className="text-cyan bg-gradient-to-r from-cyan via-cyan/80 to-cyan/60 bg-clip-text text-transparent">
-              No Official Spin.
-            </span>
+            Trackers
           </h1>
           <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Leadership, AI & Business, Citizen Discourse, Peace, and the Networks Ledger — citizen
-            rankings plus official-action intelligence.
+            Live boards only. Empty if there is no dated sample. Not a poll.
           </p>
           <div className="pt-1 flex flex-wrap items-center gap-3">
             <SimulatedDataBadge />
