@@ -48,11 +48,13 @@ export const LIVE_OUTPUT_EXCLUSIONS = new Set<string>([
   "Maritime AI Industry & Greece's Global Role",
   "fifa-world-cup-2026",
   "FIFA World Cup 2026",
-  // 2026-08-29 — political overlap archived for live mix (G7 hide, not delete)
+  // G7 hide, not delete — geopolitics overlap + EU civic overlap
   "Cuba Sanctions & the Domino Effect",
-  "Eastern Mediterranean Alliance (Israel-Greece-Cyprus)",
   "US-Iran Confrontation: Sanctions, Networks & Regime Pressure",
   "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse",
+  "Save Europe Act: Citizens, Media & EU Bureaucracy",
+  "Political Polarization & Populism Rise",
+  "Government Performance, Corruption & Scandals",
 ]);
 
 /**
@@ -68,9 +70,11 @@ export function isLiveOutputTopic(raw: string | null | undefined): boolean {
   if (/world\s*cup\s*2026/i.test(trimmed)) return false;
   if (/maritime\s*ai/i.test(trimmed)) return false;
   if (/cuba\s+sanctions/i.test(trimmed)) return false;
-  if (/eastern\s+mediterranean\s+alliance/i.test(trimmed)) return false;
   if (/us[-–—\s]*iran\s+confrontation/i.test(trimmed)) return false;
   if (/cyprus.+palestine|selective\s+outrage/i.test(trimmed)) return false;
+  if (/save\s+europe\s+act/i.test(trimmed)) return false;
+  if (/political\s+polarization/i.test(trimmed)) return false;
+  if (/government\s+performance/i.test(trimmed) && /corruption/i.test(trimmed)) return false;
   if (LIVE_OUTPUT_EXCLUSIONS.has(trimmed)) return false;
 
   const key = normalizeTopicKey(trimmed) ?? trimmed;
