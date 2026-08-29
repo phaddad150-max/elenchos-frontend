@@ -3,21 +3,31 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DESK_DEMO_ORG, DESK_DEMO_TOKEN } from "@/lib/desk/catalog";
 
 export const Route = createFileRoute("/desk/thanks")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    session_id: typeof s.session_id === "string" ? s.session_id : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { session_id?: string; demo?: "1" } => {
+    const out: { session_id?: string; demo?: "1" } = {};
+    if (typeof s.session_id === "string" && s.session_id) out.session_id = s.session_id;
+    if (s.demo === "1" || s.demo === true) out.demo = "1";
+    return out;
+  },
   component: DeskThanksPage,
 });
 
 function DeskThanksPage() {
-  const { session_id: sessionId } = Route.useSearch();
-  const [state, setState] = useState<"wait" | "ok" | "err">("wait");
-  const [token, setToken] = useState<string | null>(null);
-  const [org, setOrg] = useState("");
+  const { session_id: sessionId, demo } = Route.useSearch();
+  const [state, setState] = useState<"wait" | "ok" | "err">(demo === "1" ? "ok" : "wait");
+  const [token, setToken] = useState<string | null>(demo === "1" ? DESK_DEMO_TOKEN : null);
+  const [org, setOrg] = useState(demo === "1" ? DESK_DEMO_ORG : "");
 
   useEffect(() => {
+    if (demo === "1") {
+      setToken(DESK_DEMO_TOKEN);
+      setOrg(DESK_DEMO_ORG);
+      setState("ok");
+      return;
+    }
     if (!sessionId) {
       setState("err");
       return;
@@ -45,7 +55,7 @@ function DeskThanksPage() {
       });
     }, 1500);
     return () => window.clearInterval(id);
-  }, [sessionId, token]);
+  }, [sessionId, token, demo]);
 
   return (
     <div className="page-shell dash-landing">
@@ -59,6 +69,11 @@ function DeskThanksPage() {
         {state === "ok" && token ? (
           <>
             <h1 className="page-hero-title text-2xl">Payment received</h1>
+            {demo === "1" ? (
+              <p className="text-[12px] font-mono uppercase tracking-[0.14em] text-amber-signal">
+                Walkthrough · no card charged
+              </p>
+            ) : null}
             <p className="text-[14px] text-muted-foreground leading-relaxed">
               {org ? `${org}: ` : ""}your desk tables exist. Next: brand it, pick topics, Generate
               the live URL. Scoring stays on Elenchos.

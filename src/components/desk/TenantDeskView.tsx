@@ -61,7 +61,9 @@ export function TenantDeskView({ desk }: { desk: LiveDesk | null }) {
           <div className="min-w-0 flex-1">
             <p className="font-display font-semibold text-lg sm:text-xl tracking-tight truncate">{title}</p>
             <p className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              Public discourse desk
+              {tenant.email === "demo@elenchos.live"
+                ? "Walkthrough desk · not a paid tenant"
+                : "Public discourse desk"}
             </p>
           </div>
         </div>

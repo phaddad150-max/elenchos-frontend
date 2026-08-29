@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { isDeskDemoToken } from "@/lib/desk/catalog";
 
 type CatalogItem = { id: string; label: string };
 
@@ -135,6 +136,11 @@ function DeskStudioPage() {
       <main className="max-w-[860px] mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-5 mobile-safe-bottom">
         <header className="space-y-1">
           <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">Desk studio</p>
+          {isDeskDemoToken(token) ? (
+            <p className="text-[12px] font-mono uppercase tracking-[0.14em] text-amber-signal">
+              Walkthrough · no card charged
+            </p>
+          ) : null}
           <h1 className="page-hero-title text-2xl">Brand it. Pick topics. Generate.</h1>
           <p className="text-[13.5px] text-muted-foreground max-w-xl">
             Scoring stays locked on Elenchos. Generate publishes a live URL. Catalog topics reuse

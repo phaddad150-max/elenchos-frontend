@@ -3,6 +3,7 @@
  * Isolated from public intelligence tables. Scoring pipelines never write here.
  */
 import { LIVE_TOPIC_KEYS, isArchivedTopicId } from "@/lib/topic-catalog";
+import { DESK_DEMO_ORG, DESK_DEMO_SLUG, DESK_DEMO_TOKEN, isDeskDemoToken } from "./catalog";
 import type { DeskBranding, DeskCard, DeskPicks, DeskTenant } from "./types";
 
 export type { DeskBranding, DeskCard, DeskPicks, DeskStatus, DeskTenant, LiveDesk } from "./types";
@@ -11,6 +12,52 @@ const memTenants: DeskTenant[] = [];
 const memBrand = new Map<string, DeskBranding>();
 const memPicks = new Map<string, DeskPicks>();
 const memCards = new Map<string, DeskCard[]>();
+
+const DEMO_ID = "11111111-1111-4111-8111-111111111111";
+const DEMO_TOPIC_IDS = [
+  "greece-economic-recovery",
+  "levant-realignment",
+  "global-ai-race",
+  "crime-safety-lawlessness",
+];
+
+function demoTenant(): DeskTenant {
+  return {
+    id: DEMO_ID,
+    manage_token: DESK_DEMO_TOKEN,
+    slug: DESK_DEMO_SLUG,
+    email: "demo@elenchos.live",
+    org_name: memBrand.get(DEMO_ID)?.org_name || DESK_DEMO_ORG,
+    stripe_session_id: "cs_demo_walkthrough",
+    status: "live",
+    custom_domain: null,
+    created_at: "2026-08-29T00:00:00.000Z",
+    paid_at: "2026-08-29T00:00:00.000Z",
+  };
+}
+
+function seedDemoMem(): void {
+  if (!memTenants.some((t) => t.id === DEMO_ID)) memTenants.push(demoTenant());
+  if (!memBrand.has(DEMO_ID)) {
+    memBrand.set(DEMO_ID, {
+      tenant_id: DEMO_ID,
+      org_name: DESK_DEMO_ORG,
+      unbranded: false,
+      logo_url: null,
+      primary_color: "#22d3ee",
+      accent_color: "#f59e0b",
+    });
+  }
+  if (!memPicks.has(DEMO_ID)) {
+    memPicks.set(DEMO_ID, {
+      tenant_id: DEMO_ID,
+      topic_ids: DEMO_TOPIC_IDS,
+      custom_topics: [],
+    });
+  }
+}
+
+seedDemoMem();
 
 function supabaseConfig() {
   const url =
@@ -164,6 +211,75 @@ async function restGet<T>(path: string): Promise<T[]> {
   return Array.isArray(rows) ? rows : [];
 }
 
+async function buildCardsForPicks(picks: DeskPicks | undefined): Promise<DeskCard[]> {
+  const cards: DeskCard[] = [];
+  const { url, key } = supabaseConfig();
+  const readKey =
+    key ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    process.env.VITE_SUPABASE_ANON_KEY?.trim() ||
+    "";
+  for (const id of picks?.topic_ids ?? []) {
+    const cfg = LIVE_TOPIC_KEYS[id];
+    if (!cfg || isArchivedTopicId(id)) continue;
+    let card: DeskCard = {
+      topic_id: id,
+      topic_name: cfg.headerLabel,
+      headline: null,
+      overall_sentiment: null,
+      divergence_score: null,
+      sample_size: 0,
+      last_updated: null,
+    };
+    if (readKey) {
+      const q = new URLSearchParams({
+        select: "topic,last_updated,overall_sentiment,divergence_score,sample_size,narrative_summary",
+        topic: `eq.${cfg.rootKey}`,
+        order: "last_updated.desc",
+        limit: "1",
+      });
+      const res = await fetch(`${url}/rest/v1/topic_snapshots?${q}`, {
+        headers: restHeaders(readKey),
+      });
+      if (res.ok) {
+        const rows = (await res.json()) as Array<{
+          topic?: string;
+          last_updated?: string;
+          overall_sentiment?: { score?: number; label?: string };
+          divergence_score?: number;
+          sample_size?: number;
+          narrative_summary?: string;
+        }>;
+        const r = rows[0];
+        if (r) {
+          card = {
+            topic_id: id,
+            topic_name: cfg.headerLabel,
+            headline: r.narrative_summary?.slice(0, 180) ?? null,
+            overall_sentiment: r.overall_sentiment ?? null,
+            divergence_score: typeof r.divergence_score === "number" ? r.divergence_score : null,
+            sample_size: typeof r.sample_size === "number" ? r.sample_size : 0,
+            last_updated: r.last_updated ?? null,
+          };
+        }
+      }
+    }
+    cards.push(card);
+  }
+  for (const custom of picks?.custom_topics ?? []) {
+    cards.push({
+      topic_id: `custom:${custom.slice(0, 40)}`,
+      topic_name: custom.slice(0, 80),
+      headline: null,
+      overall_sentiment: null,
+      divergence_score: null,
+      sample_size: 0,
+      last_updated: null,
+    });
+  }
+  return cards;
+}
+
 export async function getTenantById(id: string): Promise<DeskTenant | null> {
   const mem = memTenants.find((t) => t.id === id);
   const rows = await restGet<DeskTenant>(`desk_tenants?id=eq.${id}&limit=1`);
@@ -171,6 +287,10 @@ export async function getTenantById(id: string): Promise<DeskTenant | null> {
 }
 
 export async function getTenantByToken(token: string): Promise<DeskTenant | null> {
+  if (isDeskDemoToken(token)) {
+    seedDemoMem();
+    return memTenants.find((t) => t.id === DEMO_ID) ?? demoTenant();
+  }
   const mem = memTenants.find((t) => t.manage_token === token);
   const rows = await restGet<DeskTenant>(
     `desk_tenants?manage_token=eq.${encodeURIComponent(token)}&limit=1`,
@@ -192,6 +312,20 @@ export async function getLiveDesk(slug: string): Promise<{
   picks: DeskPicks;
   cards: DeskCard[];
 } | null> {
+  if (slug === DESK_DEMO_SLUG) {
+    seedDemoMem();
+    const tenant = memTenants.find((t) => t.id === DEMO_ID) ?? demoTenant();
+    tenant.status = "live";
+    tenant.slug = DESK_DEMO_SLUG;
+    const branding = memBrand.get(DEMO_ID)!;
+    const picks = memPicks.get(DEMO_ID)!;
+    let cards = memCards.get(DEMO_ID) ?? [];
+    if (!cards.length) {
+      cards = await buildCardsForPicks(picks);
+      memCards.set(DEMO_ID, cards);
+    }
+    return { tenant, branding, picks, cards };
+  }
   const rows = await restGet<DeskTenant>(
     `desk_tenants?slug=eq.${encodeURIComponent(slug)}&status=eq.live&limit=1`,
   );
@@ -289,7 +423,7 @@ export async function saveStudio(
   if (input.custom_domain !== undefined) {
     tenant.custom_domain = input.custom_domain?.trim() || null;
   }
-  if (!key) return;
+  if (!key || tenant.id === DEMO_ID) return;
   await fetch(`${url}/rest/v1/desk_branding?tenant_id=eq.${tenant.id}`, {
     method: "PATCH",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
@@ -310,6 +444,7 @@ export async function saveStudio(
 }
 
 export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
+  const demo = tenant.id === DEMO_ID;
   const picks =
     memPicks.get(tenant.id) ??
     (await restGet<DeskPicks>(`desk_picks?tenant_id=eq.${tenant.id}&limit=1`))[0];
@@ -317,78 +452,20 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
     memBrand.get(tenant.id) ??
     (await restGet<DeskBranding>(`desk_branding?tenant_id=eq.${tenant.id}&limit=1`))[0];
   const base = slugify(branding?.org_name || tenant.org_name || "desk");
-  let slug = tenant.slug || base;
-  if (!tenant.slug) {
+  let slug = demo ? DESK_DEMO_SLUG : tenant.slug || base;
+  if (!demo && !tenant.slug) {
     const clash = await restGet<DeskTenant>(`desk_tenants?slug=eq.${slug}&limit=1`);
     if (clash[0] && clash[0].id !== tenant.id) slug = `${base}-${tenant.id.slice(0, 6)}`;
   }
 
-  const cards: DeskCard[] = [];
-  const { url, key } = supabaseConfig();
-  for (const id of picks?.topic_ids ?? []) {
-    const cfg = LIVE_TOPIC_KEYS[id];
-    if (!cfg || isArchivedTopicId(id)) continue;
-    let card: DeskCard = {
-      topic_id: id,
-      topic_name: cfg.headerLabel,
-      headline: null,
-      overall_sentiment: null,
-      divergence_score: null,
-      sample_size: 0,
-      last_updated: null,
-    };
-    if (key) {
-      const q = new URLSearchParams({
-        select: "topic,last_updated,overall_sentiment,divergence_score,sample_size,narrative_summary",
-        topic: `eq.${cfg.rootKey}`,
-        order: "last_updated.desc",
-        limit: "1",
-      });
-      const res = await fetch(`${url}/rest/v1/topic_snapshots?${q}`, {
-        headers: restHeaders(key),
-      });
-      if (res.ok) {
-        const rows = (await res.json()) as Array<{
-          topic?: string;
-          last_updated?: string;
-          overall_sentiment?: { score?: number; label?: string };
-          divergence_score?: number;
-          sample_size?: number;
-          narrative_summary?: string;
-        }>;
-        const r = rows[0];
-        if (r) {
-          card = {
-            topic_id: id,
-            topic_name: cfg.headerLabel,
-            headline: r.narrative_summary?.slice(0, 180) ?? null,
-            overall_sentiment: r.overall_sentiment ?? null,
-            divergence_score: typeof r.divergence_score === "number" ? r.divergence_score : null,
-            sample_size: typeof r.sample_size === "number" ? r.sample_size : 0,
-            last_updated: r.last_updated ?? null,
-          };
-        }
-      }
-    }
-    cards.push(card);
-  }
-  for (const custom of picks?.custom_topics ?? []) {
-    cards.push({
-      topic_id: `custom:${custom.slice(0, 40)}`,
-      topic_name: custom.slice(0, 80),
-      headline: null,
-      overall_sentiment: null,
-      divergence_score: null,
-      sample_size: 0,
-      last_updated: null,
-    });
-  }
+  const cards = await buildCardsForPicks(picks);
   memCards.set(tenant.id, cards);
   tenant.slug = slug;
   tenant.status = "live";
   tenant.org_name = branding?.org_name || tenant.org_name;
 
-  if (key) {
+  const { url, key } = supabaseConfig();
+  if (key && !demo) {
     await fetch(`${url}/rest/v1/desk_tenants?id=eq.${tenant.id}`, {
       method: "PATCH",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
