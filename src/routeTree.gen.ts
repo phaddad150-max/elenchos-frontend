@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UaeRouteImport } from './routes/uae'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
@@ -63,6 +64,11 @@ import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/che
 import { Route as ApiResearchReportTokenRouteImport } from './routes/api/research/report.$token'
 import { Route as ApiResearchAdminCommissionRouteImport } from './routes/api/research/admin/commission'
 
+const UaeRoute = UaeRouteImport.update({
+  id: '/uae',
+  path: '/uae',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -343,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/research-aviation': typeof ResearchAviationRoute
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/uae': typeof UaeRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRoute
   '/desk/studio': typeof DeskStudioRoute
@@ -397,6 +404,7 @@ export interface FileRoutesByTo {
   '/research-aviation': typeof ResearchAviationRoute
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/uae': typeof UaeRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRoute
   '/desk/studio': typeof DeskStudioRoute
@@ -453,6 +461,7 @@ export interface FileRoutesById {
   '/research-aviation': typeof ResearchAviationRoute
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/uae': typeof UaeRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRoute
   '/desk/studio': typeof DeskStudioRoute
@@ -510,6 +519,7 @@ export interface FileRouteTypes {
     | '/research-aviation'
     | '/research-migration'
     | '/sitemap.xml'
+    | '/uae'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -564,6 +574,7 @@ export interface FileRouteTypes {
     | '/research-aviation'
     | '/research-migration'
     | '/sitemap.xml'
+    | '/uae'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -619,6 +630,7 @@ export interface FileRouteTypes {
     | '/research-aviation'
     | '/research-migration'
     | '/sitemap.xml'
+    | '/uae'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -675,6 +687,7 @@ export interface RootRouteChildren {
   ResearchAviationRoute: typeof ResearchAviationRoute
   ResearchMigrationRoute: typeof ResearchMigrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  UaeRoute: typeof UaeRoute
   AdminCurationRoute: typeof AdminCurationRoute
   DSlugRoute: typeof DSlugRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
@@ -718,6 +731,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/uae': {
+      id: '/uae'
+      path: '/uae'
+      fullPath: '/uae'
+      preLoaderRoute: typeof UaeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -1132,6 +1152,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchAviationRoute: ResearchAviationRoute,
   ResearchMigrationRoute: ResearchMigrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  UaeRoute: UaeRoute,
   AdminCurationRoute: AdminCurationRoute,
   DSlugRoute: DSlugRoute,
   ResearchSlugRoute: ResearchSlugRoute,

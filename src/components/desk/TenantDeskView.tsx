@@ -2,9 +2,13 @@ import { useState, type CSSProperties } from "react";
 import { Layers, Radio } from "lucide-react";
 import type { DeskCard, LiveDesk } from "@/lib/desk/types";
 import { sentimentTone } from "@/lib/score-colors";
+import { PaidEarnedPanel } from "@/components/desk/PaidEarnedPanel";
+import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
+import type { UaeLang } from "@/lib/desk/uae";
 
 export function TenantDeskView({ desk }: { desk: LiveDesk | null }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [lang, setLang] = useState<UaeLang>("en");
 
   if (!desk) {
     return (
@@ -22,6 +26,8 @@ export function TenantDeskView({ desk }: { desk: LiveDesk | null }) {
   }
 
   const { tenant, branding, cards } = desk;
+  const uae = tenant.slug === UAE_DEMO_SLUG || tenant.email === "uae-demo@elenchos.live";
+  const ar = uae && lang === "ar";
   const title = branding.org_name || tenant.org_name || "Public discourse desk";
   const primary = branding.primary_color || "#22d3ee";
   const accent = branding.accent_color || "#f59e0b";
@@ -36,11 +42,13 @@ export function TenantDeskView({ desk }: { desk: LiveDesk | null }) {
   return (
     <div
       className="min-h-screen relative flex flex-col dash-landing"
+      dir={ar ? "rtl" : "ltr"}
       style={
         {
           ["--cyan" as string]: primary,
           ["--cyan-glow" as string]: `${primary}73`,
           ["--amber-signal" as string]: accent,
+          ...(ar ? { fontFamily: '"IBM Plex Sans Arabic", "Segoe UI", sans-serif' } : {}),
         } as CSSProperties
       }
     >
@@ -61,20 +69,49 @@ export function TenantDeskView({ desk }: { desk: LiveDesk | null }) {
           <div className="min-w-0 flex-1">
             <p className="font-display font-semibold text-lg sm:text-xl tracking-tight truncate">{title}</p>
             <p className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              {tenant.email === "demo@elenchos.live"
-                ? "Walkthrough desk · not a paid tenant"
-                : "Public discourse desk"}
+              {uae
+                ? ar
+                  ? "لوحة تجريبية · ليست مستأجراً مدفوعاً"
+                  : "UAE walkthrough desk · not a paid tenant"
+                : tenant.email === "demo@elenchos.live"
+                  ? "Walkthrough desk · not a paid tenant"
+                  : "Public discourse desk"}
             </p>
           </div>
+          {uae ? (
+            <div className="inline-flex rounded-full border border-border p-0.5 text-[11px] font-medium shrink-0">
+              <button
+                type="button"
+                className={`min-h-[32px] px-2.5 rounded-full ${lang === "en" ? "bg-cyan/15 text-cyan" : "text-muted-foreground"}`}
+                onClick={() => setLang("en")}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                className={`min-h-[32px] px-2.5 rounded-full ${lang === "ar" ? "bg-cyan/15 text-cyan" : "text-muted-foreground"}`}
+                onClick={() => setLang("ar")}
+              >
+                العربية
+              </button>
+            </div>
+          ) : null}
         </div>
       </header>
 
       <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-3 sm:py-6 space-y-3 sm:space-y-5 relative flex-1 mobile-safe-bottom">
         <div className="hidden md:grid grid-cols-3 gap-2.5">
-          <KpiFace label="Topics" value={cards.length} />
-          <KpiFace label="Sample posts" value={sampled} awaiting={sampled === 0} />
-          <KpiFace label="Awaiting data" value={awaitingCount} />
+          <KpiFace label={ar ? "مواضيع" : "Topics"} value={cards.length} />
+          <KpiFace
+            label={ar ? "عيّنة منشورات" : "Sample posts"}
+            value={sampled}
+            awaiting={sampled === 0}
+            awaitingLabel={ar ? "0 · بانتظار البيانات" : undefined}
+          />
+          <KpiFace label={ar ? "بانتظار البيانات" : "Awaiting data"} value={awaitingCount} />
         </div>
+
+        {uae ? <PaidEarnedPanel lang={lang} /> : null}
 
         {cards.length === 0 ? (
           <p className="text-[13px] font-mono text-muted-foreground">0 · awaiting data</p>
@@ -102,16 +139,27 @@ export function TenantDeskView({ desk }: { desk: LiveDesk | null }) {
                 {discourseTitle}
               </h2>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                Tap a topic card. Empty rows stay 0 · awaiting data — never invented.
+                {ar
+                  ? "اختر موضوعاً. الصفوف الفارغة تبقى 0 بانتظار البيانات — بلا اختراع."
+                  : "Tap a topic card. Empty rows stay 0 · awaiting data — never invented."}
               </p>
             </div>
           </div>
           {selectedCard?.headline && selectedCard.sample_size ? (
             <p className="text-[14px] leading-relaxed text-foreground/90">{selectedCard.headline}</p>
           ) : (
-            <p className="text-[13px] font-mono text-muted-foreground">0 · awaiting data</p>
+            <p className="text-[13px] font-mono text-muted-foreground">
+              {ar ? "0 · بانتظار البيانات" : "0 · awaiting data"}
+            </p>
           )}
         </section>
+        {uae ? (
+          <p className="text-[12px] text-muted-foreground leading-relaxed">
+            {ar
+              ? "واجهة عربية مسودة. مراجعة بشرية قبل الاستخدام في الحملات. إكس العام والواجهة — ليست بكسل عائد خاص."
+              : "Arabic UI is a draft. Human review before campaign use. Public X + API — not a private ROAS pixel."}
+          </p>
+        ) : null}
       </main>
 
       {branding.unbranded ? (
@@ -132,10 +180,12 @@ function KpiFace({
   label,
   value,
   awaiting,
+  awaitingLabel,
 }: {
   label: string;
   value: number;
   awaiting?: boolean;
+  awaitingLabel?: string;
 }) {
   return (
     <div className="dash-kpi dash-kpi-hero px-2.5 py-2.5 space-y-1">
@@ -143,7 +193,7 @@ function KpiFace({
         {label}
       </p>
       {awaiting ? (
-        <p className="text-[12px] font-mono text-muted-foreground">0 · awaiting data</p>
+        <p className="text-[12px] font-mono text-muted-foreground">{awaitingLabel || "0 · awaiting data"}</p>
       ) : (
         <p className="dash-kpi-value text-[1.35rem] font-display font-semibold tabular-nums text-cyan leading-none">
           {value}

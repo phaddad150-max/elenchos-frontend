@@ -3,28 +3,42 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { DESK_DEMO_ORG, DESK_DEMO_TOKEN } from "@/lib/desk/catalog";
+import {
+  DESK_DEMO_ORG,
+  DESK_DEMO_TOKEN,
+  UAE_DEMO_ORG,
+  UAE_DEMO_TOKEN,
+} from "@/lib/desk/catalog";
 
 export const Route = createFileRoute("/desk/thanks")({
-  validateSearch: (s: Record<string, unknown>): { session_id?: string; demo?: "1" } => {
-    const out: { session_id?: string; demo?: "1" } = {};
+  validateSearch: (s: Record<string, unknown>): { session_id?: string; demo?: "1" | "uae" } => {
+    const out: { session_id?: string; demo?: "1" | "uae" } = {};
     if (typeof s.session_id === "string" && s.session_id) out.session_id = s.session_id;
-    if (s.demo === "1" || s.demo === true) out.demo = "1";
+    if (s.demo === "uae") out.demo = "uae";
+    else if (s.demo === "1" || s.demo === true) out.demo = "1";
     return out;
   },
   component: DeskThanksPage,
 });
 
+function demoDefaults(demo: "1" | "uae" | undefined) {
+  if (demo === "uae") return { token: UAE_DEMO_TOKEN, org: UAE_DEMO_ORG };
+  if (demo === "1") return { token: DESK_DEMO_TOKEN, org: DESK_DEMO_ORG };
+  return null;
+}
+
 function DeskThanksPage() {
   const { session_id: sessionId, demo } = Route.useSearch();
-  const [state, setState] = useState<"wait" | "ok" | "err">(demo === "1" ? "ok" : "wait");
-  const [token, setToken] = useState<string | null>(demo === "1" ? DESK_DEMO_TOKEN : null);
-  const [org, setOrg] = useState(demo === "1" ? DESK_DEMO_ORG : "");
+  const seeded = demoDefaults(demo);
+  const [state, setState] = useState<"wait" | "ok" | "err">(seeded ? "ok" : "wait");
+  const [token, setToken] = useState<string | null>(seeded?.token ?? null);
+  const [org, setOrg] = useState(seeded?.org ?? "");
 
   useEffect(() => {
-    if (demo === "1") {
-      setToken(DESK_DEMO_TOKEN);
-      setOrg(DESK_DEMO_ORG);
+    const next = demoDefaults(demo);
+    if (next) {
+      setToken(next.token);
+      setOrg(next.org);
       setState("ok");
       return;
     }
@@ -69,9 +83,9 @@ function DeskThanksPage() {
         {state === "ok" && token ? (
           <>
             <h1 className="page-hero-title text-2xl">Payment received</h1>
-            {demo === "1" ? (
+            {demo ? (
               <p className="text-[12px] font-mono uppercase tracking-[0.14em] text-amber-signal">
-                Walkthrough · no card charged
+                {demo === "uae" ? "UAE walkthrough · no card charged" : "Walkthrough · no card charged"}
               </p>
             ) : null}
             <p className="text-[14px] text-muted-foreground leading-relaxed">

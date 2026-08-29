@@ -6,6 +6,7 @@ import { attachStripeSession, createPendingTenant } from "@/lib/desk/store.serve
 const BodySchema = z.object({
   orgName: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200),
+  market: z.enum(["desk", "uae"]).optional(),
 });
 
 function siteOrigin(request: Request): string {
@@ -39,28 +40,36 @@ export const Route = createFileRoute("/api/desk/checkout")({
             email: parsed.data.email,
           });
           const origin = siteOrigin(request);
+          const uae = parsed.data.market === "uae";
           const params = new URLSearchParams();
           params.set("mode", "subscription");
           params.set(
             "success_url",
             `${origin}/desk/thanks?session_id={CHECKOUT_SESSION_ID}`,
           );
-          params.set("cancel_url", `${origin}/desk?cancelled=1`);
+          params.set("cancel_url", `${origin}${uae ? "/uae" : "/desk"}?cancelled=1`);
           params.set("client_reference_id", tenant.id);
           params.set("metadata[kind]", "desk");
           params.set("metadata[tenantId]", tenant.id);
+          params.set("metadata[market]", uae ? "uae" : "desk");
           params.set("subscription_data[metadata][kind]", "desk");
           params.set("subscription_data[metadata][tenantId]", tenant.id);
+          params.set("subscription_data[metadata][market]", uae ? "uae" : "desk");
           params.set("customer_email", tenant.email || parsed.data.email);
           params.set("payment_method_types[0]", "card");
           params.set("line_items[0][quantity]", "1");
           params.set("line_items[0][price_data][currency]", "usd");
           params.set("line_items[0][price_data][unit_amount]", String(DESK_PRICE_USD * 100));
           params.set("line_items[0][price_data][recurring][interval]", "month");
-          params.set("line_items[0][price_data][product_data][name]", DESK_PRODUCT_NAME);
+          params.set(
+            "line_items[0][price_data][product_data][name]",
+            uae ? `${DESK_PRODUCT_NAME} · UAE` : DESK_PRODUCT_NAME,
+          );
           params.set(
             "line_items[0][price_data][product_data][description]",
-            "Licensed dashboard. Your tables are created at payment. Scoring logic stays on Elenchos.",
+            uae
+              ? "UAE white-label desk. Paid vs earned on X. Tables at payment. Scoring stays on Elenchos."
+              : "Licensed dashboard. Your tables are created at payment. Scoring logic stays on Elenchos.",
           );
 
           const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {

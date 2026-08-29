@@ -3,7 +3,12 @@
  * Isolated from public intelligence tables. Scoring pipelines never write here.
  */
 import { LIVE_TOPIC_KEYS, isArchivedTopicId } from "@/lib/topic-catalog";
-import { DESK_DEMO_ORG, DESK_DEMO_SLUG, DESK_DEMO_TOKEN, isDeskDemoToken } from "./catalog";
+import {
+  DESK_DEMO_SEEDS,
+  demoSeedBySlug,
+  demoSeedByToken,
+  type DeskDemoSeed,
+} from "./catalog";
 import type { DeskBranding, DeskCard, DeskPicks, DeskTenant } from "./types";
 
 export type { DeskBranding, DeskCard, DeskPicks, DeskStatus, DeskTenant, LiveDesk } from "./types";
@@ -13,22 +18,14 @@ const memBrand = new Map<string, DeskBranding>();
 const memPicks = new Map<string, DeskPicks>();
 const memCards = new Map<string, DeskCard[]>();
 
-const DEMO_ID = "11111111-1111-4111-8111-111111111111";
-const DEMO_TOPIC_IDS = [
-  "greece-economic-recovery",
-  "levant-realignment",
-  "global-ai-race",
-  "crime-safety-lawlessness",
-];
-
-function demoTenant(): DeskTenant {
+function tenantFromSeed(seed: DeskDemoSeed): DeskTenant {
   return {
-    id: DEMO_ID,
-    manage_token: DESK_DEMO_TOKEN,
-    slug: DESK_DEMO_SLUG,
-    email: "demo@elenchos.live",
-    org_name: memBrand.get(DEMO_ID)?.org_name || DESK_DEMO_ORG,
-    stripe_session_id: "cs_demo_walkthrough",
+    id: seed.id,
+    manage_token: seed.token,
+    slug: seed.slug,
+    email: seed.email,
+    org_name: memBrand.get(seed.id)?.org_name || seed.org,
+    stripe_session_id: `cs_demo_${seed.slug}`,
     status: "live",
     custom_domain: null,
     created_at: "2026-08-29T00:00:00.000Z",
@@ -37,23 +34,25 @@ function demoTenant(): DeskTenant {
 }
 
 function seedDemoMem(): void {
-  if (!memTenants.some((t) => t.id === DEMO_ID)) memTenants.push(demoTenant());
-  if (!memBrand.has(DEMO_ID)) {
-    memBrand.set(DEMO_ID, {
-      tenant_id: DEMO_ID,
-      org_name: DESK_DEMO_ORG,
-      unbranded: false,
-      logo_url: null,
-      primary_color: "#22d3ee",
-      accent_color: "#f59e0b",
-    });
-  }
-  if (!memPicks.has(DEMO_ID)) {
-    memPicks.set(DEMO_ID, {
-      tenant_id: DEMO_ID,
-      topic_ids: DEMO_TOPIC_IDS,
-      custom_topics: [],
-    });
+  for (const seed of DESK_DEMO_SEEDS) {
+    if (!memTenants.some((t) => t.id === seed.id)) memTenants.push(tenantFromSeed(seed));
+    if (!memBrand.has(seed.id)) {
+      memBrand.set(seed.id, {
+        tenant_id: seed.id,
+        org_name: seed.org,
+        unbranded: false,
+        logo_url: null,
+        primary_color: seed.primary_color,
+        accent_color: seed.accent_color,
+      });
+    }
+    if (!memPicks.has(seed.id)) {
+      memPicks.set(seed.id, {
+        tenant_id: seed.id,
+        topic_ids: seed.topic_ids,
+        custom_topics: seed.custom_topics,
+      });
+    }
   }
 }
 
@@ -287,9 +286,10 @@ export async function getTenantById(id: string): Promise<DeskTenant | null> {
 }
 
 export async function getTenantByToken(token: string): Promise<DeskTenant | null> {
-  if (isDeskDemoToken(token)) {
+  const seed = demoSeedByToken(token);
+  if (seed) {
     seedDemoMem();
-    return memTenants.find((t) => t.id === DEMO_ID) ?? demoTenant();
+    return memTenants.find((t) => t.id === seed.id) ?? tenantFromSeed(seed);
   }
   const mem = memTenants.find((t) => t.manage_token === token);
   const rows = await restGet<DeskTenant>(
@@ -312,17 +312,18 @@ export async function getLiveDesk(slug: string): Promise<{
   picks: DeskPicks;
   cards: DeskCard[];
 } | null> {
-  if (slug === DESK_DEMO_SLUG) {
+  const seed = demoSeedBySlug(slug);
+  if (seed) {
     seedDemoMem();
-    const tenant = memTenants.find((t) => t.id === DEMO_ID) ?? demoTenant();
+    const tenant = memTenants.find((t) => t.id === seed.id) ?? tenantFromSeed(seed);
     tenant.status = "live";
-    tenant.slug = DESK_DEMO_SLUG;
-    const branding = memBrand.get(DEMO_ID)!;
-    const picks = memPicks.get(DEMO_ID)!;
-    let cards = memCards.get(DEMO_ID) ?? [];
+    tenant.slug = seed.slug;
+    const branding = memBrand.get(seed.id)!;
+    const picks = memPicks.get(seed.id)!;
+    let cards = memCards.get(seed.id) ?? [];
     if (!cards.length) {
       cards = await buildCardsForPicks(picks);
-      memCards.set(DEMO_ID, cards);
+      memCards.set(seed.id, cards);
     }
     return { tenant, branding, picks, cards };
   }
@@ -423,7 +424,7 @@ export async function saveStudio(
   if (input.custom_domain !== undefined) {
     tenant.custom_domain = input.custom_domain?.trim() || null;
   }
-  if (!key || tenant.id === DEMO_ID) return;
+  if (!key || DESK_DEMO_SEEDS.some((d) => d.id === tenant.id)) return;
   await fetch(`${url}/rest/v1/desk_branding?tenant_id=eq.${tenant.id}`, {
     method: "PATCH",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
@@ -444,7 +445,7 @@ export async function saveStudio(
 }
 
 export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
-  const demo = tenant.id === DEMO_ID;
+  const demoSeed = DESK_DEMO_SEEDS.find((d) => d.id === tenant.id);
   const picks =
     memPicks.get(tenant.id) ??
     (await restGet<DeskPicks>(`desk_picks?tenant_id=eq.${tenant.id}&limit=1`))[0];
@@ -452,8 +453,8 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
     memBrand.get(tenant.id) ??
     (await restGet<DeskBranding>(`desk_branding?tenant_id=eq.${tenant.id}&limit=1`))[0];
   const base = slugify(branding?.org_name || tenant.org_name || "desk");
-  let slug = demo ? DESK_DEMO_SLUG : tenant.slug || base;
-  if (!demo && !tenant.slug) {
+  let slug = demoSeed ? demoSeed.slug : tenant.slug || base;
+  if (!demoSeed && !tenant.slug) {
     const clash = await restGet<DeskTenant>(`desk_tenants?slug=eq.${slug}&limit=1`);
     if (clash[0] && clash[0].id !== tenant.id) slug = `${base}-${tenant.id.slice(0, 6)}`;
   }
@@ -465,7 +466,7 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
   tenant.org_name = branding?.org_name || tenant.org_name;
 
   const { url, key } = supabaseConfig();
-  if (key && !demo) {
+  if (key && !demoSeed) {
     await fetch(`${url}/rest/v1/desk_tenants?id=eq.${tenant.id}`, {
       method: "PATCH",
       headers: restHeaders(key, { Prefer: "return=minimal" }),

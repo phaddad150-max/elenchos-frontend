@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { isDeskDemoToken } from "@/lib/desk/catalog";
+import { isDeskDemoToken, isUaeDemoToken } from "@/lib/desk/catalog";
 
 type CatalogItem = { id: string; label: string };
 
@@ -138,7 +138,9 @@ function DeskStudioPage() {
           <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">Desk studio</p>
           {isDeskDemoToken(token) ? (
             <p className="text-[12px] font-mono uppercase tracking-[0.14em] text-amber-signal">
-              Walkthrough · no card charged
+              {isUaeDemoToken(token)
+                ? "UAE walkthrough · no card charged"
+                : "Walkthrough · no card charged"}
             </p>
           ) : null}
           <h1 className="page-hero-title text-2xl">Brand it. Pick topics. Generate.</h1>

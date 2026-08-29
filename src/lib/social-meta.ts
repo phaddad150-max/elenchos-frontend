@@ -65,6 +65,14 @@ export const DESK_SOCIAL: SocialPageMeta = {
   image: DEFAULT_OG,
 };
 
+export const UAE_SOCIAL: SocialPageMeta = {
+  title: "UAE desk · paid vs earned on X · Elenchos",
+  description:
+    "White-label public-discourse dashboard for UAE SMBs, corporates, and startups. Paid vs earned on X. Brand it, generate a live URL. Scoring stays on Elenchos.",
+  url: `${SITE}/uae`,
+  image: DEFAULT_OG,
+};
+
 export const LIBRARY_SOCIAL: SocialPageMeta = {
   title: "Library · Topics, case studies & trackers · Elenchos",
   description:
