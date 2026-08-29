@@ -3,7 +3,7 @@ import { BookOpen } from "lucide-react";
 
 /**
  * Research secondary nav — Library only (free published work).
- * Private analyses live on /pro. Legacy /research/commission is unlinked.
+ * Private analyses retired with the Pro tab. Legacy /research/commission redirects to /desk.
  */
 const ITEMS = [
   {

@@ -39,13 +39,27 @@ function DeskStudioPage() {
         const data = (await r.json()) as {
           error?: string;
           tenant?: { org_name?: string; slug?: string | null; custom_domain?: string | null };
+          branding?: {
+            org_name?: string;
+            unbranded?: boolean;
+            logo_url?: string | null;
+            primary_color?: string;
+            accent_color?: string;
+          };
+          picks?: { topic_ids?: string[]; custom_topics?: string[] };
           catalog?: CatalogItem[];
         };
         if (!r.ok) {
           setErr(data.error || "Could not open studio.");
           return;
         }
-        setOrgName(data.tenant?.org_name || "");
+        setOrgName(data.branding?.org_name || data.tenant?.org_name || "");
+        setUnbranded(Boolean(data.branding?.unbranded));
+        setLogoUrl(data.branding?.logo_url || "");
+        if (data.branding?.primary_color) setPrimary(data.branding.primary_color);
+        if (data.branding?.accent_color) setAccent(data.branding.accent_color);
+        setTopicIds(data.picks?.topic_ids || []);
+        setCustomText((data.picks?.custom_topics || []).join("\n"));
         setDomain(data.tenant?.custom_domain || "");
         setCatalog(data.catalog || []);
         if (data.tenant?.slug) setLivePath(`/d/${data.tenant.slug}`);
@@ -168,6 +182,16 @@ function DeskStudioPage() {
                   Accent
                   <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
                 </label>
+              </div>
+              <div
+                className="rounded-xl border px-3 py-2.5 flex items-center gap-3"
+                style={{ borderColor: primary, background: `${primary}14` }}
+              >
+                <span className="w-8 h-8 rounded-full" style={{ background: primary }} />
+                <span className="w-8 h-8 rounded-full" style={{ background: accent }} />
+                <p className="text-[13px] font-display font-semibold truncate" style={{ color: primary }}>
+                  {orgName || "Your desk"}
+                </p>
               </div>
             </section>
 

@@ -49,6 +49,8 @@ export const Route = createFileRoute("/api/desk/checkout")({
           params.set("client_reference_id", tenant.id);
           params.set("metadata[kind]", "desk");
           params.set("metadata[tenantId]", tenant.id);
+          params.set("subscription_data[metadata][kind]", "desk");
+          params.set("subscription_data[metadata][tenantId]", tenant.id);
           params.set("customer_email", tenant.email || parsed.data.email);
           params.set("payment_method_types[0]", "card");
           params.set("line_items[0][quantity]", "1");

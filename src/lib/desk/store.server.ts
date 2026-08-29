@@ -3,46 +3,9 @@
  * Isolated from public intelligence tables. Scoring pipelines never write here.
  */
 import { LIVE_TOPIC_KEYS, isArchivedTopicId } from "@/lib/topic-catalog";
+import type { DeskBranding, DeskCard, DeskPicks, DeskTenant } from "./types";
 
-export type DeskStatus = "pending" | "paid" | "live";
-
-export type DeskTenant = {
-  id: string;
-  manage_token: string;
-  slug: string | null;
-  email: string | null;
-  org_name: string;
-  stripe_session_id: string | null;
-  status: DeskStatus;
-  custom_domain: string | null;
-  created_at: string;
-  paid_at: string | null;
-};
-
-export type DeskBranding = {
-  tenant_id: string;
-  org_name: string;
-  unbranded: boolean;
-  logo_url: string | null;
-  primary_color: string;
-  accent_color: string;
-};
-
-export type DeskPicks = {
-  tenant_id: string;
-  topic_ids: string[];
-  custom_topics: string[];
-};
-
-export type DeskCard = {
-  topic_id: string;
-  topic_name: string;
-  headline: string | null;
-  overall_sentiment: { score?: number; label?: string } | null;
-  divergence_score: number | null;
-  sample_size: number | null;
-  last_updated: string | null;
-};
+export type { DeskBranding, DeskCard, DeskPicks, DeskStatus, DeskTenant, LiveDesk } from "./types";
 
 const memTenants: DeskTenant[] = [];
 const memBrand = new Map<string, DeskBranding>();
@@ -102,7 +65,12 @@ export async function createPendingTenant(input: {
   };
   memTenants.push(row);
   const { url, key } = supabaseConfig();
-  if (key) {
+  if (!key) {
+    throw new Error(
+      "Desk storage is not configured. Set SUPABASE_SERVICE_ROLE_KEY and run RUN_ME_desk_tenants.sql.",
+    );
+  }
+  {
     const res = await fetch(`${url}/rest/v1/desk_tenants`, {
       method: "POST",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
@@ -257,6 +225,33 @@ export async function getLiveDesk(slug: string): Promise<{
     latest.push(c);
   }
   return { tenant, branding, picks, cards: latest };
+}
+
+export async function getStudioBundle(token: string): Promise<{
+  tenant: DeskTenant;
+  branding: DeskBranding;
+  picks: DeskPicks;
+} | null> {
+  const tenant = await getTenantByToken(token);
+  if (!tenant) return null;
+  const branding =
+    (await restGet<DeskBranding>(`desk_branding?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
+    memBrand.get(tenant.id) ?? {
+      tenant_id: tenant.id,
+      org_name: tenant.org_name,
+      unbranded: false,
+      logo_url: null,
+      primary_color: "#22d3ee",
+      accent_color: "#f59e0b",
+    };
+  const picks =
+    (await restGet<DeskPicks>(`desk_picks?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
+    memPicks.get(tenant.id) ?? {
+      tenant_id: tenant.id,
+      topic_ids: [],
+      custom_topics: [],
+    };
+  return { tenant, branding, picks };
 }
 
 export async function saveStudio(

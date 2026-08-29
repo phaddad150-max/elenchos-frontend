@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackersIndexRouteImport } from './routes/trackers.index'
 import { Route as TopicsIndexRouteImport } from './routes/topics.index'
 import { Route as ResearchIndexRouteImport } from './routes/research.index'
+import { Route as DeskIndexRouteImport } from './routes/desk.index'
 import { Route as TrackersPeaceRouteImport } from './routes/trackers.peace'
 import { Route as TrackersLeadersRouteImport } from './routes/trackers.leaders'
 import { Route as TrackersCitizenDiscourseRouteImport } from './routes/trackers.citizen-discourse'
@@ -126,6 +127,11 @@ const ResearchIndexRoute = ResearchIndexRouteImport.update({
   id: '/research/',
   path: '/research/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DeskIndexRoute = DeskIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DeskRoute,
 } as any)
 const TrackersPeaceRoute = TrackersPeaceRouteImport.update({
   id: '/trackers/peace',
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/trackers/citizen-discourse': typeof TrackersCitizenDiscourseRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
+  '/desk/': typeof DeskIndexRoute
   '/research/': typeof ResearchIndexRoute
   '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
@@ -383,7 +390,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/desk': typeof DeskRouteWithChildren
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -405,6 +411,7 @@ export interface FileRoutesByTo {
   '/trackers/citizen-discourse': typeof TrackersCitizenDiscourseRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
+  '/desk': typeof DeskIndexRoute
   '/research': typeof ResearchIndexRoute
   '/topics': typeof TopicsIndexRoute
   '/trackers': typeof TrackersIndexRoute
@@ -460,6 +467,7 @@ export interface FileRoutesById {
   '/trackers/citizen-discourse': typeof TrackersCitizenDiscourseRoute
   '/trackers/leaders': typeof TrackersLeadersRoute
   '/trackers/peace': typeof TrackersPeaceRoute
+  '/desk/': typeof DeskIndexRoute
   '/research/': typeof ResearchIndexRoute
   '/topics/': typeof TopicsIndexRoute
   '/trackers/': typeof TrackersIndexRoute
@@ -516,6 +524,7 @@ export interface FileRouteTypes {
     | '/trackers/citizen-discourse'
     | '/trackers/leaders'
     | '/trackers/peace'
+    | '/desk/'
     | '/research/'
     | '/topics/'
     | '/trackers/'
@@ -548,7 +557,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/desk'
     | '/leaders'
     | '/peace'
     | '/privacy'
@@ -570,6 +578,7 @@ export interface FileRouteTypes {
     | '/trackers/citizen-discourse'
     | '/trackers/leaders'
     | '/trackers/peace'
+    | '/desk'
     | '/research'
     | '/topics'
     | '/trackers'
@@ -624,6 +633,7 @@ export interface FileRouteTypes {
     | '/trackers/citizen-discourse'
     | '/trackers/leaders'
     | '/trackers/peace'
+    | '/desk/'
     | '/research/'
     | '/topics/'
     | '/trackers/'
@@ -798,6 +808,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/research/'
       preLoaderRoute: typeof ResearchIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/desk/': {
+      id: '/desk/'
+      path: '/'
+      fullPath: '/desk/'
+      preLoaderRoute: typeof DeskIndexRouteImport
+      parentRoute: typeof DeskRoute
     }
     '/trackers/peace': {
       id: '/trackers/peace'
@@ -1078,11 +1095,13 @@ declare module '@tanstack/react-router' {
 interface DeskRouteChildren {
   DeskStudioRoute: typeof DeskStudioRoute
   DeskThanksRoute: typeof DeskThanksRoute
+  DeskIndexRoute: typeof DeskIndexRoute
 }
 
 const DeskRouteChildren: DeskRouteChildren = {
   DeskStudioRoute: DeskStudioRoute,
   DeskThanksRoute: DeskThanksRoute,
+  DeskIndexRoute: DeskIndexRoute,
 }
 
 const DeskRouteWithChildren = DeskRoute._addFileChildren(DeskRouteChildren)

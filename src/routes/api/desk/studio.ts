@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { listSellableDeskTopics } from "@/lib/topic-catalog";
-import { getTenantByToken, saveStudio } from "@/lib/desk/store.server";
+import { getStudioBundle, getTenantByToken, saveStudio } from "@/lib/desk/store.server";
 
 const SaveSchema = z.object({
   token: z.string().min(16).max(80),
@@ -20,10 +20,14 @@ export const Route = createFileRoute("/api/desk/studio")({
     handlers: {
       GET: async ({ request }) => {
         const token = new URL(request.url).searchParams.get("token")?.trim() || "";
-        const tenant = token ? await getTenantByToken(token) : null;
-        if (!tenant || (tenant.status !== "paid" && tenant.status !== "live")) {
+        const bundle = token ? await getStudioBundle(token) : null;
+        if (
+          !bundle ||
+          (bundle.tenant.status !== "paid" && bundle.tenant.status !== "live")
+        ) {
           return Response.json({ error: "Invalid or unpaid studio link." }, { status: 401 });
         }
+        const { tenant, branding, picks } = bundle;
         return Response.json({
           tenant: {
             id: tenant.id,
@@ -33,6 +37,8 @@ export const Route = createFileRoute("/api/desk/studio")({
             email: tenant.email,
             custom_domain: tenant.custom_domain,
           },
+          branding,
+          picks,
           catalog: listSellableDeskTopics(),
         });
       },
