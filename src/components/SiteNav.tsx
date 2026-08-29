@@ -6,7 +6,6 @@ import { MobileTabBar } from "@/components/MobileTabBar";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import type { ReactNode } from "react";
 import { ELENCHOS_NAV_LINE } from "@/lib/brand";
-import { useAdminSession } from "@/lib/use-admin-session";
 
 function XLogo({ className }: { className?: string }) {
   return (
@@ -31,13 +30,11 @@ const TABS = [
   /** Research opens Library content directly (no intermediate landing). */
   { to: "/research/library", label: "Research", exact: false, badge: null as null | "new" },
   { to: "/desk", label: "Desk", exact: true, badge: "new" as const },
-  { to: "/pro", label: "Pro", exact: false, badge: null as null | "new" },
   { to: "/about", label: "About", exact: true, badge: null as null | "new" },
 ] as const;
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
-  const showPro = useAdminSession();
-  const tabs = showPro ? TABS : TABS.filter((t) => t.to !== "/pro");
+  const tabs = TABS;
   return (
     <>
       <nav className="sticky top-0 z-30 nav-shell" aria-label="Main">

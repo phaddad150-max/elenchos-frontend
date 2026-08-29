@@ -178,6 +178,13 @@ export function liveTopicConfig(id: string): LiveTopicConfig | undefined {
   return LIVE_TOPIC_KEYS[id];
 }
 
+/** Topics a paying desk customer may select (live monitors only). */
+export function listSellableDeskTopics(): { id: string; label: string }[] {
+  return Object.entries(LIVE_TOPIC_KEYS)
+    .filter(([id]) => !isArchivedTopicId(id))
+    .map(([id, cfg]) => ({ id, label: cfg.headerLabel }));
+}
+
 export function topicIdForBackendName(backendName: string): string | null {
   const canonical = normalizeTopicKey(backendName) ?? backendName;
   const entry = Object.entries(LIVE_TOPIC_KEYS).find(([, cfg]) => cfg.rootKey === canonical);

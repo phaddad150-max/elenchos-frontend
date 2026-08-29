@@ -889,10 +889,10 @@ function DeskSellStrip() {
           For organizations · one product
         </p>
         <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground leading-snug">
-          Buy this desk — your brand, or none. Topics you choose and pay to sample.
+          Buy this dashboard — pay, brand it, generate a live URL.
         </p>
         <p className="text-[12px] sm:text-[12.5px] text-muted-foreground leading-snug">
-          elenchos.live is the working prototype. Same public-discourse dashboard, licensed to you.
+          elenchos.live is the template. Scoring stays locked. Your tables are created at payment.
         </p>
       </div>
       <Link

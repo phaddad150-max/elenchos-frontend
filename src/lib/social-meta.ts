@@ -58,9 +58,9 @@ export const ABOUT_SOCIAL: SocialPageMeta = {
 };
 
 export const DESK_SOCIAL: SocialPageMeta = {
-  title: "Buy this desk · Your brand or none · Elenchos",
+  title: "Buy this dashboard · Elenchos Desk",
   description:
-    "One product for organizations: the elenchos.live dashboard as your desk — your branding or unbranded, topics you choose and pay to sample.",
+    "Pay for a licensed public-discourse dashboard. Brand it, pick topics, generate a live URL. Scoring logic stays on Elenchos.",
   url: `${SITE}/desk`,
   image: DEFAULT_OG,
 };

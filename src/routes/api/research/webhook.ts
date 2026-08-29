@@ -19,6 +19,7 @@ import {
   handleInvoicePaid,
   handleSubscriptionUpdated,
 } from "@/lib/billing/webhook-handlers.server";
+import { markDeskPaid } from "@/lib/desk/store.server";
 
 /**
  * Stripe webhook — guest Research Desk commissions + Pro billing.
@@ -78,6 +79,18 @@ export const Route = createFileRoute("/api/research/webhook")({
 
         // ── Billing: Pro + packs ──────────────────────────────────────────
         if (type === "checkout.session.completed") {
+          const meta0 = ((obj as { metadata?: Record<string, string> }).metadata || {});
+          if (meta0.kind === "desk" && (meta0.tenantId || (obj as { id?: string }).id)) {
+            const paid = await markDeskPaid({
+              tenantId: meta0.tenantId,
+              sessionId: (obj as { id?: string }).id,
+            });
+            return Response.json({
+              received: true,
+              desk: true,
+              tenantId: paid?.id ?? meta0.tenantId,
+            });
+          }
           const billing = await handleBillingCheckoutCompleted(
             obj as Parameters<typeof handleBillingCheckoutCompleted>[0],
           );

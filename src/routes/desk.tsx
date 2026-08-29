@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Building2, Layers, Palette, Radio, Shield } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { ArrowRight, Building2, Layers, Loader2, Lock, Palette, Radio, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { DESK_SOCIAL, socialMetaTags } from "@/lib/social-meta";
+import { DESK_INCLUDED, DESK_INTERVAL, DESK_PRICE_USD, DESK_PRODUCT_BLURB } from "@/lib/desk/catalog";
 
 export const Route = createFileRoute("/desk")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    cancelled: s.cancelled === "1" || s.cancelled === true ? "1" : undefined,
+  }),
   head: () => ({
     meta: socialMetaTags(DESK_SOCIAL),
     links: [{ rel: "canonical", href: DESK_SOCIAL.url }],
@@ -13,34 +17,36 @@ export const Route = createFileRoute("/desk")({
   component: DeskPage,
 });
 
-const INCLUDED = [
-  {
-    icon: Radio,
-    title: "This dashboard, as yours",
-    body: "The live elenchos.live desk is the prototype: public-discourse signals, heatmap, topic briefings. You get that product — not a new science project.",
-  },
-  {
-    icon: Palette,
-    title: "Your brand, or none",
-    body: "Ship with your name, colors, and domain — or run unbranded. Elenchos does not have to appear on the public face.",
-  },
-  {
-    icon: Layers,
-    title: "Topics you choose and fund",
-    body: "You pick the topics. You pay to sample them. No weekly X/Grok refresh unless the sample is funded — the public prototype stays as the demo.",
-  },
-] as const;
-
-const DEFAULT_INQUIRY = `Hi — I want to buy an Elenchos desk.
-
-Organization:
-Brand: own brand / unbranded (no Elenchos mark)
-Topics we want sampled:
-Domain / audience:
-
-`;
-
 function DeskPage() {
+  const search = Route.useSearch();
+  const [orgName, setOrgName] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const onPay = async (e: FormEvent) => {
+    e.preventDefault();
+    setErr(null);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/desk/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ orgName, email }),
+      });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setErr(data.error || "Checkout failed.");
+        return;
+      }
+      window.location.assign(data.url);
+    } catch {
+      setErr("Could not start checkout.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="page-shell dash-landing">
       <div className="absolute inset-0 grid-bg pointer-events-none" />
@@ -55,107 +61,112 @@ function DeskPage() {
               Organizations · one product
             </div>
             <h1 className="page-hero-title text-[1.55rem] sm:text-3xl md:text-[2.05rem] break-words max-w-3xl">
-              Buy this desk
+              Buy this dashboard
             </h1>
             <p className="text-[14px] sm:text-[15.5px] text-foreground/90 max-w-2xl leading-relaxed">
-              One public offer: the dashboard you can already use on elenchos.live, licensed
-              to your organization — with your branding or none, and topics you choose and pay
-              to keep sampled.
+              {DESK_PRODUCT_BLURB} Like a site template: pay, brand it, pick topics, generate a live
+              link. Connect your own domain when you are ready.
             </p>
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center pt-1">
-              <ContactEmailMe
-                source="desk-enterprise"
-                variant="button"
-                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-5 rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[13.5px] font-display font-semibold hover:bg-cyan/25"
-                defaultMessage={DEFAULT_INQUIRY}
-                dialogTitle="Request a desk"
-                dialogDescription="Tell us the organization, brand choice, and topics. We reply from the Elenchos inbox — no self-serve checkout."
-              >
-                Request a desk
-              </ContactEmailMe>
-              <Link
-                to="/"
-                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 text-[13px] font-medium text-muted-foreground hover:text-cyan"
-              >
-                Open the live prototype
-                <ArrowRight className="w-3.5 h-3.5" aria-hidden />
-              </Link>
-            </div>
+            <p className="text-[13px] font-display font-semibold text-cyan">
+              ${DESK_PRICE_USD}/{DESK_INTERVAL} · tables created at payment
+            </p>
           </div>
         </header>
 
-        <section aria-labelledby="desk-included" className="space-y-3">
-          <h2
-            id="desk-included"
-            className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground"
-          >
-            What you buy — one option
-          </h2>
-          <ul className="grid sm:grid-cols-3 gap-3">
-            {INCLUDED.map((item) => (
-              <li
-                key={item.title}
-                className="dash-panel p-4 sm:p-5 space-y-2.5 min-h-[168px] flex flex-col"
-              >
-                <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
-                  <item.icon className="w-4 h-4" aria-hidden />
+        {search.cancelled ? (
+          <p className="text-[13px] text-amber-signal">Checkout cancelled. You can start again below.</p>
+        ) : null}
+
+        <div className="grid lg:grid-cols-12 gap-5">
+          <section className="lg:col-span-7 space-y-3">
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+              What you buy
+            </h2>
+            <ul className="grid sm:grid-cols-2 gap-3">
+              {[
+                { icon: Radio, title: "This dashboard, as yours", body: "elenchos.live is the template. You get the same public-discourse surface." },
+                { icon: Palette, title: "Brand after you pay", body: "Colors, name, logo — or unbranded. Studio opens only after Stripe." },
+                { icon: Layers, title: "Pick topics, then Generate", body: "Catalog topics copy existing samples. Custom names stay 0 · awaiting data until a funded run." },
+                { icon: Lock, title: "Code stays locked", body: "You do not get Pass-1 / scoring logic. You buy the desk, not the method." },
+              ].map((item) => (
+                <li key={item.title} className="dash-panel p-4 space-y-2 min-h-[140px] flex flex-col">
+                  <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
+                    <item.icon className="w-4 h-4" aria-hidden />
+                  </span>
+                  <h3 className="font-display font-semibold text-[15px]">{item.title}</h3>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed flex-1">{item.body}</p>
+                </li>
+              ))}
+            </ul>
+            <ul className="text-[12.5px] text-muted-foreground space-y-1 pt-1">
+              {DESK_INCLUDED.map((line) => (
+                <li key={line}>· {line}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="lg:col-span-5">
+            <form
+              onSubmit={onPay}
+              className="dash-panel p-4 sm:p-5 space-y-3"
+              aria-labelledby="desk-checkout"
+            >
+              <h2 id="desk-checkout" className="font-display font-semibold text-[1.05rem]">
+                Checkout
+              </h2>
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed">
+                Stripe takes the card. After payment you land in the studio — not a message popup —
+                to brand the desk and generate your live URL.
+              </p>
+              <label className="block space-y-1">
+                <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                  Organization
                 </span>
-                <h3 className="font-display font-semibold text-[15px] leading-snug">
-                  {item.title}
-                </h3>
-                <p className="text-[13px] text-muted-foreground leading-relaxed flex-1">
-                  {item.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section
-          aria-labelledby="desk-prototype"
-          className="rounded-2xl border border-border/80 bg-card/40 p-4 sm:p-6 space-y-3"
-        >
-          <h2
-            id="desk-prototype"
-            className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan"
-          >
-            Prototype
-          </h2>
-          <p className="text-[15px] font-display font-semibold text-foreground">
-            You already used it. This is the product.
-          </p>
-          <p className="text-[13.5px] text-muted-foreground leading-relaxed max-w-2xl">
-            Public discourse around a topic of selection, heatmap, leadership boards, and the
-            Research Library are the working surface. We do not sell a vaporware mock. The
-            public site remains the citizen demo; a paid desk is that same stack with your
-            face on it and a sample you fund.
-          </p>
-          <ul className="grid sm:grid-cols-2 gap-2 text-[13px] text-foreground/90">
-            <li className="rounded-xl border border-border/80 px-3 py-2.5">
-              Unbranded — no Elenchos mark on the public face
-            </li>
-            <li className="rounded-xl border border-border/80 px-3 py-2.5">
-              Your brand — name, colors, domain
-            </li>
-            <li className="rounded-xl border border-border/80 px-3 py-2.5">
-              Your topic list — only what you pay to refresh
-            </li>
-            <li className="rounded-xl border border-border/80 px-3 py-2.5">
-              Contact-only sale — no extra public plan grid
-            </li>
-          </ul>
-        </section>
-
-        <aside className="rounded-xl border border-dashed border-border/80 px-4 py-3 text-[12.5px] text-muted-foreground flex items-start gap-2">
-          <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" aria-hidden />
-          <span>
-            Citizen journalism on the public Library stays free. A desk does not buy silence or
-            a censorship bureau — it buys a branded (or unbranded) discourse dashboard and the
-            samples you fund. Method and falsifiers stay visible.
-          </span>
-        </aside>
+                <input
+                  required
+                  minLength={2}
+                  maxLength={80}
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 text-[14px]"
+                  placeholder="Acme Research"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                  Work email
+                </span>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 text-[14px]"
+                  placeholder="you@org.com"
+                />
+              </label>
+              {err ? <p className="text-[13px] text-rose-signal">{err}</p> : null}
+              <button
+                type="submit"
+                disabled={busy}
+                className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[14px] font-display font-semibold hover:bg-cyan/25 disabled:opacity-50"
+              >
+                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Pay ${DESK_PRICE_USD}/{DESK_INTERVAL}
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" />
+                Card on Stripe. Your desk tables are created when payment clears. No invented scores.
+              </p>
+              <Link to="/" className="text-[12px] text-cyan hover:underline inline-flex items-center gap-1">
+                Open the live prototype
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            </form>
+          </section>
+        </div>
       </main>
-
       <SiteFooter />
     </div>
   );

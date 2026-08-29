@@ -1,8 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, FlaskConical, Building2, Sparkles, Info } from "lucide-react";
-import { useAdminSession } from "@/lib/use-admin-session";
+import { LayoutDashboard, FlaskConical, Building2, Info } from "lucide-react";
 
-/** Main nav (mobile): Home · Research · Desk · About. Pro stays admin-only. */
+/** Main nav (mobile): Home · Research · Desk · About. */
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
   {
@@ -21,22 +20,15 @@ const TABS = [
   {
     to: "/desk",
     label: "Desk",
-    match: (p: string) => p === "/desk" || p.startsWith("/desk/"),
+    match: (p: string) => p === "/desk" || p.startsWith("/desk/") || p.startsWith("/d/"),
     icon: Building2,
-  },
-  {
-    to: "/pro",
-    label: "Pro",
-    match: (p: string) => p === "/pro" || p.startsWith("/pro/"),
-    icon: Sparkles,
   },
   { to: "/about", label: "About", match: (p: string) => p === "/about", icon: Info },
 ] as const;
 
 export function MobileTabBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const showPro = useAdminSession();
-  const tabs = showPro ? TABS : TABS.filter((t) => t.to !== "/pro");
+  const tabs = TABS;
 
   return (
     <nav
@@ -44,7 +36,7 @@ export function MobileTabBar() {
       className="mobile-tab-bar md:hidden fixed bottom-0 inset-x-0 z-40"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className={`grid gap-0.5 px-1 pt-1 pb-0.5 ${showPro ? "grid-cols-5" : "grid-cols-4"}`}>
+      <ul className="grid gap-0.5 px-1 pt-1 pb-0.5 grid-cols-4">
         {tabs.map((t) => {
           const Icon = t.icon;
           const active = t.match(pathname);

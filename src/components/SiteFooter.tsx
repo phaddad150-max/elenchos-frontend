@@ -2,14 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { ELENCHOS_TAGLINE } from "@/lib/brand";
 import { requestConsentPreferences } from "@/lib/privacy-consent";
-import { useAdminSession } from "@/lib/use-admin-session";
 
 const linkClass =
   "text-cyan hover:underline touch-manipulation min-h-[32px] inline-flex items-center";
 
 /** Site footer: main nav + legal. Cyan links. Contact me > Enterprise. */
 export function SiteFooter() {
-  const showPro = useAdminSession();
   return (
     <footer className="border-t border-border/80 mt-8 pb-20 md:pb-0 bg-gradient-to-t from-card/40 to-transparent">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-5 space-y-3 text-muted-foreground">
@@ -26,11 +24,6 @@ export function SiteFooter() {
           <Link to="/desk" className={linkClass}>
             Desk
           </Link>
-          {showPro ? (
-            <Link to="/pro" className={linkClass}>
-              Pro
-            </Link>
-          ) : null}
           <Link to="/about" className={linkClass}>
             About
           </Link>

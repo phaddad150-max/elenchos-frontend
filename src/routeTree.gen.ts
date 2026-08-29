@@ -32,6 +32,9 @@ import { Route as ResearchNetworksLedgerRouteImport } from './routes/research.ne
 import { Route as ResearchLibraryRouteImport } from './routes/research.library'
 import { Route as ResearchCommissionRouteImport } from './routes/research.commission'
 import { Route as ResearchSlugRouteImport } from './routes/research.$slug'
+import { Route as DeskThanksRouteImport } from './routes/desk.thanks'
+import { Route as DeskStudioRouteImport } from './routes/desk.studio'
+import { Route as DSlugRouteImport } from './routes/d.$slug'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ResearchTrackersIndexRouteImport } from './routes/research.trackers.index'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
@@ -49,6 +52,10 @@ import { Route as ApiResearchEmailRouteImport } from './routes/api/research/emai
 import { Route as ApiResearchCheckoutRouteImport } from './routes/api/research/checkout'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiProRunRouteImport } from './routes/api/pro/run'
+import { Route as ApiDeskThanksRouteImport } from './routes/api/desk/thanks'
+import { Route as ApiDeskStudioRouteImport } from './routes/api/desk/studio'
+import { Route as ApiDeskGenerateRouteImport } from './routes/api/desk/generate'
+import { Route as ApiDeskCheckoutRouteImport } from './routes/api/desk/checkout'
 import { Route as ApiBillingStripeStatusRouteImport } from './routes/api/billing/stripe-status'
 import { Route as ApiBillingMeRouteImport } from './routes/api/billing/me'
 import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
@@ -171,6 +178,21 @@ const ResearchSlugRoute = ResearchSlugRouteImport.update({
   path: '/research/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeskThanksRoute = DeskThanksRouteImport.update({
+  id: '/thanks',
+  path: '/thanks',
+  getParentRoute: () => DeskRoute,
+} as any)
+const DeskStudioRoute = DeskStudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => DeskRoute,
+} as any)
+const DSlugRoute = DSlugRouteImport.update({
+  id: '/d/$slug',
+  path: '/d/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCurationRoute = AdminCurationRouteImport.update({
   id: '/admin/curation',
   path: '/admin/curation',
@@ -257,6 +279,26 @@ const ApiProRunRoute = ApiProRunRouteImport.update({
   path: '/api/pro/run',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDeskThanksRoute = ApiDeskThanksRouteImport.update({
+  id: '/api/desk/thanks',
+  path: '/api/desk/thanks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDeskStudioRoute = ApiDeskStudioRouteImport.update({
+  id: '/api/desk/studio',
+  path: '/api/desk/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDeskGenerateRoute = ApiDeskGenerateRouteImport.update({
+  id: '/api/desk/generate',
+  path: '/api/desk/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDeskCheckoutRoute = ApiDeskCheckoutRouteImport.update({
+  id: '/api/desk/checkout',
+  path: '/api/desk/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiBillingStripeStatusRoute = ApiBillingStripeStatusRouteImport.update({
   id: '/api/billing/stripe-status',
   path: '/api/billing/stripe-status',
@@ -287,7 +329,7 @@ const ApiResearchAdminCommissionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/desk': typeof DeskRoute
+  '/desk': typeof DeskRouteWithChildren
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -296,6 +338,9 @@ export interface FileRoutesByFullPath {
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
+  '/d/$slug': typeof DSlugRoute
+  '/desk/studio': typeof DeskStudioRoute
+  '/desk/thanks': typeof DeskThanksRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
@@ -312,6 +357,10 @@ export interface FileRoutesByFullPath {
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/me': typeof ApiBillingMeRoute
   '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
+  '/api/desk/checkout': typeof ApiDeskCheckoutRoute
+  '/api/desk/generate': typeof ApiDeskGenerateRoute
+  '/api/desk/studio': typeof ApiDeskStudioRoute
+  '/api/desk/thanks': typeof ApiDeskThanksRoute
   '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
@@ -334,7 +383,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/desk': typeof DeskRoute
+  '/desk': typeof DeskRouteWithChildren
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -343,6 +392,9 @@ export interface FileRoutesByTo {
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
+  '/d/$slug': typeof DSlugRoute
+  '/desk/studio': typeof DeskStudioRoute
+  '/desk/thanks': typeof DeskThanksRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
@@ -359,6 +411,10 @@ export interface FileRoutesByTo {
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/me': typeof ApiBillingMeRoute
   '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
+  '/api/desk/checkout': typeof ApiDeskCheckoutRoute
+  '/api/desk/generate': typeof ApiDeskGenerateRoute
+  '/api/desk/studio': typeof ApiDeskStudioRoute
+  '/api/desk/thanks': typeof ApiDeskThanksRoute
   '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
@@ -382,7 +438,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/desk': typeof DeskRoute
+  '/desk': typeof DeskRouteWithChildren
   '/leaders': typeof LeadersRoute
   '/peace': typeof PeaceRoute
   '/privacy': typeof PrivacyRoute
@@ -391,6 +447,9 @@ export interface FileRoutesById {
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/curation': typeof AdminCurationRoute
+  '/d/$slug': typeof DSlugRoute
+  '/desk/studio': typeof DeskStudioRoute
+  '/desk/thanks': typeof DeskThanksRoute
   '/research/$slug': typeof ResearchSlugRoute
   '/research/commission': typeof ResearchCommissionRoute
   '/research/library': typeof ResearchLibraryRoute
@@ -407,6 +466,10 @@ export interface FileRoutesById {
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/me': typeof ApiBillingMeRoute
   '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
+  '/api/desk/checkout': typeof ApiDeskCheckoutRoute
+  '/api/desk/generate': typeof ApiDeskGenerateRoute
+  '/api/desk/studio': typeof ApiDeskStudioRoute
+  '/api/desk/thanks': typeof ApiDeskThanksRoute
   '/api/pro/run': typeof ApiProRunRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/research/checkout': typeof ApiResearchCheckoutRoute
@@ -440,6 +503,9 @@ export interface FileRouteTypes {
     | '/research-migration'
     | '/sitemap.xml'
     | '/admin/curation'
+    | '/d/$slug'
+    | '/desk/studio'
+    | '/desk/thanks'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
@@ -456,6 +522,10 @@ export interface FileRouteTypes {
     | '/api/billing/checkout'
     | '/api/billing/me'
     | '/api/billing/stripe-status'
+    | '/api/desk/checkout'
+    | '/api/desk/generate'
+    | '/api/desk/studio'
+    | '/api/desk/thanks'
     | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
@@ -487,6 +557,9 @@ export interface FileRouteTypes {
     | '/research-migration'
     | '/sitemap.xml'
     | '/admin/curation'
+    | '/d/$slug'
+    | '/desk/studio'
+    | '/desk/thanks'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
@@ -503,6 +576,10 @@ export interface FileRouteTypes {
     | '/api/billing/checkout'
     | '/api/billing/me'
     | '/api/billing/stripe-status'
+    | '/api/desk/checkout'
+    | '/api/desk/generate'
+    | '/api/desk/studio'
+    | '/api/desk/thanks'
     | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
@@ -534,6 +611,9 @@ export interface FileRouteTypes {
     | '/research-migration'
     | '/sitemap.xml'
     | '/admin/curation'
+    | '/d/$slug'
+    | '/desk/studio'
+    | '/desk/thanks'
     | '/research/$slug'
     | '/research/commission'
     | '/research/library'
@@ -550,6 +630,10 @@ export interface FileRouteTypes {
     | '/api/billing/checkout'
     | '/api/billing/me'
     | '/api/billing/stripe-status'
+    | '/api/desk/checkout'
+    | '/api/desk/generate'
+    | '/api/desk/studio'
+    | '/api/desk/thanks'
     | '/api/pro/run'
     | '/api/public/contact'
     | '/api/research/checkout'
@@ -573,7 +657,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  DeskRoute: typeof DeskRoute
+  DeskRoute: typeof DeskRouteWithChildren
   LeadersRoute: typeof LeadersRoute
   PeaceRoute: typeof PeaceRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -582,6 +666,7 @@ export interface RootRouteChildren {
   ResearchMigrationRoute: typeof ResearchMigrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdminCurationRoute: typeof AdminCurationRoute
+  DSlugRoute: typeof DSlugRoute
   ResearchSlugRoute: typeof ResearchSlugRoute
   ResearchCommissionRoute: typeof ResearchCommissionRoute
   ResearchLibraryRoute: typeof ResearchLibraryRoute
@@ -598,6 +683,10 @@ export interface RootRouteChildren {
   ApiBillingCheckoutRoute: typeof ApiBillingCheckoutRoute
   ApiBillingMeRoute: typeof ApiBillingMeRoute
   ApiBillingStripeStatusRoute: typeof ApiBillingStripeStatusRoute
+  ApiDeskCheckoutRoute: typeof ApiDeskCheckoutRoute
+  ApiDeskGenerateRoute: typeof ApiDeskGenerateRoute
+  ApiDeskStudioRoute: typeof ApiDeskStudioRoute
+  ApiDeskThanksRoute: typeof ApiDeskThanksRoute
   ApiProRunRoute: typeof ApiProRunRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiResearchCheckoutRoute: typeof ApiResearchCheckoutRoute
@@ -780,6 +869,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/desk/thanks': {
+      id: '/desk/thanks'
+      path: '/thanks'
+      fullPath: '/desk/thanks'
+      preLoaderRoute: typeof DeskThanksRouteImport
+      parentRoute: typeof DeskRoute
+    }
+    '/desk/studio': {
+      id: '/desk/studio'
+      path: '/studio'
+      fullPath: '/desk/studio'
+      preLoaderRoute: typeof DeskStudioRouteImport
+      parentRoute: typeof DeskRoute
+    }
+    '/d/$slug': {
+      id: '/d/$slug'
+      path: '/d/$slug'
+      fullPath: '/d/$slug'
+      preLoaderRoute: typeof DSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/curation': {
       id: '/admin/curation'
       path: '/admin/curation'
@@ -899,6 +1009,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProRunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/desk/thanks': {
+      id: '/api/desk/thanks'
+      path: '/api/desk/thanks'
+      fullPath: '/api/desk/thanks'
+      preLoaderRoute: typeof ApiDeskThanksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/desk/studio': {
+      id: '/api/desk/studio'
+      path: '/api/desk/studio'
+      fullPath: '/api/desk/studio'
+      preLoaderRoute: typeof ApiDeskStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/desk/generate': {
+      id: '/api/desk/generate'
+      path: '/api/desk/generate'
+      fullPath: '/api/desk/generate'
+      preLoaderRoute: typeof ApiDeskGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/desk/checkout': {
+      id: '/api/desk/checkout'
+      path: '/api/desk/checkout'
+      fullPath: '/api/desk/checkout'
+      preLoaderRoute: typeof ApiDeskCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/billing/stripe-status': {
       id: '/api/billing/stripe-status'
       path: '/api/billing/stripe-status'
@@ -937,6 +1075,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DeskRouteChildren {
+  DeskStudioRoute: typeof DeskStudioRoute
+  DeskThanksRoute: typeof DeskThanksRoute
+}
+
+const DeskRouteChildren: DeskRouteChildren = {
+  DeskStudioRoute: DeskStudioRoute,
+  DeskThanksRoute: DeskThanksRoute,
+}
+
+const DeskRouteWithChildren = DeskRoute._addFileChildren(DeskRouteChildren)
+
 interface ResearchNetworksLedgerRouteChildren {
   ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
 }
@@ -955,7 +1105,7 @@ const ResearchNetworksLedgerRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  DeskRoute: DeskRoute,
+  DeskRoute: DeskRouteWithChildren,
   LeadersRoute: LeadersRoute,
   PeaceRoute: PeaceRoute,
   PrivacyRoute: PrivacyRoute,
@@ -964,6 +1114,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchMigrationRoute: ResearchMigrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdminCurationRoute: AdminCurationRoute,
+  DSlugRoute: DSlugRoute,
   ResearchSlugRoute: ResearchSlugRoute,
   ResearchCommissionRoute: ResearchCommissionRoute,
   ResearchLibraryRoute: ResearchLibraryRoute,
@@ -980,6 +1131,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBillingCheckoutRoute: ApiBillingCheckoutRoute,
   ApiBillingMeRoute: ApiBillingMeRoute,
   ApiBillingStripeStatusRoute: ApiBillingStripeStatusRoute,
+  ApiDeskCheckoutRoute: ApiDeskCheckoutRoute,
+  ApiDeskGenerateRoute: ApiDeskGenerateRoute,
+  ApiDeskStudioRoute: ApiDeskStudioRoute,
+  ApiDeskThanksRoute: ApiDeskThanksRoute,
   ApiProRunRoute: ApiProRunRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiResearchCheckoutRoute: ApiResearchCheckoutRoute,
