@@ -1077,13 +1077,29 @@ const TOPIC_GROUP_MAP: Record<string, TopicGroup> = {
   "US-Iran Confrontation: Sanctions, Networks & Regime Pressure": "Political",
   "Public Voices on Elon Musk: Trust, Media Frames & Power": "Political",
   "fifa-world-cup-2026": "Social",
+  "Greece Economic Recovery: Resilience, Security & Digital Transformation": "Economic",
+  "US AI Economy Boom & American Technological Renaissance": "Economic",
+  "AI Productivity & GDP Growth: Investment Boom vs Lived Gains, Energy Constraints & Narrative Gaps":
+    "Economic",
+  "India's Economic Growth Narrative: Headline GDP, Employment Quality, AI/IT Disruption & Citizen vs Official Frames":
+    "Economic",
+  "Commercial Space Race: SpaceX, Rivals & Public Trust": "Economic",
+  "Save Europe Act: Citizens, Media & EU Bureaucracy": "Political",
+  "Cyprus, Palestine & Selective Outrage: Attention Asymmetries in European Public Discourse":
+    "Political",
 };
 
 function topicGroup(topic?: string | null): TopicGroup {
   if (!topic) return "Political";
   if (TOPIC_GROUP_MAP[topic]) return TOPIC_GROUP_MAP[topic];
   const t = topic.toLowerCase();
-  if (/(crypto|market|economic|ai race|finance|sanction|trade|tariff)/.test(t)) return "Economic";
+  if (
+    /(crypto|market|economic|ai race|finance|gdp|productivity|space race|spacex|jobs|wages)/.test(
+      t,
+    )
+  ) {
+    return "Economic";
+  }
   if (/(crime|migration|polariz|social|safety|populism)/.test(t)) return "Social";
   return "Political";
 }

@@ -104,8 +104,23 @@ export const LIVE_TOPIC_KEYS: Record<string, LiveTopicConfig> = {
   },
 };
 
-/** Topics kept for history / read-only archive (not primary live monitors). */
-export const ARCHIVED_TOPIC_IDS = ["fifa-world-cup-2026", "maritime-ai-greece"] as const;
+/**
+ * Topics kept for history / read-only archive (not primary live monitors).
+ * G7: never DELETE snapshots — hide from live KPIs, signals, heatmap, Library active list.
+ *
+ * 2026-08-29 balance pass: live set was geopolitics-heavy. Archived four overlapping
+ * political monitors so the public desk is closer to Political / Economic / Social:
+ *   Cuba sanctions · E. Med alliance (covered by Accords + Greece recovery) ·
+ *   US–Iran (covered by Iranian Voices) · Cyprus/Palestine attention asymmetry.
+ */
+export const ARCHIVED_TOPIC_IDS = [
+  "fifa-world-cup-2026",
+  "maritime-ai-greece",
+  "cuba-sanctions-domino",
+  "levant-realignment",
+  "us-iran-confrontation",
+  "cyprus-palestine-attention-asymmetry",
+] as const;
 
 /** Active (non-archived) live monitors — product surface count. */
 export function activeLiveTopicCount(): number {
