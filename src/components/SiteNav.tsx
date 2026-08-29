@@ -30,7 +30,8 @@ const TABS = [
   { to: "/", label: "Dashboard", exact: true, badge: null as null | "new" },
   /** Research opens Library content directly (no intermediate landing). */
   { to: "/research/library", label: "Research", exact: false, badge: null as null | "new" },
-  { to: "/pro", label: "Pro", exact: false, badge: "new" as const },
+  { to: "/desk", label: "Desk", exact: true, badge: "new" as const },
+  { to: "/pro", label: "Pro", exact: false, badge: null as null | "new" },
   { to: "/about", label: "About", exact: true, badge: null as null | "new" },
 ] as const;
 

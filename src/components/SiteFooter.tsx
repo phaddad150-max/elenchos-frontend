@@ -23,6 +23,9 @@ export function SiteFooter() {
           <Link to="/research/library" className={linkClass}>
             Research Library
           </Link>
+          <Link to="/desk" className={linkClass}>
+            Desk
+          </Link>
           {showPro ? (
             <Link to="/pro" className={linkClass}>
               Pro

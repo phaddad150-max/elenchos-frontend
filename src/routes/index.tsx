@@ -680,6 +680,8 @@ function Dashboard() {
           />
         </div>
 
+        <DeskSellStrip />
+
         {/* Signals + heatmap — side by side, independent heights (signal flips must not move globe) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -690,8 +692,9 @@ function Dashboard() {
             <div className="flex flex-col gap-1.5 sm:gap-2.5 mb-2 sm:mb-2.5 pb-2 sm:pb-2.5 border-b border-border/80 shrink-0">
               <Header
                 icon={<Radio className="w-4 h-4" />}
-                title="Live Citizen Signals"
+                title={publicDiscourseHeadline(topicFilter)}
                 subtitle="Tap a row for the full briefing."
+                sentence
               />
               <div className="overflow-x-auto -mx-1 px-1 pb-0.5 custom-scroll overscroll-x-contain">
                 <CitizenGroupFilter value={topicFilter} onChange={setTopicFilter} />
@@ -865,23 +868,65 @@ function resolveSnapshotForTopic(
 // === Subcomponents ===
 
 
+function publicDiscourseHeadline(selection: string | null): string {
+  const topic = selection?.trim();
+  if (!topic) return "Public Discourse Around topic of selection";
+  return `Public Discourse Around ${topic}`;
+}
+
 function Header({
   icon,
   title,
   subtitle,
+  sentence = false,
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle?: string;
+  sentence?: boolean;
 }) {
   return (
     <div className="intel-header">
       <div className="intel-header-row">
         <div className="intel-header-icon">{icon}</div>
-        <h2 className="intel-header-title">{title}</h2>
+        <h2
+          className={
+            sentence
+              ? "font-display font-semibold text-[0.98rem] sm:text-[1.15rem] text-foreground leading-snug tracking-tight text-balance min-w-0"
+              : "intel-header-title"
+          }
+        >
+          {title}
+        </h2>
       </div>
       {subtitle && <p className="intel-header-sub">{subtitle}</p>}
     </div>
+  );
+}
+
+/** One public B2B sell — this live dashboard is the prototype. */
+function DeskSellStrip() {
+  return (
+    <aside className="rounded-2xl border border-cyan/35 bg-cyan/[0.07] px-3.5 sm:px-5 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4 min-w-0">
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
+          For organizations · one product
+        </p>
+        <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground leading-snug">
+          Buy this desk — your brand, or none. Topics you choose and pay to sample.
+        </p>
+        <p className="text-[12px] sm:text-[12.5px] text-muted-foreground leading-snug">
+          elenchos.live is the working prototype. Same public-discourse dashboard, licensed to you.
+        </p>
+      </div>
+      <Link
+        to="/desk"
+        className="shrink-0 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[13px] font-display font-semibold hover:bg-cyan/25 touch-manipulation"
+      >
+        Get this desk
+        <ArrowRight className="w-3.5 h-3.5" aria-hidden />
+      </Link>
+    </aside>
   );
 }
 

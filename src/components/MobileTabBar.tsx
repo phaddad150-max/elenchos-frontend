@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, FlaskConical, Sparkles, Info } from "lucide-react";
+import { LayoutDashboard, FlaskConical, Building2, Sparkles, Info } from "lucide-react";
 import { useAdminSession } from "@/lib/use-admin-session";
 
-/** Main nav (mobile): Dashboard · Research · Pro · About — Library nested under Research only. */
+/** Main nav (mobile): Home · Research · Desk · About. Pro stays admin-only. */
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
   {
@@ -17,6 +17,12 @@ const TABS = [
       p === "/topics" ||
       p.startsWith("/topics/"),
     icon: FlaskConical,
+  },
+  {
+    to: "/desk",
+    label: "Desk",
+    match: (p: string) => p === "/desk" || p.startsWith("/desk/"),
+    icon: Building2,
   },
   {
     to: "/pro",
@@ -38,7 +44,7 @@ export function MobileTabBar() {
       className="mobile-tab-bar md:hidden fixed bottom-0 inset-x-0 z-40"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className={`grid gap-0.5 px-1 pt-1 pb-0.5 ${showPro ? "grid-cols-4" : "grid-cols-3"}`}>
+      <ul className={`grid gap-0.5 px-1 pt-1 pb-0.5 ${showPro ? "grid-cols-5" : "grid-cols-4"}`}>
         {tabs.map((t) => {
           const Icon = t.icon;
           const active = t.match(pathname);
@@ -59,7 +65,7 @@ export function MobileTabBar() {
                     strokeWidth={active ? 2.4 : 2}
                     aria-hidden
                   />
-                  {t.to === "/pro" && (
+                  {t.to === "/desk" && (
                     <span className="absolute -top-2 -right-3.5 inline-flex items-center justify-center rounded-md bg-cyan px-1 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wide text-background shadow-[0_0_8px_-1px_rgba(0,200,200,0.7)]">
                       NEW
                     </span>

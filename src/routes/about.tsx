@@ -128,20 +128,18 @@ function AboutPage() {
                 <span className="w-9 h-9 rounded-lg border border-cyan/35 bg-cyan/10 text-cyan grid place-items-center">
                   <Sparkles className="w-4 h-4" aria-hidden />
                 </span>
-                <p className="font-display font-semibold text-[15px]">Custom research</p>
+                <p className="font-display font-semibold text-[15px]">Your desk</p>
               </div>
               <p className="text-[13px] text-muted-foreground leading-relaxed flex-1">
-                <strong className="text-foreground/90 font-medium">Contact only</strong> —
-                private briefs, custom topics, or team dashboards. No public self-serve checkout
-                while Pro is in operator testing.
+                <strong className="text-foreground/90 font-medium">One paid offer</strong> —
+                this dashboard as yours: your brand or none, topics you choose and pay to sample.
               </p>
-              <ContactEmailMe
-                source="about-custom"
-                variant="link"
+              <Link
+                to="/desk"
                 className="inline-flex items-center gap-1 text-[13px] font-semibold text-cyan self-start min-h-[36px]"
               >
-                Contact me <ArrowRight className="w-3.5 h-3.5" />
-              </ContactEmailMe>
+                Get this desk <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
         </section>
