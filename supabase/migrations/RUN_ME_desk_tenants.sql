@@ -17,6 +17,23 @@ create table if not exists public.desk_tenants (
 create index if not exists desk_tenants_slug_idx on public.desk_tenants (slug);
 create index if not exists desk_tenants_session_idx on public.desk_tenants (stripe_session_id);
 
+alter table public.desk_tenants add column if not exists stripe_customer_id text;
+
+create table if not exists public.desk_runs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references public.desk_tenants (id),
+  topic_count integer not null default 0,
+  amount_cents integer not null default 0,
+  currency text not null default 'eur',
+  stripe_invoice_id text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists desk_runs_tenant_idx on public.desk_runs (tenant_id, created_at desc);
+
+alter table public.desk_runs enable row level security;
+revoke insert, update, delete, truncate on public.desk_runs from anon, authenticated;
+
 create table if not exists public.desk_branding (
   tenant_id uuid primary key references public.desk_tenants (id),
   org_name text not null default '',

@@ -1,19 +1,36 @@
 /** One public SKU: the dashboard, licensed. Scoring code stays locked. */
 
-export const DESK_PRICE_USD = 49;
+export const DESK_CURRENCY = "eur" as const;
+export const DESK_SETUP_EUR = 490;
+export const DESK_LICENSE_EUR = 199;
 export const DESK_INTERVAL = "month" as const;
+export const DESK_RUN_EUR = 1.5;
+export const DESK_MAX_TOPICS = 15;
+
+/** @deprecated use DESK_LICENSE_EUR — kept so older imports still typecheck during edit */
+export const DESK_PRICE_USD = DESK_LICENSE_EUR;
 
 export const DESK_PRODUCT_NAME = "Elenchos Desk";
 export const DESK_PRODUCT_BLURB =
-  "Your public-discourse dashboard. Pay, brand it, pick topics, generate a live URL. Truth-scoring stays on Elenchos.";
+  "Your public-discourse dashboard — the same design as elenchos.live. Setup, monthly license, then each sample run bills your card. Scoring stays on Elenchos.";
 
 export const DESK_INCLUDED = [
-  "Branded or unbranded dashboard (this live site is the template)",
-  "Your own data tables created at payment",
-  "Topic picker + Generate → free live link on elenchos.live",
+  "Full dashboard clone (overview + Research tab) on your live URL",
+  "Setup fee covers design, tables, and white-label chrome",
+  "Monthly license hosts your desk; scoring / Pass-1 stays locked",
+  "Up to 15 topics (catalog and/or your own names)",
+  `Each sample run is €${DESK_RUN_EUR.toFixed(2)} per topic, charged to your card — not absorbed by Elenchos`,
   "Connect your own domain (CNAME)",
-  "Scoring / Pass-1 logic is not exported — you buy the surface, not the method",
 ] as const;
+
+export function deskRunCostEur(topicCount: number): number {
+  const n = Math.max(0, Math.min(DESK_MAX_TOPICS, Math.floor(topicCount)));
+  return Math.round(n * DESK_RUN_EUR * 100) / 100;
+}
+
+export function deskRunCents(topicCount: number): number {
+  return Math.round(deskRunCostEur(topicCount) * 100);
+}
 
 /** Owner walkthrough — not a paid tenant. Token is 16+ chars for studio API. */
 export const DESK_DEMO_TOKEN = "desk-demo-walkthrough";

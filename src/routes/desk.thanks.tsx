@@ -89,8 +89,9 @@ function DeskThanksPage() {
               </p>
             ) : null}
             <p className="text-[14px] text-muted-foreground leading-relaxed">
-              {org ? `${org}: ` : ""}your desk tables exist. Next: brand it, pick topics, Generate
-              the live URL. Scoring stays on Elenchos.
+              {org ? `${org}: ` : ""}setup and license are on your card. Next: brand it, pick up to
+              15 topics (including your own), Generate overview + Research URLs. Each sample run bills
+              that same card. Scoring stays on Elenchos.
             </p>
             <Link
               to="/desk/studio"

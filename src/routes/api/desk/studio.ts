@@ -10,8 +10,8 @@ const SaveSchema = z.object({
   logo_url: z.string().trim().url().max(500).optional().or(z.literal("")),
   primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   accent_color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  topic_ids: z.array(z.string()).max(20),
-  custom_topics: z.array(z.string().max(120)).max(8),
+  topic_ids: z.array(z.string()).max(15),
+  custom_topics: z.array(z.string().max(120)).max(15),
   custom_domain: z.string().trim().max(120).optional().or(z.literal("")),
 });
 

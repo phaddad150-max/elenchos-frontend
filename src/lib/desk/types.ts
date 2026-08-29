@@ -9,6 +9,7 @@ export type DeskTenant = {
   email: string | null;
   org_name: string;
   stripe_session_id: string | null;
+  stripe_customer_id: string | null;
   status: DeskStatus;
   custom_domain: string | null;
   created_at: string;

@@ -4,7 +4,14 @@ import { ArrowRight, Building2, Layers, Loader2, Lock, Palette, Radio, Shield } 
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DESK_SOCIAL, socialMetaTags } from "@/lib/social-meta";
-import { DESK_INCLUDED, DESK_INTERVAL, DESK_PRICE_USD, DESK_PRODUCT_BLURB } from "@/lib/desk/catalog";
+import {
+  DESK_INCLUDED,
+  DESK_INTERVAL,
+  DESK_LICENSE_EUR,
+  DESK_PRODUCT_BLURB,
+  DESK_RUN_EUR,
+  DESK_SETUP_EUR,
+} from "@/lib/desk/catalog";
 
 export const Route = createFileRoute("/desk/")({
   validateSearch: (s: Record<string, unknown>): { cancelled?: "1" } =>
@@ -63,11 +70,12 @@ function DeskPage() {
               Buy this dashboard
             </h1>
             <p className="text-[14px] sm:text-[15.5px] text-foreground/90 max-w-2xl leading-relaxed">
-              {DESK_PRODUCT_BLURB} Like a site template: pay, brand it, pick topics, generate a live
-              link. Connect your own domain when you are ready.
+              {DESK_PRODUCT_BLURB} Same overview design as elenchos.live, plus a Research tab on your
+              topics (up to 15, including your own).
             </p>
             <p className="text-[13px] font-display font-semibold text-cyan">
-              ${DESK_PRICE_USD}/{DESK_INTERVAL} · tables created at payment
+              €{DESK_SETUP_EUR} setup + €{DESK_LICENSE_EUR}/{DESK_INTERVAL} · runs €{DESK_RUN_EUR.toFixed(2)}/topic on
+              your card
             </p>
           </div>
         </header>
@@ -83,9 +91,9 @@ function DeskPage() {
             </h2>
             <ul className="grid sm:grid-cols-2 gap-3">
               {[
-                { icon: Radio, title: "This dashboard, as yours", body: "elenchos.live is the template. You get the same public-discourse surface." },
+                { icon: Radio, title: "This dashboard, as yours", body: "Same overview layout as elenchos.live — KPI row, discourse panel, heatmap stage, topic tiles — on your URL." },
                 { icon: Palette, title: "Brand after you pay", body: "Colors, name, logo — or unbranded. Studio opens only after Stripe." },
-                { icon: Layers, title: "Pick topics, then Generate", body: "Catalog topics copy existing samples. Custom names stay 0 · awaiting data until a funded run." },
+                { icon: Layers, title: "Up to 15 topics + Research tab", body: "Catalog and your own names. Generate the live overview + Research URL. Each sample run bills your card." },
                 { icon: Lock, title: "Code stays locked", body: "You do not get Pass-1 / scoring logic. You buy the desk, not the method." },
               ].map((item) => (
                 <li key={item.title} className="dash-panel p-4 space-y-2 min-h-[140px] flex flex-col">
@@ -151,12 +159,13 @@ function DeskPage() {
                 className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[14px] font-display font-semibold hover:bg-cyan/25 disabled:opacity-50"
               >
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Pay ${DESK_PRICE_USD}/{DESK_INTERVAL}
+                Pay €{DESK_SETUP_EUR} + €{DESK_LICENSE_EUR}/{DESK_INTERVAL}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
                 <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" />
-                Card on Stripe. Your desk tables are created when payment clears. No invented scores.
+                Setup and license on your card via Stripe. Later sample runs (€{DESK_RUN_EUR.toFixed(2)} per
+                topic) bill that same card — not Elenchos. No invented scores.
               </p>
               <Link to="/" className="text-[12px] text-cyan hover:underline inline-flex items-center gap-1">
                 Open the live prototype

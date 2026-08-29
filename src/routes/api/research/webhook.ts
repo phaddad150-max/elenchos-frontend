@@ -81,9 +81,14 @@ export const Route = createFileRoute("/api/research/webhook")({
         if (type === "checkout.session.completed") {
           const meta0 = ((obj as { metadata?: Record<string, string> }).metadata || {});
           if (meta0.kind === "desk" && (meta0.tenantId || (obj as { id?: string }).id)) {
+            const customer =
+              typeof (obj as { customer?: string }).customer === "string"
+                ? (obj as { customer?: string }).customer
+                : undefined;
             const paid = await markDeskPaid({
               tenantId: meta0.tenantId,
               sessionId: (obj as { id?: string }).id,
+              customerId: customer,
             });
             return Response.json({
               received: true,

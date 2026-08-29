@@ -20,10 +20,12 @@ export const Route = createFileRoute("/api/desk/generate")({
           return Response.json({ error: "Pay for a desk first." }, { status: 401 });
         }
         const slug = await generateLiveUrl(tenant);
+        const path = publicDeskPath(slug);
         return Response.json({
           ok: true,
           slug,
-          path: publicDeskPath(slug),
+          path,
+          researchPath: `${path}/research`,
         });
       },
     },

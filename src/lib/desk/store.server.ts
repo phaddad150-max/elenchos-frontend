@@ -5,6 +5,7 @@
 import { LIVE_TOPIC_KEYS, isArchivedTopicId } from "@/lib/topic-catalog";
 import {
   DESK_DEMO_SEEDS,
+  DESK_MAX_TOPICS,
   demoSeedBySlug,
   demoSeedByToken,
   type DeskDemoSeed,
@@ -26,6 +27,7 @@ function tenantFromSeed(seed: DeskDemoSeed): DeskTenant {
     email: seed.email,
     org_name: memBrand.get(seed.id)?.org_name || seed.org,
     stripe_session_id: `cs_demo_${seed.slug}`,
+    stripe_customer_id: null,
     status: "live",
     custom_domain: null,
     created_at: "2026-08-29T00:00:00.000Z",
@@ -104,6 +106,7 @@ export async function createPendingTenant(input: {
     email: input.email.trim().toLowerCase(),
     org_name: input.orgName.trim().slice(0, 80),
     stripe_session_id: null,
+    stripe_customer_id: null,
     status: "pending",
     custom_domain: null,
     created_at: now,
@@ -160,21 +163,31 @@ export async function createPendingTenant(input: {
   return row;
 }
 
-export async function attachStripeSession(id: string, sessionId: string): Promise<void> {
+export async function attachStripeSession(
+  id: string,
+  sessionId: string,
+  customerId?: string | null,
+): Promise<void> {
   const t = memTenants.find((x) => x.id === id);
-  if (t) t.stripe_session_id = sessionId;
+  if (t) {
+    t.stripe_session_id = sessionId;
+    if (customerId) t.stripe_customer_id = customerId;
+  }
   const { url, key } = supabaseConfig();
   if (!key) return;
+  const patch: Record<string, string> = { stripe_session_id: sessionId };
+  if (customerId) patch.stripe_customer_id = customerId;
   await fetch(`${url}/rest/v1/desk_tenants?id=eq.${id}`, {
     method: "PATCH",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
-    body: JSON.stringify({ stripe_session_id: sessionId }),
+    body: JSON.stringify(patch),
   });
 }
 
 export async function markDeskPaid(opts: {
   tenantId?: string;
   sessionId?: string;
+  customerId?: string;
 }): Promise<DeskTenant | null> {
   const { url, key } = supabaseConfig();
   let tenant: DeskTenant | null = null;
@@ -185,6 +198,7 @@ export async function markDeskPaid(opts: {
   tenant.status = "paid";
   tenant.paid_at = paid_at;
   if (opts.sessionId) tenant.stripe_session_id = opts.sessionId;
+  if (opts.customerId) tenant.stripe_customer_id = opts.customerId;
   if (key) {
     await fetch(`${url}/rest/v1/desk_tenants?id=eq.${tenant.id}`, {
       method: "PATCH",
@@ -193,6 +207,7 @@ export async function markDeskPaid(opts: {
         status: "paid",
         paid_at,
         stripe_session_id: tenant.stripe_session_id,
+        stripe_customer_id: tenant.stripe_customer_id,
       }),
     });
   }
@@ -411,13 +426,15 @@ export async function saveStudio(
     primary_color: input.primary_color || "#22d3ee",
     accent_color: input.accent_color || "#f59e0b",
   };
+  const topic_ids = (input.topic_ids ?? []).filter((id) => !isArchivedTopicId(id) && LIVE_TOPIC_KEYS[id]);
+  const custom_topics = (input.custom_topics ?? [])
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const room = Math.max(0, DESK_MAX_TOPICS - topic_ids.length);
   const picks: DeskPicks = {
     tenant_id: tenant.id,
-    topic_ids: (input.topic_ids ?? []).filter((id) => !isArchivedTopicId(id) && LIVE_TOPIC_KEYS[id]),
-    custom_topics: (input.custom_topics ?? [])
-      .map((t) => t.trim())
-      .filter(Boolean)
-      .slice(0, 8),
+    topic_ids: topic_ids.slice(0, DESK_MAX_TOPICS),
+    custom_topics: custom_topics.slice(0, room),
   };
   memBrand.set(tenant.id, branding);
   memPicks.set(tenant.id, picks);
@@ -489,4 +506,30 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
 
 export function publicDeskPath(slug: string): string {
   return `/d/${slug}`;
+}
+
+export function countDeskTopics(picks: DeskPicks | undefined): number {
+  return (picks?.topic_ids?.length ?? 0) + (picks?.custom_topics?.length ?? 0);
+}
+
+export async function recordDeskRun(input: {
+  tenantId: string;
+  topicCount: number;
+  amountCents: number;
+  invoiceId: string | null;
+}): Promise<void> {
+  const { url, key } = supabaseConfig();
+  if (!key || DESK_DEMO_SEEDS.some((d) => d.id === input.tenantId)) return;
+  await fetch(`${url}/rest/v1/desk_runs`, {
+    method: "POST",
+    headers: restHeaders(key, { Prefer: "return=minimal" }),
+    body: JSON.stringify({
+      tenant_id: input.tenantId,
+      topic_count: input.topicCount,
+      amount_cents: input.amountCents,
+      currency: "eur",
+      stripe_invoice_id: input.invoiceId,
+      created_at: new Date().toISOString(),
+    }),
+  });
 }

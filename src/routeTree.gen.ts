@@ -40,12 +40,14 @@ import { Route as DSlugRouteImport } from './routes/d.$slug'
 import { Route as AdminCurationRouteImport } from './routes/admin.curation'
 import { Route as ResearchTrackersIndexRouteImport } from './routes/research.trackers.index'
 import { Route as ResearchPreviewIndexRouteImport } from './routes/research.preview.index'
+import { Route as DSlugIndexRouteImport } from './routes/d.$slug.index'
 import { Route as ResearchTrackersIndexIdRouteImport } from './routes/research.trackers.$indexId'
 import { Route as ResearchTopicTopicIdRouteImport } from './routes/research.topic.$topicId'
 import { Route as ResearchReportTokenRouteImport } from './routes/research.report.$token'
 import { Route as ResearchPreviewSlugRouteImport } from './routes/research.preview.$slug'
 import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
 import { Route as ResearchCasestudySlugRouteImport } from './routes/research.casestudy.$slug'
+import { Route as DSlugResearchRouteImport } from './routes/d.$slug.research'
 import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
 import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
 import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
@@ -56,6 +58,7 @@ import { Route as ApiPublicContactRouteImport } from './routes/api/public/contac
 import { Route as ApiProRunRouteImport } from './routes/api/pro/run'
 import { Route as ApiDeskThanksRouteImport } from './routes/api/desk/thanks'
 import { Route as ApiDeskStudioRouteImport } from './routes/api/desk/studio'
+import { Route as ApiDeskRunRouteImport } from './routes/api/desk/run'
 import { Route as ApiDeskGenerateRouteImport } from './routes/api/desk/generate'
 import { Route as ApiDeskCheckoutRouteImport } from './routes/api/desk/checkout'
 import { Route as ApiBillingStripeStatusRouteImport } from './routes/api/billing/stripe-status'
@@ -220,6 +223,11 @@ const ResearchPreviewIndexRoute = ResearchPreviewIndexRouteImport.update({
   path: '/research/preview/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DSlugIndexRoute = DSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DSlugRoute,
+} as any)
 const ResearchTrackersIndexIdRoute = ResearchTrackersIndexIdRouteImport.update({
   id: '/research/trackers/$indexId',
   path: '/research/trackers/$indexId',
@@ -250,6 +258,11 @@ const ResearchCasestudySlugRoute = ResearchCasestudySlugRouteImport.update({
   id: '/research/casestudy/$slug',
   path: '/research/casestudy/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DSlugResearchRoute = DSlugResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => DSlugRoute,
 } as any)
 const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
   id: '/api/research/webhook',
@@ -299,6 +312,11 @@ const ApiDeskThanksRoute = ApiDeskThanksRouteImport.update({
 const ApiDeskStudioRoute = ApiDeskStudioRouteImport.update({
   id: '/api/desk/studio',
   path: '/api/desk/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDeskRunRoute = ApiDeskRunRouteImport.update({
+  id: '/api/desk/run',
+  path: '/api/desk/run',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDeskGenerateRoute = ApiDeskGenerateRouteImport.update({
@@ -351,7 +369,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/uae': typeof UaeRoute
   '/admin/curation': typeof AdminCurationRoute
-  '/d/$slug': typeof DSlugRoute
+  '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
   '/research/$slug': typeof ResearchSlugRoute
@@ -373,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
   '/api/desk/checkout': typeof ApiDeskCheckoutRoute
   '/api/desk/generate': typeof ApiDeskGenerateRoute
+  '/api/desk/run': typeof ApiDeskRunRoute
   '/api/desk/studio': typeof ApiDeskStudioRoute
   '/api/desk/thanks': typeof ApiDeskThanksRoute
   '/api/pro/run': typeof ApiProRunRoute
@@ -383,12 +402,14 @@ export interface FileRoutesByFullPath {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/d/$slug/research': typeof DSlugResearchRoute
   '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/topic/$topicId': typeof ResearchTopicTopicIdRoute
   '/research/trackers/$indexId': typeof ResearchTrackersIndexIdRoute
+  '/d/$slug/': typeof DSlugIndexRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
   '/research/trackers/': typeof ResearchTrackersIndexRoute
   '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
@@ -406,7 +427,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/uae': typeof UaeRoute
   '/admin/curation': typeof AdminCurationRoute
-  '/d/$slug': typeof DSlugRoute
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
   '/research/$slug': typeof ResearchSlugRoute
@@ -428,6 +448,7 @@ export interface FileRoutesByTo {
   '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
   '/api/desk/checkout': typeof ApiDeskCheckoutRoute
   '/api/desk/generate': typeof ApiDeskGenerateRoute
+  '/api/desk/run': typeof ApiDeskRunRoute
   '/api/desk/studio': typeof ApiDeskStudioRoute
   '/api/desk/thanks': typeof ApiDeskThanksRoute
   '/api/pro/run': typeof ApiProRunRoute
@@ -438,12 +459,14 @@ export interface FileRoutesByTo {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/d/$slug/research': typeof DSlugResearchRoute
   '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/topic/$topicId': typeof ResearchTopicTopicIdRoute
   '/research/trackers/$indexId': typeof ResearchTrackersIndexIdRoute
+  '/d/$slug': typeof DSlugIndexRoute
   '/research/preview': typeof ResearchPreviewIndexRoute
   '/research/trackers': typeof ResearchTrackersIndexRoute
   '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
@@ -463,7 +486,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/uae': typeof UaeRoute
   '/admin/curation': typeof AdminCurationRoute
-  '/d/$slug': typeof DSlugRoute
+  '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
   '/research/$slug': typeof ResearchSlugRoute
@@ -485,6 +508,7 @@ export interface FileRoutesById {
   '/api/billing/stripe-status': typeof ApiBillingStripeStatusRoute
   '/api/desk/checkout': typeof ApiDeskCheckoutRoute
   '/api/desk/generate': typeof ApiDeskGenerateRoute
+  '/api/desk/run': typeof ApiDeskRunRoute
   '/api/desk/studio': typeof ApiDeskStudioRoute
   '/api/desk/thanks': typeof ApiDeskThanksRoute
   '/api/pro/run': typeof ApiProRunRoute
@@ -495,12 +519,14 @@ export interface FileRoutesById {
   '/api/research/share': typeof ApiResearchShareRoute
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
+  '/d/$slug/research': typeof DSlugResearchRoute
   '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
   '/research/report/$token': typeof ResearchReportTokenRoute
   '/research/topic/$topicId': typeof ResearchTopicTopicIdRoute
   '/research/trackers/$indexId': typeof ResearchTrackersIndexIdRoute
+  '/d/$slug/': typeof DSlugIndexRoute
   '/research/preview/': typeof ResearchPreviewIndexRoute
   '/research/trackers/': typeof ResearchTrackersIndexRoute
   '/api/research/admin/commission': typeof ApiResearchAdminCommissionRoute
@@ -543,6 +569,7 @@ export interface FileRouteTypes {
     | '/api/billing/stripe-status'
     | '/api/desk/checkout'
     | '/api/desk/generate'
+    | '/api/desk/run'
     | '/api/desk/studio'
     | '/api/desk/thanks'
     | '/api/pro/run'
@@ -553,12 +580,14 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/d/$slug/research'
     | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/topic/$topicId'
     | '/research/trackers/$indexId'
+    | '/d/$slug/'
     | '/research/preview/'
     | '/research/trackers/'
     | '/api/research/admin/commission'
@@ -576,7 +605,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/uae'
     | '/admin/curation'
-    | '/d/$slug'
     | '/desk/studio'
     | '/desk/thanks'
     | '/research/$slug'
@@ -598,6 +626,7 @@ export interface FileRouteTypes {
     | '/api/billing/stripe-status'
     | '/api/desk/checkout'
     | '/api/desk/generate'
+    | '/api/desk/run'
     | '/api/desk/studio'
     | '/api/desk/thanks'
     | '/api/pro/run'
@@ -608,12 +637,14 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/d/$slug/research'
     | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/topic/$topicId'
     | '/research/trackers/$indexId'
+    | '/d/$slug'
     | '/research/preview'
     | '/research/trackers'
     | '/api/research/admin/commission'
@@ -654,6 +685,7 @@ export interface FileRouteTypes {
     | '/api/billing/stripe-status'
     | '/api/desk/checkout'
     | '/api/desk/generate'
+    | '/api/desk/run'
     | '/api/desk/studio'
     | '/api/desk/thanks'
     | '/api/pro/run'
@@ -664,12 +696,14 @@ export interface FileRouteTypes {
     | '/api/research/share'
     | '/api/research/shared'
     | '/api/research/webhook'
+    | '/d/$slug/research'
     | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
     | '/research/report/$token'
     | '/research/topic/$topicId'
     | '/research/trackers/$indexId'
+    | '/d/$slug/'
     | '/research/preview/'
     | '/research/trackers/'
     | '/api/research/admin/commission'
@@ -689,7 +723,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UaeRoute: typeof UaeRoute
   AdminCurationRoute: typeof AdminCurationRoute
-  DSlugRoute: typeof DSlugRoute
+  DSlugRoute: typeof DSlugRouteWithChildren
   ResearchSlugRoute: typeof ResearchSlugRoute
   ResearchCommissionRoute: typeof ResearchCommissionRoute
   ResearchLibraryRoute: typeof ResearchLibraryRoute
@@ -708,6 +742,7 @@ export interface RootRouteChildren {
   ApiBillingStripeStatusRoute: typeof ApiBillingStripeStatusRoute
   ApiDeskCheckoutRoute: typeof ApiDeskCheckoutRoute
   ApiDeskGenerateRoute: typeof ApiDeskGenerateRoute
+  ApiDeskRunRoute: typeof ApiDeskRunRoute
   ApiDeskStudioRoute: typeof ApiDeskStudioRoute
   ApiDeskThanksRoute: typeof ApiDeskThanksRoute
   ApiProRunRoute: typeof ApiProRunRoute
@@ -948,6 +983,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchPreviewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/d/$slug/': {
+      id: '/d/$slug/'
+      path: '/'
+      fullPath: '/d/$slug/'
+      preLoaderRoute: typeof DSlugIndexRouteImport
+      parentRoute: typeof DSlugRoute
+    }
     '/research/trackers/$indexId': {
       id: '/research/trackers/$indexId'
       path: '/research/trackers/$indexId'
@@ -989,6 +1031,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/research/casestudy/$slug'
       preLoaderRoute: typeof ResearchCasestudySlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/d/$slug/research': {
+      id: '/d/$slug/research'
+      path: '/research'
+      fullPath: '/d/$slug/research'
+      preLoaderRoute: typeof DSlugResearchRouteImport
+      parentRoute: typeof DSlugRoute
     }
     '/api/research/webhook': {
       id: '/api/research/webhook'
@@ -1060,6 +1109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDeskStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/desk/run': {
+      id: '/api/desk/run'
+      path: '/api/desk/run'
+      fullPath: '/api/desk/run'
+      preLoaderRoute: typeof ApiDeskRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/desk/generate': {
       id: '/api/desk/generate'
       path: '/api/desk/generate'
@@ -1126,6 +1182,18 @@ const DeskRouteChildren: DeskRouteChildren = {
 
 const DeskRouteWithChildren = DeskRoute._addFileChildren(DeskRouteChildren)
 
+interface DSlugRouteChildren {
+  DSlugResearchRoute: typeof DSlugResearchRoute
+  DSlugIndexRoute: typeof DSlugIndexRoute
+}
+
+const DSlugRouteChildren: DSlugRouteChildren = {
+  DSlugResearchRoute: DSlugResearchRoute,
+  DSlugIndexRoute: DSlugIndexRoute,
+}
+
+const DSlugRouteWithChildren = DSlugRoute._addFileChildren(DSlugRouteChildren)
+
 interface ResearchNetworksLedgerRouteChildren {
   ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
 }
@@ -1154,7 +1222,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UaeRoute: UaeRoute,
   AdminCurationRoute: AdminCurationRoute,
-  DSlugRoute: DSlugRoute,
+  DSlugRoute: DSlugRouteWithChildren,
   ResearchSlugRoute: ResearchSlugRoute,
   ResearchCommissionRoute: ResearchCommissionRoute,
   ResearchLibraryRoute: ResearchLibraryRoute,
@@ -1173,6 +1241,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBillingStripeStatusRoute: ApiBillingStripeStatusRoute,
   ApiDeskCheckoutRoute: ApiDeskCheckoutRoute,
   ApiDeskGenerateRoute: ApiDeskGenerateRoute,
+  ApiDeskRunRoute: ApiDeskRunRoute,
   ApiDeskStudioRoute: ApiDeskStudioRoute,
   ApiDeskThanksRoute: ApiDeskThanksRoute,
   ApiProRunRoute: ApiProRunRoute,

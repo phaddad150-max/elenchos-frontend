@@ -1,12 +1,12 @@
 /** UAE prototype copy. Arabic UI chrome is draft — human review before campaign use. */
 
-export const UAE_PRICE_NOTE = "$49/month USD";
+export const UAE_PRICE_NOTE = "€490 setup + €199/month · €1.50/topic run";
 
 export const UAE_EN = {
   kicker: "Dubai · white-label desk",
   title: "Did the buy create earned speech — or only paid noise?",
   blurb:
-    "A licensed public-discourse dashboard for UAE SMBs, corporates, and startups. X is the measurement surface. X API is the source of record. xAI reads paid vs earned. Scoring stays locked on Elenchos.",
+    "A licensed clone of the elenchos.live dashboard for UAE SMBs, corporates, and startups. Setup + monthly license, then each sample run bills your card. X is the measurement surface. Scoring stays locked on Elenchos.",
   payCta: "Pay and brand your desk",
   walkCta: "Test the UAE desk (no charge)",
   productTitle: "What you measure",
@@ -21,7 +21,7 @@ export const UAE_EN = {
     },
     {
       title: "Your desk, your mark",
-      body: "Pay, set colors and name, pick topics, Generate a live URL. Connect your domain. Code that surfaces truth stays on Elenchos.",
+      body: "Pay setup and license, set colors and name, add up to 15 topics (including your own), Generate overview + Research URLs. Runs bill your card. Code that surfaces truth stays on Elenchos.",
     },
   ],
   whyTitle: "Why this view",
@@ -53,7 +53,7 @@ export const UAE_AR = {
     },
     {
       title: "لوحتك وعلامتك",
-      body: "ادفع، عيّن الألوان والاسم، اختر المواضيع، أنشئ رابطاً حياً. اربط نطاقك. طريقة كشف الحقيقة تبقى مقفلة.",
+      body: "ادفع التأسيس والترخيص، عيّن الألوان والاسم، أضف حتى 15 موضوعاً (بما فيها مواضيعك)، أنشئ رابط النظرة العامة والبحث. كل تشغيل يُفوتر على بطاقتك. طريقة كشف الحقيقة تبقى مقفلة.",
     },
   ],
   whyTitle: "لماذا هذه القراءة",

@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { DESK_PRICE_USD, DESK_PRODUCT_NAME } from "@/lib/desk/catalog";
+import {
+  DESK_CURRENCY,
+  DESK_LICENSE_EUR,
+  DESK_PRODUCT_NAME,
+  DESK_RUN_EUR,
+  DESK_SETUP_EUR,
+} from "@/lib/desk/catalog";
 import { attachStripeSession, createPendingTenant } from "@/lib/desk/store.server";
 
 const BodySchema = z.object({
@@ -56,20 +62,28 @@ export const Route = createFileRoute("/api/desk/checkout")({
           params.set("subscription_data[metadata][tenantId]", tenant.id);
           params.set("subscription_data[metadata][market]", uae ? "uae" : "desk");
           params.set("customer_email", tenant.email || parsed.data.email);
-          params.set("payment_method_types[0]", "card");
           params.set("line_items[0][quantity]", "1");
-          params.set("line_items[0][price_data][currency]", "usd");
-          params.set("line_items[0][price_data][unit_amount]", String(DESK_PRICE_USD * 100));
-          params.set("line_items[0][price_data][recurring][interval]", "month");
+          params.set("line_items[0][price_data][currency]", DESK_CURRENCY);
+          params.set("line_items[0][price_data][unit_amount]", String(DESK_SETUP_EUR * 100));
           params.set(
             "line_items[0][price_data][product_data][name]",
-            uae ? `${DESK_PRODUCT_NAME} · UAE` : DESK_PRODUCT_NAME,
+            `${uae ? `${DESK_PRODUCT_NAME} · UAE` : DESK_PRODUCT_NAME} setup`,
           );
           params.set(
             "line_items[0][price_data][product_data][description]",
-            uae
-              ? "UAE white-label desk. Paid vs earned on X. Tables at payment. Scoring stays on Elenchos."
-              : "Licensed dashboard. Your tables are created at payment. Scoring logic stays on Elenchos.",
+            "One-time setup: white-label dashboard, tables, branding studio.",
+          );
+          params.set("line_items[1][quantity]", "1");
+          params.set("line_items[1][price_data][currency]", DESK_CURRENCY);
+          params.set("line_items[1][price_data][unit_amount]", String(DESK_LICENSE_EUR * 100));
+          params.set("line_items[1][price_data][recurring][interval]", "month");
+          params.set(
+            "line_items[1][price_data][product_data][name]",
+            uae ? `${DESK_PRODUCT_NAME} · UAE license` : `${DESK_PRODUCT_NAME} license`,
+          );
+          params.set(
+            "line_items[1][price_data][product_data][description]",
+            `Hosted desk. Sample runs bill your card at €${DESK_RUN_EUR.toFixed(2)} per topic. Scoring stays on Elenchos.`,
           );
 
           const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -83,6 +97,7 @@ export const Route = createFileRoute("/api/desk/checkout")({
           const data = (await res.json()) as {
             id?: string;
             url?: string;
+            customer?: string;
             error?: { message?: string };
           };
           if (!res.ok || !data.url || !data.id) {
@@ -92,7 +107,7 @@ export const Route = createFileRoute("/api/desk/checkout")({
               { status: 502 },
             );
           }
-          await attachStripeSession(tenant.id, data.id);
+          await attachStripeSession(tenant.id, data.id, data.customer ?? null);
           return Response.json({ url: data.url, sessionId: data.id });
         } catch (e) {
           console.error("[desk-checkout]", e);

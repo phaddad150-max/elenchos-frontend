@@ -4,7 +4,7 @@ import { ArrowRight, Building2, Loader2, Lock, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { UAE_SOCIAL, socialMetaTags } from "@/lib/social-meta";
-import { DESK_INTERVAL, DESK_PRICE_USD } from "@/lib/desk/catalog";
+import { DESK_INTERVAL, DESK_LICENSE_EUR, DESK_RUN_EUR, DESK_SETUP_EUR } from "@/lib/desk/catalog";
 import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
 
 export const Route = createFileRoute("/uae")({
@@ -96,7 +96,8 @@ function UaePage() {
             </h1>
             <p className="text-[14px] sm:text-[15.5px] text-foreground/90 max-w-2xl leading-relaxed">{copy.blurb}</p>
             <p className="text-[13px] font-display font-semibold text-cyan">
-              ${DESK_PRICE_USD}/{DESK_INTERVAL} USD · {rtl ? "جداول عند الدفع" : "tables created at payment"}
+              €{DESK_SETUP_EUR} {rtl ? "تأسيس" : "setup"} + €{DESK_LICENSE_EUR}/{DESK_INTERVAL} · €
+              {DESK_RUN_EUR.toFixed(2)}/{rtl ? "موضوع" : "topic run"}
             </p>
             <p className="text-[12px] text-amber-signal">{copy.arReview}</p>
           </div>
@@ -172,14 +173,14 @@ function UaePage() {
                 className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[14px] font-display font-semibold hover:bg-cyan/25 disabled:opacity-50"
               >
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {copy.payCta} · ${DESK_PRICE_USD}/{DESK_INTERVAL}
+                {copy.payCta} · €{DESK_SETUP_EUR} + €{DESK_LICENSE_EUR}/{DESK_INTERVAL}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
                 <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" />
                 {rtl
-                  ? "البطاقة عبر سترايب. جداولك تُنشأ عند نجاح الدفع. لا أرقام مخترعة."
-                  : "Card on Stripe. Your tables are created when payment clears. No invented scores."}
+                  ? "التأسيس والترخيص على بطاقتك عبر سترايب. كل تشغيل عيّنة يُفوتر على البطاقة نفسها — ليس على إلنخوس."
+                  : "Setup and license on your card via Stripe. Each sample run bills that same card — not Elenchos."}
               </p>
             </form>
             <Link

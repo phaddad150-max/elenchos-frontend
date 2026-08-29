@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { TenantDeskView } from "@/components/desk/TenantDeskView";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { TenantShell } from "@/components/desk/TenantShell";
 import { getLiveDesk } from "@/lib/desk/store.server";
 
 export const Route = createFileRoute("/d/$slug")({
@@ -7,10 +7,14 @@ export const Route = createFileRoute("/d/$slug")({
     const desk = await getLiveDesk(params.slug);
     return { desk };
   },
-  component: TenantDeskPage,
+  component: TenantDeskLayout,
 });
 
-function TenantDeskPage() {
+function TenantDeskLayout() {
   const { desk } = Route.useLoaderData();
-  return <TenantDeskView desk={desk} />;
+  return (
+    <TenantShell desk={desk}>
+      {desk ? <Outlet /> : null}
+    </TenantShell>
+  );
 }

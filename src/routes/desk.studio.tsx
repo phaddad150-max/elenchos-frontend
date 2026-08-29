@@ -3,7 +3,13 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { isDeskDemoToken, isUaeDemoToken } from "@/lib/desk/catalog";
+import {
+  DESK_MAX_TOPICS,
+  DESK_RUN_EUR,
+  deskRunCostEur,
+  isDeskDemoToken,
+  isUaeDemoToken,
+} from "@/lib/desk/catalog";
 
 type CatalogItem = { id: string; label: string };
 
@@ -29,6 +35,13 @@ function DeskStudioPage() {
   const [domain, setDomain] = useState("");
   const [busy, setBusy] = useState(false);
   const [livePath, setLivePath] = useState<string | null>(null);
+  const [researchPath, setResearchPath] = useState<string | null>(null);
+  const customCount = customText
+    .split("\n")
+    .map((t) => t.trim())
+    .filter(Boolean).length;
+  const topicTotal = topicIds.length + customCount;
+  const runCost = deskRunCostEur(topicTotal);
 
   useEffect(() => {
     if (!token) {
@@ -63,14 +76,21 @@ function DeskStudioPage() {
         setCustomText((data.picks?.custom_topics || []).join("\n"));
         setDomain(data.tenant?.custom_domain || "");
         setCatalog(data.catalog || []);
-        if (data.tenant?.slug) setLivePath(`/d/${data.tenant.slug}`);
+        if (data.tenant?.slug) {
+          setLivePath(`/d/${data.tenant.slug}`);
+          setResearchPath(`/d/${data.tenant.slug}/research`);
+        }
         setReady(true);
       })
       .catch(() => setErr("Could not open studio."));
   }, [token]);
 
   const toggleTopic = (id: string) => {
-    setTopicIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setTopicIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length + customCount >= DESK_MAX_TOPICS) return prev;
+      return [...prev, id];
+    });
   };
 
   const save = async () => {
@@ -123,8 +143,37 @@ function DeskStudioPage() {
       const data = (await res.json()) as { path?: string; error?: string };
       if (!res.ok || !data.path) throw new Error(data.error || "Generate failed");
       setLivePath(data.path);
+      setResearchPath(`${data.path}/research`);
     } catch (ex) {
       setErr(ex instanceof Error ? ex.message : "Generate failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRun = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      await save();
+      const res = await fetch("/api/desk/run", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = (await res.json()) as {
+        path?: string;
+        researchPath?: string;
+        error?: string;
+        charged?: boolean;
+        demo?: boolean;
+        amount?: number;
+      };
+      if (!res.ok || !data.path) throw new Error(data.error || "Run failed");
+      setLivePath(data.path);
+      setResearchPath(data.researchPath || `${data.path}/research`);
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "Run failed");
     } finally {
       setBusy(false);
     }
@@ -204,7 +253,10 @@ function DeskStudioPage() {
             </section>
 
             <section className="dash-panel p-4 space-y-3">
-              <h2 className="font-display font-semibold">Topics</h2>
+              <h2 className="font-display font-semibold">Topics · up to {DESK_MAX_TOPICS}</h2>
+              <p className="text-[12px] text-muted-foreground">
+                {topicTotal}/{DESK_MAX_TOPICS} selected. Catalog and your own names share the cap.
+              </p>
               <ul className="grid sm:grid-cols-2 gap-1.5 max-h-[280px] overflow-y-auto">
                 {catalog.map((t) => (
                   <li key={t.id}>
@@ -221,12 +273,21 @@ function DeskStudioPage() {
               </ul>
               <label className="block space-y-1">
                 <span className="text-[11px] font-mono uppercase text-muted-foreground">
-                  Custom topics (one per line) — await a funded sample
+                  Your own topics (one per line, up to {DESK_MAX_TOPICS} total)
                 </span>
                 <textarea
                   className="w-full min-h-[88px] rounded-xl border border-border bg-background px-3 py-2 text-[13px]"
                   value={customText}
-                  onChange={(e) => setCustomText(e.target.value)}
+                  onChange={(e) => {
+                    const lines = e.target.value.split("\n");
+                    const kept: string[] = [];
+                    for (const line of lines) {
+                      const filled = kept.filter((x) => x.trim()).length;
+                      if (line.trim() && topicIds.length + filled >= DESK_MAX_TOPICS) continue;
+                      kept.push(line);
+                    }
+                    setCustomText(kept.join("\n"));
+                  }}
                 />
               </label>
             </section>
@@ -261,13 +322,34 @@ function DeskStudioPage() {
               >
                 {busy ? "Working…" : "Generate live URL"}
               </button>
+              <button
+                type="button"
+                disabled={busy || topicTotal < 1}
+                onClick={() => void onRun()}
+                className="min-h-[44px] px-5 rounded-full border border-amber-signal/50 bg-amber-signal/10 text-amber-signal font-display font-semibold"
+              >
+                {busy ? "Working…" : `Run sample · €${runCost.toFixed(2)} on your card`}
+              </button>
             </div>
+            <p className="text-[12px] text-muted-foreground">
+              Generate publishes overview + Research URLs. Each run is €{DESK_RUN_EUR.toFixed(2)} per
+              topic, billed to the card from checkout — not to Elenchos. Walkthroughs are not charged.
+              Custom names stay 0 · awaiting data until a run can pull public X.
+            </p>
             {livePath ? (
               <p className="text-[14px]">
                 Live:{" "}
                 <a href={livePath} className="text-cyan hover:underline">
                   {typeof window !== "undefined" ? `${window.location.origin}${livePath}` : livePath}
                 </a>
+                {researchPath ? (
+                  <>
+                    {" · "}
+                    <a href={researchPath} className="text-cyan hover:underline">
+                      Research
+                    </a>
+                  </>
+                ) : null}
               </p>
             ) : null}
           </form>
