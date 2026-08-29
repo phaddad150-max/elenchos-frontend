@@ -3,19 +3,27 @@ import { BookOpen, Layers } from "lucide-react";
 import type { LiveDesk } from "@/lib/desk/types";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
 import { sentimentTone } from "@/lib/score-colors";
+import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
+import { UAE_EN } from "@/lib/desk/uae";
 
 export function TenantResearchView({ desk }: { desk: LiveDesk }) {
   const slug = desk.tenant.slug || "";
   const cards = desk.cards;
+  const uae = desk.tenant.slug === UAE_DEMO_SLUG || desk.tenant.email === "uae-demo@elenchos.live";
 
   return (
     <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 relative flex-1 mobile-safe-bottom">
       <header className="space-y-1">
-        <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">Research</p>
-        <h1 className="page-hero-title text-2xl sm:text-3xl">Selected topics</h1>
+        <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">
+          {uae ? UAE_EN.lens : "Research"}
+        </p>
+        <h1 className="page-hero-title text-2xl sm:text-3xl">
+          {uae ? "UAE workforce topics" : "Selected topics"}
+        </h1>
         <p className="text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
-          This tab only lists topics this desk picked. Catalog topics may reuse a public sample after a
-          billed run. Your own names stay 0 · awaiting data until that run. Scoring stays on Elenchos.
+          {uae
+            ? "Lived monitors: rents, jobs, heat, housing, commute. Catalog rows may reuse a public sample after a billed run. UAE names stay 0 · awaiting data. Official and media are contrast, not the sample. Method locked."
+            : "This tab only lists topics this desk picked. Catalog topics may reuse a public sample after a billed run. Your own names stay 0 · awaiting data until that run. Scoring stays on Elenchos."}
         </p>
       </header>
 

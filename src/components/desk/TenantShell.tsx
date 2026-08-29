@@ -65,7 +65,11 @@ export function TenantShell({
           <div className="min-w-0 flex-1">
             <p className="font-display font-semibold text-lg sm:text-xl tracking-tight truncate">{title}</p>
             <p className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              {walk ? "Walkthrough desk · not a paid tenant" : "Public discourse desk"}
+              {uae
+                ? "Workforce speech · method locked"
+                : walk
+                  ? "Walkthrough desk · not a paid tenant"
+                  : "Public discourse desk"}
             </p>
           </div>
           <nav className="hidden md:flex items-center gap-1 nav-pill-group rounded-full p-1" aria-label="Desk pages">

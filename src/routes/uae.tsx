@@ -5,7 +5,12 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { UAE_SOCIAL, socialMetaTags } from "@/lib/social-meta";
 import { DESK_INTERVAL, DESK_LICENSE_EUR, DESK_RUN_EUR, DESK_SETUP_EUR } from "@/lib/desk/catalog";
-import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
+import {
+  UAE_AR,
+  UAE_CITIZEN_CUSTOM_TOPICS,
+  UAE_EN,
+  type UaeLang,
+} from "@/lib/desk/uae";
 
 export const Route = createFileRoute("/uae")({
   validateSearch: (s: Record<string, unknown>): { cancelled?: "1" } =>
@@ -134,6 +139,34 @@ function UaePage() {
               <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" />
               {copy.limits}
             </p>
+            <div className="dash-panel p-4 space-y-2">
+              <h3 className="font-display font-semibold text-[15px]">{copy.rulesTitle}</h3>
+              <ul className="text-[12.5px] text-muted-foreground space-y-1.5 leading-relaxed">
+                {copy.rules.map((line) => (
+                  <li key={line}>· {line}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="dash-panel p-4 space-y-2">
+              <h3 className="font-display font-semibold text-[15px]">
+                {rtl ? "مواضيع هذا النموذج" : "Topics on this prototype"}
+              </h3>
+              <p className="text-[12px] text-muted-foreground">
+                {rtl
+                  ? "أسماء إماراتية تبقى 0 بانتظار تشغيل مدفوع. بلا اختراع."
+                  : "UAE names stay 0 · awaiting data until a billed run. Never invented."}
+              </p>
+              <ul className="flex flex-wrap gap-1.5">
+                {UAE_CITIZEN_CUSTOM_TOPICS.map((t) => (
+                  <li
+                    key={t}
+                    className="text-[11px] font-mono rounded-full border border-border px-2.5 py-1 text-muted-foreground"
+                  >
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
 
           <section className="lg:col-span-5 space-y-3">

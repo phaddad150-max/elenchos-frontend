@@ -2,68 +2,107 @@
 
 export const UAE_PRICE_NOTE = "€490 setup + €199/month · €1.50/topic run";
 
+/** Existing live catalog that is citizen/lived — not ministry or alliance frames. */
+export const UAE_CITIZEN_CATALOG_IDS = [
+  "ai-productivity-gdp-growth",
+  "crypto-regulation-financial-markets",
+  "crime-safety-lawlessness",
+  "elon-musk-public-voices",
+] as const;
+
+/**
+ * UAE citizen monitors. Desk-only names — not added to the public live mix.
+ * Stay 0 · awaiting data until a billed run. Do not invent scores.
+ */
+export const UAE_CITIZEN_CUSTOM_TOPICS = [
+  "Dubai cost of living & rents",
+  "UAE jobs, visas & talent",
+  "Heat, livability & daily life",
+  "Housing & school fees",
+  "Workforce talk vs paid campaign frames",
+  "Gig work & startup life in Dubai",
+  "Traffic & daily commute",
+] as const;
+
 export const UAE_EN = {
-  kicker: "Dubai · white-label desk",
-  title: "Did the buy create earned speech — or only paid noise?",
+  kicker: "UAE · workforce communication alert",
+  title: "Hear the workforce — not ministry feeds, not media as the public",
   blurb:
-    "A licensed clone of the elenchos.live dashboard for UAE SMBs, corporates, and startups. Setup + monthly license, then each sample run bills your card. X is the measurement surface. Scoring stays locked on Elenchos.",
+    "Citizen communication alert for UAE SMBs and corporates. Same dashboard and locked scoring as elenchos.live. In the UAE the workforce drives the story under leadership. You do not run the method. You get the alert.",
   payCta: "Pay and brand your desk",
-  walkCta: "Test the UAE desk (no charge)",
-  productTitle: "What you measure",
+  walkCta: "Test the alert desk (no charge)",
+  productTitle: "What you get",
   product: [
     {
-      title: "Paid vs earned on X",
-      body: "Paid = promoted ads, trend takeovers, boosted posts. Earned = unprompted replies, quotes, reposts, organic mentions.",
+      title: "Workforce speech, labeled honestly",
+      body: "Earned = unprompted ordinary accounts. Paid/official = boosts, ministry and media volume — contrast, never mixed in as “the public.” Not activism. Respect for leadership and for people doing the work.",
     },
     {
-      title: "Integrity, not vanity",
-      body: "Real accounts vs spam, farms, impersonation. Campaign frame vs citizen frame. Not an ad-server ROAS pixel.",
+      title: "Lived UAE topics",
+      body: "Rents, jobs and visas, heat, housing, commute, gig and startup life. Same Pass-1 logic as elenchos.live. Locked. You cannot edit how truth is surfaced.",
     },
     {
-      title: "Your desk, your mark",
-      body: "Pay setup and license, set colors and name, add up to 15 topics (including your own), Generate overview + Research URLs. Runs bill your card. Code that surfaces truth stays on Elenchos.",
+      title: "Accuracy without you sampling",
+      body: "You buy the alert surface. A billed run samples public X onto your desk. Empty tiles stay 0 · awaiting data — never invented.",
     },
   ],
   whyTitle: "Why this view",
-  why: "X is the cleanest public measurement surface. Not a multi-platform soup. Public posts + ad-visible objects the API allows — then xAI labels, with a human gate. We do not sell activism. We sell paid/earned integrity.",
+  why: "SMBs and corporates need to know what the workforce is actually saying. Official and media volume is real — it is not the same as earned speech. Communication alert, not a smear tool.",
   buyersTitle: "Who buys",
   buyers:
-    "B2B and B2G comms, media buyers, in-house brand, startup CMOs. Job: did spend create earned speech, or only impressions and farms? UAE: campaign authenticity and wasted spend.",
+    "UAE SMBs, corporates, in-house comms, agencies. Job: hear workforce communication early, without treating official or media campaigns as public talk.",
   limits:
-    "Public X + API. Not private ROAS pixels. Empty boards stay 0 · awaiting data. Arabic copy needs human review before you run a campaign on it.",
+    "Public X + API only. GDPR/EU (operator in Greece) and UAE law. No private messages, no targeting individuals, no smear. Method locked. Arabic UI is draft — human review before campaign use.",
   arReview: "Arabic UI is a draft. Human review before campaign use.",
+  lens: "Workforce speech · public X · method locked",
+  rulesTitle: "Use rules",
+  rules: [
+    "Same locked scoring as elenchos.live — you cannot edit Pass-1 or use this desk to invent harm.",
+    "Public X only. No private chats, no targeting named private individuals.",
+    "Not for smear, harassment, or agitation against leadership or workers.",
+    "EU GDPR (freelancer operator in Greece) plus UAE law.",
+    "Empty boards stay 0 · awaiting data. Never publish invented samples as live.",
+  ],
 } as const;
 
 export const UAE_AR = {
-  kicker: "دبي · لوحة بعلامتك",
-  title: "هل أنتج الشراء حديثاً مكتسباً — أم ضوضاء مدفوعة فقط؟",
+  kicker: "الإمارات · تنبيه تواصل القوة العاملة",
+  title: "اسمع القوة العاملة — لا تغذية الوزارات ولا الإعلام كصوت الجمهور",
   blurb:
-    "لوحة خطاب عام مرخّصة للشركات الصغيرة والمتوسطة والشركات الناشئة في الإمارات. إكس سطح القياس. واجهة إكس مصدر السجل. xAI يقرأ المدفوع مقابل المكتسب. منطق التقييم يبقى لدى إلنخوس.",
+    "تنبيه تواصل للمؤسسات الصغيرة والشركات في الإمارات. نفس اللوحة ونفس التقييم المقفول في elenchos.live. القوة العاملة هي المحرّك تحت القيادة. أنت لا تشغّل المنهج. أنت تحصل على التنبيه.",
   payCta: "ادفع وخصّص لوحتك",
-  walkCta: "جرّب اللوحة دون دفع",
-  productTitle: "ماذا تقيس",
+  walkCta: "جرّب لوحة التنبيه دون دفع",
+  productTitle: "ماذا تحصل",
   product: [
     {
-      title: "مدفوع مقابل مكتسب على إكس",
-      body: "المدفوع: إعلانات وترندات معززة. المكتسب: ردود واقتباسات وإعادة نشر وذكر عضوي.",
+      title: "كلام القوة العاملة بوسم صادق",
+      body: "المكتسب: حسابات عادية غير موجَّهة. المدفوع/الرسمي: تعزيز ووزارات وإعلام — للمقارنة لا كصوت الجمهور. ليست نشاطاً سياسياً. احترام للقيادة وللعاملين.",
     },
     {
-      title: "نزاهة لا أرقام تجميل",
-      body: "حسابات حقيقية مقابل مزارع وانتحال. إطار الحملة مقابل إطار الناس. ليست بكسل عائد إعلاني خاص.",
+      title: "مواضيع معيشة إماراتية",
+      body: "الإيجار، العمل والتأشيرات، الحر، السكن، التنقل، العمل الحر. نفس منطق التقييم. مقفول. لا يمكن تعديل طريقة السطح.",
     },
     {
-      title: "لوحتك وعلامتك",
-      body: "ادفع التأسيس والترخيص، عيّن الألوان والاسم، أضف حتى 15 موضوعاً (بما فيها مواضيعك)، أنشئ رابط النظرة العامة والبحث. كل تشغيل يُفوتر على بطاقتك. طريقة كشف الحقيقة تبقى مقفلة.",
+      title: "دقة دون أن تأخذ العيّنة بنفسك",
+      body: "تشتري سطح التنبيه. التشغيل المدفوع يضع عيّنة إكس العامة على لوحتك. الفارغ يبقى 0 بانتظار البيانات — بلا اختراع.",
     },
   ],
   whyTitle: "لماذا هذه القراءة",
-  why: "إكس أنظف سطح قياس عام. ليست حساء منصات. منشورات عامة وما تسمح به الواجهة — ثم تصنيف xAI مع بوابة بشرية. لا نبيع نشاطاً سياسياً. نبيع نزاهة المدفوع والمكتسب.",
+  why: "المؤسسات تحتاج أن تعرف ماذا تقول القوة العاملة. حجم الرسمي والإعلام حقيقي — وليس هو الكلام المكتسب. تنبيه تواصل لا أداة تشهير.",
   buyersTitle: "من يشتري",
-  buyers:
-    "اتصالات الشركات والجهات، مشتري الإعلام، العلامات الداخلية، مدراء التسويق في الشركات الناشئة. السؤال: هل صنع الإنفاق حديثاً مكتسباً أم انطباعات ومزارع؟ الإمارات: أصالة الحملة والإنفاق الضائع.",
+  buyers: "شركات صغيرة وكبيرة واتصالات داخلية ووكالات في الإمارات. المهمة: سماع تواصل القوة العاملة مبكراً.",
   limits:
-    "إكس العام والواجهة. ليست بكسل عائد خاص. اللوحات الفارغة تبقى 0 بانتظار البيانات. النص العربي يحتاج مراجعة بشرية قبل استخدامه في حملة.",
+    "إكس العام فقط. اللائحة الأوروبية (المشغّل مستقل في اليونان) وقانون الإمارات. لا رسائل خاصة ولا استهداف أفراد ولا تشهير. المنهج مقفول. العربية مسودة.",
   arReview: "واجهة عربية مسودة. مراجعة بشرية قبل الاستخدام في الحملات.",
+  lens: "كلام القوة العاملة · إكس العام · المنهج مقفول",
+  rulesTitle: "قواعد الاستخدام",
+  rules: [
+    "نفس التقييم المقفول — لا تعديل للمنهج ولا استخدام للإضرار.",
+    "إكس العام فقط. لا محادثات خاصة ولا استهداف أفراد.",
+    "ليست للتشهير أو التحرش أو التحريض ضد القيادة أو العاملين.",
+    "اللائحة الأوروبية (مستقل في اليونان) وقانون الإمارات.",
+    "اللوحات الفارغة تبقى 0 بانتظار البيانات. لا نشر لعيّنات مخترعة.",
+  ],
 } as const;
 
 export type UaeLang = "en" | "ar";

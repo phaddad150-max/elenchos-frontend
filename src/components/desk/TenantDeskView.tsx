@@ -6,7 +6,7 @@ import { sentimentTone } from "@/lib/score-colors";
 import { PaidEarnedPanel } from "@/components/desk/PaidEarnedPanel";
 import { Globe3D } from "@/components/Globe3D";
 import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
-import type { UaeLang } from "@/lib/desk/uae";
+import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
 
 export function TenantDeskView({ desk }: { desk: LiveDesk }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -36,8 +36,11 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
       </aside>
 
       {uae ? (
-        <div className="flex justify-end">
-          <div className="inline-flex rounded-full border border-border p-0.5 text-[11px] font-medium">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan">
+            {ar ? UAE_AR.lens : UAE_EN.lens}
+          </p>
+          <div className="inline-flex rounded-full border border-border p-0.5 text-[11px] font-medium self-end sm:self-auto">
             <button
               type="button"
               className={`min-h-[32px] px-2.5 rounded-full ${lang === "en" ? "bg-cyan/15 text-cyan" : "text-muted-foreground"}`}
@@ -86,8 +89,8 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
               </div>
               <p className="intel-header-sub">
                 {ar
-                  ? "اختر موضوعاً. الفارغ يبقى 0 بانتظار البيانات — بلا اختراع."
-                  : "Tap a topic. Empty rows stay 0 · awaiting data — never invented."}
+                  ? "عيّنة القوة العاملة — لا الوزارات ولا الإعلام كصوت الجمهور. الفارغ يبقى 0 بانتظار البيانات."
+                  : "Workforce sample — not ministry feeds, not media as the public. Empty rows stay 0 · awaiting data."}
               </p>
             </div>
           </div>
@@ -189,9 +192,7 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
 
       {uae ? (
         <p className="text-[12px] text-muted-foreground leading-relaxed">
-          {ar
-            ? "واجهة عربية مسودة. مراجعة بشرية قبل الاستخدام في الحملات. إكس العام والواجهة — ليست بكسل عائد خاص."
-            : "Arabic UI is a draft. Human review before campaign use. Public X + API — not a private ROAS pixel."}
+          {ar ? UAE_AR.limits : UAE_EN.limits}
         </p>
       ) : null}
     </main>

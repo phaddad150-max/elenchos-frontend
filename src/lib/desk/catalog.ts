@@ -1,4 +1,5 @@
 /** One public SKU: the dashboard, licensed. Scoring code stays locked. */
+import { UAE_CITIZEN_CATALOG_IDS, UAE_CITIZEN_CUSTOM_TOPICS } from "./uae";
 
 export const DESK_CURRENCY = "eur" as const;
 export const DESK_SETUP_EUR = 490;
@@ -39,7 +40,7 @@ export const DESK_DEMO_ORG = "Acme Research";
 
 export const UAE_DEMO_TOKEN = "uae-demo-walkthrough";
 export const UAE_DEMO_SLUG = "uae-prototype";
-export const UAE_DEMO_ORG = "Gulf Desk";
+export const UAE_DEMO_ORG = "UAE Citizen Desk";
 
 export type DeskDemoSeed = {
   id: string;
@@ -76,14 +77,8 @@ export const DESK_DEMO_SEEDS: DeskDemoSeed[] = [
     slug: UAE_DEMO_SLUG,
     org: UAE_DEMO_ORG,
     email: "uae-demo@elenchos.live",
-    topic_ids: [
-      "arab-israeli-normalization",
-      "levant-realignment",
-      "global-ai-race",
-      "crypto-regulation-financial-markets",
-      "us-ai-economy-boom",
-    ],
-    custom_topics: ["UAE campaign authenticity", "Dubai brand on X"],
+    topic_ids: [...UAE_CITIZEN_CATALOG_IDS],
+    custom_topics: [...UAE_CITIZEN_CUSTOM_TOPICS],
     primary_color: "#0d9488",
     accent_color: "#c9a227",
   },
