@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Megaphone } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { JOURNALIST_DIMENSIONS, TRACKER_CATALOG } from "@/lib/trackers-data";
-import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
+import {
+  JOURNALIST_DIMENSIONS,
+  TRACKER_CATALOG,
+  fetchLatestTrackers,
+  type TrackerRow,
+} from "@/lib/trackers-data";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
-import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/citizen-discourse")({
@@ -32,9 +35,20 @@ export const Route = createFileRoute("/trackers/citizen-discourse")({
 });
 
 function CitizenDiscoursePage() {
-  const row = useMemo(() => seedCitizenDiscourseTrackerRow(), []);
+  const [rows, setRows] = useState<TrackerRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    fetchLatestTrackers()
+      .then(setRows)
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const row = useMemo(
+    () => rows.find((r) => r.tracker_type === "citizen_discourse_index"),
+    [rows],
+  );
   const def = TRACKER_CATALOG.find((t) => t.tracker_type === "citizen_discourse_index");
-  const snapshotDate = formatDate(row.created_at ?? new Date().toISOString());
+  const snapshotDate = row ? formatDate(row.created_at) : null;
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -62,42 +76,48 @@ function CitizenDiscoursePage() {
           <span aria-hidden className="text-border">
             /
           </span>
-          <span className="text-foreground/80">Citizen discourse</span>
+          <span className="text-foreground/80">Citizen journalism</span>
         </div>
         <header className="mb-8 space-y-3 max-w-4xl">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-[color:var(--magenta)]">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.28em] text-cyan">
             <Megaphone className="w-3.5 h-3.5" />
             Social board
           </div>
           <h1 className="text-[1.6rem] sm:text-3xl md:text-[2.4rem] lg:text-[2.75rem] font-display font-semibold tracking-tight leading-[1.08] break-words">
-            {def?.title ?? "Citizen Discourse"}{" "}
-            <span className="text-cyan">by citizens</span>
+            {def?.title ?? "Citizen journalism"}{" "}
+            <span className="text-cyan">index</span>
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
             {def?.tagline}
           </p>
           <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="px-2 py-0.5 rounded-full border border-[color:var(--magenta)]/35 bg-[color:var(--magenta)]/10 text-[color:var(--magenta)] text-[10px] font-mono uppercase tracking-[0.18em]">
-              Seed preview
+            <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em]">
+              {loaded && !row ? "Awaiting data" : "Live"}
             </span>
             {snapshotDate && (
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                 {snapshotDate}
               </span>
             )}
-            <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              {row.item_count} entries
-            </span>
-            <SimulatedDataBadge />
+            {typeof row?.item_count === "number" && (
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                {row.item_count} entries
+              </span>
+            )}
+            {loaded && !row ? (
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                0 · awaiting data
+              </span>
+            ) : null}
           </div>
         </header>
         <LeaderboardDetail row={row} dimensions={JOURNALIST_DIMENSIONS} />
         <section className="mt-10 rounded-2xl border border-cyan/30 bg-cyan/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <p className="text-[13px] text-foreground/90">
-            Need a custom brief on migration, fraud, or peace discourse?
+            Need a custom brief on citizen reporting in a country or beat?
           </p>
           <ContactEmailMe
-            source="trackers-citizen"
+            source="trackers-citizen-discourse"
             variant="button"
             className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full text-[13px] font-semibold border border-cyan/40 bg-cyan/12 text-cyan"
           >

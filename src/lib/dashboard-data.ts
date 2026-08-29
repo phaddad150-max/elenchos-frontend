@@ -1574,12 +1574,8 @@ const SIM_KEY = "cp_sim_mode";
 const SIM_EVT = "cp:sim-mode-change";
 
 export function getSimMode(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(SIM_KEY) === "1";
-  } catch {
-    return false;
-  }
+  // Public product never invents a sample. SIM stays off even if localStorage is set.
+  return false;
 }
 
 export function setSimMode(v: boolean) {

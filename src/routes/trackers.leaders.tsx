@@ -4,18 +4,12 @@ import { ArrowLeft, Trophy } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
-  extractRankedLeaders,
   fetchLatestTrackers,
   LEADER_DIMENSIONS,
   TRACKER_CATALOG,
   type TrackerRow,
 } from "@/lib/trackers-data";
-import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
-import {
-  seedWorldLeadersTrackerRow,
-  worldLeadersRosterIsOutdated,
-} from "@/lib/trackers/seeds/world-leaders";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/leaders")({
@@ -49,18 +43,7 @@ function LeadersPage() {
     [rows],
   );
 
-  const row = useMemo(() => {
-    if (!loaded) return undefined;
-    const liveLeaders = liveRow ? extractRankedLeaders(liveRow) : [];
-    if (worldLeadersRosterIsOutdated(liveLeaders)) {
-      return seedWorldLeadersTrackerRow();
-    }
-    return liveRow;
-  }, [loaded, liveRow]);
-
-  const usingSeed = Boolean(
-    loaded && row && row.snapshot_label?.startsWith("seed-current-officeholders"),
-  );
+  const row = liveRow;
 
   const def = TRACKER_CATALOG.find((t) => t.tracker_type === "global_leader_trust");
   const snapshotDate = row ? formatDate(row.created_at) : null;
@@ -108,7 +91,7 @@ function LeadersPage() {
           <div className="flex items-center gap-2 flex-wrap pt-1">
             <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em] inline-flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />{" "}
-              {usingSeed ? "Current roster" : "Live"}
+              {loaded && !row ? "Awaiting data" : "Live"}
             </span>
             {snapshotDate && (
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
@@ -120,7 +103,11 @@ function LeadersPage() {
                 {row.item_count} entries
               </span>
             )}
-            {usingSeed ? <SimulatedDataBadge /> : null}
+            {loaded && !row ? (
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                0 · awaiting data
+              </span>
+            ) : null}
           </div>
         </header>
         <LeaderboardDetail row={row} dimensions={LEADER_DIMENSIONS} />

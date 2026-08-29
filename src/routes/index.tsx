@@ -74,12 +74,6 @@ import {
   type FeedCitizenSignal,
 } from "@/lib/dashboard-data";
 import { Compass } from "lucide-react";
-import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
-import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
-import {
-  seedWorldLeadersTrackerRow,
-  worldLeadersRosterIsOutdated,
-} from "@/lib/trackers/seeds/world-leaders";
 import {
   extractPeaceCountries,
   extractRankedLeaders,
@@ -265,14 +259,10 @@ function Dashboard() {
     citizenJournalists?: number;
     countriesMonitored?: number;
   }>({});
-  /** Top leaders for the focused Leadership board preview. */
+  /** Top leaders for the focused Leadership board preview — Supabase only. */
   const [topLeaders, setTopLeaders] = useState<RankedLeader[]>([]);
-  const [businessLeaders] = useState(() =>
-    extractRankedLeaders(seedAiBusinessTrackerRow()),
-  );
-  const [discourseLeaders] = useState(() =>
-    extractRankedLeaders(seedCitizenDiscourseTrackerRow()),
-  );
+  const [businessLeaders, setBusinessLeaders] = useState<RankedLeader[]>([]);
+  const [discourseLeaders, setDiscourseLeaders] = useState<RankedLeader[]>([]);
   const [curatedHighlights, setCuratedHighlights] = useState<CuratedTopicInsights[]>([]);
   const [dashReady, setDashReady] = useState(false);
   const [simMode] = useSimMode();
@@ -288,7 +278,7 @@ function Dashboard() {
         href: "/trackers/business" as const,
         ctaLabel: "Open business board",
         kicker: "Economy board",
-        preview: true,
+        preview: businessLeaders.length === 0,
       };
     }
     if (topicFilter === "Social") {
@@ -301,50 +291,33 @@ function Dashboard() {
         href: "/trackers/citizen-discourse" as const,
         ctaLabel: "Open journalism board",
         kicker: "Social board",
-        preview: true,
+        preview: scored.length === 0,
       };
     }
     // Political tab or no filter → world leaders only
     return {
       leaders: topLeaders.slice(0, 5),
-      rankedTotal: trackerKpis.leadersRanked,
+      rankedTotal: trackerKpis.worldLeaders ?? 0,
       title: "Leadership board",
       titleAccent: "by citizens",
       href: "/trackers/leaders" as const,
       ctaLabel: "Open full leaderboard",
       kicker: "Political board",
-      preview: true,
+      preview: topLeaders.length === 0,
     };
   }, [
     topicFilter,
     topLeaders,
     businessLeaders,
     discourseLeaders,
-    trackerKpis.leadersRanked,
+    trackerKpis.worldLeaders,
   ]);
 
   const [, setTickKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    const bizCount = businessLeaders.length;
-    const cjCount = discourseLeaders.filter((l) => l.status !== "waiting").length;
 
-    // Seed boards available immediately — show combined total before network returns.
-    setTrackerKpis((prev) => ({
-      ...prev,
-      businessLeaders: bizCount > 0 ? bizCount : undefined,
-      citizenJournalists: cjCount > 0 ? cjCount : undefined,
-      leadersRanked:
-        (prev.worldLeaders ?? 0) + bizCount + cjCount > 0
-          ? (prev.worldLeaders ?? 0) + bizCount + cjCount
-          : bizCount + cjCount > 0
-            ? bizCount + cjCount
-            : undefined,
-    }));
-
-    // Critical path first (overview + signals + world leaders) — paint sooner.
-    // Curated highlights deferred so they don't block first paint.
     void (async () => {
       const [snapRes, ovRes, citRes, trackRes] = await Promise.allSettled([
         loadDashboardData(),
@@ -361,36 +334,39 @@ function Dashboard() {
         const byType = new Map(rows.map((r) => [r.tracker_type, r]));
         const leaderRow = byType.get("global_leader_trust");
         const peaceRow = byType.get("peace_normalization");
-        let leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
-        // Live DB still lists departed leaders → use current-officeholder seed (max 15).
-        if (worldLeadersRosterIsOutdated(leaders)) {
-          leaders = extractRankedLeaders(seedWorldLeadersTrackerRow());
-        }
+        const bizRow = byType.get("ai_business_leader_trust");
+        const cjRow = byType.get("citizen_discourse_index");
+        const leaders = leaderRow ? extractRankedLeaders(leaderRow) : [];
+        const biz = bizRow ? extractRankedLeaders(bizRow) : [];
+        const cj = cjRow ? extractRankedLeaders(cjRow).filter((l) => l.status !== "waiting") : [];
         const peaceCountries = peaceRow ? extractPeaceCountries(peaceRow) : [];
-        const worldCount = leaders.length;
-        const totalLeaders = worldCount + bizCount + cjCount;
-        setTrackerKpis({
-          worldLeaders: worldCount > 0 ? worldCount : undefined,
-          businessLeaders: bizCount > 0 ? bizCount : undefined,
-          citizenJournalists: cjCount > 0 ? cjCount : undefined,
-          // KPI = all indexed leader types on Elenchos
-          leadersRanked: totalLeaders > 0 ? totalLeaders : undefined,
-          countriesMonitored: peaceCountries.length || undefined,
-        });
+        setBusinessLeaders(biz);
+        setDiscourseLeaders(cj);
         setTopLeaders(leaders.slice(0, 5));
-      } else {
-        // Trackers fetch failed — still count seed business + citizen boards
-        const totalLeaders = bizCount + cjCount;
+        const worldCount = leaders.length;
+        const bizCount = biz.length;
+        const cjCount = cj.length;
         setTrackerKpis({
-          worldLeaders: undefined,
-          businessLeaders: bizCount > 0 ? bizCount : undefined,
-          citizenJournalists: cjCount > 0 ? cjCount : undefined,
-          leadersRanked: totalLeaders > 0 ? totalLeaders : undefined,
+          worldLeaders: worldCount,
+          businessLeaders: bizCount,
+          citizenJournalists: cjCount,
+          leadersRanked: worldCount + bizCount + cjCount,
+          countriesMonitored: peaceCountries.length,
+        });
+      } else {
+        setBusinessLeaders([]);
+        setDiscourseLeaders([]);
+        setTopLeaders([]);
+        setTrackerKpis({
+          worldLeaders: 0,
+          businessLeaders: 0,
+          citizenJournalists: 0,
+          leadersRanked: 0,
+          countriesMonitored: 0,
         });
       }
       setDashReady(true);
 
-      // Non-blocking second wave
       void loadCuratedHighlights(24).then((cur) => {
         if (!cancelled) setCuratedHighlights(cur);
       });
@@ -398,7 +374,7 @@ function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [businessLeaders, discourseLeaders]);
+  }, []);
 
   // Simulated signal stream — only used when simMode is explicitly on.
   // Live data comes from Supabase (dashboard_overviews, topic_snapshots, citizen_signals).
@@ -532,7 +508,7 @@ function Dashboard() {
         regions,
         highAlert: overview.high_alert_topics ?? 0,
         avgVelocity: overview.trend_velocity ?? 0,
-        precision: 94.2,
+        precision: 0,
       };
     }
     const highAlert = effectiveSignals.filter(
@@ -540,7 +516,7 @@ function Dashboard() {
     ).length || liveCitizens.filter((s) => (s.sentiment_score ?? 100) < 50).length;
     const avgVelocity =
       effectiveSignals.reduce((s, x) => s + x.velocity, 0) / Math.max(effectiveSignals.length, 1);
-    return { postsAnalyzed, topics: topicsCount, regions, highAlert, avgVelocity, precision: 94.2 };
+    return { postsAnalyzed, topics: topicsCount, regions, highAlert, avgVelocity, precision: 0 };
   }, [effectiveSignals, isLive, overview, citizenSignals, snapshots, topicsCount]);
 
   // Citizen signals: prefer the inline `citizen_signals` array on the
@@ -1670,7 +1646,7 @@ function SampleStructureModules({
               <ArrowUpRight className="w-3 h-3" /> Rising
             </p>
             {movers.rising.length === 0 ? (
-              <p className="text-[10.5px] text-muted-foreground">—</p>
+              <p className="text-[10.5px] text-muted-foreground">0 · awaiting data</p>
             ) : (
               movers.rising.map((r) => (
                 <p key={r.topic} className="text-[11.5px] leading-snug truncate mb-0.5">
@@ -1685,7 +1661,7 @@ function SampleStructureModules({
               <ArrowDownRight className="w-3 h-3" /> Falling
             </p>
             {movers.falling.length === 0 ? (
-              <p className="text-[10.5px] text-muted-foreground">—</p>
+              <p className="text-[10.5px] text-muted-foreground">0 · awaiting data</p>
             ) : (
               movers.falling.map((r) => (
                 <p key={r.topic} className="text-[11.5px] leading-snug truncate mb-0.5">
@@ -1783,19 +1759,19 @@ function LeadershipBoardPreview({
               <span className="text-cyan">{titleAccent}</span>
             </h2>
             <p className="text-[11.5px] sm:text-[12px] text-muted-foreground mt-0.5">
-              Top {top.length || 5}
+              Top {top.length}
               {typeof rankedTotal === "number" ? ` of ${rankedTotal}` : ""} · trust scores
             </p>
           </div>
           <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.16em] inline-flex items-center gap-1 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
-            {preview ? "Preview" : "Live"}
+            {preview ? "Awaiting data" : "Live"}
           </span>
         </div>
 
         {top.length === 0 ? (
           <p className="text-[12px] text-muted-foreground py-6 text-center">
-            {preview ? "Illustrative roster loading, or no live sample yet." : "No leaders in this sample yet."}
+            0 · awaiting data
           </p>
         ) : (
           <ul
@@ -2415,14 +2391,14 @@ const DASHBOARD_TRACKERS = [
     title: "AI & Business leaders",
     href: "/trackers/business" as const,
     blurb: "Vision, execution, free-speech stance for AI / tech builders.",
-    badge: "Preview",
+    badge: "Index",
   },
   {
     id: "citizen",
     title: "Citizen journalism",
     href: "/trackers/citizen-discourse" as const,
     blurb: "Individual reporters — trust, authenticity, independence.",
-    badge: "Preview",
+    badge: "Index",
   },
   {
     id: "peace",
@@ -2774,7 +2750,9 @@ function KpiHeroTile({
             )}
           </div>
         ) : (
-          <div className="text-[12px] font-mono text-muted-foreground px-0.5">—</div>
+          <div className="text-[12px] font-mono text-muted-foreground px-0.5">
+            0 · awaiting data
+          </div>
         )}
         {/* Subtle delta + mini history spark — denser on mobile */}
         <div className="flex flex-col gap-1 w-full">
@@ -2898,25 +2876,22 @@ function DashboardKpiGrid({
   const researchBriefs = listResearchBriefs();
   const researchCount = researchBriefs.length;
 
-  // Until ready, leave values undefined so cards show "—" not fake zeros.
-  const topicsMonitored =
-    ready && activeTopicCount > 0 ? activeTopicCount : ready ? activeTopicCount || undefined : undefined;
+  const topicsMonitored = ready ? activeTopicCount : undefined;
 
-  // Always prefer the combined index total (world + AI/business + citizen journalists).
-  // Do NOT fall back to overview.kpis.leaders_ranked — that count is world leaders only.
+  // Combined index total from Supabase tracker rows only — 0 if no live sample.
   const leadersRanked = !ready
     ? undefined
-    : typeof trackerKpis?.leadersRanked === "number" && trackerKpis.leadersRanked > 0
+    : typeof trackerKpis?.leadersRanked === "number"
       ? trackerKpis.leadersRanked
-      : undefined;
+      : 0;
 
   const countriesMonitored = !ready
     ? undefined
-    : typeof trackerKpis?.countriesMonitored === "number" && trackerKpis.countriesMonitored > 0
+    : typeof trackerKpis?.countriesMonitored === "number"
       ? trackerKpis.countriesMonitored
-      : typeof k.regions_monitored === "number" && k.regions_monitored > 0
+      : typeof k.regions_monitored === "number"
         ? k.regions_monitored
-        : undefined;
+        : 0;
 
   // Topic intelligence reports + research case studies + curated/new highlights (existing counts only)
   const topicReports = typeof topicsMonitored === "number" ? topicsMonitored : liveTopicCount;
@@ -2938,7 +2913,7 @@ function DashboardKpiGrid({
     if (typeof postsAnalyzedProp === "number" && postsAnalyzedProp > 0) {
       return Math.round(postsAnalyzedProp);
     }
-    return resolvePostsAnalyzed({ overview, snapshots, citizenSignals });
+    return resolvePostsAnalyzed({ overview, snapshots, citizenSignals }) ?? 0;
   }, [ready, postsAnalyzedProp, overview, snapshots, citizenSignals]);
 
   const sampleFacts = useMemo(
@@ -3002,15 +2977,15 @@ function DashboardKpiGrid({
       liveNote:
         "World leaders + AI/business figures + citizen journalists across all Elenchos indexes.",
       liveFacts: [
-        trackerKpis?.worldLeaders
-          ? `World leaders: ${trackerKpis.worldLeaders}`
-          : "World leaders: loading…",
-        trackerKpis?.businessLeaders
-          ? `AI & business: ${trackerKpis.businessLeaders}`
-          : "AI & business: —",
-        trackerKpis?.citizenJournalists
-          ? `Citizen journalists: ${trackerKpis.citizenJournalists}`
-          : "Citizen journalists: —",
+        `World leaders: ${trackerKpis?.worldLeaders ?? 0}${
+          !trackerKpis?.worldLeaders ? " · awaiting data" : ""
+        }`,
+        `AI & business: ${trackerKpis?.businessLeaders ?? 0}${
+          !trackerKpis?.businessLeaders ? " · awaiting data" : ""
+        }`,
+        `Citizen journalists: ${trackerKpis?.citizenJournalists ?? 0}${
+          !trackerKpis?.citizenJournalists ? " · awaiting data" : ""
+        }`,
       ],
       links: [
         { label: "World leaders", href: "/trackers/leaders" },
@@ -3065,7 +3040,7 @@ function DashboardKpiGrid({
       value: ready ? trackersActive : undefined,
       icon: Radar,
       format: "number",
-      liveNote: "Public trackers and indexes. Seed boards are labeled preview, not live X ranks.",
+      liveNote: "Public trackers and indexes. Empty boards show 0 · awaiting data — never invented ranks.",
       liveFacts: DASHBOARD_TRACKERS.map((t) => `${t.title} · ${t.badge}`),
       links: [
         { label: "Leadership board", href: "/trackers/leaders" },

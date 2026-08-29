@@ -290,11 +290,17 @@ export async function fetchLatestTrackers(): Promise<TrackerRow[]> {
   try {
     // Primary source of truth: the `trackers` table (append-only history).
     const trackerRows = await fetchTrackerRows("trackers");
-    if (trackerRows && trackerRows.length > 0) return dedupeLatestTrackerRows(trackerRows);
+    const live = (trackerRows ?? []).filter(
+      (r) => !String(r.snapshot_label ?? "").startsWith("seed-"),
+    );
+    if (live.length > 0) return dedupeLatestTrackerRows(live);
 
     // Fallback to the `latest_trackers` view if the table read fails.
     const latestRows = await fetchTrackerRows("latest_trackers");
-    return latestRows ? dedupeLatestTrackerRows(latestRows) : [];
+    const latestLive = (latestRows ?? []).filter(
+      (r) => !String(r.snapshot_label ?? "").startsWith("seed-"),
+    );
+    return latestLive.length ? dedupeLatestTrackerRows(latestLive) : [];
   } catch {
     return [];
   }

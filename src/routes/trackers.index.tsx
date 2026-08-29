@@ -15,7 +15,6 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataFreshnessBar } from "@/components/DataFreshnessBar";
-import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
 import {
   LEADER_DIMENSIONS,
@@ -37,12 +36,6 @@ import {
   type TrackerDefinition,
   type TrackerRow,
 } from "@/lib/trackers-data";
-import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
-import { seedCitizenDiscourseTrackerRow } from "@/lib/trackers/seeds/citizen-discourse";
-import {
-  seedWorldLeadersTrackerRow,
-  worldLeadersRosterIsOutdated,
-} from "@/lib/trackers/seeds/world-leaders";
 import { ArrowDownRight, Minus, TrendingUp, AlertTriangle, MessageSquareQuote, Quote } from "lucide-react";
 
 
@@ -417,17 +410,15 @@ function LeaderOverviewCard({
           </div>
         ) : (
           <div className="mt-5 px-3 py-3 rounded-lg border border-dashed border-border bg-background/30 text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground inline-flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5" /> No leaders in this sample yet
+            <Radio className="w-3.5 h-3.5" /> 0 · awaiting data
           </div>
         )}
 
         <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
           <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-            {row?.snapshot_label?.startsWith("seed-")
-              ? "Illustrative roster · not a live X sample"
-              : leaders.length > 0
-                ? `${leaders.length} leaders ranked`
-                : "No leaders in this sample yet"}
+            {leaders.length > 0
+              ? `${leaders.length} leaders ranked`
+              : "0 · awaiting data"}
             {!row?.snapshot_label?.startsWith("seed-") && snapshotDate
               ? ` · ${snapshotDate}`
               : ""}
@@ -1033,7 +1024,7 @@ function LeaderboardDetail({
         <div className="px-4 py-6 rounded-xl border border-dashed border-border bg-background/30 text-center">
           <Radio className="w-4 h-4 animate-pulse text-cyan mx-auto mb-2" />
           <p className="text-[12px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-            No leaders in this sample yet.
+            0 · awaiting data
           </p>
         </div>
       ) : activeRegion === "all" ? (
@@ -1520,7 +1511,6 @@ function TrackersPage() {
             rankings plus official-action intelligence.
           </p>
           <div className="pt-1 flex flex-wrap items-center gap-3">
-            <SimulatedDataBadge />
             <DataFreshnessBar
               sourceUpdatedAt={sourceUpdatedAt}
               refreshedAt={refreshedAt}
@@ -1533,20 +1523,7 @@ function TrackersPage() {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
           {live.map((def, idx) => {
             const liveRow = byType.get(def.tracker_type);
-            let row =
-              liveRow ??
-              (def.tracker_type === "ai_business_leader_trust"
-                ? seedAiBusinessTrackerRow()
-                : def.tracker_type === "citizen_discourse_index"
-                  ? seedCitizenDiscourseTrackerRow()
-                  : undefined);
-            // Swap outdated world-leader roster (AMLO / Scholz / Petro / Boric) for current officeholders.
-            if (def.tracker_type === "global_leader_trust") {
-              const liveLeaders = liveRow ? extractRankedLeaders(liveRow) : [];
-              if (worldLeadersRosterIsOutdated(liveLeaders)) {
-                row = seedWorldLeadersTrackerRow();
-              }
-            }
+            const row = liveRow?.snapshot_label?.startsWith("seed-") ? undefined : liveRow;
             const inner =
               def.tracker_type === "global_leader_trust" ? (
                 <LeaderOverviewCard def={def} row={row} href="/trackers/leaders" />

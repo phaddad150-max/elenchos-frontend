@@ -792,8 +792,8 @@ function TopicCardScore({
         <span className="md:hidden">{shortLabel}</span>
         <span className="hidden md:inline">{label}</span>
       </span>
-      <span className={CARD_SCORE_VALUE} style={{ color }}>
-        {typeof value === "number" ? value : "—"}
+      <span className={CARD_SCORE_VALUE} style={{ color }} title={typeof value === "number" ? hint : "Awaiting data"}>
+        {typeof value === "number" ? value : 0}
       </span>
     </div>
   );
@@ -1059,49 +1059,6 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   const override = readTopicOverride(baseTopic.id);
   const topic: FeatureTopic = override ? { ...baseTopic, ...override } : baseTopic;
 
-  const gap = avgDivergence(topic);
-  const overallSentiment = Math.round(topic.trackers.reduce((s, t) => s + t.score, 0) / topic.trackers.length);
-  const simA = topic.simulation.pathA.series;
-  const trend = simA[simA.length - 1] - simA[0];
-  const momentum = Math.max(0, Math.min(100, 50 + trend));
-  const negSignal = topic.trackers.find((t) => t.classification === "negative");
-  const emotionalIntensity = negSignal ? 100 - negSignal.score : Math.min(100, gap + 25);
-  const sampleNum = parseInt(topic.sampleSize.replace(/[^0-9]/g, ""), 10) || 0;
-  const engagementVelocity = Math.min(100, Math.round((sampleNum / 600) * 100));
-
-  const metrics = [
-    {
-      label: "Citizen ↔ Official Gap",
-      value: gap,
-      tone: gap > 40 ? "rose" : gap > 25 ? "amber" : "emerald",
-      hint: gap > 40 ? "Severe divergence" : gap > 25 ? "Notable divergence" : "Aligned",
-    },
-    {
-      label: "Emotional Intensity",
-      value: emotionalIntensity,
-      tone: emotionalIntensity > 65 ? "rose" : emotionalIntensity > 40 ? "amber" : "emerald",
-      hint: "Anger + urgency in citizen posts",
-    },
-    {
-      label: "Narrative Momentum",
-      value: momentum,
-      tone: momentum > 60 ? "emerald" : momentum < 40 ? "rose" : "amber",
-      hint: trend >= 0 ? `+${trend} pts trajectory` : `${trend} pts trajectory`,
-    },
-    {
-      label: "Engagement Velocity",
-      value: engagementVelocity,
-      tone: engagementVelocity > 60 ? "emerald" : engagementVelocity > 35 ? "amber" : "rose",
-      hint: topic.sampleSize,
-    },
-  ] as const;
-
-  const claims = topic.actionableIntel?.claims ?? splitToBullets(topic.insights.citizenSays, 3);
-  const warnings =
-    topic.actionableIntel?.warnings ?? splitToBullets(topic.insights.gap + " " + topic.insights.officialSays, 3);
-  const opportunities =
-    topic.actionableIntel?.opportunities ?? splitToBullets(topic.takeaway + " " + topic.insights.citizenSays, 3);
-
   const liveCfg = liveTopicConfig(topic.id);
   const { data: liveData } = useLiveTopicData(liveCfg?.rootKey ?? "");
   const { hasCurated } = useCuratedTopicData(liveCfg?.rootKey ?? "");
@@ -1154,9 +1111,6 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
   })();
   const shareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
-  const sentimentTone =
-    overallSentiment >= 71 ? "emerald" : overallSentiment >= 61 ? "emerald" : overallSentiment >= 41 ? "amber" : "rose";
-
   return (
     <motion.section
       key={topic.id}
@@ -1205,7 +1159,7 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
           <ContentSourceBadge source={contentSource} />
           {contentSource === "static" && (
             <span className="text-[10px] font-mono text-muted-foreground normal-case tracking-normal">
-              Editorial preview sample — not a live public discourse run
+              0 · awaiting data — no invented sample
             </span>
           )}
           {isArchivedTopicId(topic.id) && (
@@ -1254,114 +1208,18 @@ function TopicDetail({ topic: baseTopic, onBack, simMode = false }: { topic: Fea
       ) : null}
 
       {!useLive && (
-        <>
-          {/* Overall Citizen Sentiment */}
-          <OverallSentiment score={overallSentiment} trend={trend} tone={sentimentTone} />
-
-          {/* Sub-group breakdown — Eastern Mediterranean alliance only */}
-          {topic.id === "levant-realignment" && <SubGroupBreakdown trackers={topic.trackers} />}
-
-          {/* Segmented sentiment (topic-aware) */}
-          {topic.segments && topic.segments.items.length > 0 && (
-            <SegmentedSentiment
-              overall={overallSentiment}
-              items={topic.segments.items}
-              methodology={topic.segments.methodology}
-            />
-          )}
-
-          {/* 4 metric cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {metrics.map((m) => (
-              <MetricCard key={m.label} {...m} />
-            ))}
-          </div>
-
-          {/* Path comparison — topic-specific */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <PathCard
-              kind="positive"
-              title={topic.pathExamples?.positive.title ?? "Positive Path"}
-              pathLabel={topic.pathExamples?.positive.pathLabel ?? topic.simulation.pathA.label}
-              series={topic.simulation.pathA.series}
-              exampleLabel={topic.pathExamples?.positive.exampleLabel}
-              example={
-                topic.pathExamples?.positive.exampleBody ??
-                "Pathway where citizen-aligned reform and openness compound."
-              }
-            />
-            <PathCard
-              kind="risk"
-              title={topic.pathExamples?.risk.title ?? "Risk Path"}
-              pathLabel={topic.pathExamples?.risk.pathLabel ?? topic.simulation.pathB.label}
-              series={topic.simulation.pathB.series}
-              exampleLabel={topic.pathExamples?.risk.exampleLabel}
-              example={
-                topic.pathExamples?.risk.exampleBody ??
-                "Pathway where elite paralysis or escalation overrides citizen sentiment."
-              }
-            />
-          </div>
-
-          {/* Actionable Insights */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan">
-                <Sparkles className="w-3 h-3" /> Key signals
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <ContentSourceBadge source="static" compact />
-                <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground">
-                  For journalists · researchers · policy advocates
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <InsightCard
-                tone="emerald"
-                icon={<MessageSquare className="w-4 h-4" />}
-                title="Top Citizen Claims"
-                bullets={claims}
-              />
-              <InsightCard
-                tone="rose"
-                icon={<AlertTriangle className="w-4 h-4" />}
-                title="Warning Signals"
-                bullets={warnings}
-              />
-              <InsightCard
-                tone="amber"
-                icon={<Lightbulb className="w-4 h-4" />}
-                title="Opportunity Signals"
-                bullets={opportunities}
-              />
-            </div>
-          </section>
-        </>
-      )}
-
-      {/* AI Synthesis — only for non-live (simulated) topics; live topics use TopicAnalysisPage */}
-      {!useLive && (
-        <section className="glass rounded-2xl p-5 space-y-3 border-l-2 border-l-cyan">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2 text-cyan">
-              <div className="p-1.5 rounded-md bg-cyan/15 border border-cyan/30">
-                <Brain className="w-4 h-4" />
-              </div>
-              <h2 className="font-display font-semibold tracking-[0.18em] uppercase text-sm">AI Synthesis</h2>
-            </div>
-            <ContentSourceBadge source="static" compact />
-          </div>
-          <p className="text-sm text-foreground/90 leading-relaxed">
-            <span className="text-cyan font-medium">Citizens:</span> {topic.insights.citizenSays}{" "}
-            <span className="text-muted-foreground font-medium">Officials & media:</span> {topic.insights.officialSays}{" "}
-            <span className="text-amber-signal font-medium">Bottom line:</span> {topic.takeaway}
+        <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center space-y-1.5">
+          <p className="text-[1.35rem] font-display font-semibold tabular-nums text-foreground">0</p>
+          <p className="text-[13px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+            Awaiting data
           </p>
-          <div className="text-[10.5px] font-mono uppercase tracking-wider text-muted-foreground pt-1 border-t border-border">
-            Sample: {topic.sampleSize} · Confidence: {topic.confidence ?? (gap > 25 ? "High" : "Moderate")}
-          </div>
-        </section>
+          <p className="text-[12.5px] text-muted-foreground max-w-md mx-auto leading-relaxed">
+            No Supabase sample for this topic yet. Scores, paths, and synthesis are not invented.
+          </p>
+        </div>
       )}
+
+
 
       {/* Feedback */}
       <section className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 rounded-2xl border border-border bg-secondary/30">
@@ -1607,7 +1465,7 @@ function ContentSourceBadge({ source, compact }: { source: ContentSource; compac
       color: "var(--cyan)",
     },
     static: {
-      label: compact ? "Preview" : "Illustrative preview",
+      label: compact ? "Awaiting" : "Awaiting data",
       color: "var(--amber-signal)",
     },
     loading: {

@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Briefcase } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { BUSINESS_LEADER_DIMENSIONS, TRACKER_CATALOG } from "@/lib/trackers-data";
-import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
+import {
+  BUSINESS_LEADER_DIMENSIONS,
+  TRACKER_CATALOG,
+  fetchLatestTrackers,
+  type TrackerRow,
+} from "@/lib/trackers-data";
 import { ContactEmailMe } from "@/components/ContactEmailMe";
-import { seedAiBusinessTrackerRow } from "@/lib/trackers/seeds/ai-business-leaders";
 import { LeaderboardDetail, formatDate } from "./trackers.index";
 
 export const Route = createFileRoute("/trackers/business")({
@@ -27,9 +30,20 @@ export const Route = createFileRoute("/trackers/business")({
 });
 
 function BusinessLeadersPage() {
-  const row = useMemo(() => seedAiBusinessTrackerRow(), []);
+  const [rows, setRows] = useState<TrackerRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    fetchLatestTrackers()
+      .then(setRows)
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const row = useMemo(
+    () => rows.find((r) => r.tracker_type === "ai_business_leader_trust"),
+    [rows],
+  );
   const def = TRACKER_CATALOG.find((t) => t.tracker_type === "ai_business_leader_trust");
-  const snapshotDate = formatDate(row.created_at ?? new Date().toISOString());
+  const snapshotDate = row ? formatDate(row.created_at) : null;
 
   return (
     <div className="min-h-screen relative flex flex-col">
@@ -72,18 +86,24 @@ function BusinessLeadersPage() {
             {def?.tagline}
           </p>
           <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="px-2 py-0.5 rounded-full border border-amber-signal/35 bg-amber-signal/10 text-amber-signal text-[10px] font-mono uppercase tracking-[0.18em]">
-              Seed preview
+            <span className="px-2 py-0.5 rounded-full border border-cyan/30 bg-cyan/10 text-cyan text-[10px] font-mono uppercase tracking-[0.18em]">
+              {loaded && !row ? "Awaiting data" : "Live"}
             </span>
             {snapshotDate && (
               <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                 {snapshotDate}
               </span>
             )}
-            <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              {row.item_count} entries
-            </span>
-            <SimulatedDataBadge />
+            {typeof row?.item_count === "number" && (
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                {row.item_count} entries
+              </span>
+            )}
+            {loaded && !row ? (
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                0 · awaiting data
+              </span>
+            ) : null}
           </div>
         </header>
         <LeaderboardDetail row={row} dimensions={BUSINESS_LEADER_DIMENSIONS} />
