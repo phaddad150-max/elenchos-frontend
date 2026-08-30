@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Globe2, Layers, Radio } from "lucide-react";
+import { ArrowRight, Globe2, Layers, MapPinned, Radio } from "lucide-react";
 import type { DeskCard, LiveDesk } from "@/lib/desk/types";
 import { sentimentTone } from "@/lib/score-colors";
 import { PaidEarnedPanel } from "@/components/desk/PaidEarnedPanel";
 import { Globe3D } from "@/components/Globe3D";
+import { GulfMap } from "@/components/desk/GulfMap";
 import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
 import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
 
@@ -145,25 +146,39 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
             <div className="intel-header">
               <div className="intel-header-row">
                 <div className="intel-header-icon">
-                  <Globe2 className="w-4 h-4" />
+                  {uae ? <MapPinned className="w-4 h-4" /> : <Globe2 className="w-4 h-4" />}
                 </div>
-                <h2 className="intel-header-title">Global Sentiment Heatmap</h2>
+                <h2 className="intel-header-title">
+                  {uae
+                    ? ar
+                      ? "خريطة الخليج"
+                      : "UAE & Gulf map"
+                    : "Global Sentiment Heatmap"}
+                </h2>
               </div>
               <p className="intel-header-sub">
-                {sampled > 0
-                  ? `Tap a point · ${sampled} data points`
-                  : "0 · awaiting data — no region markers until a billed run"}
+                {uae
+                  ? ar
+                    ? "اسحب وتكبير · الإمارات والخليج · النقاط بلا درجات مخترعة"
+                    : "Drag, zoom, tap a city · UAE + surrounding Gulf · pins are not scores"
+                  : sampled > 0
+                    ? `Tap a point · ${sampled} data points`
+                    : "0 · awaiting data — no region markers until a billed run"}
               </p>
             </div>
           </div>
-          <div className="relative h-[min(52vw,280px)] sm:h-[400px] xl:h-[450px] w-full rounded-xl border border-cyan/30 overflow-hidden globe-stage shadow-[inset_0_0_48px_-14px_var(--cyan-glow)] ring-1 ring-cyan/10">
-            <Globe3D signals={[]} onPick={() => undefined} />
-            <div className="absolute inset-0 grid place-items-center bg-background/40 px-4 text-center">
-              <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
-                No region markers in this sample yet. Run a billed topic sample from studio.
-              </p>
+          {uae ? (
+            <GulfMap lang={lang} />
+          ) : (
+            <div className="relative h-[min(52vw,280px)] sm:h-[400px] xl:h-[450px] w-full rounded-xl border border-cyan/30 overflow-hidden globe-stage shadow-[inset_0_0_48px_-14px_var(--cyan-glow)] ring-1 ring-cyan/10">
+              <Globe3D signals={[]} onPick={() => undefined} />
+              <div className="absolute inset-0 grid place-items-center bg-background/40 px-4 text-center">
+                <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xs">
+                  No region markers in this sample yet. Run a billed topic sample from studio.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </section>
       </div>
 
