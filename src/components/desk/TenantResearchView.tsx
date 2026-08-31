@@ -22,7 +22,7 @@ export function TenantResearchView({ desk }: { desk: LiveDesk }) {
         </h1>
         <p className="text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
           {uae
-            ? "Lived monitors: rents, jobs, heat, housing, commute. Catalog rows may reuse a public sample after a billed run. UAE names stay 0 · awaiting data. Official and media are contrast, not the sample. Method locked."
+            ? "Preselected for Solvo Creations: SMBs, startups, founders, expansion brands — visibility, trust, AI/GEO, partnerships. Simulated preview. Official and media are contrast. Method locked."
             : "This tab only lists topics this desk picked. Catalog topics may reuse a public sample after a billed run. Your own names stay 0 · awaiting data until that run. Scoring stays on Elenchos."}
         </p>
       </header>

@@ -2,26 +2,27 @@
 
 export const UAE_PRICE_NOTE = "€490 setup + €199/month · €1.50/topic run";
 
-/** Existing live catalog that is citizen/lived — not ministry or alliance frames. */
+/** Catalog rows that match Solvo’s B2B / AI / founder audience. */
 export const UAE_CITIZEN_CATALOG_IDS = [
   "ai-productivity-gdp-growth",
+  "global-ai-race",
   "crypto-regulation-financial-markets",
-  "crime-safety-lawlessness",
   "elon-musk-public-voices",
 ] as const;
 
 /**
- * UAE citizen monitors. Desk-only names — not added to the public live mix.
- * Stay 0 · awaiting data until a billed run. Do not invent scores.
+ * Solvo Creations audience monitors (SMBs, startups, founders, expansion brands).
+ * Desk-only names — not added to the public live mix.
  */
 export const UAE_CITIZEN_CUSTOM_TOPICS = [
-  "Dubai cost of living & rents",
-  "UAE jobs, visas & talent",
-  "Heat, livability & daily life",
-  "Housing & school fees",
-  "Workforce talk vs paid campaign frames",
-  "Gig work & startup life in Dubai",
-  "Traffic & daily commute",
+  "B2B visibility vs paid takeovers",
+  "Founder personal branding on X",
+  "AI search & GEO reputation",
+  "SMB trust and partnerships",
+  "Decision-maker discovery",
+  "Agency vs in-house growth talk",
+  "Podcast & PR authority vs earned replies",
+  "Expansion into UAE / GCC markets",
 ] as const;
 
 export const UAE_EN = {
@@ -38,8 +39,8 @@ export const UAE_EN = {
       body: "Earned = unprompted ordinary accounts. Paid/official = boosts, ministry and media volume — contrast, never mixed in as “the public.” Not activism. Respect for leadership and for people doing the work.",
     },
     {
-      title: "Lived UAE topics",
-      body: "Rents, jobs and visas, heat, housing, commute, gig and startup life. Same Pass-1 logic as elenchos.live. Locked. You cannot edit how truth is surfaced.",
+      title: "Topics for Solvo’s buyers",
+      body: "B2B visibility, founder branding, AI/GEO search, SMB trust, decision-maker discovery, agency vs in-house, PR/podcast authority, GCC expansion. Same Pass-1 logic. Locked.",
     },
     {
       title: "Accuracy without you sampling",
@@ -50,7 +51,7 @@ export const UAE_EN = {
   why: "SMBs and corporates need to know what the workforce is actually saying. Official and media volume is real — it is not the same as earned speech. Communication alert, not a smear tool.",
   buyersTitle: "Who buys",
   buyers:
-    "UAE SMBs, corporates, in-house comms, agencies. Job: hear workforce communication early, without treating official or media campaigns as public talk.",
+    "Solvo’s audience: SMBs and startups, founders and executives, expansion brands in the UAE. Job: public discourse vs paid/media noise around visibility, trust and partnerships.",
   limits:
     "Public X + API only. GDPR/EU (operator in Greece) and UAE law. No private messages, no targeting individuals, no smear. Method locked. Arabic UI is draft — human review before campaign use.",
   arReview: "Arabic UI is a draft. Human review before campaign use.",

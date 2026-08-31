@@ -21,27 +21,29 @@ function band(n: number): { score: number; label: string } {
 
 const HEADLINES: Record<string, string> = {
   "ai-productivity-gdp-growth":
-    "Simulated: workforce posts on AI tools vs agency/client claims of ‘transformation’ — public discourse gap.",
+    "Simulated: SMB operators on AI tools vs paid ‘transformation’ claims — public discourse gap Solvo’s Human+AI pitch sits in.",
+  "global-ai-race":
+    "Simulated: earned talk on AI search/GEO vs boosted thought-leadership threads.",
   "crypto-regulation-financial-markets":
-    "Simulated: Dubai traders’ earned replies diverge from paid fintech launch threads.",
-  "crime-safety-lawlessness":
-    "Simulated: neighbourhood safety talk vs official/media volume on the same week.",
+    "Simulated: Dubai B2B/fintech founders’ replies vs paid launch campaigns.",
   "elon-musk-public-voices":
-    "Simulated: ordinary accounts vs amplified tech-celebrity frames in GCC threads.",
-  "Dubai cost of living & rents":
-    "Simulated: rent and school-fee talk from residents, not ministry housing campaigns.",
-  "UAE jobs, visas & talent":
-    "Simulated: visa/talent earned mentions vs paid recruitment takeovers.",
-  "Heat, livability & daily life":
-    "Simulated: heat and commute lived posts — communication risk for outdoor brands.",
-  "Housing & school fees":
-    "Simulated: parent/expat discourse vs property-developer media.",
-  "Workforce talk vs paid campaign frames":
-    "Simulated: Solvo-relevant B2B visibility: earned partner talk vs boosted campaign noise.",
-  "Gig work & startup life in Dubai":
-    "Simulated: founder/freelance earned speech on X vs startup-media packages.",
-  "Traffic & daily commute":
-    "Simulated: commute complaints as early comms-risk signal for mobility brands.",
+    "Simulated: founder personal-brand talk vs celebrity-tech media frames in the GCC.",
+  "B2B visibility vs paid takeovers":
+    "Simulated: unprompted partner mentions vs boosted B2B visibility campaigns.",
+  "Founder personal branding on X":
+    "Simulated: executives’ earned replies vs packaged personal-brand media.",
+  "AI search & GEO reputation":
+    "Simulated: how decision-makers talk about being found on AI search vs SEO-agency ads.",
+  "SMB trust and partnerships":
+    "Simulated: trust/partnership earned speech from SMBs vs official/media volume.",
+  "Decision-maker discovery":
+    "Simulated: who actually gets discovered by buyers on X — organic vs paid outreach.",
+  "Agency vs in-house growth talk":
+    "Simulated: builders debating agency vs in-house — earned, not brochure copy.",
+  "Podcast & PR authority vs earned replies":
+    "Simulated: PR/podcast placements vs whether ordinary accounts repeat the frame.",
+  "Expansion into UAE / GCC markets":
+    "Simulated: expansion-brand discourse from operators entering the UAE, not tourism media.",
 };
 
 export function simulateDeskCards(picks: DeskPicks): DeskCard[] {
