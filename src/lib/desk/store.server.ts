@@ -6,11 +6,13 @@ import { LIVE_TOPIC_KEYS, isArchivedTopicId } from "@/lib/topic-catalog";
 import {
   DESK_DEMO_SEEDS,
   DESK_MAX_TOPICS,
+  UAE_DEMO_SLUG,
   demoSeedBySlug,
   demoSeedByToken,
   type DeskDemoSeed,
 } from "./catalog";
 import type { DeskBranding, DeskCard, DeskPicks, DeskTenant } from "./types";
+import { simulateDeskCards } from "./solvo-sim";
 
 export type { DeskBranding, DeskCard, DeskPicks, DeskStatus, DeskTenant, LiveDesk } from "./types";
 
@@ -38,16 +40,14 @@ function tenantFromSeed(seed: DeskDemoSeed): DeskTenant {
 function seedDemoMem(): void {
   for (const seed of DESK_DEMO_SEEDS) {
     if (!memTenants.some((t) => t.id === seed.id)) memTenants.push(tenantFromSeed(seed));
-    if (!memBrand.has(seed.id)) {
-      memBrand.set(seed.id, {
-        tenant_id: seed.id,
-        org_name: seed.org,
-        unbranded: false,
-        logo_url: null,
-        primary_color: seed.primary_color,
-        accent_color: seed.accent_color,
-      });
-    }
+    memBrand.set(seed.id, {
+      tenant_id: seed.id,
+      org_name: seed.org,
+      unbranded: false,
+      logo_url: seed.logo_url ?? null,
+      primary_color: seed.primary_color,
+      accent_color: seed.accent_color,
+    });
     if (!memPicks.has(seed.id)) {
       memPicks.set(seed.id, {
         tenant_id: seed.id,
@@ -335,7 +335,10 @@ export async function getLiveDesk(slug: string): Promise<{
     tenant.slug = seed.slug;
     const branding = memBrand.get(seed.id)!;
     const picks = memPicks.get(seed.id)!;
-    let cards = memCards.get(seed.id) ?? [];
+    let cards =
+      seed.slug === UAE_DEMO_SLUG
+        ? simulateDeskCards(picks)
+        : (memCards.get(seed.id) ?? []);
     if (!cards.length) {
       cards = await buildCardsForPicks(picks);
       memCards.set(seed.id, cards);

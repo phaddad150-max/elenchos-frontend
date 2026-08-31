@@ -25,10 +25,10 @@ export const UAE_CITIZEN_CUSTOM_TOPICS = [
 ] as const;
 
 export const UAE_EN = {
-  kicker: "UAE · workforce communication alert",
+  kicker: "Solvo Creations · Public Discourse × Research Desk",
   title: "Hear the workforce — not ministry feeds, not media as the public",
   blurb:
-    "Citizen communication alert for UAE SMBs and corporates. Same dashboard and locked scoring as elenchos.live. In the UAE the workforce drives the story under leadership. You do not run the method. You get the alert.",
+    "White-label Public Discourse × Research Desk for Solvo Creations (Dubai). Same locked scoring as elenchos.live. This preview uses labeled simulated samples so you can walk the product. In the UAE the workforce drives the story under leadership.",
   payCta: "Pay and brand your desk",
   walkCta: "Test the alert desk (no charge)",
   productTitle: "What you get",

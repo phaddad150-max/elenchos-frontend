@@ -40,7 +40,7 @@ export const DESK_DEMO_ORG = "Acme Research";
 
 export const UAE_DEMO_TOKEN = "uae-demo-walkthrough";
 export const UAE_DEMO_SLUG = "uae-prototype";
-export const UAE_DEMO_ORG = "UAE Citizen Desk";
+export const UAE_DEMO_ORG = "Solvo Creations";
 
 export type DeskDemoSeed = {
   id: string;
@@ -52,6 +52,7 @@ export type DeskDemoSeed = {
   custom_topics: string[];
   primary_color: string;
   accent_color: string;
+  logo_url?: string | null;
 };
 
 export const DESK_DEMO_SEEDS: DeskDemoSeed[] = [
@@ -79,8 +80,9 @@ export const DESK_DEMO_SEEDS: DeskDemoSeed[] = [
     email: "uae-demo@elenchos.live",
     topic_ids: [...UAE_CITIZEN_CATALOG_IDS],
     custom_topics: [...UAE_CITIZEN_CUSTOM_TOPICS],
-    primary_color: "#0d9488",
-    accent_color: "#c9a227",
+    primary_color: "#1E4ED8",
+    accent_color: "#E8B923",
+    logo_url: "/brand/solvo-logo.png",
   },
 ];
 

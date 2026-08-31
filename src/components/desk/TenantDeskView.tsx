@@ -4,10 +4,12 @@ import { ArrowRight, Globe2, Layers, MapPinned, Radio } from "lucide-react";
 import type { DeskCard, LiveDesk } from "@/lib/desk/types";
 import { sentimentTone } from "@/lib/score-colors";
 import { PaidEarnedPanel } from "@/components/desk/PaidEarnedPanel";
+import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { Globe3D } from "@/components/Globe3D";
 import { GulfMap } from "@/components/desk/GulfMap";
 import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
 import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
+import { SOLVO_SIM_PAID } from "@/lib/desk/solvo-sim";
 
 export function TenantDeskView({ desk }: { desk: LiveDesk }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -38,9 +40,12 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
 
       {uae ? (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan">
-            {ar ? UAE_AR.lens : UAE_EN.lens}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-cyan">
+              Public Discourse × Research Desk
+            </p>
+            <SimulatedDataBadge />
+          </div>
           <div className="inline-flex rounded-full border border-border p-0.5 text-[11px] font-medium self-end sm:self-auto">
             <button
               type="button"
@@ -70,8 +75,8 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
         />
         <KpiFace label={ar ? "بانتظار" : "Awaiting"} value={awaitingCount} />
         <KpiFace label={ar ? "بحث" : "Research"} value={cards.length} />
-        <KpiFace label={ar ? "مدفوع" : "Paid"} value={0} awaiting awaitingLabel={ar ? "0 · بانتظار البيانات" : undefined} />
-        <KpiFace label={ar ? "مكتسب" : "Earned"} value={0} awaiting awaitingLabel={ar ? "0 · بانتظار البيانات" : undefined} />
+        <KpiFace label={ar ? "مدفوع" : "Paid"} value={uae ? SOLVO_SIM_PAID.volume : 0} awaiting={!uae} />
+        <KpiFace label={ar ? "مكتسب" : "Earned"} value={uae ? SOLVO_SIM_PAID.earned : 0} awaiting={!uae} />
       </div>
 
       {uae ? <PaidEarnedPanel lang={lang} /> : null}

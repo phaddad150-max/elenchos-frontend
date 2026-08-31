@@ -55,7 +55,11 @@ export function TenantShell({
             <img
               src={branding.logo_url}
               alt=""
-              className="h-9 w-9 rounded-full object-cover border border-cyan/35"
+              className={
+                branding.logo_url.includes("solvo")
+                  ? "h-9 w-auto max-w-[148px] object-contain object-left"
+                  : "h-9 w-9 rounded-full object-cover border border-cyan/35"
+              }
             />
           ) : (
             <div className="brand-mark w-9 h-9 rounded-full grid place-items-center shrink-0">
@@ -66,7 +70,7 @@ export function TenantShell({
             <p className="font-display font-semibold text-lg sm:text-xl tracking-tight truncate">{title}</p>
             <p className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
               {uae
-                ? "Workforce speech · method locked"
+                ? "Public Discourse × Research Desk · simulated preview"
                 : walk
                   ? "Walkthrough desk · not a paid tenant"
                   : "Public discourse desk"}
@@ -118,8 +122,21 @@ export function TenantShell({
       ) : (
         <footer className="border-t border-border/80 mt-4 pb-20 md:pb-8 bg-gradient-to-t from-card/40 to-transparent">
           <p className="max-w-[1600px] mx-auto px-4 py-3 text-[11px] font-mono text-muted-foreground">
-            Desk hosted on elenchos.live
-            {tenant.custom_domain ? ` · connect ${tenant.custom_domain}` : ""}
+            {uae ? (
+              <>
+                Solvo Creations prototype ·{" "}
+                <a href="https://www.solvocreations.com/" className="text-cyan hover:underline">
+                  solvocreations.com
+                </a>
+                {" · "}
+                Public Discourse × Research Desk · simulated preview
+              </>
+            ) : (
+              <>
+                Desk hosted on elenchos.live
+                {tenant.custom_domain ? ` · connect ${tenant.custom_domain}` : ""}
+              </>
+            )}
           </p>
         </footer>
       )}
