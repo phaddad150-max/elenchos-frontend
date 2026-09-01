@@ -8,7 +8,8 @@ import {
   SOLVO_SETUP_AED,
   formatAed,
 } from "@/lib/desk/catalog";
-import { UAE_AR, UAE_CITIZEN_CUSTOM_TOPICS, UAE_EN, type UaeLang } from "@/lib/desk/uae";
+import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
+import { SOLVO_TOPICS } from "@/lib/desk/solvo-topics";
 
 const parentRoute = getRouteApi("/solvocreations-uae");
 
@@ -82,12 +83,12 @@ function SolvoDeskPlansPage() {
             {copy.limits}
           </p>
           <ul className="flex flex-wrap gap-1.5">
-            {UAE_CITIZEN_CUSTOM_TOPICS.map((t) => (
+            {SOLVO_TOPICS.map((t) => (
               <li
-                key={t}
+                key={t.id}
                 className="text-[11px] font-mono rounded-full border border-border px-2.5 py-1 text-muted-foreground"
               >
-                {t}
+                {t.name}
               </li>
             ))}
           </ul>

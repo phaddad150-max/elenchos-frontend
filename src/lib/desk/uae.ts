@@ -2,28 +2,13 @@
 
 export const UAE_PRICE_NOTE = "AED 6,000 setup · Pulse AED 249/mo · Insight AED 899/mo";
 
-/** Catalog rows that match Solvo’s B2B / AI / founder audience. */
-export const UAE_CITIZEN_CATALOG_IDS = [
-  "ai-productivity-gdp-growth",
-  "global-ai-race",
-  "crypto-regulation-financial-markets",
-  "elon-musk-public-voices",
-] as const;
+import { SOLVO_TOPIC_IDS } from "./solvo-topics";
 
-/**
- * Solvo Creations audience monitors (SMBs, startups, founders, expansion brands).
- * Desk-only names — not added to the public live mix.
- */
-export const UAE_CITIZEN_CUSTOM_TOPICS = [
-  "B2B visibility vs paid takeovers",
-  "Founder personal branding on X",
-  "AI search & GEO reputation",
-  "SMB trust and partnerships",
-  "Decision-maker discovery",
-  "Agency vs in-house growth talk",
-  "Podcast & PR authority vs earned replies",
-  "Expansion into UAE / GCC markets",
-] as const;
+/** Public catalog ids are not mixed into this desk — Solvo uses its own 10 topics. */
+export const UAE_CITIZEN_CATALOG_IDS = [] as const;
+
+/** Desk-only names — not added to the public live mix. */
+export const UAE_CITIZEN_CUSTOM_TOPICS = SOLVO_TOPIC_IDS;
 
 export const UAE_EN = {
   kicker: "Solvo Creations · Public Discourse × Research Desk",

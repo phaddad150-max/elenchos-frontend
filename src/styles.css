@@ -121,6 +121,21 @@
     inset 0 1px 0 oklch(1 0 0 / 0.04);
 }
 
+/* Solvo Creations prototype — white pages, no dark option. Scoped; does not change main site. */
+.solvo-light {
+  --background: #ffffff;
+  --foreground: oklch(0.26 0.04 230);
+  --card: #ffffff;
+  --card-foreground: oklch(0.26 0.04 230);
+  --popover: #ffffff;
+  --popover-foreground: oklch(0.26 0.04 230);
+  --muted: oklch(0.96 0.004 240);
+  --secondary: oklch(0.96 0.004 240);
+  color-scheme: light;
+  background: #ffffff;
+}
+.solvo-light .grid-bg { display: none; }
+
 .light {
   --background: oklch(0.96 0.004 240);
   --foreground: oklch(0.26 0.04 230);

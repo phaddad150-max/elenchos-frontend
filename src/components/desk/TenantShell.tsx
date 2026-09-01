@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Radio } from "lucide-react";
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { LiveDesk } from "@/lib/desk/types";
 import { isUaeDemoSlug } from "@/lib/desk/catalog";
 
@@ -37,27 +37,43 @@ export function TenantShell({
     tenant.email === "demo@elenchos.live" ||
     tenant.email === "uae-demo@elenchos.live";
 
+  useEffect(() => {
+    if (!uae) return;
+    const root = document.documentElement;
+    const hadDark = root.classList.contains("dark");
+    const hadLight = root.classList.contains("light");
+    root.classList.remove("dark");
+    root.classList.add("light");
+    return () => {
+      root.classList.remove("light");
+      if (hadDark) root.classList.add("dark");
+      else if (hadLight) root.classList.add("light");
+    };
+  }, [uae]);
+
   return (
     <div
-      className="min-h-screen relative flex flex-col dash-landing"
+      className={`min-h-screen relative flex flex-col dash-landing ${uae ? "solvo-light light" : ""}`}
       style={
-        {
-          ["--cyan" as string]: primary,
-          ["--cyan-glow" as string]: `${primary}73`,
-          ["--amber-signal" as string]: accent,
-        } as CSSProperties
+        uae
+          ? undefined
+          : ({
+              ["--cyan" as string]: primary,
+              ["--cyan-glow" as string]: `${primary}73`,
+              ["--amber-signal" as string]: accent,
+            } as CSSProperties)
       }
     >
-      <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+      {uae ? null : <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />}
       <header className="sticky top-0 z-30 nav-shell">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-2.5 md:py-3 flex items-center gap-3">
           {branding.logo_url ? (
             <img
               src={branding.logo_url}
-              alt=""
+              alt={uae ? "Solvo Creations" : ""}
               className={
                 branding.logo_url.includes("solvo")
-                  ? "h-9 w-auto max-w-[148px] object-contain object-left"
+                  ? "h-10 w-auto max-w-[168px] object-contain object-left"
                   : "h-9 w-9 rounded-full object-cover border border-cyan/35"
               }
             />
@@ -66,16 +82,16 @@ export function TenantShell({
               <Radio className="w-4 h-4 text-cyan" strokeWidth={2.5} />
             </div>
           )}
-          <div className="min-w-0 flex-1">
-            <p className="font-display font-semibold text-lg sm:text-xl tracking-tight truncate">{title}</p>
-            <p className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              {uae
-                ? "Public Discourse × Research Desk · simulated preview"
-                : walk
-                  ? "Walkthrough desk · not a paid tenant"
-                  : "Public discourse desk"}
-            </p>
-          </div>
+          {uae ? (
+            <div className="min-w-0 flex-1" />
+          ) : (
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-semibold text-lg sm:text-xl tracking-tight truncate">{title}</p>
+              <p className="hidden sm:block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                {walk ? "Walkthrough desk · not a paid tenant" : "Public discourse desk"}
+              </p>
+            </div>
+          )}
           <nav className="hidden md:flex items-center gap-1 nav-pill-group rounded-full p-1" aria-label="Desk pages">
             {uae ? (
               <>
@@ -182,12 +198,10 @@ export function TenantShell({
           <p className="max-w-[1600px] mx-auto px-4 py-3 text-[11px] font-mono text-muted-foreground">
             {uae ? (
               <>
-                Solvo Creations prototype ·{" "}
+                Simulated preview ·{" "}
                 <a href="https://www.solvocreations.com/" className="text-cyan hover:underline">
                   solvocreations.com
                 </a>
-                {" · "}
-                Public Discourse × Research Desk · simulated preview
               </>
             ) : (
               <>

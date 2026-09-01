@@ -15,9 +15,11 @@ const EARTH_DAY =
 interface Props {
   signals: Signal[];
   onPick: (s: Signal) => void;
+  /** Solvo prototype is light-only. Default keeps main-site theme behaviour. */
+  forceLight?: boolean;
 }
 
-export function Globe3D({ signals, onPick }: Props) {
+export function Globe3D({ signals, onPick, forceLight = false }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 600, h: 480 });
   const [mounted, setMounted] = useState(false);
@@ -25,7 +27,7 @@ export function Globe3D({ signals, onPick }: Props) {
   const [inView, setInView] = useState(false);
   const globeRef = useRef<any>(null);
   const [theme] = useTheme();
-  const isLight = theme === "light";
+  const isLight = forceLight || theme === "light";
 
   useEffect(() => {
     const el = wrapRef.current;

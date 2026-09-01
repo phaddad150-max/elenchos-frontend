@@ -14,6 +14,7 @@ import { Route as SolvocreationsUaeRouteImport } from './routes/solvocreations-u
 import { Route as SolvocreationsUaeIndexRouteImport } from './routes/solvocreations-uae.index'
 import { Route as SolvocreationsUaeResearchRouteImport } from './routes/solvocreations-uae.research'
 import { Route as SolvocreationsUaeDeskRouteImport } from './routes/solvocreations-uae.desk'
+import { Route as SolvocreationsUaeResearchTopicIdRouteImport } from './routes/solvocreations-uae.research.$topicId'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
@@ -97,6 +98,12 @@ const SolvocreationsUaeDeskRoute = SolvocreationsUaeDeskRouteImport.update({
   path: '/desk',
   getParentRoute: () => SolvocreationsUaeRoute,
 } as any)
+const SolvocreationsUaeResearchTopicIdRoute =
+  SolvocreationsUaeResearchTopicIdRouteImport.update({
+    id: '/research/$topicId',
+    path: '/research/$topicId',
+    getParentRoute: () => SolvocreationsUaeRoute,
+  } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -402,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/solvocreations-uae/': typeof SolvocreationsUaeIndexRoute
   '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRoute
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
+  '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -464,6 +472,7 @@ export interface FileRoutesByTo {
   '/solvocreations-uae': typeof SolvocreationsUaeIndexRoute
   '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRoute
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
+  '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/admin/curation': typeof AdminCurationRoute
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
@@ -528,6 +537,7 @@ export interface FileRoutesById {
   '/solvocreations-uae/': typeof SolvocreationsUaeIndexRoute
   '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRoute
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
+  '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/'
     | '/solvocreations-uae/research'
     | '/solvocreations-uae/desk'
+    | '/solvocreations-uae/research/$topicId'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -657,6 +668,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/'
     | '/solvocreations-uae/research'
     | '/solvocreations-uae/desk'
+    | '/solvocreations-uae/research/$topicId'
     | '/admin/curation'
     | '/desk/studio'
     | '/desk/thanks'
@@ -720,6 +732,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/'
     | '/solvocreations-uae/research'
     | '/solvocreations-uae/desk'
+    | '/solvocreations-uae/research/$topicId'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -859,6 +872,13 @@ declare module '@tanstack/react-router' {
       path: '/desk'
       fullPath: '/solvocreations-uae/desk'
       preLoaderRoute: typeof SolvocreationsUaeDeskRouteImport
+      parentRoute: typeof SolvocreationsUaeRoute
+    }
+    '/solvocreations-uae/research/$topicId': {
+      id: '/solvocreations-uae/research/$topicId'
+      path: '/research/$topicId'
+      fullPath: '/solvocreations-uae/research/$topicId'
+      preLoaderRoute: typeof SolvocreationsUaeResearchTopicIdRouteImport
       parentRoute: typeof SolvocreationsUaeRoute
     }
     '/sitemap.xml': {
@@ -1295,12 +1315,14 @@ interface SolvocreationsUaeRouteChildren {
   SolvocreationsUaeIndexRoute: typeof SolvocreationsUaeIndexRoute
   SolvocreationsUaeResearchRoute: typeof SolvocreationsUaeResearchRoute
   SolvocreationsUaeDeskRoute: typeof SolvocreationsUaeDeskRoute
+  SolvocreationsUaeResearchTopicIdRoute: typeof SolvocreationsUaeResearchTopicIdRoute
 }
 
 const SolvocreationsUaeRouteChildren: SolvocreationsUaeRouteChildren = {
   SolvocreationsUaeIndexRoute: SolvocreationsUaeIndexRoute,
   SolvocreationsUaeResearchRoute: SolvocreationsUaeResearchRoute,
   SolvocreationsUaeDeskRoute: SolvocreationsUaeDeskRoute,
+  SolvocreationsUaeResearchTopicIdRoute: SolvocreationsUaeResearchTopicIdRoute,
 }
 
 const SolvocreationsUaeRouteWithChildren = SolvocreationsUaeRoute._addFileChildren(

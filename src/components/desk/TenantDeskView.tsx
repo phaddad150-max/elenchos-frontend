@@ -9,12 +9,14 @@ import { GulfMap } from "@/components/desk/GulfMap";
 import { isUaeDemoSlug } from "@/lib/desk/catalog";
 import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
 import { SOLVO_SIM_PAID } from "@/lib/desk/solvo-sim";
+import { SolvoDashboard } from "@/components/desk/SolvoDashboard";
 
 export function TenantDeskView({ desk }: { desk: LiveDesk }) {
   const [lang, setLang] = useState<UaeLang>("en");
   const { tenant, cards } = desk;
   const slug = tenant.slug || "";
   const uae = isUaeDemoSlug(tenant.slug) || tenant.email === "uae-demo@elenchos.live";
+  if (uae) return <SolvoDashboard />;
   const ar = uae && lang === "ar";
   const sampled = cards.reduce((n, c) => n + (typeof c.sample_size === "number" ? c.sample_size : 0), 0);
   const awaitingCount = cards.filter((c) => !c.sample_size).length;
