@@ -17,6 +17,7 @@ import { Route as SolvocreationsUaeResearchIndexRouteImport } from './routes/sol
 import { Route as SolvocreationsUaeDeskRouteImport } from './routes/solvocreations-uae.desk'
 import { Route as SolvocreationsUaeResearchTopicIdRouteImport } from './routes/solvocreations-uae.research.$topicId'
 import { Route as SolvocreationsUaeTopicTopicIdRouteImport } from './routes/solvocreations-uae.topic.$topicId'
+import { Route as SolvocreationsUaeCasestudyAviationRouteImport } from './routes/solvocreations-uae.casestudy.aviation'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
@@ -105,6 +106,12 @@ const SolvocreationsUaeTopicTopicIdRoute = SolvocreationsUaeTopicTopicIdRouteImp
   path: '/topic/$topicId',
   getParentRoute: () => SolvocreationsUaeRoute,
 } as any)
+const SolvocreationsUaeCasestudyAviationRoute =
+  SolvocreationsUaeCasestudyAviationRouteImport.update({
+    id: '/casestudy/aviation',
+    path: '/casestudy/aviation',
+    getParentRoute: () => SolvocreationsUaeRoute,
+  } as any)
 const SolvocreationsUaeResearchTopicIdRoute =
   SolvocreationsUaeResearchTopicIdRouteImport.update({
     id: '/$topicId',
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
   '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
+  '/solvocreations-uae/casestudy/aviation': typeof SolvocreationsUaeCasestudyAviationRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -490,6 +498,7 @@ export interface FileRoutesByTo {
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
   '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
+  '/solvocreations-uae/casestudy/aviation': typeof SolvocreationsUaeCasestudyAviationRoute
   '/admin/curation': typeof AdminCurationRoute
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
@@ -557,6 +566,7 @@ export interface FileRoutesById {
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
   '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
+  '/solvocreations-uae/casestudy/aviation': typeof SolvocreationsUaeCasestudyAviationRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -625,6 +635,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/desk'
     | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
+    | '/solvocreations-uae/casestudy/aviation'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -690,6 +701,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/desk'
     | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
+    | '/solvocreations-uae/casestudy/aviation'
     | '/admin/curation'
     | '/desk/studio'
     | '/desk/thanks'
@@ -755,6 +767,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/desk'
     | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
+    | '/solvocreations-uae/casestudy/aviation'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -916,6 +929,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/solvocreations-uae/research/$topicId'
       preLoaderRoute: typeof SolvocreationsUaeResearchTopicIdRouteImport
       parentRoute: typeof SolvocreationsUaeResearchRoute
+    }
+    '/solvocreations-uae/casestudy/aviation': {
+      id: '/solvocreations-uae/casestudy/aviation'
+      path: '/casestudy/aviation'
+      fullPath: '/solvocreations-uae/casestudy/aviation'
+      preLoaderRoute: typeof SolvocreationsUaeCasestudyAviationRouteImport
+      parentRoute: typeof SolvocreationsUaeRoute
     }
     '/sitemap.xml': {
       id: '/sitemap.xml'
@@ -1369,6 +1389,7 @@ interface SolvocreationsUaeRouteChildren {
   SolvocreationsUaeResearchRoute: typeof SolvocreationsUaeResearchRouteWithChildren
   SolvocreationsUaeDeskRoute: typeof SolvocreationsUaeDeskRoute
   SolvocreationsUaeTopicTopicIdRoute: typeof SolvocreationsUaeTopicTopicIdRoute
+  SolvocreationsUaeCasestudyAviationRoute: typeof SolvocreationsUaeCasestudyAviationRoute
 }
 
 const SolvocreationsUaeRouteChildren: SolvocreationsUaeRouteChildren = {
@@ -1376,6 +1397,7 @@ const SolvocreationsUaeRouteChildren: SolvocreationsUaeRouteChildren = {
   SolvocreationsUaeResearchRoute: SolvocreationsUaeResearchRouteWithChildren,
   SolvocreationsUaeDeskRoute: SolvocreationsUaeDeskRoute,
   SolvocreationsUaeTopicTopicIdRoute: SolvocreationsUaeTopicTopicIdRoute,
+  SolvocreationsUaeCasestudyAviationRoute: SolvocreationsUaeCasestudyAviationRoute,
 }
 
 const SolvocreationsUaeRouteWithChildren = SolvocreationsUaeRoute._addFileChildren(

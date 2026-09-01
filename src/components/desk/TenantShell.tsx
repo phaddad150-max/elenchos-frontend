@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { Radio } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { FlaskConical, LayoutDashboard, Radio, Wallet } from "lucide-react";
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { LiveDesk } from "@/lib/desk/types";
 import { isUaeDemoSlug } from "@/lib/desk/catalog";
@@ -94,30 +94,7 @@ export function TenantShell({
           )}
           <nav className="hidden md:flex items-center gap-1 nav-pill-group rounded-full p-1" aria-label="Desk pages">
             {uae ? (
-              <>
-                <Link
-                  to="/solvocreations-uae"
-                  className="nav-tab inline-flex items-center"
-                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
-                  activeOptions={{ exact: true }}
-                >
-                  Overview
-                </Link>
-                <Link
-                  to="/solvocreations-uae/research"
-                  className="nav-tab inline-flex items-center"
-                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
-                >
-                  Research
-                </Link>
-                <Link
-                  to="/solvocreations-uae/desk"
-                  className="nav-tab inline-flex items-center"
-                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
-                >
-                  Desk
-                </Link>
-              </>
+              <SolvoDesktopPills />
             ) : (
               <>
                 <Link
@@ -141,56 +118,30 @@ export function TenantShell({
             )}
           </nav>
         </div>
-        <nav className="md:hidden px-3 pb-2 flex gap-2" aria-label="Desk pages mobile">
-          {uae ? (
-            <>
-              <Link
-                to="/solvocreations-uae"
-                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-                activeOptions={{ exact: true }}
-              >
-                Overview
-              </Link>
-              <Link
-                to="/solvocreations-uae/research"
-                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-              >
-                Research
-              </Link>
-              <Link
-                to="/solvocreations-uae/desk"
-                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-              >
-                Desk
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/d/$slug"
-                params={{ slug }}
-                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-                activeOptions={{ exact: true }}
-              >
-                Overview
-              </Link>
-              <Link
-                to="/d/$slug/research"
-                params={{ slug }}
-                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-              >
-                Research
-              </Link>
-            </>
-          )}
-        </nav>
+        {uae ? null : (
+          <nav className="md:hidden px-3 pb-2 flex gap-2" aria-label="Desk pages mobile">
+            <Link
+              to="/d/$slug"
+              params={{ slug }}
+              className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+              activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+              activeOptions={{ exact: true }}
+            >
+              Overview
+            </Link>
+            <Link
+              to="/d/$slug/research"
+              params={{ slug }}
+              className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+              activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+            >
+              Research
+            </Link>
+          </nav>
+        )}
       </header>
       {children}
+      {uae ? <SolvoMobileTabBar /> : null}
       {branding.unbranded ? (
         <div className="h-8" />
       ) : (
@@ -213,5 +164,95 @@ export function TenantShell({
         </footer>
       )}
     </div>
+  );
+}
+
+const SOLVO_TABS = [
+  {
+    to: "/solvocreations-uae" as const,
+    label: "Dashboard",
+    match: (p: string) => p === "/solvocreations-uae" || p === "/solvocreations-uae/",
+    icon: LayoutDashboard,
+  },
+  {
+    to: "/solvocreations-uae/research" as const,
+    label: "Research Desk",
+    match: (p: string) =>
+      p.startsWith("/solvocreations-uae/research") ||
+      p.startsWith("/solvocreations-uae/topic") ||
+      p.startsWith("/solvocreations-uae/casestudy"),
+    icon: FlaskConical,
+  },
+  {
+    to: "/solvocreations-uae/desk" as const,
+    label: "Desk",
+    match: (p: string) => p.startsWith("/solvocreations-uae/desk"),
+    icon: Wallet,
+  },
+];
+
+function SolvoDesktopPills() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return (
+    <>
+      {SOLVO_TABS.map((t) => {
+        const active = t.match(pathname);
+        return (
+          <Link
+            key={t.to}
+            to={t.to}
+            aria-current={active ? "page" : undefined}
+            className={
+              active
+                ? "nav-tab nav-tab-active inline-flex items-center"
+                : "nav-tab inline-flex items-center"
+            }
+          >
+            {t.label}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
+function SolvoMobileTabBar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return (
+    <nav
+      aria-label="Primary"
+      className="mobile-tab-bar md:hidden fixed bottom-0 inset-x-0 z-40"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <ul className="grid gap-0.5 px-1 pt-1 pb-0.5 grid-cols-3">
+        {SOLVO_TABS.map((t) => {
+          const Icon = t.icon;
+          const active = t.match(pathname);
+          return (
+            <li key={t.to}>
+              <Link
+                to={t.to}
+                aria-current={active ? "page" : undefined}
+                className={`mobile-tab flex flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] rounded-xl text-[11px] font-display font-semibold tracking-wide touch-manipulation transition-colors ${
+                  active
+                    ? "mobile-tab-active text-cyan bg-cyan/12"
+                    : "text-muted-foreground active:bg-secondary/70"
+                }`}
+              >
+                <span className="relative inline-flex">
+                  <Icon
+                    className={`w-5 h-5 ${active ? "text-cyan" : ""}`}
+                    strokeWidth={active ? 2.4 : 2}
+                    aria-hidden
+                  />
+                </span>
+                <span className="leading-none">{t.label}</span>
+                {active ? <span className="mt-0.5 h-0.5 w-5 rounded-full bg-cyan" aria-hidden /> : null}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }

@@ -7,6 +7,8 @@ import {
   ArrowRight,
   ArrowUpRight,
   Brain,
+  ChevronDown,
+  ChevronRight,
   FileStack,
   FlaskConical,
   Globe2,
@@ -20,8 +22,9 @@ import {
 } from "lucide-react";
 import { Globe3D } from "@/components/Globe3D";
 import { KpiCard } from "@/components/KpiCard";
-import { SignalModal } from "@/components/SignalModal";
 import type { Signal } from "@/lib/sim-data";
+import { divergenceColor, sentimentTone } from "@/lib/score-colors";
+import { SOLVO_TOPICS, type SolvoTopic } from "@/lib/desk/solvo-topics";
 import {
   SOLVO_ARAB_LEADERS,
   SOLVO_KPI,
@@ -29,7 +32,7 @@ import {
   solvoGaps,
   solvoMovers,
 } from "@/lib/desk/solvo-sim";
-import { SOLVO_TOPICS } from "@/lib/desk/solvo-topics";
+
 
 function leaderScoreHex(s?: number | null): string {
   if (s == null || Number.isNaN(s)) return "#6B7280";
@@ -58,15 +61,6 @@ export function SolvoDashboard() {
       return true;
     });
   }, [signals, groupFilter, regionFilter]);
-
-  const groups = useMemo(() => {
-    const sorted = [...filtered].sort((a, b) => b.intensityScore - a.intensityScore);
-    return {
-      critical: sorted.filter((s) => s.intensity === "critical"),
-      elevated: sorted.filter((s) => s.intensity === "high"),
-      monitor: sorted.filter((s) => s.intensity !== "critical" && s.intensity !== "high"),
-    };
-  }, [filtered]);
 
   return (
     <main className="max-w-[1600px] mx-auto w-full px-3 sm:px-4 md:px-6 py-3 sm:py-6 md:py-7 space-y-3 sm:space-y-5 md:space-y-6 relative flex-1 mobile-safe-bottom overflow-x-clip min-w-0">
@@ -135,7 +129,7 @@ export function SolvoDashboard() {
           format="number"
           icon={Radar}
           description="Arab leaders board on this landing."
-          detail="No separate tracker route on this prototype."
+          detail="Arab leaders + key business leaders on Research → Trackers."
         />
       </motion.div>
 
@@ -181,31 +175,10 @@ export function SolvoDashboard() {
               </div>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <FeedBlock
-              label="Critical"
-              color="var(--rose-signal)"
-              pill="CRIT"
-              items={groups.critical}
-              onPick={setPicked}
-            />
-            <FeedBlock
-              label="Elevated"
-              color="var(--amber-signal)"
-              pill="ELEV"
-              items={groups.elevated}
-              onPick={setPicked}
-              start={groups.critical.length}
-            />
-            <FeedBlock
-              label="Monitor"
-              color="var(--cyan)"
-              pill="MON"
-              items={groups.monitor}
-              onPick={setPicked}
-              start={groups.critical.length + groups.elevated.length}
-            />
-          </div>
+          <SolvoDiscourseFeed
+            signals={filtered}
+            onPick={setPicked}
+          />
         </section>
 
         <section className="dash-panel p-2.5 sm:p-4 md:p-5 xl:col-span-4 relative overflow-hidden min-w-0 flex flex-col self-start w-full">
@@ -342,7 +315,7 @@ export function SolvoDashboard() {
         </div>
       </section>
 
-      <SignalModal signal={picked} onClose={() => setPicked(null)} />
+      <SolvoSignalBrief signal={picked} onClose={() => setPicked(null)} />
     </main>
   );
 }
@@ -356,56 +329,292 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
-function FeedBlock({
-  label,
-  color,
-  pill,
-  items,
+function moodPill(score: number) {
+  const tone = sentimentTone(score);
+  const short: Record<string, string> = {
+    "Strongly Positive": "Strong +",
+    Positive: "Positive",
+    "Leaning Positive": "Lean +",
+    Mixed: "Mixed",
+    "Slightly Negative": "Slight −",
+    Negative: "Negative",
+    "Strongly Negative": "Strong −",
+  };
+  return { label: short[String(tone.band)] ?? String(tone.band), color: tone.color, tint: tone.tint, band: String(tone.band) };
+}
+
+function SolvoDiscourseFeed({
+  signals,
   onPick,
-  start = 0,
 }: {
-  label: string;
-  color: string;
-  pill: string;
-  items: Signal[];
+  signals: Signal[];
   onPick: (s: Signal) => void;
-  start?: number;
 }) {
-  if (!items.length) return null;
+  const [expanded, setExpanded] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const COLLAPSED = 6;
+  const items = useMemo(() => {
+    return [...signals].sort((a, b) => (b.divergence ?? 0) - (a.divergence ?? 0));
+  }, [signals]);
+  useEffect(() => {
+    if (expanded || items.length <= COLLAPSED) return;
+    const id = window.setInterval(() => setRotation((r) => r + 1), 8000);
+    return () => window.clearInterval(id);
+  }, [expanded, items.length]);
+  const visible = useMemo(() => {
+    if (expanded || items.length <= COLLAPSED) return items;
+    const offset = rotation % items.length;
+    return Array.from({ length: COLLAPSED }, (_, i) => items[(offset + i) % items.length]!);
+  }, [expanded, items, rotation]);
+  const more = Math.max(0, items.length - COLLAPSED);
   return (
-    <div>
-      <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] mb-1.5">
-        <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-        <span style={{ color }}>{label}</span>
-        <span className="text-muted-foreground">({items.length})</span>
+    <div className="flex flex-col min-w-0 gap-1">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={expanded ? "expanded" : `rot-${rotation}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col gap-1.5"
+        >
+          {visible.map((s, i) => (
+            <SolvoSignalRow key={`${s.id}-${i}`} signal={s} index={i + 1} onPick={onPick} />
+          ))}
+        </motion.div>
+      </AnimatePresence>
+      {(more > 0 || expanded) && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="w-full inline-flex items-center justify-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.18em] py-2 rounded-lg border border-border/90 text-muted-foreground min-h-[44px]"
+        >
+          {expanded ? "Show less" : "More signals"}
+          <ChevronDown className={`w-3.5 h-3.5 ${expanded ? "rotate-180" : ""}`} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function topicForSignal(signal: Signal): SolvoTopic | undefined {
+  return SOLVO_TOPICS.find((t) => t.name === signal.topic);
+}
+
+function SolvoSignalRow({
+  signal,
+  index,
+  onPick,
+}: {
+  signal: Signal;
+  index: number;
+  onPick: (s: Signal) => void;
+}) {
+  const topic = topicForSignal(signal);
+  const score = topic?.score ?? Math.round((signal.divergence ?? 0.5) * 100);
+  const delta = topic?.delta ?? signal.velocity;
+  const mood = moodPill(score);
+  const trendUp = delta > 0;
+  const trendDown = delta < 0;
+  const sparkBars = [score - delta * 1.2, score - delta * 0.5, score, score + delta * 0.35, score + delta * 0.7].map(
+    (v) => Math.max(12, Math.min(100, v)),
+  );
+  const trendTitle = `${delta > 0 ? "Progressing" : delta < 0 ? "Regressing" : "Stable"} · WoW ${delta > 0 ? "+" : ""}${delta}`;
+  return (
+    <motion.button
+      type="button"
+      whileTap={{ scale: 0.995 }}
+      onClick={() => onPick(signal)}
+      className="signal-row group w-full max-w-full text-left px-2 sm:px-2.5 py-2 rounded-xl flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5 min-h-[48px] sm:min-h-[3.5rem] touch-manipulation"
+    >
+      <div className="flex items-center gap-2.5 w-full min-w-0">
+        <span className="text-[11px] font-mono text-muted-foreground tabular-nums w-5 text-right shrink-0">
+          {String(index).padStart(2, "0")}
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="flex items-center gap-1.5 mb-0.5">
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: mood.color }} />
+            <span className="block text-[10px] font-mono uppercase tracking-[0.18em] text-cyan/85 truncate">
+              {signal.topic}
+            </span>
+          </span>
+          <span className="block text-[13px] sm:text-[13.5px] font-medium leading-snug text-foreground/95 line-clamp-2 sm:line-clamp-1">
+            {signal.headline}
+          </span>
+        </span>
       </div>
-      <div className="space-y-1.5">
-        {items.map((s, i) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => onPick(s)}
-            className="w-full text-start rounded-xl border border-border/70 bg-background/50 hover:border-cyan/40 px-3 py-2.5 min-h-[52px] flex items-start gap-2"
-          >
-            <span className="text-[10px] font-mono text-muted-foreground w-5 shrink-0 pt-0.5">
-              {String(start + i + 1).padStart(2, "0")}
-            </span>
-            <span
-              className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0 mt-0.5"
-              style={{ background: `${color}22`, color }}
-            >
-              {pill}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[13px] font-medium leading-snug">{s.headline}</span>
-              <span className="block text-[11px] text-muted-foreground truncate">
-                {s.topic} · {s.region} · n={s.posts}
-              </span>
-            </span>
-          </button>
-        ))}
+      <span className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2.5 pl-7 sm:pl-0 w-full sm:w-auto shrink-0">
+        <span className="text-center min-w-[2.4rem]">
+          <span className="block text-[8px] font-mono uppercase tracking-[0.1em] text-muted-foreground">Sent</span>
+          <span className="block text-[1.05rem] font-display font-semibold tabular-nums leading-none" style={{ color: mood.color }}>
+            {score}
+          </span>
+        </span>
+        <span
+          title={mood.band}
+          className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] font-semibold px-2 py-1 rounded-md border whitespace-nowrap"
+          style={{ color: mood.color, borderColor: `${mood.color}55`, background: mood.tint }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: mood.color }} />
+          {mood.label}
+        </span>
+        <span
+          title={trendTitle}
+          className={`hidden sm:inline-flex items-end gap-0.5 h-5 px-1 ${
+            trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"
+          }`}
+        >
+          {sparkBars.map((h, i) => (
+            <span key={i} className="w-[3px] rounded-full bg-current opacity-70" style={{ height: `${Math.round(h * 0.18)}px` }} />
+          ))}
+        </span>
+        <span
+          title={trendTitle}
+          className={`inline-flex flex-col items-center min-w-[2.4rem] ${
+            trendUp ? "text-emerald-signal" : trendDown ? "text-rose-signal" : "text-muted-foreground"
+          }`}
+        >
+          {trendUp ? <ArrowUpRight className="w-4 h-4" /> : trendDown ? <ArrowDownRight className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+          <span className="text-[8px] font-mono uppercase tabular-nums">
+            {delta > 0 ? "+" : ""}
+            {delta} WoW
+          </span>
+        </span>
+        <span className="sm:hidden text-[10px] font-mono text-cyan/90 inline-flex items-center gap-0.5">
+          Brief
+          <ChevronRight className="w-3 h-3" />
+        </span>
+      </span>
+    </motion.button>
+  );
+}
+
+function SolvoSignalBrief({ signal, onClose }: { signal: Signal | null; onClose: () => void }) {
+  if (!signal) return null;
+  const topic = topicForSignal(signal);
+  const score = topic?.score ?? Math.round((signal.divergence ?? 0.5) * 100);
+  const delta = topic?.delta ?? signal.velocity;
+  const mood = moodPill(score);
+  const div = topic?.divergence ?? Math.round((signal.divergence ?? 0) * 100);
+  const sample = topic?.sample ?? signal.posts;
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="md:hidden absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-2xl border border-border border-b-0 bg-background shadow-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-3"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <SolvoBriefBody
+          signal={signal}
+          topic={topic}
+          score={score}
+          delta={delta}
+          mood={mood}
+          div={div}
+          sample={sample}
+          onClose={onClose}
+        />
+      </div>
+      <div className="hidden md:grid place-items-center p-4 h-full">
+        <div
+          className="glass-strong rounded-2xl max-w-lg w-full p-5 space-y-3 max-h-[85vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+        >
+          <SolvoBriefBody
+            signal={signal}
+            topic={topic}
+            score={score}
+            delta={delta}
+            mood={mood}
+            div={div}
+            sample={sample}
+            onClose={onClose}
+          />
+        </div>
       </div>
     </div>
+  );
+}
+
+function SolvoBriefBody({
+  signal,
+  topic,
+  score,
+  delta,
+  mood,
+  div,
+  sample,
+  onClose,
+}: {
+  signal: Signal;
+  topic?: SolvoTopic;
+  score: number;
+  delta: number;
+  mood: ReturnType<typeof moodPill>;
+  div: number;
+  sample: number;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan">{signal.topic}</p>
+      <h3 className="text-xl font-display font-semibold leading-snug">{signal.headline}</h3>
+      <p className="text-[14px] text-foreground/90 leading-relaxed">{signal.excerpt}</p>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-xl border border-border/70 p-3 text-center">
+          <p className="text-[9px] font-mono uppercase text-muted-foreground">Sentiment</p>
+          <p className="text-[1.4rem] font-display font-semibold tabular-nums" style={{ color: mood.color }}>
+            {score}
+          </p>
+          <p className="text-[10px] font-mono" style={{ color: mood.color }}>
+            {mood.label}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border/70 p-3 text-center">
+          <p className="text-[9px] font-mono uppercase text-muted-foreground">Trend WoW</p>
+          <p
+            className="text-[1.4rem] font-display font-semibold tabular-nums"
+            style={{ color: delta > 0 ? "var(--emerald-signal)" : delta < 0 ? "var(--rose-signal)" : "var(--muted-foreground)" }}
+          >
+            {delta > 0 ? "+" : ""}
+            {delta}
+          </p>
+          <p className="text-[10px] font-mono text-muted-foreground">pts this week</p>
+        </div>
+        <div className="rounded-xl border border-border/70 p-3 text-center">
+          <p className="text-[9px] font-mono uppercase text-muted-foreground">Divergence</p>
+          <p className="text-[1.4rem] font-display font-semibold tabular-nums" style={{ color: divergenceColor(div) }}>
+            {div}
+          </p>
+          <p className="text-[10px] font-mono text-muted-foreground">{sample.toLocaleString()} posts</p>
+        </div>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+        {topic ? (
+          <Link
+            to="/solvocreations-uae/research/$topicId"
+            params={{ topicId: topic.id }}
+            className="inline-flex items-center justify-center gap-1.5 min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan"
+          >
+            Open topic briefing
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        ) : null}
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex items-center justify-center min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-border text-muted-foreground"
+        >
+          Close
+        </button>
+      </div>
+    </>
   );
 }
 

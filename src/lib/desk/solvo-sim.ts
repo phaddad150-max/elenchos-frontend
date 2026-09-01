@@ -86,6 +86,79 @@ export function simulateSolvoSignals(): Signal[] {
 }
 
 /** Regional Arab leaders — simulated ranking for the Solvo landing only. Not a public Elenchos index. */
+export const SOLVO_BUSINESS_LEADERS: RankedLeader[] = [
+  {
+    rank: 1,
+    name: "Mohamed Alabbar",
+    flag: "🇦🇪",
+    country: "UAE",
+    region: "GCC",
+    role: "Emaar",
+    overall_score: 76,
+    divergence: 26,
+    summary:
+      "Simulated: development and consumer-brand talk versus official mega-project volume. Preview ranking — not a live public index.",
+    posts_analyzed: 310,
+    status: "active",
+  },
+  {
+    rank: 2,
+    name: "Fadi Ghandour",
+    flag: "🇯🇴",
+    country: "Jordan / UAE",
+    region: "MENA",
+    role: "Aramex · Wamda",
+    overall_score: 73,
+    divergence: 21,
+    summary:
+      "Simulated: logistics and founder-operator talk versus packaged entrepreneurship media. Preview ranking — not live X.",
+    posts_analyzed: 240,
+    status: "active",
+  },
+  {
+    rank: 3,
+    name: "Badr Jafar",
+    flag: "🇦🇪",
+    country: "UAE",
+    region: "GCC",
+    role: "Crescent Enterprises",
+    overall_score: 71,
+    divergence: 19,
+    summary:
+      "Simulated: family-enterprise and regional-investment discourse versus brochure growth talk. Preview ranking — not a live index.",
+    posts_analyzed: 210,
+    status: "active",
+  },
+  {
+    rank: 4,
+    name: "Hussain Sajwani",
+    flag: "🇦🇪",
+    country: "UAE",
+    region: "GCC",
+    role: "DAMAC",
+    overall_score: 64,
+    divergence: 32,
+    summary:
+      "Simulated: real-estate brand talk versus housing-cost earned speech. Preview ranking — not live X.",
+    posts_analyzed: 265,
+    status: "active",
+  },
+  {
+    rank: 5,
+    name: "Khaldoon Al Mubarak",
+    flag: "🇦🇪",
+    country: "UAE",
+    region: "GCC",
+    role: "Mubadala",
+    overall_score: 78,
+    divergence: 17,
+    summary:
+      "Simulated: sovereign-investment and AI/industrial strategy talk versus official communications. Preview ranking — not a live public index.",
+    posts_analyzed: 290,
+    status: "active",
+  },
+];
+
 export const SOLVO_ARAB_LEADERS: RankedLeader[] = [
   {
     rank: 1,
@@ -167,7 +240,7 @@ export const SOLVO_KPI = {
   leaders: SOLVO_ARAB_LEADERS.length,
   intelligence: SOLVO_TOPICS.length * 9,
   sample: SOLVO_TOPICS.reduce((n, t) => n + t.sample, 0),
-  trackers: 1,
+  trackers: 2,
 };
 
 export function solvoGaps(): { topic: string; score: number; sample: number }[] {
