@@ -48,6 +48,7 @@ import { Route as ResearchPreviewSlugRouteImport } from './routes/research.previ
 import { Route as ResearchNetworksLedgerSpeechReachRouteImport } from './routes/research.networks-ledger.speech-reach'
 import { Route as ResearchCasestudySlugRouteImport } from './routes/research.casestudy.$slug'
 import { Route as DSlugResearchRouteImport } from './routes/d.$slug.research'
+import { Route as DSlugDeskRouteImport } from './routes/d.$slug.desk'
 import { Route as ApiResearchWebhookRouteImport } from './routes/api/research/webhook'
 import { Route as ApiResearchSharedRouteImport } from './routes/api/research/shared'
 import { Route as ApiResearchShareRouteImport } from './routes/api/research/share'
@@ -264,6 +265,11 @@ const DSlugResearchRoute = DSlugResearchRouteImport.update({
   path: '/research',
   getParentRoute: () => DSlugRoute,
 } as any)
+const DSlugDeskRoute = DSlugDeskRouteImport.update({
+  id: '/desk',
+  path: '/desk',
+  getParentRoute: () => DSlugRoute,
+} as any)
 const ApiResearchWebhookRoute = ApiResearchWebhookRouteImport.update({
   id: '/api/research/webhook',
   path: '/api/research/webhook',
@@ -403,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/d/$slug/research': typeof DSlugResearchRoute
+  '/d/$slug/desk': typeof DSlugDeskRoute
   '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/d/$slug/research': typeof DSlugResearchRoute
+  '/d/$slug/desk': typeof DSlugDeskRoute
   '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
@@ -520,6 +528,7 @@ export interface FileRoutesById {
   '/api/research/shared': typeof ApiResearchSharedRoute
   '/api/research/webhook': typeof ApiResearchWebhookRoute
   '/d/$slug/research': typeof DSlugResearchRoute
+  '/d/$slug/desk': typeof DSlugDeskRoute
   '/research/casestudy/$slug': typeof ResearchCasestudySlugRoute
   '/research/networks-ledger/speech-reach': typeof ResearchNetworksLedgerSpeechReachRoute
   '/research/preview/$slug': typeof ResearchPreviewSlugRoute
@@ -581,6 +590,7 @@ export interface FileRouteTypes {
     | '/api/research/shared'
     | '/api/research/webhook'
     | '/d/$slug/research'
+    | '/d/$slug/desk'
     | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
@@ -638,6 +648,7 @@ export interface FileRouteTypes {
     | '/api/research/shared'
     | '/api/research/webhook'
     | '/d/$slug/research'
+    | '/d/$slug/desk'
     | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
@@ -697,6 +708,7 @@ export interface FileRouteTypes {
     | '/api/research/shared'
     | '/api/research/webhook'
     | '/d/$slug/research'
+    | '/d/$slug/desk'
     | '/research/casestudy/$slug'
     | '/research/networks-ledger/speech-reach'
     | '/research/preview/$slug'
@@ -1039,6 +1051,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DSlugResearchRouteImport
       parentRoute: typeof DSlugRoute
     }
+    '/d/$slug/desk': {
+      id: '/d/$slug/desk'
+      path: '/desk'
+      fullPath: '/d/$slug/desk'
+      preLoaderRoute: typeof DSlugDeskRouteImport
+      parentRoute: typeof DSlugRoute
+    }
     '/api/research/webhook': {
       id: '/api/research/webhook'
       path: '/api/research/webhook'
@@ -1184,11 +1203,13 @@ const DeskRouteWithChildren = DeskRoute._addFileChildren(DeskRouteChildren)
 
 interface DSlugRouteChildren {
   DSlugResearchRoute: typeof DSlugResearchRoute
+  DSlugDeskRoute: typeof DSlugDeskRoute
   DSlugIndexRoute: typeof DSlugIndexRoute
 }
 
 const DSlugRouteChildren: DSlugRouteChildren = {
   DSlugResearchRoute: DSlugResearchRoute,
+  DSlugDeskRoute: DSlugDeskRoute,
   DSlugIndexRoute: DSlugIndexRoute,
 }
 

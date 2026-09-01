@@ -328,13 +328,17 @@ function DeskStudioPage() {
                 onClick={() => void onRun()}
                 className="min-h-[44px] px-5 rounded-full border border-amber-signal/50 bg-amber-signal/10 text-amber-signal font-display font-semibold"
               >
-                {busy ? "Working…" : `Run sample · €${runCost.toFixed(2)} on your card`}
+                {busy
+                  ? "Working…"
+                  : isUaeDemoToken(token)
+                    ? "Run weekly sample (included)"
+                    : `Run sample · €${runCost.toFixed(2)} on your card`}
               </button>
             </div>
             <p className="text-[12px] text-muted-foreground">
-              Generate publishes overview + Research URLs. Each run is €{DESK_RUN_EUR.toFixed(2)} per
-              topic, billed to the card from checkout — not to Elenchos. Walkthroughs are not charged.
-              Custom names stay 0 · awaiting data until a run can pull public X.
+              {isUaeDemoToken(token)
+                ? "Generate publishes overview + Research URLs. Weekly refresh is included in Pulse/Insight — no per-topic fee. Walkthroughs are not charged. Custom names stay 0 · awaiting data until a run can pull public X."
+                : `Generate publishes overview + Research URLs. Each run is €${DESK_RUN_EUR.toFixed(2)} per topic, billed to the card from checkout — not to Elenchos. Walkthroughs are not charged. Custom names stay 0 · awaiting data until a run can pull public X.`}
             </p>
             {livePath ? (
               <p className="text-[14px]">

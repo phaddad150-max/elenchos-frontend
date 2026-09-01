@@ -20,7 +20,7 @@ export function publicSiteOrigin(): string {
 }
 
 /** Where Google/X should send the user after Supabase finishes the OAuth exchange. */
-export function oauthReturnTo(path = "/desk"): string {
+export function oauthReturnTo(path = "/"): string {
   const base = publicSiteOrigin();
   const p = path.startsWith("/") ? path : `/${path}`;
   return `${base}${p}`;

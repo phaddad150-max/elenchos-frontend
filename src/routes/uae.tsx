@@ -1,10 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
-import { ArrowRight, Building2, Loader2, Lock, Shield } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Building2, Lock } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SolvoPlans } from "@/components/desk/SolvoPlans";
 import { UAE_SOCIAL, socialMetaTags } from "@/lib/social-meta";
-import { DESK_INTERVAL, DESK_LICENSE_EUR, DESK_RUN_EUR, DESK_SETUP_EUR } from "@/lib/desk/catalog";
+import {
+  SOLVO_INSIGHT_AED,
+  SOLVO_PULSE_AED,
+  SOLVO_SETUP_AED,
+  formatAed,
+} from "@/lib/desk/catalog";
 import {
   UAE_AR,
   UAE_CITIZEN_CUSTOM_TOPICS,
@@ -31,35 +37,8 @@ export const Route = createFileRoute("/uae")({
 function UaePage() {
   const search = Route.useSearch();
   const [lang, setLang] = useState<UaeLang>("en");
-  const [orgName, setOrgName] = useState("");
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
   const copy = lang === "ar" ? UAE_AR : UAE_EN;
   const rtl = lang === "ar";
-
-  const onPay = async (e: FormEvent) => {
-    e.preventDefault();
-    setErr(null);
-    setBusy(true);
-    try {
-      const res = await fetch("/api/desk/checkout", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ orgName, email, market: "uae" }),
-      });
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        setErr(data.error || (rtl ? "فشل الدفع." : "Checkout failed."));
-        return;
-      }
-      window.location.assign(data.url);
-    } catch {
-      setErr(rtl ? "تعذر بدء الدفع." : "Could not start checkout.");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <div
@@ -101,8 +80,9 @@ function UaePage() {
             </h1>
             <p className="text-[14px] sm:text-[15.5px] text-foreground/90 max-w-2xl leading-relaxed">{copy.blurb}</p>
             <p className="text-[13px] font-display font-semibold text-cyan">
-              €{DESK_SETUP_EUR} {rtl ? "تأسيس" : "setup"} + €{DESK_LICENSE_EUR}/{DESK_INTERVAL} · €
-              {DESK_RUN_EUR.toFixed(2)}/{rtl ? "موضوع" : "topic run"}
+              {formatAed(SOLVO_SETUP_AED)} {rtl ? "تأسيس لمرة واحدة" : "one-time setup"} ·{" "}
+              {rtl ? "نبض" : "Pulse"} {formatAed(SOLVO_PULSE_AED)}/{rtl ? "شهر" : "mo"} ·{" "}
+              {rtl ? "رؤية" : "Insight"} {formatAed(SOLVO_INSIGHT_AED)}/{rtl ? "شهر" : "mo"}
             </p>
             <p className="text-[12px] text-amber-signal">{copy.arReview}</p>
           </div>
@@ -130,6 +110,16 @@ function UaePage() {
             <div className="dash-panel p-4 space-y-2">
               <h3 className="font-display font-semibold text-[15px]">{copy.whyTitle}</h3>
               <p className="text-[13px] text-muted-foreground leading-relaxed">{copy.why}</p>
+            </div>
+            <div className="dash-panel p-4 space-y-2">
+              <h3 className="font-display font-semibold text-[15px]">
+                {rtl ? "لماذا هذا السعر" : "Why this ladder"}
+              </h3>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
+                {rtl
+                  ? "نبض بسعر مقعد أدوات النشر. رؤية ليست ×8 رغم عيّنة 1000 بدل 120 — خصم حجم مع ساعة محلل أسبوعياً. أقل من ملت ووتر وإيبسوس، أعلى من اشتراك سوشيال جاهز."
+                  : "Pulse sits near a social-seat price. Insight is not 8× Pulse even though n=1000 vs 120 — volume discount plus one analyst hour a week. Below Meltwater and Ipsos retainers; above a Hootsuite seat."}
+              </p>
             </div>
             <div className="dash-panel p-4 space-y-2">
               <h3 className="font-display font-semibold text-[15px]">{copy.buyersTitle}</h3>
@@ -170,52 +160,7 @@ function UaePage() {
           </section>
 
           <section className="lg:col-span-5 space-y-3">
-            <form onSubmit={onPay} className="dash-panel p-4 sm:p-5 space-y-3">
-              <h2 className="font-display font-semibold text-[1.05rem]">{copy.payCta}</h2>
-              <label className="block space-y-1">
-                <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-                  {rtl ? "المؤسسة" : "Organization"}
-                </span>
-                <input
-                  required
-                  minLength={2}
-                  maxLength={80}
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 text-[14px]"
-                  placeholder={rtl ? "شركتك في دبي" : "Your Dubai company"}
-                />
-              </label>
-              <label className="block space-y-1">
-                <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-                  {rtl ? "البريد" : "Work email"}
-                </span>
-                <input
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 text-[14px]"
-                  placeholder="you@company.ae"
-                />
-              </label>
-              {err ? <p className="text-[13px] text-rose-signal">{err}</p> : null}
-              <button
-                type="submit"
-                disabled={busy}
-                className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[14px] font-display font-semibold hover:bg-cyan/25 disabled:opacity-50"
-              >
-                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {copy.payCta} · €{DESK_SETUP_EUR} + €{DESK_LICENSE_EUR}/{DESK_INTERVAL}
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-                <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" />
-                {rtl
-                  ? "التأسيس والترخيص على بطاقتك عبر سترايب. كل تشغيل عيّنة يُفوتر على البطاقة نفسها — ليس على إلنخوس."
-                  : "Setup and license on your card via Stripe. Each sample run bills that same card — not Elenchos."}
-              </p>
-            </form>
+            <SolvoPlans lang={lang} />
             <Link
               to="/desk/thanks"
               search={{ demo: "uae" }}

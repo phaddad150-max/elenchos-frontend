@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { DESK_CURRENCY, DESK_RUN_EUR } from "@/lib/desk/catalog";
+import { DESK_CURRENCY, DESK_RUN_EUR, SOLVO_CURRENCY } from "@/lib/desk/catalog";
 import { chargeDeskRun } from "@/lib/desk/billing.server";
 import {
   countDeskTopics,
   generateLiveUrl,
-  getStudioBundle,
   getTenantByToken,
+  getStudioBundle,
+  isSolvoTenantId,
   publicDeskPath,
 } from "@/lib/desk/store.server";
 
@@ -35,6 +36,8 @@ export const Route = createFileRoute("/api/desk/run")({
         try {
           const billed = await chargeDeskRun({ tenant, topicCount: n });
           const slug = await generateLiveUrl(tenant);
+          const solvo =
+            isSolvoTenantId(tenant.id) || tenant.market === "uae" || Boolean(tenant.plan);
           return Response.json({
             ok: true,
             slug,
@@ -42,10 +45,10 @@ export const Route = createFileRoute("/api/desk/run")({
             researchPath: `${publicDeskPath(slug)}/research`,
             topicCount: n,
             amount: billed.amountCents / 100,
-            currency: DESK_CURRENCY,
+            currency: solvo ? SOLVO_CURRENCY : DESK_CURRENCY,
             charged: billed.charged,
             demo: billed.demo,
-            perTopic: DESK_RUN_EUR,
+            perTopic: solvo ? 0 : DESK_RUN_EUR,
           });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "Run failed";

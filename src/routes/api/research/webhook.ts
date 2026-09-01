@@ -80,7 +80,10 @@ export const Route = createFileRoute("/api/research/webhook")({
         // ── Billing: Pro + packs ──────────────────────────────────────────
         if (type === "checkout.session.completed") {
           const meta0 = ((obj as { metadata?: Record<string, string> }).metadata || {});
-          if (meta0.kind === "desk" && (meta0.tenantId || (obj as { id?: string }).id)) {
+          if (
+            (meta0.kind === "desk" || meta0.kind === "solvo") &&
+            (meta0.tenantId || (obj as { id?: string }).id)
+          ) {
             const customer =
               typeof (obj as { customer?: string }).customer === "string"
                 ? (obj as { customer?: string }).customer

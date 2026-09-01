@@ -3,7 +3,7 @@
  * Elenchos does not absorb X/sample cost.
  */
 import { DESK_CURRENCY, DESK_DEMO_SEEDS, deskRunCents } from "./catalog";
-import { recordDeskRun, type DeskTenant } from "./store.server";
+import { isSolvoTenantId, recordDeskRun, type DeskTenant } from "./store.server";
 
 function stripeSecret(): string {
   return process.env.STRIPE_SECRET_KEY?.trim() || "";
@@ -32,14 +32,18 @@ export async function chargeDeskRun(opts: {
 }): Promise<{ charged: boolean; amountCents: number; invoiceId: string | null; demo: boolean }> {
   const amountCents = deskRunCents(opts.topicCount);
   const demo = DESK_DEMO_SEEDS.some((d) => d.id === opts.tenant.id);
-  if (demo || amountCents <= 0) {
+  const solvo =
+    isSolvoTenantId(opts.tenant.id) ||
+    opts.tenant.market === "uae" ||
+    Boolean(opts.tenant.plan);
+  if (demo || solvo || amountCents <= 0) {
     await recordDeskRun({
       tenantId: opts.tenant.id,
       topicCount: opts.topicCount,
       amountCents: 0,
       invoiceId: null,
     });
-    return { charged: false, amountCents: 0, invoiceId: null, demo: true };
+    return { charged: false, amountCents: 0, invoiceId: null, demo: demo || solvo };
   }
   const customer = opts.tenant.stripe_customer_id;
   if (!customer) {

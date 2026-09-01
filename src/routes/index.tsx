@@ -48,6 +48,7 @@ import { TopicRequestModal } from "@/components/TopicRequestModal";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { GoDeeperCTA } from "@/components/GoDeeperCTA";
+import { ContactEmailMe } from "@/components/ContactEmailMe";
 import { TeaserLock } from "@/components/TeaserLock";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -656,8 +657,6 @@ function Dashboard() {
           />
         </div>
 
-        <DeskSellStrip />
-
         {/* Signals + heatmap — side by side, independent heights (signal flips must not move globe) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -796,8 +795,9 @@ function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Contextual actions — end of page only, not mid-page marketing banners */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        {/* Personalize CTA sits above Go deeper — no public prices on elenchos.live */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+          <PersonalizeDashboardStrip />
           <DashboardActionRow />
         </motion.div>
 
@@ -880,28 +880,32 @@ function Header({
   );
 }
 
-/** One public B2B sell — this live dashboard is the prototype. */
-function DeskSellStrip() {
+/** Bottom-of-page notice — opens existing contact form. No prices. */
+function PersonalizeDashboardStrip() {
   return (
     <aside className="rounded-2xl border border-cyan/35 bg-cyan/[0.07] px-3.5 sm:px-5 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4 min-w-0">
       <div className="min-w-0 flex-1 space-y-0.5">
         <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-cyan">
-          For organizations · one product
+          For organizations
         </p>
         <p className="text-[14px] sm:text-[15px] font-display font-semibold text-foreground leading-snug">
-          Buy this dashboard — pay, brand it, generate a live URL.
+          Personalize this dashboard
         </p>
         <p className="text-[12px] sm:text-[12.5px] text-muted-foreground leading-snug">
-          elenchos.live is the template. Scoring stays locked. Your tables are created at payment.
+          Brand, topics, and a live URL — write me. No public price list on elenchos.live.
         </p>
       </div>
-      <Link
-        to="/desk"
+      <ContactEmailMe
+        source="personalize-dashboard"
+        variant="unstyled"
         className="shrink-0 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[13px] font-display font-semibold hover:bg-cyan/25 touch-manipulation"
+        defaultMessage="Hi — I would like to personalize this dashboard for my organization.\n\n"
+        dialogTitle="Personalize this dashboard"
+        dialogDescription="Tell me who it is for and what you need. I will reply by email — no checkout on this site."
       >
-        Get this desk
+        Personalize this dashboard
         <ArrowRight className="w-3.5 h-3.5" aria-hidden />
-      </Link>
+      </ContactEmailMe>
     </aside>
   );
 }

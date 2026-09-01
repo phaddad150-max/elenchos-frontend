@@ -58,17 +58,17 @@ export const ABOUT_SOCIAL: SocialPageMeta = {
 };
 
 export const DESK_SOCIAL: SocialPageMeta = {
-  title: "Buy this dashboard · Elenchos Desk",
+  title: "Solvo Creations desk · UAE prototype",
   description:
-    "Pay for a licensed public-discourse dashboard. Brand it, pick topics, generate a live URL. Scoring logic stays on Elenchos.",
-  url: `${SITE}/desk`,
+    "White-label Public Discourse × Research Desk for Solvo Creations. Setup and monthly plans in AED. Scoring stays on Elenchos.",
+  url: `${SITE}/uae`,
   image: DEFAULT_OG,
 };
 
 export const UAE_SOCIAL: SocialPageMeta = {
-  title: "UAE desk · paid vs earned on X · Elenchos",
+  title: "Solvo Creations · Public Discourse × Research Desk · UAE",
   description:
-    "White-label public-discourse dashboard for UAE SMBs, corporates, and startups. Paid vs earned on X. Brand it, generate a live URL. Scoring stays on Elenchos.",
+    "White-label dashboard for UAE SMBs, founders, and expansion brands. AED setup plus Pulse or Insight monthly. Scoring stays on Elenchos.",
   url: `${SITE}/uae`,
   image: DEFAULT_OG,
 };

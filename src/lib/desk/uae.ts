@@ -1,6 +1,6 @@
 /** UAE prototype copy. Arabic UI chrome is draft — human review before campaign use. */
 
-export const UAE_PRICE_NOTE = "€490 setup + €199/month · €1.50/topic run";
+export const UAE_PRICE_NOTE = "AED 6,000 setup · Pulse AED 249/mo · Insight AED 899/mo";
 
 /** Catalog rows that match Solvo’s B2B / AI / founder audience. */
 export const UAE_CITIZEN_CATALOG_IDS = [
@@ -43,8 +43,8 @@ export const UAE_EN = {
       body: "B2B visibility, founder branding, AI/GEO search, SMB trust, decision-maker discovery, agency vs in-house, PR/podcast authority, GCC expansion. Same Pass-1 logic. Locked.",
     },
     {
-      title: "Accuracy without you sampling",
-      body: "You buy the alert surface. A billed run samples public X onto your desk. Empty tiles stay 0 · awaiting data — never invented.",
+      title: "Weekly sample, not a per-topic meter",
+      body: "Pulse: 15 topics, n=120, once a week, no human support. Insight: same 15 topics, n=1000, plus 1 hour/week to analyze and rework. Empty tiles stay 0 · awaiting data — never invented.",
     },
   ],
   whyTitle: "Why this view",
@@ -84,8 +84,8 @@ export const UAE_AR = {
       body: "الإيجار، العمل والتأشيرات، الحر، السكن، التنقل، العمل الحر. نفس منطق التقييم. مقفول. لا يمكن تعديل طريقة السطح.",
     },
     {
-      title: "دقة دون أن تأخذ العيّنة بنفسك",
-      body: "تشتري سطح التنبيه. التشغيل المدفوع يضع عيّنة إكس العامة على لوحتك. الفارغ يبقى 0 بانتظار البيانات — بلا اختراع.",
+      title: "عيّنة أسبوعية لا رسوم لكل موضوع",
+      body: "نبض: 15 موضوعاً، عيّنة 120، مرة أسبوعياً، بلا دعم بشري. رؤية: نفس المواضيع، عيّنة 1000، مع ساعة أسبوعياً للتحليل وإعادة الصياغة. الفارغ يبقى 0 بانتظار البيانات — بلا اختراع.",
     },
   ],
   whyTitle: "لماذا هذه القراءة",

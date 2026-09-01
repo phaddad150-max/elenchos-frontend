@@ -9,7 +9,9 @@ import {
   UAE_DEMO_SLUG,
   demoSeedBySlug,
   demoSeedByToken,
+  solvoPlan,
   type DeskDemoSeed,
+  type SolvoPlanId,
 } from "./catalog";
 import type { DeskBranding, DeskCard, DeskPicks, DeskTenant } from "./types";
 import { simulateDeskCards } from "./solvo-sim";
@@ -60,6 +62,62 @@ function seedDemoMem(): void {
 
 seedDemoMem();
 
+type TableSet = {
+  tenants: string;
+  branding: string;
+  picks: string;
+  snapshots: string;
+  runs: string;
+};
+
+const DESK_TABLES: TableSet = {
+  tenants: "desk_tenants",
+  branding: "desk_branding",
+  picks: "desk_picks",
+  snapshots: "desk_topic_snapshots",
+  runs: "desk_runs",
+};
+
+const SOLVO_TABLES: TableSet = {
+  tenants: "solvo_tenants",
+  branding: "solvo_branding",
+  picks: "solvo_picks",
+  snapshots: "solvo_topic_snapshots",
+  runs: "solvo_runs",
+};
+
+const solvoIdSet = new Set<string>(
+  DESK_DEMO_SEEDS.filter((d) => d.slug === UAE_DEMO_SLUG).map((d) => d.id),
+);
+
+function rememberSolvo(id: string) {
+  solvoIdSet.add(id);
+}
+
+export function isSolvoTenantId(id: string): boolean {
+  return solvoIdSet.has(id);
+}
+
+async function tablesForTenantId(id: string): Promise<TableSet> {
+  if (solvoIdSet.has(id)) return SOLVO_TABLES;
+  const solvo = await restGet<DeskTenant>(`solvo_tenants?id=eq.${encodeURIComponent(id)}&limit=1`);
+  if (solvo[0]) {
+    rememberSolvo(id);
+    return SOLVO_TABLES;
+  }
+  return DESK_TABLES;
+}
+
+async function restGetTenant(query: string): Promise<DeskTenant | null> {
+  const solvo = await restGet<DeskTenant>(`solvo_tenants?${query}`);
+  if (solvo[0]) {
+    rememberSolvo(solvo[0].id);
+    return solvo[0];
+  }
+  const desk = await restGet<DeskTenant>(`desk_tenants?${query}`);
+  return desk[0] ?? null;
+}
+
 function supabaseConfig() {
   const url =
     process.env.SUPABASE_URL?.trim() ||
@@ -97,8 +155,11 @@ export function slugify(raw: string): string {
 export async function createPendingTenant(input: {
   orgName: string;
   email: string;
+  market: "uae";
+  plan: SolvoPlanId;
 }): Promise<DeskTenant> {
   const now = new Date().toISOString();
+  const plan = solvoPlan(input.plan);
   const row: DeskTenant = {
     id: crypto.randomUUID(),
     manage_token: newManageToken(),
@@ -111,37 +172,44 @@ export async function createPendingTenant(input: {
     custom_domain: null,
     created_at: now,
     paid_at: null,
+    market: "uae",
+    plan: plan.id,
+    sample_size: plan.sampleSize,
   };
   memTenants.push(row);
+  rememberSolvo(row.id);
   const { url, key } = supabaseConfig();
   if (!key) {
     throw new Error(
-      "Desk storage is not configured. Set SUPABASE_SERVICE_ROLE_KEY and run RUN_ME_desk_tenants.sql.",
+      "Solvo storage is not configured. Set SUPABASE_SERVICE_ROLE_KEY and run RUN_ME_solvo_tenants.sql.",
     );
   }
   {
-    const res = await fetch(`${url}/rest/v1/desk_tenants`, {
+    const res = await fetch(`${url}/rest/v1/solvo_tenants`, {
       method: "POST",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
-      body: JSON.stringify(row),
+      body: JSON.stringify({
+        ...row,
+        currency: "aed",
+      }),
     });
     if (!res.ok) {
       const t = await res.text().catch(() => "");
-      console.error("[desk] create pending failed", res.status, t.slice(0, 400));
-      throw new Error("Could not create desk tables. Run RUN_ME_desk_tenants.sql in Supabase.");
+      console.error("[solvo] create pending failed", res.status, t.slice(0, 400));
+      throw new Error("Could not create Solvo tables. Run RUN_ME_solvo_tenants.sql in Supabase.");
     }
-    await fetch(`${url}/rest/v1/desk_branding`, {
+    await fetch(`${url}/rest/v1/solvo_branding`, {
       method: "POST",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
       body: JSON.stringify({
         tenant_id: row.id,
         org_name: row.org_name,
         unbranded: false,
-        primary_color: "#22d3ee",
-        accent_color: "#f59e0b",
+        primary_color: "#1E4ED8",
+        accent_color: "#E8B923",
       }),
     });
-    await fetch(`${url}/rest/v1/desk_picks`, {
+    await fetch(`${url}/rest/v1/solvo_picks`, {
       method: "POST",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
       body: JSON.stringify({
@@ -156,8 +224,8 @@ export async function createPendingTenant(input: {
     org_name: row.org_name,
     unbranded: false,
     logo_url: null,
-    primary_color: "#22d3ee",
-    accent_color: "#f59e0b",
+    primary_color: "#1E4ED8",
+    accent_color: "#E8B923",
   });
   memPicks.set(row.id, { tenant_id: row.id, topic_ids: [], custom_topics: [] });
   return row;
@@ -175,9 +243,10 @@ export async function attachStripeSession(
   }
   const { url, key } = supabaseConfig();
   if (!key) return;
+  const tables = await tablesForTenantId(id);
   const patch: Record<string, string> = { stripe_session_id: sessionId };
   if (customerId) patch.stripe_customer_id = customerId;
-  await fetch(`${url}/rest/v1/desk_tenants?id=eq.${id}`, {
+  await fetch(`${url}/rest/v1/${tables.tenants}?id=eq.${id}`, {
     method: "PATCH",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
     body: JSON.stringify(patch),
@@ -200,7 +269,8 @@ export async function markDeskPaid(opts: {
   if (opts.sessionId) tenant.stripe_session_id = opts.sessionId;
   if (opts.customerId) tenant.stripe_customer_id = opts.customerId;
   if (key) {
-    await fetch(`${url}/rest/v1/desk_tenants?id=eq.${tenant.id}`, {
+    const tables = await tablesForTenantId(tenant.id);
+    await fetch(`${url}/rest/v1/${tables.tenants}?id=eq.${tenant.id}`, {
       method: "PATCH",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
       body: JSON.stringify({
@@ -296,8 +366,8 @@ async function buildCardsForPicks(picks: DeskPicks | undefined): Promise<DeskCar
 
 export async function getTenantById(id: string): Promise<DeskTenant | null> {
   const mem = memTenants.find((t) => t.id === id);
-  const rows = await restGet<DeskTenant>(`desk_tenants?id=eq.${id}&limit=1`);
-  return rows[0] ?? mem ?? null;
+  const row = await restGetTenant(`id=eq.${id}&limit=1`);
+  return row ?? mem ?? null;
 }
 
 export async function getTenantByToken(token: string): Promise<DeskTenant | null> {
@@ -307,18 +377,16 @@ export async function getTenantByToken(token: string): Promise<DeskTenant | null
     return memTenants.find((t) => t.id === seed.id) ?? tenantFromSeed(seed);
   }
   const mem = memTenants.find((t) => t.manage_token === token);
-  const rows = await restGet<DeskTenant>(
-    `desk_tenants?manage_token=eq.${encodeURIComponent(token)}&limit=1`,
-  );
-  return rows[0] ?? mem ?? null;
+  const row = await restGetTenant(`manage_token=eq.${encodeURIComponent(token)}&limit=1`);
+  return row ?? mem ?? null;
 }
 
 export async function getTenantBySession(sessionId: string): Promise<DeskTenant | null> {
   const mem = memTenants.find((t) => t.stripe_session_id === sessionId);
-  const rows = await restGet<DeskTenant>(
-    `desk_tenants?stripe_session_id=eq.${encodeURIComponent(sessionId)}&limit=1`,
+  const row = await restGetTenant(
+    `stripe_session_id=eq.${encodeURIComponent(sessionId)}&limit=1`,
   );
-  return rows[0] ?? mem ?? null;
+  return row ?? mem ?? null;
 }
 
 export async function getLiveDesk(slug: string): Promise<{
@@ -345,30 +413,31 @@ export async function getLiveDesk(slug: string): Promise<{
     }
     return { tenant, branding, picks, cards };
   }
-  const rows = await restGet<DeskTenant>(
-    `desk_tenants?slug=eq.${encodeURIComponent(slug)}&status=eq.live&limit=1`,
-  );
-  const tenant = rows[0] ?? memTenants.find((t) => t.slug === slug && t.status === "live") ?? null;
+  const tenant =
+    (await restGetTenant(`slug=eq.${encodeURIComponent(slug)}&status=eq.live&limit=1`)) ??
+    memTenants.find((t) => t.slug === slug && t.status === "live") ??
+    null;
   if (!tenant) return null;
+  const tables = await tablesForTenantId(tenant.id);
   const branding =
-    (await restGet<DeskBranding>(`desk_branding?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
+    (await restGet<DeskBranding>(`${tables.branding}?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
     memBrand.get(tenant.id) ?? {
       tenant_id: tenant.id,
       org_name: tenant.org_name,
       unbranded: false,
       logo_url: null,
-      primary_color: "#22d3ee",
-      accent_color: "#f59e0b",
+      primary_color: tables === SOLVO_TABLES ? "#1E4ED8" : "#22d3ee",
+      accent_color: tables === SOLVO_TABLES ? "#E8B923" : "#f59e0b",
     };
   const picks =
-    (await restGet<DeskPicks>(`desk_picks?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
+    (await restGet<DeskPicks>(`${tables.picks}?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
     memPicks.get(tenant.id) ?? {
       tenant_id: tenant.id,
       topic_ids: [],
       custom_topics: [],
     };
   const cards = await restGet<DeskCard>(
-    `desk_topic_snapshots?tenant_id=eq.${tenant.id}&order=created_at.desc&limit=40`,
+    `${tables.snapshots}?tenant_id=eq.${tenant.id}&order=created_at.desc&limit=40`,
   );
   const seen = new Set<string>();
   const latest: DeskCard[] = [];
@@ -387,18 +456,19 @@ export async function getStudioBundle(token: string): Promise<{
 } | null> {
   const tenant = await getTenantByToken(token);
   if (!tenant) return null;
+  const tables = await tablesForTenantId(tenant.id);
   const branding =
-    (await restGet<DeskBranding>(`desk_branding?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
+    (await restGet<DeskBranding>(`${tables.branding}?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
     memBrand.get(tenant.id) ?? {
       tenant_id: tenant.id,
       org_name: tenant.org_name,
       unbranded: false,
       logo_url: null,
-      primary_color: "#22d3ee",
-      accent_color: "#f59e0b",
+      primary_color: tables === SOLVO_TABLES ? "#1E4ED8" : "#22d3ee",
+      accent_color: tables === SOLVO_TABLES ? "#E8B923" : "#f59e0b",
     };
   const picks =
-    (await restGet<DeskPicks>(`desk_picks?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
+    (await restGet<DeskPicks>(`${tables.picks}?tenant_id=eq.${tenant.id}&limit=1`))[0] ??
     memPicks.get(tenant.id) ?? {
       tenant_id: tenant.id,
       topic_ids: [],
@@ -445,18 +515,19 @@ export async function saveStudio(
     tenant.custom_domain = input.custom_domain?.trim() || null;
   }
   if (!key || DESK_DEMO_SEEDS.some((d) => d.id === tenant.id)) return;
-  await fetch(`${url}/rest/v1/desk_branding?tenant_id=eq.${tenant.id}`, {
+  const tables = await tablesForTenantId(tenant.id);
+  await fetch(`${url}/rest/v1/${tables.branding}?tenant_id=eq.${tenant.id}`, {
     method: "PATCH",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
     body: JSON.stringify({ ...branding, updated_at: new Date().toISOString() }),
   });
-  await fetch(`${url}/rest/v1/desk_picks?tenant_id=eq.${tenant.id}`, {
+  await fetch(`${url}/rest/v1/${tables.picks}?tenant_id=eq.${tenant.id}`, {
     method: "PATCH",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
     body: JSON.stringify({ ...picks, updated_at: new Date().toISOString() }),
   });
   if (input.custom_domain !== undefined) {
-    await fetch(`${url}/rest/v1/desk_tenants?id=eq.${tenant.id}`, {
+    await fetch(`${url}/rest/v1/${tables.tenants}?id=eq.${tenant.id}`, {
       method: "PATCH",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
       body: JSON.stringify({ custom_domain: tenant.custom_domain }),
@@ -466,17 +537,18 @@ export async function saveStudio(
 
 export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
   const demoSeed = DESK_DEMO_SEEDS.find((d) => d.id === tenant.id);
+  const tables = await tablesForTenantId(tenant.id);
   const picks =
     memPicks.get(tenant.id) ??
-    (await restGet<DeskPicks>(`desk_picks?tenant_id=eq.${tenant.id}&limit=1`))[0];
+    (await restGet<DeskPicks>(`${tables.picks}?tenant_id=eq.${tenant.id}&limit=1`))[0];
   const branding =
     memBrand.get(tenant.id) ??
-    (await restGet<DeskBranding>(`desk_branding?tenant_id=eq.${tenant.id}&limit=1`))[0];
+    (await restGet<DeskBranding>(`${tables.branding}?tenant_id=eq.${tenant.id}&limit=1`))[0];
   const base = slugify(branding?.org_name || tenant.org_name || "desk");
   let slug = demoSeed ? demoSeed.slug : tenant.slug || base;
   if (!demoSeed && !tenant.slug) {
-    const clash = await restGet<DeskTenant>(`desk_tenants?slug=eq.${slug}&limit=1`);
-    if (clash[0] && clash[0].id !== tenant.id) slug = `${base}-${tenant.id.slice(0, 6)}`;
+    const clash = await restGetTenant(`slug=eq.${slug}&limit=1`);
+    if (clash && clash.id !== tenant.id) slug = `${base}-${tenant.id.slice(0, 6)}`;
   }
 
   const cards = await buildCardsForPicks(picks);
@@ -487,13 +559,13 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
 
   const { url, key } = supabaseConfig();
   if (key && !demoSeed) {
-    await fetch(`${url}/rest/v1/desk_tenants?id=eq.${tenant.id}`, {
+    await fetch(`${url}/rest/v1/${tables.tenants}?id=eq.${tenant.id}`, {
       method: "PATCH",
       headers: restHeaders(key, { Prefer: "return=minimal" }),
       body: JSON.stringify({ slug, status: "live", org_name: tenant.org_name }),
     });
     for (const c of cards) {
-      await fetch(`${url}/rest/v1/desk_topic_snapshots`, {
+      await fetch(`${url}/rest/v1/${tables.snapshots}`, {
         method: "POST",
         headers: restHeaders(key, { Prefer: "return=minimal" }),
         body: JSON.stringify({
@@ -523,14 +595,15 @@ export async function recordDeskRun(input: {
 }): Promise<void> {
   const { url, key } = supabaseConfig();
   if (!key || DESK_DEMO_SEEDS.some((d) => d.id === input.tenantId)) return;
-  await fetch(`${url}/rest/v1/desk_runs`, {
+  const tables = await tablesForTenantId(input.tenantId);
+  await fetch(`${url}/rest/v1/${tables.runs}`, {
     method: "POST",
     headers: restHeaders(key, { Prefer: "return=minimal" }),
     body: JSON.stringify({
       tenant_id: input.tenantId,
       topic_count: input.topicCount,
       amount_cents: input.amountCents,
-      currency: "eur",
+      currency: tables === SOLVO_TABLES ? "aed" : "eur",
       stripe_invoice_id: input.invoiceId,
       created_at: new Date().toISOString(),
     }),

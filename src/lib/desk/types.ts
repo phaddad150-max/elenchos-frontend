@@ -14,6 +14,10 @@ export type DeskTenant = {
   custom_domain: string | null;
   created_at: string;
   paid_at: string | null;
+  /** Solvo/UAE rows only — never written onto desk_* tables. */
+  market?: string | null;
+  plan?: string | null;
+  sample_size?: number | null;
 };
 
 export type DeskBranding = {

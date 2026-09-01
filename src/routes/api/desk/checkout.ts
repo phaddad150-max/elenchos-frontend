@@ -1,18 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import {
-  DESK_CURRENCY,
-  DESK_LICENSE_EUR,
-  DESK_PRODUCT_NAME,
-  DESK_RUN_EUR,
-  DESK_SETUP_EUR,
+  SOLVO_CURRENCY,
+  SOLVO_INTERVAL,
+  SOLVO_PLANS,
+  SOLVO_SETUP_AED,
+  formatAed,
+  solvoMonthlyFils,
+  solvoSetupFils,
+  type SolvoPlanId,
 } from "@/lib/desk/catalog";
 import { attachStripeSession, createPendingTenant } from "@/lib/desk/store.server";
 
 const BodySchema = z.object({
   orgName: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200),
-  market: z.enum(["desk", "uae"]).optional(),
+  market: z.literal("uae"),
+  plan: z.enum(["pulse", "insight"]),
 });
 
 function siteOrigin(request: Request): string {
@@ -39,51 +43,61 @@ export const Route = createFileRoute("/api/desk/checkout")({
           const json = await request.json().catch(() => null);
           const parsed = BodySchema.safeParse(json);
           if (!parsed.success) {
-            return Response.json({ error: "Organization name and a valid email are required." }, { status: 400 });
+            return Response.json(
+              { error: "Organization, email, and a UAE plan (Pulse or Insight) are required." },
+              { status: 400 },
+            );
           }
+          const planId = parsed.data.plan as SolvoPlanId;
+          const plan = SOLVO_PLANS[planId];
           const tenant = await createPendingTenant({
             orgName: parsed.data.orgName,
             email: parsed.data.email,
+            market: "uae",
+            plan: planId,
           });
           const origin = siteOrigin(request);
-          const uae = parsed.data.market === "uae";
           const params = new URLSearchParams();
           params.set("mode", "subscription");
           params.set(
             "success_url",
             `${origin}/desk/thanks?session_id={CHECKOUT_SESSION_ID}`,
           );
-          params.set("cancel_url", `${origin}${uae ? "/uae" : "/desk"}?cancelled=1`);
+          params.set("cancel_url", `${origin}/uae?cancelled=1`);
           params.set("client_reference_id", tenant.id);
-          params.set("metadata[kind]", "desk");
+          params.set("metadata[kind]", "solvo");
           params.set("metadata[tenantId]", tenant.id);
-          params.set("metadata[market]", uae ? "uae" : "desk");
-          params.set("subscription_data[metadata][kind]", "desk");
+          params.set("metadata[market]", "uae");
+          params.set("metadata[plan]", plan.id);
+          params.set("subscription_data[metadata][kind]", "solvo");
           params.set("subscription_data[metadata][tenantId]", tenant.id);
-          params.set("subscription_data[metadata][market]", uae ? "uae" : "desk");
+          params.set("subscription_data[metadata][market]", "uae");
+          params.set("subscription_data[metadata][plan]", plan.id);
           params.set("customer_email", tenant.email || parsed.data.email);
           params.set("line_items[0][quantity]", "1");
-          params.set("line_items[0][price_data][currency]", DESK_CURRENCY);
-          params.set("line_items[0][price_data][unit_amount]", String(DESK_SETUP_EUR * 100));
+          params.set("line_items[0][price_data][currency]", SOLVO_CURRENCY);
+          params.set("line_items[0][price_data][unit_amount]", String(solvoSetupFils()));
           params.set(
             "line_items[0][price_data][product_data][name]",
-            `${uae ? `${DESK_PRODUCT_NAME} · UAE` : DESK_PRODUCT_NAME} setup`,
+            "Solvo Creations desk setup",
           );
           params.set(
             "line_items[0][price_data][product_data][description]",
-            "One-time setup: white-label dashboard, tables, branding studio.",
+            `One-time setup ${formatAed(SOLVO_SETUP_AED)}: white-label dashboard, Solvo tables, branding studio.`,
           );
           params.set("line_items[1][quantity]", "1");
-          params.set("line_items[1][price_data][currency]", DESK_CURRENCY);
-          params.set("line_items[1][price_data][unit_amount]", String(DESK_LICENSE_EUR * 100));
-          params.set("line_items[1][price_data][recurring][interval]", "month");
+          params.set("line_items[1][price_data][currency]", SOLVO_CURRENCY);
+          params.set("line_items[1][price_data][unit_amount]", String(solvoMonthlyFils(plan.id)));
+          params.set("line_items[1][price_data][recurring][interval]", SOLVO_INTERVAL);
           params.set(
             "line_items[1][price_data][product_data][name]",
-            uae ? `${DESK_PRODUCT_NAME} · UAE license` : `${DESK_PRODUCT_NAME} license`,
+            `Solvo Creations · ${plan.name}`,
           );
           params.set(
             "line_items[1][price_data][product_data][description]",
-            `Hosted desk. Sample runs bill your card at €${DESK_RUN_EUR.toFixed(2)} per topic. Scoring stays on Elenchos.`,
+            `${plan.topics} topics, weekly refresh, n=${plan.sampleSize}${
+              plan.humanHoursPerWeek ? `, ${plan.humanHoursPerWeek} hr/week human support` : ", no human support"
+            }. Scoring stays on Elenchos.`,
           );
 
           const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {

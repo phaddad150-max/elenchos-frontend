@@ -15,22 +15,11 @@ function XLogo({ className }: { className?: string }) {
   );
 }
 
-function NewBadge({ className, strokeWidth: _ }: { className?: string; strokeWidth?: number }) {
-  return (
-    <span
-      className={`inline-flex items-center justify-center rounded-md bg-cyan px-1.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase leading-none tracking-wide text-background shadow-[0_0_10px_-2px_var(--cyan-glow)] ${className ?? ""}`}
-    >
-      NEW
-    </span>
-  );
-}
-
 const TABS = [
-  { to: "/", label: "Dashboard", exact: true, badge: null as null | "new" },
+  { to: "/", label: "Dashboard", exact: true },
   /** Research opens Library content directly (no intermediate landing). */
-  { to: "/research/library", label: "Research", exact: false, badge: null as null | "new" },
-  { to: "/desk", label: "Desk", exact: true, badge: "new" as const },
-  { to: "/about", label: "About", exact: true, badge: null as null | "new" },
+  { to: "/research/library", label: "Research Desk", exact: false },
+  { to: "/about", label: "About", exact: true },
 ] as const;
 
 export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
@@ -71,7 +60,6 @@ export function SiteNav({ rightSlot }: { rightSlot?: ReactNode }) {
                 activeOptions={{ exact: t.exact }}
               >
                 {t.label}
-                {t.badge === "new" ? <NewBadge /> : null}
               </Link>
             ))}
           </div>

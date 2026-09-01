@@ -6,6 +6,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
  */
 export const Route = createFileRoute("/research/commission")({
   beforeLoad: () => {
-    throw redirect({ to: "/desk", replace: true });
+    throw redirect({ to: "/research/library", replace: true });
   },
 });

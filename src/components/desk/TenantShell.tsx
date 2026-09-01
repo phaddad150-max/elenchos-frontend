@@ -94,6 +94,16 @@ export function TenantShell({
             >
               Research
             </Link>
+            {uae ? (
+              <Link
+                to="/d/$slug/desk"
+                params={{ slug }}
+                className="nav-tab inline-flex items-center"
+                activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
+              >
+                Desk
+              </Link>
+            ) : null}
           </nav>
         </div>
         <nav className="md:hidden px-3 pb-2 flex gap-2" aria-label="Desk pages mobile">
@@ -114,6 +124,16 @@ export function TenantShell({
           >
             Research
           </Link>
+          {uae ? (
+            <Link
+              to="/d/$slug/desk"
+              params={{ slug }}
+              className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+              activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+            >
+              Desk
+            </Link>
+          ) : null}
         </nav>
       </header>
       {children}
