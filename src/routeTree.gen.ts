@@ -912,7 +912,7 @@ declare module '@tanstack/react-router' {
     }
     '/solvocreations-uae/research/$topicId': {
       id: '/solvocreations-uae/research/$topicId'
-      path: '/research/$topicId'
+      path: '/$topicId'
       fullPath: '/solvocreations-uae/research/$topicId'
       preLoaderRoute: typeof SolvocreationsUaeResearchTopicIdRouteImport
       parentRoute: typeof SolvocreationsUaeResearchRoute

@@ -122,7 +122,7 @@ function SolvoResearchList() {
           return (
             <li key={t.id}>
               <Link
-                to="/solvocreations-uae/topic/$topicId"
+                to="/solvocreations-uae/research/$topicId"
                 params={{ topicId: t.id }}
                 className="dash-panel p-4 space-y-2 min-h-[160px] flex flex-col hover:border-cyan/40 transition-colors"
               >
