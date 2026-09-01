@@ -37,17 +37,29 @@ export function TenantShell({
     tenant.email === "demo@elenchos.live" ||
     tenant.email === "uae-demo@elenchos.live";
 
+  const solvoBlue = "#1E4ED8";
+
   useEffect(() => {
     if (!uae) return;
     const root = document.documentElement;
     const hadDark = root.classList.contains("dark");
     const hadLight = root.classList.contains("light");
+    const brandVars = [
+      ["--cyan", solvoBlue],
+      ["--cyan-glow", "color-mix(in oklab, #1E4ED8 40%, transparent)"],
+      ["--primary", solvoBlue],
+      ["--accent", solvoBlue],
+      ["--ring", solvoBlue],
+      ["--magenta", solvoBlue],
+    ] as const;
     root.classList.remove("dark");
     root.classList.add("light");
+    for (const [prop, value] of brandVars) root.style.setProperty(prop, value);
     return () => {
       root.classList.remove("light");
       if (hadDark) root.classList.add("dark");
       else if (hadLight) root.classList.add("light");
+      for (const [prop] of brandVars) root.style.removeProperty(prop);
     };
   }, [uae]);
 
@@ -56,7 +68,14 @@ export function TenantShell({
       className={`min-h-screen relative flex flex-col dash-landing ${uae ? "solvo-light light" : ""}`}
       style={
         uae
-          ? undefined
+          ? ({
+              ["--cyan" as string]: solvoBlue,
+              ["--cyan-glow" as string]: "color-mix(in oklab, #1E4ED8 40%, transparent)",
+              ["--primary" as string]: solvoBlue,
+              ["--accent" as string]: solvoBlue,
+              ["--ring" as string]: solvoBlue,
+              ["--magenta" as string]: solvoBlue,
+            } as CSSProperties)
           : ({
               ["--cyan" as string]: primary,
               ["--cyan-glow" as string]: `${primary}73`,
