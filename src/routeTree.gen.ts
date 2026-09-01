@@ -16,6 +16,7 @@ import { Route as SolvocreationsUaeResearchRouteImport } from './routes/solvocre
 import { Route as SolvocreationsUaeResearchIndexRouteImport } from './routes/solvocreations-uae.research.index'
 import { Route as SolvocreationsUaeDeskRouteImport } from './routes/solvocreations-uae.desk'
 import { Route as SolvocreationsUaeResearchTopicIdRouteImport } from './routes/solvocreations-uae.research.$topicId'
+import { Route as SolvocreationsUaeTopicTopicIdRouteImport } from './routes/solvocreations-uae.topic.$topicId'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
@@ -97,6 +98,11 @@ const SolvocreationsUaeResearchRoute = SolvocreationsUaeResearchRouteImport.upda
 const SolvocreationsUaeDeskRoute = SolvocreationsUaeDeskRouteImport.update({
   id: '/desk',
   path: '/desk',
+  getParentRoute: () => SolvocreationsUaeRoute,
+} as any)
+const SolvocreationsUaeTopicTopicIdRoute = SolvocreationsUaeTopicTopicIdRouteImport.update({
+  id: '/topic/$topicId',
+  path: '/topic/$topicId',
   getParentRoute: () => SolvocreationsUaeRoute,
 } as any)
 const SolvocreationsUaeResearchTopicIdRoute =
@@ -417,6 +423,7 @@ export interface FileRoutesByFullPath {
   '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRouteWithChildren
   '/solvocreations-uae/research/': typeof SolvocreationsUaeResearchIndexRoute
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
+  '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRouteWithChildren
   '/solvocreations-uae/research/': typeof SolvocreationsUaeResearchIndexRoute
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
+  '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/admin/curation': typeof AdminCurationRoute
   '/desk/studio': typeof DeskStudioRoute
@@ -547,6 +555,7 @@ export interface FileRoutesById {
   '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRouteWithChildren
   '/solvocreations-uae/research/': typeof SolvocreationsUaeResearchIndexRoute
   '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
+  '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
@@ -614,6 +623,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/'
     | '/solvocreations-uae/research'
     | '/solvocreations-uae/desk'
+    | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
     | '/admin/curation'
     | '/d/$slug'
@@ -678,6 +688,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/'
     | '/solvocreations-uae/research'
     | '/solvocreations-uae/desk'
+    | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
     | '/admin/curation'
     | '/desk/studio'
@@ -742,6 +753,7 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/'
     | '/solvocreations-uae/research'
     | '/solvocreations-uae/desk'
+    | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
     | '/admin/curation'
     | '/d/$slug'
@@ -889,6 +901,13 @@ declare module '@tanstack/react-router' {
       path: '/desk'
       fullPath: '/solvocreations-uae/desk'
       preLoaderRoute: typeof SolvocreationsUaeDeskRouteImport
+      parentRoute: typeof SolvocreationsUaeRoute
+    }
+    '/solvocreations-uae/topic/$topicId': {
+      id: '/solvocreations-uae/topic/$topicId'
+      path: '/topic/$topicId'
+      fullPath: '/solvocreations-uae/topic/$topicId'
+      preLoaderRoute: typeof SolvocreationsUaeTopicTopicIdRouteImport
       parentRoute: typeof SolvocreationsUaeRoute
     }
     '/solvocreations-uae/research/$topicId': {
@@ -1349,12 +1368,14 @@ interface SolvocreationsUaeRouteChildren {
   SolvocreationsUaeIndexRoute: typeof SolvocreationsUaeIndexRoute
   SolvocreationsUaeResearchRoute: typeof SolvocreationsUaeResearchRouteWithChildren
   SolvocreationsUaeDeskRoute: typeof SolvocreationsUaeDeskRoute
+  SolvocreationsUaeTopicTopicIdRoute: typeof SolvocreationsUaeTopicTopicIdRoute
 }
 
 const SolvocreationsUaeRouteChildren: SolvocreationsUaeRouteChildren = {
   SolvocreationsUaeIndexRoute: SolvocreationsUaeIndexRoute,
   SolvocreationsUaeResearchRoute: SolvocreationsUaeResearchRouteWithChildren,
   SolvocreationsUaeDeskRoute: SolvocreationsUaeDeskRoute,
+  SolvocreationsUaeTopicTopicIdRoute: SolvocreationsUaeTopicTopicIdRoute,
 }
 
 const SolvocreationsUaeRouteWithChildren = SolvocreationsUaeRoute._addFileChildren(
