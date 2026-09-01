@@ -131,6 +131,13 @@
   --popover-foreground: oklch(0.26 0.04 230);
   --muted: oklch(0.96 0.004 240);
   --secondary: oklch(0.96 0.004 240);
+  /* Brand blue from solvocreations.com / desk seed (#1E4ED8) — replaces neon cyan on this prototype only */
+  --cyan: #1E4ED8;
+  --cyan-glow: color-mix(in oklab, #1E4ED8 40%, transparent);
+  --primary: #1E4ED8;
+  --accent: #1E4ED8;
+  --ring: #1E4ED8;
+  --magenta: #1E4ED8;
   color-scheme: light;
   background: #ffffff;
 }
