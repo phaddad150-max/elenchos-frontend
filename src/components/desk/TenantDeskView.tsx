@@ -6,7 +6,7 @@ import { PaidEarnedPanel } from "@/components/desk/PaidEarnedPanel";
 import { SimulatedDataBadge } from "@/components/SimulatedDataBadge";
 import { Globe3D } from "@/components/Globe3D";
 import { GulfMap } from "@/components/desk/GulfMap";
-import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
+import { isUaeDemoSlug } from "@/lib/desk/catalog";
 import { UAE_AR, UAE_EN, type UaeLang } from "@/lib/desk/uae";
 import { SOLVO_SIM_PAID } from "@/lib/desk/solvo-sim";
 
@@ -14,7 +14,7 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
   const [lang, setLang] = useState<UaeLang>("en");
   const { tenant, cards } = desk;
   const slug = tenant.slug || "";
-  const uae = tenant.slug === UAE_DEMO_SLUG || tenant.email === "uae-demo@elenchos.live";
+  const uae = isUaeDemoSlug(tenant.slug) || tenant.email === "uae-demo@elenchos.live";
   const ar = uae && lang === "ar";
   const sampled = cards.reduce((n, c) => n + (typeof c.sample_size === "number" ? c.sample_size : 0), 0);
   const awaitingCount = cards.filter((c) => !c.sample_size).length;
@@ -106,9 +106,15 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
           )}
           <p className="text-[12px] text-muted-foreground pt-2">
             {ar ? "قائمة المواضيع في بحث فقط." : "Topic list lives on Research only."}{" "}
-            <Link to="/d/$slug/research" params={{ slug }} className="text-cyan hover:underline">
-              {ar ? "فتح البحث" : "Open Research"}
-            </Link>
+            {uae ? (
+              <Link to="/solvocreations-uae/research" className="text-cyan hover:underline">
+                {ar ? "فتح البحث" : "Open Research"}
+              </Link>
+            ) : (
+              <Link to="/d/$slug/research" params={{ slug }} className="text-cyan hover:underline">
+                {ar ? "فتح البحث" : "Open Research"}
+              </Link>
+            )}
           </p>
         </section>
 
@@ -156,15 +162,26 @@ export function TenantDeskView({ desk }: { desk: LiveDesk }) {
       <section className="rounded-xl border border-border/80 bg-card/30 px-2.5 py-2 sm:px-3 sm:py-2.5">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
           <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">Go deeper</span>
-          <Link
-            to="/d/$slug/research"
-            params={{ slug }}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 rounded-lg border border-border/90 bg-background/60 hover:border-cyan/50 text-[12.5px] font-medium"
-          >
-            <Layers className="w-3.5 h-3.5 text-cyan" />
-            Research · selected topics
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          {uae ? (
+            <Link
+              to="/solvocreations-uae/research"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 rounded-lg border border-border/90 bg-background/60 hover:border-cyan/50 text-[12.5px] font-medium"
+            >
+              <Layers className="w-3.5 h-3.5 text-cyan" />
+              Research · selected topics
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : (
+            <Link
+              to="/d/$slug/research"
+              params={{ slug }}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 rounded-lg border border-border/90 bg-background/60 hover:border-cyan/50 text-[12.5px] font-medium"
+            >
+              <Layers className="w-3.5 h-3.5 text-cyan" />
+              Research · selected topics
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
         </div>
       </section>
 

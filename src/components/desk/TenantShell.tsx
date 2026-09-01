@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Radio } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import type { LiveDesk } from "@/lib/desk/types";
-import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
+import { isUaeDemoSlug } from "@/lib/desk/catalog";
 
 export function TenantShell({
   desk,
@@ -31,7 +31,7 @@ export function TenantShell({
   const title = branding.org_name || tenant.org_name || "Public discourse desk";
   const primary = branding.primary_color || "#22d3ee";
   const accent = branding.accent_color || "#f59e0b";
-  const uae = tenant.slug === UAE_DEMO_SLUG || tenant.email === "uae-demo@elenchos.live";
+  const uae = isUaeDemoSlug(tenant.slug) || tenant.email === "uae-demo@elenchos.live";
   const walk =
     uae ||
     tenant.email === "demo@elenchos.live" ||
@@ -77,63 +77,101 @@ export function TenantShell({
             </p>
           </div>
           <nav className="hidden md:flex items-center gap-1 nav-pill-group rounded-full p-1" aria-label="Desk pages">
-            <Link
-              to="/d/$slug"
-              params={{ slug }}
-              className="nav-tab inline-flex items-center"
-              activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
-              activeOptions={{ exact: true }}
-            >
-              Overview
-            </Link>
-            <Link
-              to="/d/$slug/research"
-              params={{ slug }}
-              className="nav-tab inline-flex items-center"
-              activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
-            >
-              Research
-            </Link>
             {uae ? (
-              <Link
-                to="/d/$slug/desk"
-                params={{ slug }}
-                className="nav-tab inline-flex items-center"
-                activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
-              >
-                Desk
-              </Link>
-            ) : null}
+              <>
+                <Link
+                  to="/solvocreations-uae"
+                  className="nav-tab inline-flex items-center"
+                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
+                  activeOptions={{ exact: true }}
+                >
+                  Overview
+                </Link>
+                <Link
+                  to="/solvocreations-uae/research"
+                  className="nav-tab inline-flex items-center"
+                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
+                >
+                  Research
+                </Link>
+                <Link
+                  to="/solvocreations-uae/desk"
+                  className="nav-tab inline-flex items-center"
+                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
+                >
+                  Desk
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/d/$slug"
+                  params={{ slug }}
+                  className="nav-tab inline-flex items-center"
+                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
+                  activeOptions={{ exact: true }}
+                >
+                  Overview
+                </Link>
+                <Link
+                  to="/d/$slug/research"
+                  params={{ slug }}
+                  className="nav-tab inline-flex items-center"
+                  activeProps={{ className: "nav-tab nav-tab-active inline-flex items-center" }}
+                >
+                  Research
+                </Link>
+              </>
+            )}
           </nav>
         </div>
         <nav className="md:hidden px-3 pb-2 flex gap-2" aria-label="Desk pages mobile">
-          <Link
-            to="/d/$slug"
-            params={{ slug }}
-            className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-            activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-            activeOptions={{ exact: true }}
-          >
-            Overview
-          </Link>
-          <Link
-            to="/d/$slug/research"
-            params={{ slug }}
-            className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-            activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-          >
-            Research
-          </Link>
           {uae ? (
-            <Link
-              to="/d/$slug/desk"
-              params={{ slug }}
-              className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
-              activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
-            >
-              Desk
-            </Link>
-          ) : null}
+            <>
+              <Link
+                to="/solvocreations-uae"
+                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+                activeOptions={{ exact: true }}
+              >
+                Overview
+              </Link>
+              <Link
+                to="/solvocreations-uae/research"
+                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+              >
+                Research
+              </Link>
+              <Link
+                to="/solvocreations-uae/desk"
+                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+              >
+                Desk
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/d/$slug"
+                params={{ slug }}
+                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+                activeOptions={{ exact: true }}
+              >
+                Overview
+              </Link>
+              <Link
+                to="/d/$slug/research"
+                params={{ slug }}
+                className="flex-1 min-h-[44px] rounded-xl border border-border text-center text-[13px] font-display font-semibold grid place-items-center"
+                activeProps={{ className: "flex-1 min-h-[44px] rounded-xl border border-cyan/50 bg-cyan/15 text-cyan text-center text-[13px] font-display font-semibold grid place-items-center" }}
+              >
+                Research
+              </Link>
+            </>
+          )}
         </nav>
       </header>
       {children}

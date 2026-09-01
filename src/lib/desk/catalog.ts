@@ -145,8 +145,21 @@ export const DESK_DEMO_SLUG = "acme-research";
 export const DESK_DEMO_ORG = "Acme Research";
 
 export const UAE_DEMO_TOKEN = "uae-demo-walkthrough";
-export const UAE_DEMO_SLUG = "uae-prototype";
+/** Public URL prefix and tenant slug for the Solvo prototype. */
+export const UAE_DEMO_SLUG = "solvocreations-uae";
+export const UAE_DEMO_SLUG_LEGACY = "uae-prototype";
+export const SOLVO_PUBLIC_BASE = "/solvocreations-uae";
 export const UAE_DEMO_ORG = "Solvo Creations";
+
+export function isUaeDemoSlug(slug: string | null | undefined): boolean {
+  return slug === UAE_DEMO_SLUG || slug === UAE_DEMO_SLUG_LEGACY;
+}
+
+export function solvoPublicPath(sub?: "research" | "desk"): "/solvocreations-uae" | "/solvocreations-uae/research" | "/solvocreations-uae/desk" {
+  if (sub === "research") return "/solvocreations-uae/research";
+  if (sub === "desk") return "/solvocreations-uae/desk";
+  return "/solvocreations-uae";
+}
 
 export type DeskDemoSeed = {
   id: string;
@@ -198,6 +211,7 @@ export function demoSeedByToken(token: string): DeskDemoSeed | undefined {
 }
 
 export function demoSeedBySlug(slug: string): DeskDemoSeed | undefined {
+  if (isUaeDemoSlug(slug)) return DESK_DEMO_SEEDS.find((d) => d.slug === UAE_DEMO_SLUG);
   return DESK_DEMO_SEEDS.find((d) => d.slug === slug);
 }
 

@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, FlaskConical, Info } from "lucide-react";
 
-/** Main nav (mobile): Home · Research Desk · About. Desk lives on the UAE prototype only. */
+/** Main nav (mobile): Home · Research Desk · About. */
 const TABS = [
   { to: "/", label: "Home", match: (p: string) => p === "/", icon: LayoutDashboard },
   {

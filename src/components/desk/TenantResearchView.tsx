@@ -3,13 +3,13 @@ import { BookOpen, Layers } from "lucide-react";
 import type { LiveDesk } from "@/lib/desk/types";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
 import { sentimentTone } from "@/lib/score-colors";
-import { UAE_DEMO_SLUG } from "@/lib/desk/catalog";
+import { isUaeDemoSlug } from "@/lib/desk/catalog";
 import { UAE_EN } from "@/lib/desk/uae";
 
 export function TenantResearchView({ desk }: { desk: LiveDesk }) {
   const slug = desk.tenant.slug || "";
   const cards = desk.cards;
-  const uae = desk.tenant.slug === UAE_DEMO_SLUG || desk.tenant.email === "uae-demo@elenchos.live";
+  const uae = isUaeDemoSlug(desk.tenant.slug) || desk.tenant.email === "uae-demo@elenchos.live";
 
   return (
     <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 relative flex-1 mobile-safe-bottom">
@@ -84,9 +84,15 @@ export function TenantResearchView({ desk }: { desk: LiveDesk }) {
         </ul>
       )}
 
-      <Link to="/d/$slug" params={{ slug }} className="text-[12px] text-cyan hover:underline">
-        Back to overview
-      </Link>
+      {uae ? (
+        <Link to="/solvocreations-uae" className="text-[12px] text-cyan hover:underline">
+          Back to overview
+        </Link>
+      ) : (
+        <Link to="/d/$slug" params={{ slug }} className="text-[12px] text-cyan hover:underline">
+          Back to overview
+        </Link>
+      )}
     </main>
   );
 }

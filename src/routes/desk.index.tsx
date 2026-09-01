@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-/** Public Desk sell page retired. Prices live on the UAE / Solvo prototype only. */
+/** Public Desk sell page retired. Not linked from the main site. */
 export const Route = createFileRoute("/desk/")({
   beforeLoad: () => {
-    throw redirect({ to: "/uae", replace: true });
+    throw redirect({ to: "/", replace: true });
   },
 });

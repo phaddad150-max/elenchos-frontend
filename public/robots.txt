@@ -3,6 +3,7 @@ Allow: /
 Disallow: /api/
 Disallow: /admin
 Disallow: /pro
+Disallow: /uae
 Disallow: /sponsor
 Disallow: /sponsor/success
 

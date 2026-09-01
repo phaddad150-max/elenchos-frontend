@@ -6,9 +6,11 @@ import { LIVE_TOPIC_KEYS, isArchivedTopicId } from "@/lib/topic-catalog";
 import {
   DESK_DEMO_SEEDS,
   DESK_MAX_TOPICS,
+  SOLVO_PUBLIC_BASE,
   UAE_DEMO_SLUG,
   demoSeedBySlug,
   demoSeedByToken,
+  isUaeDemoSlug,
   solvoPlan,
   type DeskDemoSeed,
   type SolvoPlanId,
@@ -580,6 +582,7 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
 }
 
 export function publicDeskPath(slug: string): string {
+  if (isUaeDemoSlug(slug)) return SOLVO_PUBLIC_BASE;
   return `/d/${slug}`;
 }
 

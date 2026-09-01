@@ -63,7 +63,7 @@ export const Route = createFileRoute("/api/desk/checkout")({
             "success_url",
             `${origin}/desk/thanks?session_id={CHECKOUT_SESSION_ID}`,
           );
-          params.set("cancel_url", `${origin}/uae?cancelled=1`);
+          params.set("cancel_url", `${origin}/solvocreations-uae/desk?cancelled=1`);
           params.set("client_reference_id", tenant.id);
           params.set("metadata[kind]", "solvo");
           params.set("metadata[tenantId]", tenant.id);

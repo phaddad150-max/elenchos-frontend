@@ -10,6 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UaeRouteImport } from './routes/uae'
+import { Route as SolvocreationsUaeRouteImport } from './routes/solvocreations-uae'
+import { Route as SolvocreationsUaeIndexRouteImport } from './routes/solvocreations-uae.index'
+import { Route as SolvocreationsUaeResearchRouteImport } from './routes/solvocreations-uae.research'
+import { Route as SolvocreationsUaeDeskRouteImport } from './routes/solvocreations-uae.desk'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
@@ -72,6 +76,26 @@ const UaeRoute = UaeRouteImport.update({
   id: '/uae',
   path: '/uae',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SolvocreationsUaeRoute = SolvocreationsUaeRouteImport.update({
+  id: '/solvocreations-uae',
+  path: '/solvocreations-uae',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SolvocreationsUaeIndexRoute = SolvocreationsUaeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SolvocreationsUaeRoute,
+} as any)
+const SolvocreationsUaeResearchRoute = SolvocreationsUaeResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => SolvocreationsUaeRoute,
+} as any)
+const SolvocreationsUaeDeskRoute = SolvocreationsUaeDeskRouteImport.update({
+  id: '/desk',
+  path: '/desk',
+  getParentRoute: () => SolvocreationsUaeRoute,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -374,6 +398,10 @@ export interface FileRoutesByFullPath {
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/uae': typeof UaeRoute
+  '/solvocreations-uae': typeof SolvocreationsUaeRouteWithChildren
+  '/solvocreations-uae/': typeof SolvocreationsUaeIndexRoute
+  '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRoute
+  '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -433,6 +461,9 @@ export interface FileRoutesByTo {
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/uae': typeof UaeRoute
+  '/solvocreations-uae': typeof SolvocreationsUaeIndexRoute
+  '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRoute
+  '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
   '/admin/curation': typeof AdminCurationRoute
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
@@ -493,6 +524,10 @@ export interface FileRoutesById {
   '/research-migration': typeof ResearchMigrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/uae': typeof UaeRoute
+  '/solvocreations-uae': typeof SolvocreationsUaeRouteWithChildren
+  '/solvocreations-uae/': typeof SolvocreationsUaeIndexRoute
+  '/solvocreations-uae/research': typeof SolvocreationsUaeResearchRoute
+  '/solvocreations-uae/desk': typeof SolvocreationsUaeDeskRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -555,6 +590,10 @@ export interface FileRouteTypes {
     | '/research-migration'
     | '/sitemap.xml'
     | '/uae'
+    | '/solvocreations-uae'
+    | '/solvocreations-uae/'
+    | '/solvocreations-uae/research'
+    | '/solvocreations-uae/desk'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -614,6 +653,10 @@ export interface FileRouteTypes {
     | '/research-migration'
     | '/sitemap.xml'
     | '/uae'
+    | '/solvocreations-uae'
+    | '/solvocreations-uae/'
+    | '/solvocreations-uae/research'
+    | '/solvocreations-uae/desk'
     | '/admin/curation'
     | '/desk/studio'
     | '/desk/thanks'
@@ -673,6 +716,10 @@ export interface FileRouteTypes {
     | '/research-migration'
     | '/sitemap.xml'
     | '/uae'
+    | '/solvocreations-uae'
+    | '/solvocreations-uae/'
+    | '/solvocreations-uae/research'
+    | '/solvocreations-uae/desk'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -734,6 +781,7 @@ export interface RootRouteChildren {
   ResearchMigrationRoute: typeof ResearchMigrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UaeRoute: typeof UaeRoute
+  SolvocreationsUaeRoute: typeof SolvocreationsUaeRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
   DSlugRoute: typeof DSlugRouteWithChildren
   ResearchSlugRoute: typeof ResearchSlugRoute
@@ -784,6 +832,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/uae'
       preLoaderRoute: typeof UaeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/solvocreations-uae': {
+      id: '/solvocreations-uae'
+      path: '/solvocreations-uae'
+      fullPath: '/solvocreations-uae'
+      preLoaderRoute: typeof SolvocreationsUaeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/solvocreations-uae/': {
+      id: '/solvocreations-uae/'
+      path: '/'
+      fullPath: '/solvocreations-uae/'
+      preLoaderRoute: typeof SolvocreationsUaeIndexRouteImport
+      parentRoute: typeof SolvocreationsUaeRoute
+    }
+    '/solvocreations-uae/research': {
+      id: '/solvocreations-uae/research'
+      path: '/research'
+      fullPath: '/solvocreations-uae/research'
+      preLoaderRoute: typeof SolvocreationsUaeResearchRouteImport
+      parentRoute: typeof SolvocreationsUaeRoute
+    }
+    '/solvocreations-uae/desk': {
+      id: '/solvocreations-uae/desk'
+      path: '/desk'
+      fullPath: '/solvocreations-uae/desk'
+      preLoaderRoute: typeof SolvocreationsUaeDeskRouteImport
+      parentRoute: typeof SolvocreationsUaeRoute
     }
     '/sitemap.xml': {
       id: '/sitemap.xml'
@@ -1215,6 +1291,22 @@ const DSlugRouteChildren: DSlugRouteChildren = {
 
 const DSlugRouteWithChildren = DSlugRoute._addFileChildren(DSlugRouteChildren)
 
+interface SolvocreationsUaeRouteChildren {
+  SolvocreationsUaeIndexRoute: typeof SolvocreationsUaeIndexRoute
+  SolvocreationsUaeResearchRoute: typeof SolvocreationsUaeResearchRoute
+  SolvocreationsUaeDeskRoute: typeof SolvocreationsUaeDeskRoute
+}
+
+const SolvocreationsUaeRouteChildren: SolvocreationsUaeRouteChildren = {
+  SolvocreationsUaeIndexRoute: SolvocreationsUaeIndexRoute,
+  SolvocreationsUaeResearchRoute: SolvocreationsUaeResearchRoute,
+  SolvocreationsUaeDeskRoute: SolvocreationsUaeDeskRoute,
+}
+
+const SolvocreationsUaeRouteWithChildren = SolvocreationsUaeRoute._addFileChildren(
+  SolvocreationsUaeRouteChildren,
+)
+
 interface ResearchNetworksLedgerRouteChildren {
   ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
 }
@@ -1242,6 +1334,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchMigrationRoute: ResearchMigrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UaeRoute: UaeRoute,
+  SolvocreationsUaeRoute: SolvocreationsUaeRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
   DSlugRoute: DSlugRouteWithChildren,
   ResearchSlugRoute: ResearchSlugRoute,
