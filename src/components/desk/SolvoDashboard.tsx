@@ -25,6 +25,7 @@ import { KpiCard } from "@/components/KpiCard";
 import type { Signal } from "@/lib/sim-data";
 import { divergenceColor, sentimentTone } from "@/lib/score-colors";
 import { SOLVO_TOPICS, type SolvoTopic } from "@/lib/desk/solvo-topics";
+import { protoPath, usePrototypeBase } from "@/lib/desk/prototype-base";
 import {
   SOLVO_ARAB_LEADERS,
   SOLVO_KPI,
@@ -44,6 +45,7 @@ function leaderScoreHex(s?: number | null): string {
 }
 
 export function SolvoDashboard() {
+  const base = usePrototypeBase();
   const signals = useMemo(() => simulateSolvoSignals(), []);
   const gaps = useMemo(() => solvoGaps(), []);
   const movers = useMemo(() => solvoMovers(), []);
@@ -305,7 +307,7 @@ export function SolvoDashboard() {
             Go deeper
           </span>
           <Link
-            to="/solvocreations-uae/research"
+            to={protoPath(base, "research") as never}
             className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 rounded-lg border border-border/90 bg-background/60 hover:border-cyan/50 text-[12.5px] font-medium"
           >
             <Layers className="w-3.5 h-3.5 text-cyan" />
@@ -561,6 +563,7 @@ function SolvoBriefBody({
   sample: number;
   onClose: () => void;
 }) {
+  const base = usePrototypeBase();
   return (
     <>
       <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan">{signal.topic}</p>
@@ -598,8 +601,7 @@ function SolvoBriefBody({
       <div className="flex flex-col sm:flex-row gap-2 pt-1">
         {topic ? (
           <Link
-            to="/solvocreations-uae/research/$topicId"
-            params={{ topicId: topic.id }}
+            to={protoPath(base, `research/${topic.id}`) as never}
             className="inline-flex items-center justify-center gap-1.5 min-h-[48px] sm:min-h-[40px] px-4 rounded-full text-[12px] font-mono border border-cyan/40 text-cyan"
           >
             Open topic briefing

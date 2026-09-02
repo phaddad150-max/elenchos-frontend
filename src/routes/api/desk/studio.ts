@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { isSolvoDeskEmail } from "@/lib/desk/catalog";
+import { isPubliceyeDeskEmail } from "@/lib/desk/catalog";
 import { listSellableDeskTopics } from "@/lib/topic-catalog";
 import { getStudioBundle, getTenantByToken, saveStudio } from "@/lib/desk/store.server";
 
-function solvoStudioAllowed(tenant: { market?: string | null; email?: string | null; plan?: string | null }): boolean {
-  const solvo = tenant.market === "uae" || Boolean(tenant.plan);
-  if (!solvo) return true;
-  return isSolvoDeskEmail(tenant.email);
+function studioEmailAllowed(tenant: { market?: string | null; email?: string | null; plan?: string | null }): boolean {
+  if (tenant.market === "publiceye") return isPubliceyeDeskEmail(tenant.email);
+  return true;
 }
 
 const SaveSchema = z.object({
@@ -34,8 +33,8 @@ export const Route = createFileRoute("/api/desk/studio")({
         ) {
           return Response.json({ error: "Invalid or unpaid studio link." }, { status: 401 });
         }
-        if (!solvoStudioAllowed(bundle.tenant)) {
-          return Response.json({ error: "This Solvo desk is invitation-only." }, { status: 403 });
+        if (!studioEmailAllowed(bundle.tenant)) {
+          return Response.json({ error: "This BrandEye desk is invitation-only." }, { status: 403 });
         }
         const { tenant, branding, picks } = bundle;
         return Response.json({
@@ -62,8 +61,8 @@ export const Route = createFileRoute("/api/desk/studio")({
         if (!tenant || (tenant.status !== "paid" && tenant.status !== "live")) {
           return Response.json({ error: "Invalid or unpaid studio link." }, { status: 401 });
         }
-        if (!solvoStudioAllowed(tenant)) {
-          return Response.json({ error: "This Solvo desk is invitation-only." }, { status: 403 });
+        if (!studioEmailAllowed(tenant)) {
+          return Response.json({ error: "This BrandEye desk is invitation-only." }, { status: 403 });
         }
         await saveStudio(tenant, {
           org_name: parsed.data.org_name,

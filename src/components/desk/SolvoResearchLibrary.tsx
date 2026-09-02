@@ -18,12 +18,14 @@ import {
 import { divergenceColor, sentimentColorCoarse, sentimentTone } from "@/lib/score-colors";
 import { SOLVO_TOPICS } from "@/lib/desk/solvo-topics";
 import { SOLVO_ARAB_LEADERS, SOLVO_BUSINESS_LEADERS } from "@/lib/desk/solvo-sim";
+import { protoPath, usePrototypeBase } from "@/lib/desk/prototype-base";
 import type { RankedLeader } from "@/lib/trackers-data";
 
 type Section = "topics" | "cases" | "trackers";
 type TrackerId = "arab" | "business";
 
 export function SolvoResearchLibrary() {
+  const base = usePrototypeBase();
   const [section, setSection] = useState<Section>("topics");
   const [tracker, setTracker] = useState<TrackerId>("arab");
   return (
@@ -118,7 +120,7 @@ export function SolvoResearchLibrary() {
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Link
-              to="/solvocreations-uae/casestudy/aviation"
+              to={protoPath(base, "casestudy/aviation") as never}
               className="lib-case-card group relative flex flex-col h-full min-h-[148px] rounded-2xl border bg-gradient-to-br from-emerald-signal/15 to-transparent border-emerald-signal/30 hover:border-emerald-signal/55 bg-card/80 p-4 overflow-hidden"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -265,6 +267,7 @@ function TopicCard({
   topic: (typeof SOLVO_TOPICS)[number];
   delay: number;
 }) {
+  const base = usePrototypeBase();
   const sentColor = sentimentColorCoarse(topic.score);
   const divColor = divergenceColor(topic.divergence);
   const WowIcon = topic.delta > 0 ? TrendingUp : topic.delta < 0 ? TrendingDown : Minus;
@@ -274,8 +277,7 @@ function TopicCard({
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.25 }} className="h-full">
       <Link
-        to="/solvocreations-uae/research/$topicId"
-        params={{ topicId: topic.id }}
+        to={protoPath(base, `research/${topic.id}`) as never}
         className="group lib-case-card relative flex flex-col h-full min-h-0 rounded-xl border border-cyan/25 bg-card/70 hover:border-cyan/55 p-3 overflow-hidden"
       >
         <div className="flex items-start gap-2 min-w-0">

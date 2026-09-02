@@ -28,11 +28,14 @@ import {
   YAxis,
 } from "recharts";
 import { solvoTopicById, type SolvoQuestion } from "@/lib/desk/solvo-topics";
+import { PUBLICEYE_PUBLIC_BASE } from "@/lib/desk/catalog";
+import { protoPath, usePrototypeBase } from "@/lib/desk/prototype-base";
 import { divergenceColor, sentimentColor, sentimentTone } from "@/lib/score-colors";
 import { formatDelta } from "@/components/topic-analysis/utils";
 import { NarrativeGapPanel } from "@/components/topic-analysis/NarrativeGapPanel";
 
 export function SolvoTopicView({ topicId }: { topicId: string }) {
+  const base = usePrototypeBase();
   const topic = solvoTopicById(topicId);
   const [picked, setPicked] = useState<number | null>(null);
   const [chartsOpen, setChartsOpen] = useState(false);
@@ -68,7 +71,7 @@ export function SolvoTopicView({ topicId }: { topicId: string }) {
     return (
       <main className="max-w-[860px] mx-auto px-4 py-10 space-y-3 mobile-safe-bottom">
         <p className="text-[14px] text-muted-foreground">Topic not on this desk.</p>
-        <Link to="/solvocreations-uae/research" className="text-cyan hover:underline text-[13px]">
+        <Link to={protoPath(base, "research") as never} className="text-cyan hover:underline text-[13px]">
           Back to Research
         </Link>
       </main>
@@ -81,7 +84,7 @@ export function SolvoTopicView({ topicId }: { topicId: string }) {
   return (
     <main className="max-w-[1100px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6 mobile-safe-bottom">
       <Link
-        to="/solvocreations-uae/research"
+        to={protoPath(base, "research") as never}
         className="inline-flex items-center gap-1.5 text-[13px] text-cyan hover:underline min-h-[36px]"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Research Library
@@ -322,18 +325,21 @@ export function SolvoTopicView({ topicId }: { topicId: string }) {
       <section className="rounded-xl border border-cyan/35 bg-cyan/[0.06] p-4 sm:p-5 space-y-3">
         <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-cyan">What’s next</p>
         <p className="text-[13px] sm:text-[14px] text-foreground/90 leading-relaxed">
-          This is the Solvo prototype of a public topic analysis. The same layout, with your brand, is
-          what setup + Pulse or Insight buys.
+          {base === PUBLICEYE_PUBLIC_BASE
+            ? "This is a BrandEye prototype topic analysis for young UAE operators — simulated sample, same method as elenchos.live."
+            : "This is the Solvo Creations prototype of a public topic analysis. Simulated sample — scoring stays locked."}
         </p>
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+          {base === PUBLICEYE_PUBLIC_BASE ? (
+            <Link
+              to={protoPath(base, "desk") as never}
+              className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[13px] font-medium"
+            >
+              Get this desk
+            </Link>
+          ) : null}
           <Link
-            to="/solvocreations-uae/desk"
-            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[13px] font-medium"
-          >
-            Get this desk
-          </Link>
-          <Link
-            to="/solvocreations-uae/research"
+            to={protoPath(base, "research") as never}
             className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full border border-border text-muted-foreground text-[13px]"
           >
             Research Library

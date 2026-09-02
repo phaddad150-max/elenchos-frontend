@@ -6,7 +6,7 @@ import {
   SOLVO_PLANS,
   SOLVO_SETUP_AED,
   formatAed,
-  isSolvoDeskEmail,
+  isPubliceyeDeskEmail,
   normalizeDeskEmail,
   solvoMonthlyFils,
   solvoSetupFils,
@@ -17,7 +17,7 @@ import { attachStripeSession, createPendingTenant } from "@/lib/desk/store.serve
 const BodySchema = z.object({
   orgName: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(200),
-  market: z.literal("uae"),
+  market: z.enum(["uae", "publiceye"]),
   plan: z.enum(["pulse", "insight"]),
 });
 
@@ -53,19 +53,22 @@ export const Route = createFileRoute("/api/desk/checkout")({
           const planId = parsed.data.plan as SolvoPlanId;
           const plan = SOLVO_PLANS[planId];
           const email = normalizeDeskEmail(parsed.data.email);
-          if (!isSolvoDeskEmail(email)) {
+          if (parsed.data.market === "uae") {
             return Response.json(
-              {
-                error:
-                  "Solvo desk checkout is invitation-only. Use an authorized email, then pay to go live.",
-              },
+              { error: "Solvo desk checkout is closed on this prototype." },
+              { status: 410 },
+            );
+          }
+          if (!isPubliceyeDeskEmail(email)) {
+            return Response.json(
+              { error: "BrandEye desk checkout is invitation-only." },
               { status: 403 },
             );
           }
           const tenant = await createPendingTenant({
             orgName: parsed.data.orgName,
             email,
-            market: "uae",
+            market: "publiceye",
             plan: planId,
           });
           const origin = siteOrigin(request);
@@ -75,15 +78,15 @@ export const Route = createFileRoute("/api/desk/checkout")({
             "success_url",
             `${origin}/desk/thanks?session_id={CHECKOUT_SESSION_ID}`,
           );
-          params.set("cancel_url", `${origin}/solvocreations-uae/desk?cancelled=1`);
+          params.set("cancel_url", `${origin}/publiceye-uae/desk?cancelled=1`);
           params.set("client_reference_id", tenant.id);
-          params.set("metadata[kind]", "solvo");
+          params.set("metadata[kind]", "publiceye");
           params.set("metadata[tenantId]", tenant.id);
-          params.set("metadata[market]", "uae");
+          params.set("metadata[market]", "publiceye");
           params.set("metadata[plan]", plan.id);
-          params.set("subscription_data[metadata][kind]", "solvo");
+          params.set("subscription_data[metadata][kind]", "publiceye");
           params.set("subscription_data[metadata][tenantId]", tenant.id);
-          params.set("subscription_data[metadata][market]", "uae");
+          params.set("subscription_data[metadata][market]", "publiceye");
           params.set("subscription_data[metadata][plan]", plan.id);
           params.set("customer_email", tenant.email || email);
           params.set("line_items[0][quantity]", "1");
@@ -91,11 +94,11 @@ export const Route = createFileRoute("/api/desk/checkout")({
           params.set("line_items[0][price_data][unit_amount]", String(solvoSetupFils()));
           params.set(
             "line_items[0][price_data][product_data][name]",
-            "Solvo Creations desk setup",
+            "BrandEye desk setup",
           );
           params.set(
             "line_items[0][price_data][product_data][description]",
-            `One-time setup ${formatAed(SOLVO_SETUP_AED)}: white-label dashboard, Solvo tables, branding studio.`,
+            `One-time setup ${formatAed(SOLVO_SETUP_AED)}: white-label dashboard, BrandEye tables, branding studio.`,
           );
           params.set("line_items[1][quantity]", "1");
           params.set("line_items[1][price_data][currency]", SOLVO_CURRENCY);
@@ -103,7 +106,7 @@ export const Route = createFileRoute("/api/desk/checkout")({
           params.set("line_items[1][price_data][recurring][interval]", SOLVO_INTERVAL);
           params.set(
             "line_items[1][price_data][product_data][name]",
-            `Solvo Creations · ${plan.name}`,
+            `BrandEye · ${plan.name}`,
           );
           params.set(
             "line_items[1][price_data][product_data][description]",

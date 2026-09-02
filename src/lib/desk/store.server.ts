@@ -10,8 +10,11 @@ import {
   UAE_DEMO_SLUG,
   demoSeedBySlug,
   demoSeedByToken,
-  isSolvoDeskEmail,
+  PUBLICEYE_PUBLIC_BASE,
+  isPubliceyeDemoSlug,
+  isPubliceyeDeskEmail,
   isUaeDemoSlug,
+  isUaeWalkthroughSlug,
   solvoPlan,
   type DeskDemoSeed,
   type SolvoPlanId,
@@ -158,13 +161,16 @@ export function slugify(raw: string): string {
 export async function createPendingTenant(input: {
   orgName: string;
   email: string;
-  market: "uae";
+  market: "uae" | "publiceye";
   plan: SolvoPlanId;
 }): Promise<DeskTenant> {
   const now = new Date().toISOString();
   const plan = solvoPlan(input.plan);
-  if (!isSolvoDeskEmail(input.email)) {
-    throw new Error("Solvo desk checkout is invitation-only.");
+  if (input.market === "uae") {
+    throw new Error("Solvo desk checkout is closed on this prototype.");
+  }
+  if (input.market === "publiceye" && !isPubliceyeDeskEmail(input.email)) {
+    throw new Error("BrandEye desk checkout is invitation-only.");
   }
   const row: DeskTenant = {
     id: crypto.randomUUID(),
@@ -178,7 +184,7 @@ export async function createPendingTenant(input: {
     custom_domain: null,
     created_at: now,
     paid_at: null,
-    market: "uae",
+    market: input.market,
     plan: plan.id,
     sample_size: plan.sampleSize,
   };
@@ -410,7 +416,7 @@ export async function getLiveDesk(slug: string): Promise<{
     const branding = memBrand.get(seed.id)!;
     const picks = memPicks.get(seed.id)!;
     let cards =
-      seed.slug === UAE_DEMO_SLUG
+      isUaeWalkthroughSlug(seed.slug)
         ? simulateDeskCards(picks)
         : (memCards.get(seed.id) ?? []);
     if (!cards.length) {
@@ -586,6 +592,7 @@ export async function generateLiveUrl(tenant: DeskTenant): Promise<string> {
 }
 
 export function publicDeskPath(slug: string): string {
+  if (isPubliceyeDemoSlug(slug)) return PUBLICEYE_PUBLIC_BASE;
   if (isUaeDemoSlug(slug)) return SOLVO_PUBLIC_BASE;
   return `/d/${slug}`;
 }

@@ -8,15 +8,15 @@ import {
   SUBHEADLINES,
 } from "@/lib/aviation/data";
 
-export const Route = createFileRoute("/solvocreations-uae/casestudy/aviation")({
-  component: SolvoAviationCasePage,
+export const Route = createFileRoute("/publiceye-uae/casestudy/aviation")({
+  component: PublicEyeAviationCasePage,
 });
 
-function SolvoAviationCasePage() {
+function PublicEyeAviationCasePage() {
   return (
     <main className="max-w-[860px] mx-auto w-full px-3 sm:px-4 md:px-6 py-5 sm:py-8 space-y-5 mobile-safe-bottom">
       <Link
-        to="/solvocreations-uae/research"
+        to="/publiceye-uae/research"
         className="inline-flex items-center gap-1.5 text-[13px] text-cyan hover:underline min-h-[36px]"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Research Library
@@ -24,7 +24,7 @@ function SolvoAviationCasePage() {
       <aside className="rounded-2xl border border-amber-signal/45 bg-amber-signal/[0.12] px-4 py-3 flex items-start gap-2">
         <FlaskConical className="w-4 h-4 text-amber-signal shrink-0 mt-0.5" />
         <p className="text-[13px] text-foreground/90 leading-snug">
-          Estimated regional briefing for the Solvo prototype — public aviation thesis adapted for
+          Estimated regional briefing for the BrandEye prototype — public aviation thesis adapted for
           UAE/Gulf hubs. Not a live X sample.
         </p>
       </aside>
@@ -49,8 +49,8 @@ function SolvoAviationCasePage() {
         <p className="text-[14px] text-muted-foreground leading-relaxed">{EXECUTIVE_SUMMARY}</p>
         <p className="text-[14px] text-muted-foreground leading-relaxed">
           For Gulf hubs, the same three races show up in public talk: aircraft delivery trust, cabin
-          connectivity, and whether AI ops is real or a slogan. Emirates, Etihad, flydubai, and the
-          OEM backlog into DXB/AUH are the local frame — estimated, not a live pipeline run.
+          connectivity, and whether AI ops is real or a slogan. This case sits on the BrandEye desk as
+          a regional deep-dive — estimated, not a live pipeline run.
         </p>
       </section>
       <section className="space-y-3">
@@ -65,10 +65,10 @@ function SolvoAviationCasePage() {
         </div>
       </section>
       <Link
-        to="/solvocreations-uae/research"
+        to="/publiceye-uae/desk"
         className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-full border border-cyan/45 bg-cyan/15 text-cyan text-[13px] font-medium"
       >
-        Back to Research
+        Get this desk
       </Link>
     </main>
   );

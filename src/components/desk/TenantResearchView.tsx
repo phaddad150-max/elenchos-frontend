@@ -3,13 +3,16 @@ import { BookOpen, Layers } from "lucide-react";
 import type { LiveDesk } from "@/lib/desk/types";
 import { LIVE_TOPIC_KEYS } from "@/lib/topic-catalog";
 import { sentimentTone } from "@/lib/score-colors";
-import { isUaeDemoSlug } from "@/lib/desk/catalog";
+import { isUaeWalkthroughSlug } from "@/lib/desk/catalog";
 import { SolvoResearchLibrary } from "@/components/desk/SolvoResearchLibrary";
 
 export function TenantResearchView({ desk }: { desk: LiveDesk }) {
   const slug = desk.tenant.slug || "";
   const cards = desk.cards;
-  const uae = isUaeDemoSlug(desk.tenant.slug) || desk.tenant.email === "uae-demo@elenchos.live";
+  const uae =
+    isUaeWalkthroughSlug(desk.tenant.slug) ||
+    desk.tenant.email === "uae-demo@elenchos.live" ||
+    desk.tenant.email === "publiceye-demo@elenchos.live";
   if (uae) return <SolvoResearchLibrary />;
 
   return (

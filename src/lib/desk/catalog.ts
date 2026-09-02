@@ -151,23 +151,43 @@ export const UAE_DEMO_SLUG_LEGACY = "uae-prototype";
 export const SOLVO_PUBLIC_BASE = "/solvocreations-uae";
 export const UAE_DEMO_ORG = "Solvo Creations";
 
-/** Only these emails may buy or open a paid Solvo desk. Walkthrough Home/Research stay public. */
-export const SOLVO_DESK_ALLOWED_EMAILS = [
-  "citizen.pulse101@gmail.com",
-  "lara@solvocreations.com",
-] as const;
-
 export function normalizeDeskEmail(email?: string | null): string {
   return (email ?? "").trim().toLowerCase();
 }
 
-export function isSolvoDeskEmail(email?: string | null): boolean {
-  const e = normalizeDeskEmail(email);
-  return (SOLVO_DESK_ALLOWED_EMAILS as readonly string[]).includes(e);
-}
-
 export function isUaeDemoSlug(slug: string | null | undefined): boolean {
   return slug === UAE_DEMO_SLUG || slug === UAE_DEMO_SLUG_LEGACY;
+}
+
+/** BrandEye walkthrough — cloned UAE prototype, separate public URL. */
+export const PUBLICEYE_DEMO_TOKEN = "publiceye-demo-walkthrough";
+export const PUBLICEYE_DEMO_SLUG = "publiceye-uae";
+export const PUBLICEYE_PUBLIC_BASE = "/publiceye-uae";
+export const PUBLICEYE_DEMO_ORG = "BrandEye";
+export const PUBLICEYE_BRAND = "#4338CA";
+export const PUBLICEYE_ACCENT = "#84CC16";
+
+export const PUBLICEYE_DESK_ALLOWED_EMAILS = ["citizen.pulse101@gmail.com"] as const;
+
+export function isPubliceyeDemoSlug(slug: string | null | undefined): boolean {
+  return slug === PUBLICEYE_DEMO_SLUG;
+}
+
+export function isPubliceyeDeskEmail(email?: string | null): boolean {
+  const e = normalizeDeskEmail(email);
+  return (PUBLICEYE_DESK_ALLOWED_EMAILS as readonly string[]).includes(e);
+}
+
+export function isUaeWalkthroughSlug(slug: string | null | undefined): boolean {
+  return isUaeDemoSlug(slug) || isPubliceyeDemoSlug(slug);
+}
+
+export type PrototypeBase = typeof SOLVO_PUBLIC_BASE | typeof PUBLICEYE_PUBLIC_BASE;
+
+export function prototypeBaseForSlug(slug: string | null | undefined): PrototypeBase | null {
+  if (isPubliceyeDemoSlug(slug)) return PUBLICEYE_PUBLIC_BASE;
+  if (isUaeDemoSlug(slug)) return SOLVO_PUBLIC_BASE;
+  return null;
 }
 
 export function solvoPublicPath(sub?: "research" | "desk"): "/solvocreations-uae" | "/solvocreations-uae/research" | "/solvocreations-uae/desk" {
@@ -217,6 +237,18 @@ export const DESK_DEMO_SEEDS: DeskDemoSeed[] = [
     primary_color: "#1E4ED8",
     accent_color: "#E8B923",
     logo_url: "/brand/solvo-logo.png",
+  },
+  {
+    id: "33333333-3333-4333-8333-333333333333",
+    token: PUBLICEYE_DEMO_TOKEN,
+    slug: PUBLICEYE_DEMO_SLUG,
+    org: PUBLICEYE_DEMO_ORG,
+    email: "publiceye-demo@elenchos.live",
+    topic_ids: [...UAE_CITIZEN_CATALOG_IDS],
+    custom_topics: [...UAE_CITIZEN_CUSTOM_TOPICS],
+    primary_color: PUBLICEYE_BRAND,
+    accent_color: PUBLICEYE_ACCENT,
+    logo_url: "/brand/brandeye-mark.jpg",
   },
 ];
 

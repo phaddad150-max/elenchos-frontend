@@ -60,7 +60,7 @@ export const ABOUT_SOCIAL: SocialPageMeta = {
 export const DESK_SOCIAL: SocialPageMeta = {
   title: "Solvo Creations desk · UAE",
   description:
-    "White-label Public Discourse × Research Desk for Solvo Creations. Setup and monthly plans in AED. Scoring stays on Elenchos.",
+    "White-label Public Discourse × Research Desk prototype for Solvo Creations. Simulated UAE sample. Scoring stays on Elenchos.",
   url: `${SITE}/solvocreations-uae`,
   image: DEFAULT_OG,
 };
@@ -68,8 +68,16 @@ export const DESK_SOCIAL: SocialPageMeta = {
 export const UAE_SOCIAL: SocialPageMeta = {
   title: "Solvo Creations · Public Discourse × Research Desk · UAE",
   description:
-    "White-label dashboard for UAE SMBs, founders, and expansion brands. AED setup plus Pulse or Insight monthly. Scoring stays on Elenchos.",
+    "White-label dashboard prototype for UAE SMBs, founders, and expansion brands. Simulated sample. Scoring stays on Elenchos.",
   url: `${SITE}/solvocreations-uae`,
+  image: DEFAULT_OG,
+};
+
+export const PUBLICEYE_SOCIAL: SocialPageMeta = {
+  title: "BrandEye · Public Discourse × Research Desk · UAE",
+  description:
+    "Public-discourse prototype for young UAE freelancers, founders, marketers, and consultants. Simulated sample. Scoring stays on Elenchos.",
+  url: `${SITE}/publiceye-uae`,
   image: DEFAULT_OG,
 };
 

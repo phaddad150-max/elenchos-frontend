@@ -5,13 +5,19 @@ import {
   SOLVO_PLANS,
   SOLVO_SETUP_AED,
   formatAed,
-  isSolvoDeskEmail,
+  isPubliceyeDeskEmail,
   normalizeDeskEmail,
   type SolvoPlanId,
 } from "@/lib/desk/catalog";
 import type { UaeLang } from "@/lib/desk/uae";
 
-export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
+export function SolvoPlans({
+  lang = "en",
+  market = "publiceye",
+}: {
+  lang?: UaeLang;
+  market?: "publiceye";
+}) {
   const rtl = lang === "ar";
   const [plan, setPlan] = useState<SolvoPlanId>("pulse");
   const [orgName, setOrgName] = useState("");
@@ -20,16 +26,16 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const selected = SOLVO_PLANS[plan];
-  const allowed = isSolvoDeskEmail(email);
+  const allowed = isPubliceyeDeskEmail(email);
 
   const onUnlock = (e: FormEvent) => {
     e.preventDefault();
     setErr(null);
-    if (!isSolvoDeskEmail(email)) {
+    if (!isPubliceyeDeskEmail(email)) {
       setErr(
         rtl
-          ? "هذا المكتب بدعوة فقط. استخدم بريداً مصرّحاً."
-          : "This desk is invitation-only. Use an authorized Solvo email.",
+          ? "هذا المكتب بدعوة فقط."
+          : "BrandEye desk checkout is invitation-only.",
       );
       setUnlocked(false);
       return;
@@ -41,12 +47,8 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
   const onPay = async (e: FormEvent) => {
     e.preventDefault();
     setErr(null);
-    if (!isSolvoDeskEmail(email)) {
-      setErr(
-        rtl
-          ? "هذا المكتب بدعوة فقط."
-          : "This desk is invitation-only. Use an authorized Solvo email.",
-      );
+    if (!isPubliceyeDeskEmail(email)) {
+      setErr(rtl ? "هذا المكتب بدعوة فقط." : "BrandEye desk checkout is invitation-only.");
       return;
     }
     setBusy(true);
@@ -57,7 +59,7 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
         body: JSON.stringify({
           orgName,
           email: normalizeDeskEmail(email),
-          market: "uae",
+          market,
           plan,
         }),
       });
@@ -112,8 +114,8 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
 
       <p className="text-[12px] text-muted-foreground leading-relaxed">
         {rtl
-          ? `${formatAed(SOLVO_SETUP_AED)} تأسيس لمرة واحدة. التحديث الأسبوعي مشمول. لا رسوم لكل موضوع.`
-          : `${formatAed(SOLVO_SETUP_AED)} one-time setup. Weekly refresh included. No per-topic run fee.`}
+          ? `${formatAed(SOLVO_SETUP_AED)} تأسيس لمرة واحدة. التحديث الأسبوعي مشمول.`
+          : `${formatAed(SOLVO_SETUP_AED)} one-time setup. Weekly refresh included.`}
       </p>
 
       {!unlocked ? (
@@ -126,8 +128,8 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
               </h2>
               <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-1">
                 {rtl
-                  ? "أدخل بريداً مصرّحاً لفتح الدفع. المكتب الحي لا يُفتح إلا بعد سترايب."
-                  : "Enter an authorized email to unlock checkout. A live desk only opens after Stripe payment."}
+                  ? "أدخل البريد المصرّح لفتح الدفع."
+                  : "Enter the operator email to unlock checkout. A live desk only opens after Stripe payment."}
               </p>
             </div>
           </div>
@@ -144,7 +146,7 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
                 setErr(null);
               }}
               className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 text-[14px]"
-              placeholder="lara@solvocreations.com"
+              placeholder="citizen.pulse101@gmail.com"
               autoComplete="email"
             />
           </label>
@@ -163,9 +165,7 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
             {rtl ? "ادفع وخصّص لوحتك" : "Pay and brand your desk"}
           </h2>
           <p className="text-[12.5px] text-muted-foreground leading-relaxed">
-            {rtl
-              ? `تأسيس ${formatAed(SOLVO_SETUP_AED)} + ${formatAed(selected.monthlyAed)} شهرياً · خطة ${selected.nameAr}.`
-              : `${formatAed(SOLVO_SETUP_AED)} setup + ${formatAed(selected.monthlyAed)}/${SOLVO_INTERVAL} · ${selected.name}.`}
+            {`${formatAed(SOLVO_SETUP_AED)} setup + ${formatAed(selected.monthlyAed)}/${SOLVO_INTERVAL} · ${selected.name}.`}
           </p>
           <label className="block space-y-1">
             <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
@@ -178,13 +178,11 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
               className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 text-[14px]"
-              placeholder={rtl ? "شركتك في دبي" : "Your Dubai company"}
+              placeholder="Your Dubai company"
             />
           </label>
           <label className="block space-y-1">
-            <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              {rtl ? "البريد" : "Work email"}
-            </span>
+            <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">Work email</span>
             <input
               required
               type="email"
@@ -200,15 +198,12 @@ export function SolvoPlans({ lang = "en" }: { lang?: UaeLang }) {
             className="w-full inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-full border border-cyan/50 bg-cyan/15 text-cyan text-[14px] font-display font-semibold hover:bg-cyan/25 disabled:opacity-50"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {rtl ? "ادفع عبر سترايب" : "Pay with Stripe"} · {formatAed(SOLVO_SETUP_AED)} +{" "}
-            {formatAed(selected.monthlyAed)}/{SOLVO_INTERVAL}
+            Pay with Stripe · {formatAed(SOLVO_SETUP_AED)} + {formatAed(selected.monthlyAed)}/{SOLVO_INTERVAL}
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
           <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
             <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-cyan" />
-            {rtl
-              ? "الأسعار بالدرهم الإماراتي على سترايب. الجداول الجديدة لسلفو فقط — لا تعديل لصفوف إلنخوس القديمة."
-              : "Prices in UAE dirhams on Stripe. New Solvo tables only — existing Elenchos rows are not overwritten."}
+            Prices in UAE dirhams on Stripe. BrandEye tables only — existing Elenchos rows are not overwritten.
           </p>
         </form>
       )}

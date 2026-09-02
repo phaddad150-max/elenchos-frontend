@@ -18,6 +18,14 @@ import { Route as SolvocreationsUaeDeskRouteImport } from './routes/solvocreatio
 import { Route as SolvocreationsUaeResearchTopicIdRouteImport } from './routes/solvocreations-uae.research.$topicId'
 import { Route as SolvocreationsUaeTopicTopicIdRouteImport } from './routes/solvocreations-uae.topic.$topicId'
 import { Route as SolvocreationsUaeCasestudyAviationRouteImport } from './routes/solvocreations-uae.casestudy.aviation'
+import { Route as PubliceyeUaeRouteImport } from './routes/publiceye-uae'
+import { Route as PubliceyeUaeIndexRouteImport } from './routes/publiceye-uae.index'
+import { Route as PubliceyeUaeResearchRouteImport } from './routes/publiceye-uae.research'
+import { Route as PubliceyeUaeResearchIndexRouteImport } from './routes/publiceye-uae.research.index'
+import { Route as PubliceyeUaeDeskRouteImport } from './routes/publiceye-uae.desk'
+import { Route as PubliceyeUaeResearchTopicIdRouteImport } from './routes/publiceye-uae.research.$topicId'
+import { Route as PubliceyeUaeTopicTopicIdRouteImport } from './routes/publiceye-uae.topic.$topicId'
+import { Route as PubliceyeUaeCasestudyAviationRouteImport } from './routes/publiceye-uae.casestudy.aviation'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResearchMigrationRouteImport } from './routes/research-migration'
 import { Route as ResearchAviationRouteImport } from './routes/research-aviation'
@@ -111,6 +119,49 @@ const SolvocreationsUaeCasestudyAviationRoute =
     id: '/casestudy/aviation',
     path: '/casestudy/aviation',
     getParentRoute: () => SolvocreationsUaeRoute,
+  } as any)
+const PubliceyeUaeRoute = PubliceyeUaeRouteImport.update({
+  id: '/publiceye-uae',
+  path: '/publiceye-uae',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PubliceyeUaeIndexRoute = PubliceyeUaeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PubliceyeUaeRoute,
+} as any)
+const PubliceyeUaeResearchRoute = PubliceyeUaeResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => PubliceyeUaeRoute,
+} as any)
+const PubliceyeUaeDeskRoute = PubliceyeUaeDeskRouteImport.update({
+  id: '/desk',
+  path: '/desk',
+  getParentRoute: () => PubliceyeUaeRoute,
+} as any)
+const PubliceyeUaeTopicTopicIdRoute = PubliceyeUaeTopicTopicIdRouteImport.update({
+  id: '/topic/$topicId',
+  path: '/topic/$topicId',
+  getParentRoute: () => PubliceyeUaeRoute,
+} as any)
+const PubliceyeUaeCasestudyAviationRoute =
+  PubliceyeUaeCasestudyAviationRouteImport.update({
+    id: '/casestudy/aviation',
+    path: '/casestudy/aviation',
+    getParentRoute: () => PubliceyeUaeRoute,
+  } as any)
+const PubliceyeUaeResearchTopicIdRoute =
+  PubliceyeUaeResearchTopicIdRouteImport.update({
+    id: '/$topicId',
+    path: '/$topicId',
+    getParentRoute: () => PubliceyeUaeResearchRoute,
+  } as any)
+const PubliceyeUaeResearchIndexRoute =
+  PubliceyeUaeResearchIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => PubliceyeUaeResearchRoute,
   } as any)
 const SolvocreationsUaeResearchTopicIdRoute =
   SolvocreationsUaeResearchTopicIdRouteImport.update({
@@ -433,6 +484,14 @@ export interface FileRoutesByFullPath {
   '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/solvocreations-uae/casestudy/aviation': typeof SolvocreationsUaeCasestudyAviationRoute
+  '/publiceye-uae': typeof PubliceyeUaeRouteWithChildren
+  '/publiceye-uae/': typeof PubliceyeUaeIndexRoute
+  '/publiceye-uae/research': typeof PubliceyeUaeResearchRouteWithChildren
+  '/publiceye-uae/research/': typeof PubliceyeUaeResearchIndexRoute
+  '/publiceye-uae/desk': typeof PubliceyeUaeDeskRoute
+  '/publiceye-uae/topic/$topicId': typeof PubliceyeUaeTopicTopicIdRoute
+  '/publiceye-uae/research/$topicId': typeof PubliceyeUaeResearchTopicIdRoute
+  '/publiceye-uae/casestudy/aviation': typeof PubliceyeUaeCasestudyAviationRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -499,6 +558,14 @@ export interface FileRoutesByTo {
   '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/solvocreations-uae/casestudy/aviation': typeof SolvocreationsUaeCasestudyAviationRoute
+  '/publiceye-uae': typeof PubliceyeUaeRouteWithChildren
+  '/publiceye-uae/': typeof PubliceyeUaeIndexRoute
+  '/publiceye-uae/research': typeof PubliceyeUaeResearchRouteWithChildren
+  '/publiceye-uae/research/': typeof PubliceyeUaeResearchIndexRoute
+  '/publiceye-uae/desk': typeof PubliceyeUaeDeskRoute
+  '/publiceye-uae/topic/$topicId': typeof PubliceyeUaeTopicTopicIdRoute
+  '/publiceye-uae/research/$topicId': typeof PubliceyeUaeResearchTopicIdRoute
+  '/publiceye-uae/casestudy/aviation': typeof PubliceyeUaeCasestudyAviationRoute
   '/admin/curation': typeof AdminCurationRoute
   '/desk/studio': typeof DeskStudioRoute
   '/desk/thanks': typeof DeskThanksRoute
@@ -567,6 +634,14 @@ export interface FileRoutesById {
   '/solvocreations-uae/topic/$topicId': typeof SolvocreationsUaeTopicTopicIdRoute
   '/solvocreations-uae/research/$topicId': typeof SolvocreationsUaeResearchTopicIdRoute
   '/solvocreations-uae/casestudy/aviation': typeof SolvocreationsUaeCasestudyAviationRoute
+  '/publiceye-uae': typeof PubliceyeUaeRouteWithChildren
+  '/publiceye-uae/': typeof PubliceyeUaeIndexRoute
+  '/publiceye-uae/research': typeof PubliceyeUaeResearchRouteWithChildren
+  '/publiceye-uae/research/': typeof PubliceyeUaeResearchIndexRoute
+  '/publiceye-uae/desk': typeof PubliceyeUaeDeskRoute
+  '/publiceye-uae/topic/$topicId': typeof PubliceyeUaeTopicTopicIdRoute
+  '/publiceye-uae/research/$topicId': typeof PubliceyeUaeResearchTopicIdRoute
+  '/publiceye-uae/casestudy/aviation': typeof PubliceyeUaeCasestudyAviationRoute
   '/admin/curation': typeof AdminCurationRoute
   '/d/$slug': typeof DSlugRouteWithChildren
   '/desk/studio': typeof DeskStudioRoute
@@ -636,6 +711,13 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
     | '/solvocreations-uae/casestudy/aviation'
+    | '/publiceye-uae'
+    | '/publiceye-uae/'
+    | '/publiceye-uae/research'
+    | '/publiceye-uae/desk'
+    | '/publiceye-uae/topic/$topicId'
+    | '/publiceye-uae/research/$topicId'
+    | '/publiceye-uae/casestudy/aviation'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -702,6 +784,13 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
     | '/solvocreations-uae/casestudy/aviation'
+    | '/publiceye-uae'
+    | '/publiceye-uae/'
+    | '/publiceye-uae/research'
+    | '/publiceye-uae/desk'
+    | '/publiceye-uae/topic/$topicId'
+    | '/publiceye-uae/research/$topicId'
+    | '/publiceye-uae/casestudy/aviation'
     | '/admin/curation'
     | '/desk/studio'
     | '/desk/thanks'
@@ -768,6 +857,13 @@ export interface FileRouteTypes {
     | '/solvocreations-uae/topic/$topicId'
     | '/solvocreations-uae/research/$topicId'
     | '/solvocreations-uae/casestudy/aviation'
+    | '/publiceye-uae'
+    | '/publiceye-uae/'
+    | '/publiceye-uae/research'
+    | '/publiceye-uae/desk'
+    | '/publiceye-uae/topic/$topicId'
+    | '/publiceye-uae/research/$topicId'
+    | '/publiceye-uae/casestudy/aviation'
     | '/admin/curation'
     | '/d/$slug'
     | '/desk/studio'
@@ -830,6 +926,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UaeRoute: typeof UaeRoute
   SolvocreationsUaeRoute: typeof SolvocreationsUaeRouteWithChildren
+  PubliceyeUaeRoute: typeof PubliceyeUaeRouteWithChildren
   AdminCurationRoute: typeof AdminCurationRoute
   DSlugRoute: typeof DSlugRouteWithChildren
   ResearchSlugRoute: typeof ResearchSlugRoute
@@ -936,6 +1033,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/solvocreations-uae/casestudy/aviation'
       preLoaderRoute: typeof SolvocreationsUaeCasestudyAviationRouteImport
       parentRoute: typeof SolvocreationsUaeRoute
+    }
+    '/publiceye-uae': {
+      id: '/publiceye-uae'
+      path: '/publiceye-uae'
+      fullPath: '/publiceye-uae'
+      preLoaderRoute: typeof PubliceyeUaeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/publiceye-uae/': {
+      id: '/publiceye-uae/'
+      path: '/'
+      fullPath: '/publiceye-uae/'
+      preLoaderRoute: typeof PubliceyeUaeIndexRouteImport
+      parentRoute: typeof PubliceyeUaeRoute
+    }
+    '/publiceye-uae/research': {
+      id: '/publiceye-uae/research'
+      path: '/research'
+      fullPath: '/publiceye-uae/research'
+      preLoaderRoute: typeof PubliceyeUaeResearchRouteImport
+      parentRoute: typeof PubliceyeUaeRoute
+    }
+    '/publiceye-uae/research/': {
+      id: '/publiceye-uae/research/'
+      path: '/'
+      fullPath: '/publiceye-uae/research/'
+      preLoaderRoute: typeof PubliceyeUaeResearchIndexRouteImport
+      parentRoute: typeof PubliceyeUaeResearchRoute
+    }
+    '/publiceye-uae/desk': {
+      id: '/publiceye-uae/desk'
+      path: '/desk'
+      fullPath: '/publiceye-uae/desk'
+      preLoaderRoute: typeof PubliceyeUaeDeskRouteImport
+      parentRoute: typeof PubliceyeUaeRoute
+    }
+    '/publiceye-uae/topic/$topicId': {
+      id: '/publiceye-uae/topic/$topicId'
+      path: '/topic/$topicId'
+      fullPath: '/publiceye-uae/topic/$topicId'
+      preLoaderRoute: typeof PubliceyeUaeTopicTopicIdRouteImport
+      parentRoute: typeof PubliceyeUaeRoute
+    }
+    '/publiceye-uae/research/$topicId': {
+      id: '/publiceye-uae/research/$topicId'
+      path: '/$topicId'
+      fullPath: '/publiceye-uae/research/$topicId'
+      preLoaderRoute: typeof PubliceyeUaeResearchTopicIdRouteImport
+      parentRoute: typeof PubliceyeUaeResearchRoute
+    }
+    '/publiceye-uae/casestudy/aviation': {
+      id: '/publiceye-uae/casestudy/aviation'
+      path: '/casestudy/aviation'
+      fullPath: '/publiceye-uae/casestudy/aviation'
+      preLoaderRoute: typeof PubliceyeUaeCasestudyAviationRouteImport
+      parentRoute: typeof PubliceyeUaeRoute
     }
     '/sitemap.xml': {
       id: '/sitemap.xml'
@@ -1404,6 +1557,39 @@ const SolvocreationsUaeRouteWithChildren = SolvocreationsUaeRoute._addFileChildr
   SolvocreationsUaeRouteChildren,
 )
 
+interface PubliceyeUaeResearchRouteChildren {
+  PubliceyeUaeResearchIndexRoute: typeof PubliceyeUaeResearchIndexRoute
+  PubliceyeUaeResearchTopicIdRoute: typeof PubliceyeUaeResearchTopicIdRoute
+}
+
+const PubliceyeUaeResearchRouteChildren: PubliceyeUaeResearchRouteChildren = {
+  PubliceyeUaeResearchIndexRoute: PubliceyeUaeResearchIndexRoute,
+  PubliceyeUaeResearchTopicIdRoute: PubliceyeUaeResearchTopicIdRoute,
+}
+
+const PubliceyeUaeResearchRouteWithChildren =
+  PubliceyeUaeResearchRoute._addFileChildren(PubliceyeUaeResearchRouteChildren)
+
+interface PubliceyeUaeRouteChildren {
+  PubliceyeUaeIndexRoute: typeof PubliceyeUaeIndexRoute
+  PubliceyeUaeResearchRoute: typeof PubliceyeUaeResearchRouteWithChildren
+  PubliceyeUaeDeskRoute: typeof PubliceyeUaeDeskRoute
+  PubliceyeUaeTopicTopicIdRoute: typeof PubliceyeUaeTopicTopicIdRoute
+  PubliceyeUaeCasestudyAviationRoute: typeof PubliceyeUaeCasestudyAviationRoute
+}
+
+const PubliceyeUaeRouteChildren: PubliceyeUaeRouteChildren = {
+  PubliceyeUaeIndexRoute: PubliceyeUaeIndexRoute,
+  PubliceyeUaeResearchRoute: PubliceyeUaeResearchRouteWithChildren,
+  PubliceyeUaeDeskRoute: PubliceyeUaeDeskRoute,
+  PubliceyeUaeTopicTopicIdRoute: PubliceyeUaeTopicTopicIdRoute,
+  PubliceyeUaeCasestudyAviationRoute: PubliceyeUaeCasestudyAviationRoute,
+}
+
+const PubliceyeUaeRouteWithChildren = PubliceyeUaeRoute._addFileChildren(
+  PubliceyeUaeRouteChildren,
+)
+
 interface ResearchNetworksLedgerRouteChildren {
   ResearchNetworksLedgerSpeechReachRoute: typeof ResearchNetworksLedgerSpeechReachRoute
 }
@@ -1432,6 +1618,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UaeRoute: UaeRoute,
   SolvocreationsUaeRoute: SolvocreationsUaeRouteWithChildren,
+  PubliceyeUaeRoute: PubliceyeUaeRouteWithChildren,
   AdminCurationRoute: AdminCurationRoute,
   DSlugRoute: DSlugRouteWithChildren,
   ResearchSlugRoute: ResearchSlugRoute,
