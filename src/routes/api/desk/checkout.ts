@@ -53,9 +53,9 @@ export const Route = createFileRoute("/api/desk/checkout")({
           const planId = parsed.data.plan as SolvoPlanId;
           const plan = SOLVO_PLANS[planId];
           const email = normalizeDeskEmail(parsed.data.email);
-          if (parsed.data.market === "uae") {
+          if (parsed.data.market === "uae" || parsed.data.market === "publiceye") {
             return Response.json(
-              { error: "Solvo desk checkout is closed on this prototype." },
+              { error: "This prototype checkout is offline." },
               { status: 410 },
             );
           }

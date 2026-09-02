@@ -4,6 +4,7 @@ Disallow: /api/
 Disallow: /admin
 Disallow: /pro
 Disallow: /uae
+Disallow: /publiceye-uae
 Disallow: /sponsor
 Disallow: /sponsor/success
 
