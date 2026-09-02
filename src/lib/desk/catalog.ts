@@ -151,6 +151,21 @@ export const UAE_DEMO_SLUG_LEGACY = "uae-prototype";
 export const SOLVO_PUBLIC_BASE = "/solvocreations-uae";
 export const UAE_DEMO_ORG = "Solvo Creations";
 
+/** Only these emails may buy or open a paid Solvo desk. Walkthrough Home/Research stay public. */
+export const SOLVO_DESK_ALLOWED_EMAILS = [
+  "citizen.pulse101@gmail.com",
+  "lara@solvocreations.com",
+] as const;
+
+export function normalizeDeskEmail(email?: string | null): string {
+  return (email ?? "").trim().toLowerCase();
+}
+
+export function isSolvoDeskEmail(email?: string | null): boolean {
+  const e = normalizeDeskEmail(email);
+  return (SOLVO_DESK_ALLOWED_EMAILS as readonly string[]).includes(e);
+}
+
 export function isUaeDemoSlug(slug: string | null | undefined): boolean {
   return slug === UAE_DEMO_SLUG || slug === UAE_DEMO_SLUG_LEGACY;
 }

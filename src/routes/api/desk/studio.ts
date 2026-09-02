@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { isSolvoDeskEmail } from "@/lib/desk/catalog";
 import { listSellableDeskTopics } from "@/lib/topic-catalog";
 import { getStudioBundle, getTenantByToken, saveStudio } from "@/lib/desk/store.server";
+
+function solvoStudioAllowed(tenant: { market?: string | null; email?: string | null; plan?: string | null }): boolean {
+  const solvo = tenant.market === "uae" || Boolean(tenant.plan);
+  if (!solvo) return true;
+  return isSolvoDeskEmail(tenant.email);
+}
 
 const SaveSchema = z.object({
   token: z.string().min(16).max(80),
@@ -27,6 +34,9 @@ export const Route = createFileRoute("/api/desk/studio")({
         ) {
           return Response.json({ error: "Invalid or unpaid studio link." }, { status: 401 });
         }
+        if (!solvoStudioAllowed(bundle.tenant)) {
+          return Response.json({ error: "This Solvo desk is invitation-only." }, { status: 403 });
+        }
         const { tenant, branding, picks } = bundle;
         return Response.json({
           tenant: {
@@ -51,6 +61,9 @@ export const Route = createFileRoute("/api/desk/studio")({
         const tenant = await getTenantByToken(parsed.data.token);
         if (!tenant || (tenant.status !== "paid" && tenant.status !== "live")) {
           return Response.json({ error: "Invalid or unpaid studio link." }, { status: 401 });
+        }
+        if (!solvoStudioAllowed(tenant)) {
+          return Response.json({ error: "This Solvo desk is invitation-only." }, { status: 403 });
         }
         await saveStudio(tenant, {
           org_name: parsed.data.org_name,

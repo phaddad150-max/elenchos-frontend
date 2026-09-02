@@ -10,6 +10,7 @@ import {
   UAE_DEMO_SLUG,
   demoSeedBySlug,
   demoSeedByToken,
+  isSolvoDeskEmail,
   isUaeDemoSlug,
   solvoPlan,
   type DeskDemoSeed,
@@ -162,6 +163,9 @@ export async function createPendingTenant(input: {
 }): Promise<DeskTenant> {
   const now = new Date().toISOString();
   const plan = solvoPlan(input.plan);
+  if (!isSolvoDeskEmail(input.email)) {
+    throw new Error("Solvo desk checkout is invitation-only.");
+  }
   const row: DeskTenant = {
     id: crypto.randomUUID(),
     manage_token: newManageToken(),

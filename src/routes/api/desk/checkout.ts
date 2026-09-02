@@ -6,6 +6,8 @@ import {
   SOLVO_PLANS,
   SOLVO_SETUP_AED,
   formatAed,
+  isSolvoDeskEmail,
+  normalizeDeskEmail,
   solvoMonthlyFils,
   solvoSetupFils,
   type SolvoPlanId,
@@ -50,9 +52,19 @@ export const Route = createFileRoute("/api/desk/checkout")({
           }
           const planId = parsed.data.plan as SolvoPlanId;
           const plan = SOLVO_PLANS[planId];
+          const email = normalizeDeskEmail(parsed.data.email);
+          if (!isSolvoDeskEmail(email)) {
+            return Response.json(
+              {
+                error:
+                  "Solvo desk checkout is invitation-only. Use an authorized email, then pay to go live.",
+              },
+              { status: 403 },
+            );
+          }
           const tenant = await createPendingTenant({
             orgName: parsed.data.orgName,
-            email: parsed.data.email,
+            email,
             market: "uae",
             plan: planId,
           });
@@ -73,7 +85,7 @@ export const Route = createFileRoute("/api/desk/checkout")({
           params.set("subscription_data[metadata][tenantId]", tenant.id);
           params.set("subscription_data[metadata][market]", "uae");
           params.set("subscription_data[metadata][plan]", plan.id);
-          params.set("customer_email", tenant.email || parsed.data.email);
+          params.set("customer_email", tenant.email || email);
           params.set("line_items[0][quantity]", "1");
           params.set("line_items[0][price_data][currency]", SOLVO_CURRENCY);
           params.set("line_items[0][price_data][unit_amount]", String(solvoSetupFils()));

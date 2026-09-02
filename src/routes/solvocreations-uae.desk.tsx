@@ -23,8 +23,8 @@ function SolvoDeskPlansPage() {
           This dashboard. Your brand. Live in a week.
         </h1>
         <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto">
-          You just walked Home and Research Desk. Setup puts that layout on your URL. A monthly plan
-          keeps the weekly sample running.
+          You just walked Home and Research Desk. A live desk only opens after payment. Checkout is
+          invitation-only for authorized Solvo emails.
         </p>
       </header>
 
