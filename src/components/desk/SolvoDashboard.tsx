@@ -75,8 +75,9 @@ export function SolvoDashboard() {
           Simulated sample
         </span>
         <p className="text-[13px] text-foreground/90 leading-snug">
-          Testing data for the Solvo Creations UAE prototype — not live X. Scores use the same locked
-          bands as elenchos.live. Empty would stay 0 · awaiting data.
+          {base === "/publiceye-uae"
+            ? "Testing data for the BrandEye UAE prototype — not live X. Scores use the same locked bands as elenchos.live. Empty would stay 0 · awaiting data."
+            : "Testing data for the Solvo Creations UAE prototype — not live X. Scores use the same locked bands as elenchos.live. Empty would stay 0 · awaiting data."}
         </p>
       </aside>
 

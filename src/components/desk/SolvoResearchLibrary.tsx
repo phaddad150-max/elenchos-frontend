@@ -33,8 +33,9 @@ export function SolvoResearchLibrary() {
       <aside className="rounded-2xl border border-amber-signal/45 bg-amber-signal/[0.12] px-4 py-3 flex items-start gap-2">
         <FlaskConical className="w-4 h-4 text-amber-signal shrink-0 mt-0.5" />
         <p className="text-[13px] text-foreground/90 leading-snug">
-          Simulated / estimated sample for Solvo Creations UAE — not live X. Same Research Library
-          layout as elenchos.live.
+          {base === "/publiceye-uae"
+            ? "Simulated / estimated sample for BrandEye UAE — not live X. Same Research Library layout as elenchos.live."
+            : "Simulated / estimated sample for Solvo Creations UAE — not live X. Same Research Library layout as elenchos.live."}
         </p>
       </aside>
       <header className="page-hero-banner overflow-hidden min-w-0 relative rounded-2xl">
@@ -42,7 +43,7 @@ export function SolvoResearchLibrary() {
         <div className="relative p-4 sm:p-5 md:p-7 space-y-4">
           <div className="page-hero-kicker">
             <BookOpen className="w-3.5 h-3.5" />
-            Research · Solvo Creations UAE
+            {base === "/publiceye-uae" ? "Research · BrandEye UAE" : "Research · Solvo Creations UAE"}
           </div>
           <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:justify-between">
             <div className="min-w-0 flex-1 space-y-2">
